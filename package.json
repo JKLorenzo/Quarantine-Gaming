@@ -1,18 +1,18 @@
 {
-  "name": "handler",
+  "name": "quarantine-gaming",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/JKLorenzo/Handler.git"
+    "url": "git+https://github.com/JKLorenzo/Quarantine-Gaming.git"
   },
   "author": "Juruel Keanu Lorenzo",
   "license": "GPL-3.0-only",
   "bugs": {
-    "url": "https://github.com/JKLorenzo/Handler/issues"
+    "url": "https://github.com/JKLorenzo/Quarantine-Gaming/issues"
   },
-  "homepage": "https://github.com/JKLorenzo/Handler#readme",
+  "homepage": "https://github.com/JKLorenzo/Quarantine-Gaming#readme",
   "dependencies": {
     "discord.js": "^12.3.1",
     "discord.js-commando": "github:discordjs/Commando"
