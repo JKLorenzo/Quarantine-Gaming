@@ -1,0 +1,20 @@
+{
+  "name": "handler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JKLorenzo/Handler.git"
+  },
+  "author": "Juruel Keanu Lorenzo",
+  "license": "GPL-3.0-only",
+  "bugs": {
+    "url": "https://github.com/JKLorenzo/Handler/issues"
+  },
+  "homepage": "https://github.com/JKLorenzo/Handler#readme",
+  "dependencies": {
+    "discord.js": "^12.3.1",
+    "discord.js-commando": "github:discordjs/Commando"
+  }
+}
