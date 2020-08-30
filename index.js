@@ -21,6 +21,11 @@ client.registry
         ['management', 'Server Management'],
         ['services', 'Server Services']
     ])
+    .registerDefaultGroups()
+    .registerDefaultCommands({
+        prefix: false,
+        ping: false
+    })
     .registerCommandsIn(path.join(__dirname, 'commands'));
 
 client.once('ready', async () => {

@@ -25,7 +25,7 @@ module.exports = class PushCommand extends Command {
         });
     }
 
-    run(message, {title, link}) {
+    run(message, { title, link }) {
         g_interface.push({
             title: title,
             url: link
