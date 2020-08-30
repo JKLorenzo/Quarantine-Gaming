@@ -124,10 +124,6 @@ async function updateGuild() {
                                                     allow: ["CONNECT"]
                                                 },
                                                 {
-                                                    id: this_guild.roles.cache.find(role => role.name.toLowerCase() == 'presence').id,
-                                                    allow: ["CONNECT", "MANAGE_CHANNELS", "MOVE_MEMBERS"]
-                                                },
-                                                {
                                                     id: this_guild.roles.everyone.id,
                                                     deny: ["CONNECT"]
                                                 }
@@ -208,10 +204,6 @@ async function updateGuild() {
                             {
                                 id: this_guild.roles.cache.find(role => role.name.toLowerCase() == 'music bots').id,
                                 allow: ["CONNECT"]
-                            },
-                            {
-                                id: this_guild.roles.cache.find(role => role.name.toLowerCase() == 'presence').id,
-                                allow: ["CONNECT", "MANAGE_CHANNELS", "MOVE_MEMBERS"]
                             },
                             {
                                 id: this_guild.roles.everyone.id,
