@@ -11,8 +11,7 @@ global.g_interface = interface;
 
 const client = new CommandoClient({
     commandPrefix: 'sudo ',
-    owner: '393013053488103435',
-    unknownCommandResponse: false,
+    owner: '393013053488103435'
 });
 
 client.registry
@@ -23,8 +22,9 @@ client.registry
     ])
     .registerDefaultGroups()
     .registerDefaultCommands({
+        ping: false,
         prefix: false,
-        ping: false
+        commandState: false
     })
     .registerCommandsIn(path.join(__dirname, 'commands'));
 
