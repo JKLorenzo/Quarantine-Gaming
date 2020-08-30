@@ -1,5 +1,13 @@
 const { CommandoClient } = require('discord.js-commando');
 const path = require('path');
+const db = require(path.join(__dirname, 'internal_commands', 'database.js'));
+const interface = require(path.join(__dirname, 'internal_commands', 'interface.js'))
+const feed = require(path.join(__dirname, 'internal_commands', 'feed.js'))
+
+// Global Variables
+global.rootDir = path.resolve(__dirname);
+global.g_db = db;
+global.g_interface = interface;
 
 const client = new CommandoClient({
     commandPrefix: 'sudo ',
@@ -10,12 +18,16 @@ const client = new CommandoClient({
 client.registry
     .registerDefaultTypes()
     .registerGroups([
-        ['administrator', 'Commands for admins']
+        ['management', 'Server Management'],
+        ['services', 'Server Services']
     ])
     .registerCommandsIn(path.join(__dirname, 'commands'));
 
-client.once('ready', () => {
+client.once('ready', async () => {
     console.log('-------------{  Startup  }-------------');
+    interface.init(client);
+    await db.init(client);
+    await feed.start();
     updateGuild();
 });
 
@@ -24,7 +36,7 @@ const ignored_titles = [
     'StartupWindow', 'Error', 'modlauncher', 'BlueStacks', 'NoxPlayer'
 ]
 async function updateGuild() {
-    console.log('**Updating Guild**')
+    console.log('**Updating Guild**');
     // Loops through every guild
     for (let this_guild of client.guilds.cache.array()) {
         // Get all the members of the guild

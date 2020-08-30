@@ -18,6 +18,9 @@
   "homepage": "https://github.com/JKLorenzo/Quarantine-Gaming#readme",
   "dependencies": {
     "discord.js": "^12.3.1",
-    "discord.js-commando": "github:discordjs/Commando"
+    "discord.js-commando": "github:discordjs/Commando",
+    "g-i-s": "^2.1.6",
+    "node-fetch": "^2.6.0",
+    "probe-image-size": "^5.0.0"
   }
 }

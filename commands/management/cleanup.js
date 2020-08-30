@@ -4,7 +4,7 @@ module.exports = class CleanUp extends Command {
 	constructor(client) {
 		super(client, {
 			name: 'cleanup',
-			group: 'administrator',
+			group: 'management',
 			memberName: 'clean',
 			description: 'Removes n number of messages.',
 			userPermissions: ["ADMINISTRATOR"],
