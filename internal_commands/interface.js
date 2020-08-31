@@ -114,14 +114,14 @@ async function updateGuild() {
                                     // Check if this role doesn't exists
                                     if (!this_voice_role) {
                                         // Get reference role
-                                        let member_role = this_guild.roles.cache.find(role => role.name.toLowerCase() == 'member');
+                                        let play_role = this_guild.roles.cache.find(role => role.name == '<PLAYROLES>');
                                         // Create role on this guild
                                         await this_guild.roles.create({
                                             data: {
                                                 name: this_vr_name,
                                                 color: '0x7b00ff',
                                                 mentionable: true,
-                                                position: member_role.position + 1,
+                                                position: play_role - 1,
                                                 hoist: true
                                             },
                                             reason: `A new game is played by (${this_member.user.tag}).`
