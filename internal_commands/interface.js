@@ -56,7 +56,6 @@ function image_search(name) {
     })
 }
 async function updateGuild() {
-    console.log('**Updating Guild**');
     // Loops through every guild
     for (let this_guild of client.guilds.cache.array()) {
         // Get all the members of the guild
@@ -89,7 +88,6 @@ async function updateGuild() {
                                     if (this_mentionable_role) {
                                         // Assign role to this member
                                         await this_member.roles.add(this_mentionable_role);
-                                        console.log(`Mentionable role (${this_game}) added to (${this_member.user.tag}).`);
                                     } else {
                                         // Create role on this guild
                                         await this_guild.roles.create({
@@ -100,10 +98,8 @@ async function updateGuild() {
                                             },
                                             reason: `A new game is played by (${this_member.user.tag}).`
                                         }).then(async function (this_mentionable_role) {
-                                            console.log(`Mentionable role (${this_game}) created.`);
                                             // Assign role to this member
                                             await this_member.roles.add(this_mentionable_role);
-                                            console.log(`Mentionable role (${this_game}) added to (${this_member.user.tag}).`);
                                         });
                                     }
                                 }
@@ -130,7 +126,6 @@ async function updateGuild() {
                                             },
                                             reason: `A new game is played by (${this_member.user.tag}).`
                                         }).then(async function (voice_role) {
-                                            console.log(`Voice room role (${this_vr_name}) created.`);
                                             this_voice_role = voice_role;
                                         });
                                     }
@@ -144,9 +139,8 @@ async function updateGuild() {
                                             type: 'voice',
                                             topic: `Voice room dedicated for ${this_game} players.`,
                                             reason: `${this_game} is being played.`,
-                                            parent: parent.id
-                                        }).then(async (channel) => {
-                                            await channel.overwritePermissions([
+                                            parent: parent.id,
+                                            permissionOverwrites: [
                                                 {
                                                     id: this_voice_role.id,
                                                     allow: ["CONNECT"]
@@ -159,16 +153,14 @@ async function updateGuild() {
                                                     id: this_guild.roles.everyone.id,
                                                     deny: ["CONNECT"]
                                                 }
-                                            ]);
+                                            ]
                                         }).catch(console.error);
-                                        console.log(`Voice room channel (${this_game}) created.`);
                                     }
 
                                     // Check if user doesn't have this voice room role
                                     if (!this_member.roles.cache.find(role => role.name == this_vr_name)) {
                                         // Assign role to this member
                                         await this_member.roles.add(this_voice_role);
-                                        console.log(`Voice Room role (${this_vr_name}) added to (${this_member.user.tag}).`);
                                     }
                                 }
                             }
@@ -200,7 +192,6 @@ async function updateGuild() {
                         }
                         // Remove this role from this user
                         if (!is_playing) {
-                            console.log(`Removing voice room role (${this_role.name}) from (${this_member.user.tag}).`);
                             await this_member.roles.remove(this_role).catch(console.error);
                         }
                     }
@@ -226,11 +217,10 @@ async function updateGuild() {
                         type: 'voice',
                         topic: `Voice room dedicated for ${this_role.name.substring(vr_prefix.length)} players.`,
                         reason: `${this_role.name.substring(vr_prefix.length)} is being played.`,
-                        parent: this_guild.channels.cache.find(channel => channel.name.toLowerCase() == 'dedicated voice channels').id
-                    }).then(async (channel) => {
-                        await channel.overwritePermissions([
+                        parent: this_guild.channels.cache.find(channel => channel.name.toLowerCase() == 'dedicated voice channels').id,
+                        permissionOverwrites: [
                             {
-                                id: this_guild.id,
+                                id: this_role.id,
                                 allow: ["CONNECT"]
                             },
                             {
@@ -241,15 +231,13 @@ async function updateGuild() {
                                 id: this_guild.roles.everyone.id,
                                 deny: ["CONNECT"]
                             }
-                        ]);
+                        ]
                     }).catch(console.error);
-                    console.log(`Voice Room duplicate (${this_role.name.substring(vr_prefix.length)}) created.`);
                 } else if (buffer_channels.length > 1) {
                     // Remove duplicates that are more than 1
                     for (let i = 1; i < buffer_channels.length; i++) {
                         // Delete this channel
                         await buffer_channels.pop().delete('No players are currently playing this game.').catch(console.error);
-                        console.log(`Voice room channel (${this_role.name}) removed.`);
                     }
                 }
 
@@ -264,18 +252,15 @@ async function updateGuild() {
                             } else {
                                 // Delete this channel
                                 await this_channel.delete('No players are currently playing this game.').catch(console.error);
-                                console.log(`Channel (${this_role.name}) removed.`);
                             }
                         }
                         if (!has_users) {
                             // Delete this role
                             await this_role.delete('No players are currently playing this game.').catch(console.error);
-                            console.log(`Voice room role (${this_role.name}) removed.`);
                         }
                     } else {
                         // Delete this role
                         await this_role.delete('No players are currently playing this game.').catch(console.error);
-                        console.log(`Voice room role (${this_role.name}) removed.`);
                     }
                 }
             }
@@ -316,7 +301,6 @@ async function updateGuild() {
                                     if (channel.name == baseline_role.name && channel.members.size == 0) {
                                         for (let this_member of this_channel.members.array()) {
                                             await this_member.voice.setChannel(channel).catch(console.error);
-                                            console.log(`Transfering (${this_member.user.tag}) to (${channel.name}) channel.`);
                                         }
                                         is_trasnfered = true;
                                     }
