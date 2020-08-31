@@ -121,40 +121,13 @@ async function updateGuild() {
                                                 name: this_vr_name,
                                                 color: '0x7b00ff',
                                                 mentionable: true,
-                                                position: play_role - 1,
+                                                position: play_role.position,
                                                 hoist: true
                                             },
                                             reason: `A new game is played by (${this_member.user.tag}).`
                                         }).then(async function (voice_role) {
                                             this_voice_role = voice_role;
                                         });
-                                    }
-
-                                    // Get the equivalent voice room of this game
-                                    let this_voice_room = this_guild.channels.cache.find(channel => channel.name == this_vr_name);
-                                    // Check if this voice room doesn't exist
-                                    if (!this_voice_room) {
-                                        // Create this voice room
-                                        await this_guild.channels.create(this_vr_name, {
-                                            type: 'voice',
-                                            topic: `Voice room dedicated for ${this_game} players.`,
-                                            reason: `${this_game} is being played.`,
-                                            parent: parent.id,
-                                            permissionOverwrites: [
-                                                {
-                                                    id: this_voice_role.id,
-                                                    allow: ["CONNECT"]
-                                                },
-                                                {
-                                                    id: this_guild.roles.cache.find(role => role.name.toLowerCase() == 'music bots').id,
-                                                    allow: ["CONNECT"]
-                                                },
-                                                {
-                                                    id: this_guild.roles.everyone.id,
-                                                    deny: ["CONNECT"]
-                                                }
-                                            ]
-                                        }).catch(console.error);
                                     }
 
                                     // Check if user doesn't have this voice room role
@@ -200,44 +173,11 @@ async function updateGuild() {
                 let equivalent_channels = new Array();;
                 for (let this_channel of this_guild.channels.cache.array()) {
                     if (this_channel.name == this_role.name) {
-                        equivalent_channels.push(this_channel);
-                    }
-                }
-
-                let buffer_channels = new Array();
-                for (let this_channel of equivalent_channels) {
-                    if (this_channel.members.size == 0) {
-                        buffer_channels.push(this_channel);
-                    }
-                }
-
-                if (buffer_channels == 0) {
-                    // Create duplicate voice room
-                    await this_guild.channels.create(this_role.name, {
-                        type: 'voice',
-                        topic: `Voice room dedicated for ${this_role.name.substring(vr_prefix.length)} players.`,
-                        reason: `${this_role.name.substring(vr_prefix.length)} is being played.`,
-                        parent: this_guild.channels.cache.find(channel => channel.name.toLowerCase() == 'dedicated voice channels').id,
-                        permissionOverwrites: [
-                            {
-                                id: this_role.id,
-                                allow: ["CONNECT"]
-                            },
-                            {
-                                id: this_guild.roles.cache.find(role => role.name.toLowerCase() == 'music bots').id,
-                                allow: ["CONNECT"]
-                            },
-                            {
-                                id: this_guild.roles.everyone.id,
-                                deny: ["CONNECT"]
-                            }
-                        ]
-                    }).catch(console.error);
-                } else if (buffer_channels.length > 1) {
-                    // Remove duplicates that are more than 1
-                    for (let i = 1; i < buffer_channels.length; i++) {
-                        // Delete this channel
-                        await buffer_channels.pop().delete('No players are currently playing this game.').catch(console.error);
+                        if (this_channel.members.size == 0) {
+                            await this_channel.delete('No players are currently playing this game.').catch(console.error);
+                        } else {
+                            equivalent_channels.push(this_channel);
+                        }
                     }
                 }
 
@@ -286,27 +226,54 @@ async function updateGuild() {
                         }
                     }
                     if (baseline_role) {
-                        let same_acitivities = true;
                         // Check if all members have the same activity
+                        let same_acitivities = true;
                         for (let this_member of this_channel.members.array()) {
                             if (same_acitivities && !this_member.roles.cache.find(role => role == baseline_role)) {
                                 same_acitivities = false;
                             }
                         }
-                        if (same_acitivities) {
-                            // Find an empty room
-                            for (let channel of this_guild.channels.cache.array()) {
-                                let is_trasnfered = false;
-                                if (!is_trasnfered && channel.type == 'voice') {
-                                    if (channel.name == baseline_role.name && channel.members.size == 0) {
-                                        for (let this_member of this_channel.members.array()) {
-                                            await this_member.voice.setChannel(channel).catch(console.error);
-                                        }
-                                        is_trasnfered = true;
+                        // Check if all members are playing more than 10 minutes
+                        let more_than_10_minutes = true;
+                        for (let this_member of this_channel.members.array()) {
+                            for (let this_activity of this_member.presence.activities) {
+                                if (this_activity.name == baseline_role.name.substring(vr_prefix.length)) {
+                                    let today = new Date();
+                                    let diffMins = Math.round((today - this_activity.createdAt) / 60000); // minutes
+                                    if (diffMins < 10) {
+                                        more_than_10_minutes = false;
                                     }
                                 }
                             }
+                        }
 
+                        if (same_acitivities && more_than_10_minutes) {
+                            // Create
+                            await this_guild.channels.create(baseline_role.name, {
+                                type: 'voice',
+                                topic: `Voice room dedicated for ${this_role.name.substring(vr_prefix.length)} players.`,
+                                reason: `${this_role.name.substring(vr_prefix.length)} is being played by members in a voice room.`,
+                                parent: this_guild.channels.cache.find(channel => channel.name.toLowerCase() == 'dedicated voice channels').id,
+                                permissionOverwrites: [
+                                    {
+                                        id: this_guild.roles.everyone.id,
+                                        deny: ["CONNECT"]
+                                    },
+                                    {
+                                        id: this_guild.roles.cache.find(role => role.name.toLowerCase() == 'music bots').id,
+                                        allow: ["CONNECT"]
+                                    },
+                                    {
+                                        id: this_role.id,
+                                        allow: ["CONNECT"]
+                                    }
+                                ]
+                            }).then(async channel => {
+                                // Transfer
+                                for (let this_member of this_channel.members.array()) {
+                                    await this_member.voice.setChannel(channel).catch(console.error);
+                                }
+                            }).catch(console.error);
                         }
                     }
                 }

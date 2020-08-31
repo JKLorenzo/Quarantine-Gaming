@@ -83,7 +83,7 @@ client.on('channelDelete', channel => {
 
 client.on('guildMemberUpdate', (oldMember, newMember) => {
     let embed = new MessageEmbed();
-    embed.setAuthor(newMember.user.tag, newMember.user.displayAvatarURL());
+    embed.setAuthor(newMember.user.username, newMember.user.displayAvatarURL());
     embed.setTitle('Guild Member Update');
 
     let description = new Array();
@@ -121,7 +121,7 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
     }
 
     embed.setDescription(description.join('\n'));
-    embed.setFooter(`${oldMember.user.username} (${oldMember.user.id})`);
+    embed.setFooter(`${newMember.user.tag} (${newMember.user.id})`);
     embed.setTimestamp(new Date());
     embed.setColor('#6464ff');
     g_interface.log(embed);
