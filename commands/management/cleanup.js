@@ -25,6 +25,11 @@ module.exports = class CleanUp extends Command {
 		let remaining = count;
 		let deleted = 0;
 
+		message.channel.bulkDelete(remaining).then(messages => {
+			deleted += messages.size
+			remaining -= deleted;
+		}).catch(console.error);
+
 		async function removeMessages(number_of_messages) {
 			if (number_of_messages > 0) {
 				await message.channel.messages.fetch({ limit: number_of_messages }).then(async messages => {
@@ -34,7 +39,7 @@ module.exports = class CleanUp extends Command {
 								console.log(`Removing message from ${the_message.channel.name} channel by ${the_message.author.tag}`);
 								remaining--;
 								deleted++;
-							}).catch(console.error);
+							}).catch(error => {});
 						}
 					} else {
 						remaining = 0;
