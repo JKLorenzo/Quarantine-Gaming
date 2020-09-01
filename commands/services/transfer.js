@@ -19,7 +19,6 @@ module.exports = class TransferCommand extends Command {
     }
 
     run(message, { user }) {
-        message.delete().catch(console.error);
         let channel = message.guild.members.cache.get(message.author.id).voice.channelID;
         if (channel) {
             let this_member = message.guild.members.cache.get(user.id);
