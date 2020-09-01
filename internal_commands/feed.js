@@ -14,12 +14,16 @@ async function get(init = false) {
                     if (!results.includes(item.title)) {
                         results.push(item.title);
                         if (!init) {
+                            function htmlEntities(str) {
+                                return String(str).replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"');
+                            }
                             g_interface.push({
-                                title: item.title,
+                                title: htmlEntities(item.title),
                                 url: item.url,
-                                author: author,
-                                description: item.selftext,
-                                validity: item.upvote_ratio*100
+                                author: item.author,
+                                description: htmlEntities(item.selftext),
+                                validity: item.upvote_ratio*100,
+                                score: item.score
                             });
                         }
                     }

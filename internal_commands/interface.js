@@ -5,9 +5,6 @@ const gis = require('g-i-s');
 
 let client, is_pushing = false, to_push = new Array();
 const vr_prefix = 'Play ';
-const ignored_titles = [
-    'StartupWindow', 'Error', 'modlauncher', 'BlueStacks', 'NoxPlayer'
-]
 
 // Internal Functions Region
 function getIcon(hostname) {
@@ -103,8 +100,8 @@ async function updateGuild() {
                             // Create
                             await this_guild.channels.create(baseline_role.name, {
                                 type: 'voice',
-                                topic: `Voice room dedicated for ${this_role.name.substring(vr_prefix.length)} players.`,
-                                reason: `${this_role.name.substring(vr_prefix.length)} is being played by members in a voice room.`,
+                                topic: `Voice room dedicated for ${baseline_role.name.substring(vr_prefix.length)} players.`,
+                                reason: `${baseline_role.name.substring(vr_prefix.length)} is being played by members in a voice room.`,
                                 parent: this_guild.channels.cache.find(channel => channel.name.toLowerCase() == 'dedicated voice channels').id,
                                 permissionOverwrites: [
                                     {
@@ -116,7 +113,7 @@ async function updateGuild() {
                                         allow: ["CONNECT"]
                                     },
                                     {
-                                        id: this_role.id,
+                                        id: baseline_role.id,
                                         allow: ["CONNECT"]
                                     }
                                 ]
@@ -151,14 +148,15 @@ async function process_push() {
             let author = this_notification.author;
             let description = this_notification.description;
             let validity = this_notification.validity;
+            let score = this_notification.score;
 
             // Stores the output message as an embed
             let output = new MessageEmbed().setTimestamp();
-            output.setThumbnail('https://www.freeiconspng.com/uploads/facebook-messenger-logo-hd-14.png');
             output.setAuthor('Quarantine Gaming: Free Game/DLC Notification', client.user.displayAvatarURL());
             output.addFields([
                 { name: 'Author', value: author, inline: true },
-                { name: 'Validity', value: `${validity} %`, inline: true }
+                { name: 'Validity', value: `${validity} %`, inline: true },
+                { name: 'Score', value: `${score}`, inline: true }
             ]);
             if (description) {
                 output.addField('Details', description);
