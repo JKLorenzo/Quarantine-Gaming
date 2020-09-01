@@ -145,12 +145,15 @@ client.once('ready', async () => {
 
 // Audit logs
 client.on('channelCreate', channel => {
+    if (!channel || !channel.id) return;
     try {
         let this_channel = client.guilds.cache.get('351178660725915649').channels.cache.get(channel.id);
 
+        if (!this_channel) return;
+        
         let description = new Array();
         description.push(`**Name**: ${this_channel.name}`);
-        if (this_channel.parent.name) description.push(`**Category**: ${this_channel.parent.name}`);
+        if (this_channel.parent && this_channel.parent.name) description.push(`**Category**: ${this_channel.parent.name}`);
 
         description.push(` `);
 
@@ -300,11 +303,15 @@ client.on('guildMemberAdd', async member => {
             ]);
             embed.setFooter('Warning: These actions are irreversible!');
             embed.setTimestamp(new Date());
-            return await staff_channel.send(embed).then(async this_message => {
+            await staff_channel.send(embed).then(async this_message => {
                 await this_message.react('✅');
                 await this_message.react('❌');
                 await this_message.react('⛔');
             });
+            let dm = new Array();
+            dm.push(`Hi ${member.user.username}, and welcome to **Quarantine Gaming**!`);
+            dm.push('Please wait while our staff is processing your membership approval. See you soon!');
+            return await (await member.createDM().catch(console.error)).send(dm.join('\n')).catch(console.error);
         }
     }
 });
