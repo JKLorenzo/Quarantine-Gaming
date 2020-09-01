@@ -46,7 +46,7 @@ client.once('ready', async () => {
 
     interface.init(client);
     await db.init(client);
-    await feed.start();
+    await feed.start(client);
 
     let this_guild = client.guilds.cache.get('351178660725915649');
 
