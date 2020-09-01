@@ -43,8 +43,75 @@ client.once('ready', async () => {
     await db.init(client);
     await feed.start();
 
-    // Remove unused play roles
     let this_guild = client.guilds.cache.get('351178660725915649');
+
+    // Add play roles
+    for (let this_member of this_guild.members.cache.array()) {
+        if (!this_member.user.bot) {
+            for (let this_activity of this_member.presence.activities) {
+                if (this_activity.type == 'PLAYING') {
+                    let this_game = this_activity.name.trim();
+                    let this_vr_name = vr_prefix + this_game;
+                    let this_voice_role = this_member.guild.roles.cache.find(role => role.name == this_vr_name);
+                    // Check if the title of the game is not null and is not one of the ignored titles
+                    if (this_game && !ignored_titles.includes(this_game)) {
+                        // Check if user doesn't have this mentionable role
+                        if (!this_member.roles.cache.find(role => role.name == this_game)) {
+                            // Get the equivalent role of this game
+                            let this_mentionable_role = this_member.guild.roles.cache.find(role => role.name == this_game);
+                            // Check if this role exists
+                            if (this_mentionable_role) {
+                                // Assign role to this member
+                                await this_member.roles.add(this_mentionable_role);
+                            } else {
+                                // Create role on this guild
+                                await this_member.guild.roles.create({
+                                    data: {
+                                        name: this_game,
+                                        color: '0x00ffff',
+                                        mentionable: true
+                                    },
+                                    reason: `A new game is played by (${this_member.user.tag}).`
+                                }).then(async function (this_mentionable_role) {
+                                    // Assign role to this member
+                                    await this_member.roles.add(this_mentionable_role);
+                                });
+                            }
+                        }
+
+
+                        // Check if this role doesn't exists
+                        if (!this_voice_role) {
+                            // Get reference role
+                            let play_role = this_member.guild.roles.cache.find(role => role.name == '<PLAYROLES>');
+                            // Create role on this guild
+                            await this_member.guild.roles.create({
+                                data: {
+                                    name: this_vr_name,
+                                    color: '0x7b00ff',
+                                    mentionable: true,
+                                    position: play_role.position,
+                                    hoist: true
+                                },
+                                reason: `A new game is played by (${this_member.user.tag}).`
+                            }).then(async function (voice_role) {
+                                this_voice_role = voice_role;
+                            });
+                        }
+
+                        // Check if user doesn't have this voice room role
+                        if (!this_member.roles.cache.find(role => role == this_voice_role)) {
+                            // Assign role to this member
+                            await this_member.roles.add(this_voice_role);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Remove unused play roles
+
     for (let this_role of this_guild.roles.cache.array()) {
         if (this_role.name.startsWith(vr_prefix)) {
             // Check if the role is still in use
@@ -190,7 +257,7 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
         embed.setFooter(`${newMember.user.tag} (${newMember.user.id})`);
         embed.setTimestamp(new Date());
         embed.setColor('#6464ff');
-        g_interface.log(embed);
+        if (description.length > 0) g_interface.log(embed);
     } catch (error) {
         let embed = new MessageEmbed()
             .setAuthor(`guildMemberUpdate`)
@@ -207,10 +274,9 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
 });
 
 client.on('presenceUpdate', async (oldMember, newMember) => {
+    if (newMember.user.bot) return;
     try {
-        // Skip Offline Online Event
-        if (!oldMember || !newMember) return;
-        let this_member = newMember.member;
+        let this_member = newMember.member ? newMember.member : oldMember.member;
 
         function array_difference(a1, a2) {
             let a = [], diff = [];
@@ -230,20 +296,29 @@ client.on('presenceUpdate', async (oldMember, newMember) => {
             return diff;
         }
 
-        let oldA = oldMember.activities.map(activity => activity.name);
-        let newA = newMember.activities.map(activity => activity.name);
+        let oldA = [], newA = [];
+        if (oldMember) oldA = oldMember.activities.map(activity => activity.name);
+        if (newMember) newA = newMember.activities.map(activity => activity.name);
         let diff = array_difference(oldA, newA);
 
         for (let this_activity_name of diff) {
-            let newActivity = newMember.activities.find(activity => activity.name == this_activity_name);
-            let oldActivity = oldMember.activities.find(activity => activity.name == this_activity_name);
+            let newActivity, oldActivity
+            if (newMember) newActivity = newMember.activities.find(activity => activity.name == this_activity_name);
+            if (oldMember) oldActivity = oldMember.activities.find(activity => activity.name == this_activity_name);
             let this_activity = newActivity ? newActivity : oldActivity;
             let this_game = this_activity.name.trim();
             let this_vr_name = vr_prefix + this_game;
             let this_voice_role = this_member.guild.roles.cache.find(role => role.name == this_vr_name);
 
+            console.log('-------------')
+            console.log(newActivity)
+            console.log(oldActivity)
+            console.log(this_activity)
+            console.log(this_vr_name)
+            console.log(this_voice_role)
             if (this_activity.type == 'PLAYING') {
                 if (newActivity) {
+                    console.log('++++++++++++');
                     // Check if the title of the game is not null and is not one of the ignored titles
                     if (this_game && !ignored_titles.includes(this_game)) {
                         // Check if user doesn't have this mentionable role
@@ -297,6 +372,7 @@ client.on('presenceUpdate', async (oldMember, newMember) => {
                         }
                     }
                 } else {
+                    console.log('==========');
                     // Remove role
                     await this_member.roles.remove(this_voice_role, 'This role is no longer valid.').catch(console.error);
                     // Check if the role is still in use
@@ -310,7 +386,7 @@ client.on('presenceUpdate', async (oldMember, newMember) => {
                             }
                         }
                     }
-                    if (!role_in_use) {
+                    if (!role_in_use && this_voice_role) {
                         await this_voice_role.delete('This role is no longer in use.').catch(console.error);
                     }
                 }
