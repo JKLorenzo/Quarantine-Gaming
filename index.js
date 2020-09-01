@@ -16,7 +16,10 @@ const ignored_titles = [
 ];
 const client = new CommandoClient({
     commandPrefix: 'sudo ',
-    owner: '393013053488103435'
+    owner: '393013053488103435',
+    partials: [
+        'MESSAGE', 'REACTION'
+    ]
 });
 
 client.registry
@@ -256,8 +259,12 @@ client.on('presenceUpdate', async (oldMember, newMember) => {
                 // Check if the role is still in use
                 let role_in_use = false;
                 for (let this_guild_member of this_member.guild.members.cache.array()) {
-                    if (!role_in_use && this_guild_member.roles.cache.find(role => role == this_voice_role)) {
-                        role_in_use = true;
+                    if (this_guild_member.roles.cache.find(role => role == this_voice_role)) {
+                        if (this_guild_member.presence.activities.map(activity => activity.name.trim()).includes(this_voice_role.name.substring(vr_prefix.length))) {
+                            role_in_use = true;
+                        } else {
+                            await this_guild_member.roles.remove(this_role, 'This role is no longer valid.').catch(console.error);
+                        }
                     }
                 }
                 if (!role_in_use) {
@@ -272,17 +279,117 @@ client.on('voiceStateUpdate', (oldState, newState) => {
     let newChannel = newState.channel;
     let oldChannel = oldState.channel;
 
-    if (newChannel){
+    if (newChannel) {
         if (newChannel.name.startsWith(vr_prefix) && newChannel.members.size == 0) {
             newChannel.delete('This channel is no longer in use.').catch(console.error);
         }
     }
-    if (oldChannel){
+    if (oldChannel) {
         if (oldChannel.name.startsWith(vr_prefix) && oldChannel.members.size == 0) {
             oldChannel.delete('This channel is no longer in use.').catch(console.error);
         }
     }
 });
+
+client.on('messageReactionAdd', async (reaction, user) => {
+    if (user.bot) return;
+    if (reaction.partial) {
+        try {
+            await reaction.fetch();
+        } catch (error) {
+            console.log('Error while fetching reaction role: ', error);
+            return;
+        }
+    }
+    if (reaction.message.author.bot) {
+        switch (reaction.message.embeds[0].title) {
+            case 'Unlock NSFW Bots and Channel':
+                switch (reaction.emoji.name) {
+                    case '🔴':
+                        let this_guild = client.guilds.cache.get(reaction.message.guild.id);
+                        let this_member = this_guild.members.cache.get(user.id);
+                        let this_role = this_guild.roles.cache.find(role => role.id == '700481554132107414');
+                        if (this_role && !this_member.roles.cache.has(this_role.id)) {
+                            await this_member.roles.add(this_role.id).catch(console.error);
+                        }
+                        break;
+                }
+                break;
+            case 'Get the latest information for your selected subscriptions':
+                let this_guild = client.guilds.cache.get(reaction.message.guild.id);
+                let this_member = this_guild.members.cache.get(user.id);
+                let this_role;
+                switch (reaction.emoji.name) {
+                    case '1️⃣':
+                        this_role = this_guild.roles.cache.find(role => role.id == '722645979248984084');
+                        break;
+                    case '2️⃣':
+                        this_role = this_guild.roles.cache.find(role => role.id == '722691589813829672');
+                        break;
+                    case '3️⃣':
+                        this_role = this_guild.roles.cache.find(role => role.id == '722691679542312970');
+                        break;
+                    case '4️⃣':
+                        this_role = this_guild.roles.cache.find(role => role.id == '722691724572491776');
+                        break;
+                }
+                if (this_role && !this_member.roles.cache.has(this_role.id)) {
+                    await this_member.roles.add(this_role.id).catch(console.error);
+                }
+                break;
+        }
+    }
+});
+
+client.on('messageReactionRemove', async (reaction, user) => {
+    if (user.bot) return;
+    if (reaction.partial) {
+        try {
+            await reaction.fetch();
+        } catch (error) {
+            console.log('Error while fetching reaction role: ', error);
+            return;
+        }
+    }
+    if (reaction.message.author.bot) {
+        switch (reaction.message.embeds[0].title) {
+            case 'Unlock NSFW Bots and Channel':
+                switch (reaction.emoji.name) {
+                    case '🔴':
+                        let this_guild = client.guilds.cache.get(reaction.message.guild.id);
+                        let this_member = this_guild.members.cache.get(user.id);
+                        let this_role = this_guild.roles.cache.find(role => role.id == '700481554132107414');
+                        if (this_role && this_member.roles.cache.has(this_role.id)) {
+                            await this_member.roles.remove(this_role.id).catch(console.error);
+                        }
+                        break;
+                }
+                break;
+            case 'Get the latest information for your selected subscriptions':
+                let this_guild = client.guilds.cache.get(reaction.message.guild.id);
+                let this_member = this_guild.members.cache.get(user.id);
+                let this_role;
+                switch (reaction.emoji.name) {
+                    case '1️⃣':
+                        this_role = this_guild.roles.cache.find(role => role.id == '722645979248984084');
+                        break;
+                    case '2️⃣':
+                        this_role = this_guild.roles.cache.find(role => role.id == '722691589813829672');
+                        break;
+                    case '3️⃣':
+                        this_role = this_guild.roles.cache.find(role => role.id == '722691679542312970');
+                        break;
+                    case '4️⃣':
+                        this_role = this_guild.roles.cache.find(role => role.id == '722691724572491776');
+                        break;
+                }
+                if (this_role && this_member.roles.cache.has(this_role.id)) {
+                    await this_member.roles.remove(this_role.id).catch(console.error);
+                }
+                break;
+        }
+    }
+})
 
 client.on('error', console.error);
 
