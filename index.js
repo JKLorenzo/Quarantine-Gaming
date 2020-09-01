@@ -306,7 +306,7 @@ client.on('presenceUpdate', async (oldMember, newMember) => {
                             if (this_guild_member.presence.activities.map(activity => activity.name.trim()).includes(this_voice_role.name.substring(vr_prefix.length))) {
                                 role_in_use = true;
                             } else {
-                                await this_guild_member.roles.remove(this_role, 'This role is no longer valid.').catch(console.error);
+                                await this_guild_member.roles.remove(this_voice_role, 'This role is no longer valid.').catch(console.error);
                             }
                         }
                     }
