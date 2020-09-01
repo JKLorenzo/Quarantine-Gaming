@@ -58,154 +58,6 @@ function image_search(name) {
 async function updateGuild() {
     // Loops through every guild
     for (let this_guild of client.guilds.cache.array()) {
-        // Get all the members of the guild
-        let this_guild_members = this_guild.members.cache.array();
-        // Loop through every member
-        for (let this_member of this_guild_members) {
-            // Get the status of this member
-            let this_member_status = this_member.presence.status;
-            // Check if this member is not offline
-            if (this_member_status != 'offline') {
-                // Get the list of activities of this member
-                let this_member_activities = this_member.presence.activities;
-                // Check if this member is not a bot and also check if this member have atleast 1 activity
-                if (!this_member.user.bot && this_member_activities.length > 0) {
-                    // Loop through all the acitivities of this member
-                    for (let this_activity of this_member_activities) {
-                        // Check if this activity is of type Playing, ignore if not
-                        if (this_activity.type == 'PLAYING') {
-                            // Get the name of the game
-                            let this_game = this_activity.name;
-                            // Remove the unwanted leading and trailing characters
-                            this_game = this_game.trim();
-                            // Check if the title of the game is not null and is not one of the ignored titles
-                            if (this_game && !ignored_titles.includes(this_game)) {
-                                // Check if user doesn't have this mentionable role
-                                if (!this_member.roles.cache.find(role => role.name == this_game)) {
-                                    // Get the equivalent role of this game
-                                    let this_mentionable_role = this_guild.roles.cache.find(role => role.name == this_game);
-                                    // Check if this role exists
-                                    if (this_mentionable_role) {
-                                        // Assign role to this member
-                                        await this_member.roles.add(this_mentionable_role);
-                                    } else {
-                                        // Create role on this guild
-                                        await this_guild.roles.create({
-                                            data: {
-                                                name: this_game,
-                                                color: '0x00ffff',
-                                                mentionable: true
-                                            },
-                                            reason: `A new game is played by (${this_member.user.tag}).`
-                                        }).then(async function (this_mentionable_role) {
-                                            // Assign role to this member
-                                            await this_member.roles.add(this_mentionable_role);
-                                        });
-                                    }
-                                }
-
-                                // Get the voice room parent
-                                let parent = this_guild.channels.cache.find(channel => channel.name.toLowerCase() == 'dedicated voice channels')
-                                // Check if the voice room parent exists
-                                if (parent) {
-                                    let this_vr_name = vr_prefix + this_game;
-                                    // Get the equivalent role of this game
-                                    let this_voice_role = this_guild.roles.cache.find(role => role.name == this_vr_name);
-                                    // Check if this role doesn't exists
-                                    if (!this_voice_role) {
-                                        // Get reference role
-                                        let play_role = this_guild.roles.cache.find(role => role.name == '<PLAYROLES>');
-                                        // Create role on this guild
-                                        await this_guild.roles.create({
-                                            data: {
-                                                name: this_vr_name,
-                                                color: '0x7b00ff',
-                                                mentionable: true,
-                                                position: play_role.position,
-                                                hoist: true
-                                            },
-                                            reason: `A new game is played by (${this_member.user.tag}).`
-                                        }).then(async function (voice_role) {
-                                            this_voice_role = voice_role;
-                                        });
-                                    }
-
-                                    // Check if user doesn't have this voice room role
-                                    if (!this_member.roles.cache.find(role => role.name == this_vr_name)) {
-                                        // Assign role to this member
-                                        await this_member.roles.add(this_voice_role);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Get all the roles of this guild
-        for (let this_role of this_guild.roles.cache.array()) {
-            // Check if this role is one of the voice room roles
-            if (this_role.name.startsWith(vr_prefix)) {
-                // Boolean identifier if this role has members
-                let has_members = false;
-                // Get all the members of this guild
-                for (let this_member of this_guild.members.cache.array()) {
-                    // Check if this member has this role
-                    if (this_member.roles.cache.find(role => role.name == this_role.name)) {
-                        // Boolean identifier if this member is playing this role
-                        let is_playing = false;
-                        // Loop through all of this member's activities
-                        for (let this_activity of this_member.presence.activities) {
-                            // Check if this user is currently playing this role
-                            if (this_activity.type == 'PLAYING' && this_activity.name == this_role.name.substring(vr_prefix.length)) {
-                                has_members = true;
-                                is_playing = true;
-                            }
-                        }
-                        // Remove this role from this user
-                        if (!is_playing) {
-                            await this_member.roles.remove(this_role).catch(console.error);
-                        }
-                    }
-                }
-
-                let equivalent_channels = new Array();;
-                for (let this_channel of this_guild.channels.cache.array()) {
-                    if (this_channel.name == this_role.name) {
-                        if (this_channel.members.size == 0) {
-                            await this_channel.delete('No players are currently playing this game.').catch(console.error);
-                        } else {
-                            equivalent_channels.push(this_channel);
-                        }
-                    }
-                }
-
-                if (!has_members) {
-                    // Check if equivalent channels exists
-                    if (equivalent_channels.length > 0) {
-                        let has_users = false;
-                        for (let this_channel of equivalent_channels) {
-                            // Check if someone is using this channel
-                            if (this_channel.members.size > 0) {
-                                has_users = true;
-                            } else {
-                                // Delete this channel
-                                await this_channel.delete('No players are currently playing this game.').catch(console.error);
-                            }
-                        }
-                        if (!has_users) {
-                            // Delete this role
-                            await this_role.delete('No players are currently playing this game.').catch(console.error);
-                        }
-                    } else {
-                        // Delete this role
-                        await this_role.delete('No players are currently playing this game.').catch(console.error);
-                    }
-                }
-            }
-        }
-
         // Transfer members from generic voice rooms to dynamic voice rooms
         for (let this_channel of this_guild.channels.cache.array()) {
             if (this_channel.type == 'voice' && this_channel.name.startsWith('Voice Room')) {
@@ -233,21 +85,21 @@ async function updateGuild() {
                                 same_acitivities = false;
                             }
                         }
-                        // Check if all members are playing more than 10 minutes
-                        let more_than_10_minutes = true;
+                        // Check if all members are playing more than 5 minutes
+                        let are_playing = true;
                         for (let this_member of this_channel.members.array()) {
                             for (let this_activity of this_member.presence.activities) {
                                 if (this_activity.name == baseline_role.name.substring(vr_prefix.length)) {
                                     let today = new Date();
                                     let diffMins = Math.round((today - this_activity.createdAt) / 60000); // minutes
-                                    if (diffMins < 10) {
-                                        more_than_10_minutes = false;
+                                    if (diffMins < 5) {
+                                        are_playing = false;
                                     }
                                 }
                             }
                         }
 
-                        if (same_acitivities && more_than_10_minutes) {
+                        if (same_acitivities && are_playing) {
                             // Create
                             await this_guild.channels.create(baseline_role.name, {
                                 type: 'voice',

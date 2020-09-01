@@ -10,6 +10,10 @@ global.rootDir = path.resolve(__dirname);
 global.g_db = db;
 global.g_interface = interface;
 
+const vr_prefix = 'Play ';
+const ignored_titles = [
+    'StartupWindow', 'Error', 'modlauncher', 'BlueStacks', 'NoxPlayer'
+];
 const client = new CommandoClient({
     commandPrefix: 'sudo ',
     owner: '393013053488103435'
@@ -35,6 +39,36 @@ client.once('ready', async () => {
     interface.init(client);
     await db.init(client);
     await feed.start();
+
+    // Remove unused play roles
+    let this_guild = client.guilds.cache.get('351178660725915649');
+    for (let this_role of this_guild.roles.cache.array()) {
+        if (this_role.name.startsWith(vr_prefix)) {
+            // Check if the role is still in use
+            let role_in_use = false;
+            for (let this_member of this_guild.members.cache.array()) {
+                if (this_member.roles.cache.find(role => role == this_role)) {
+                    if (this_member.presence.activities.map(activity => activity.name.trim()).includes(this_role.name.substring(vr_prefix.length))) {
+                        role_in_use = true;
+                    } else {
+                        await this_member.roles.remove(this_role, 'This role is no longer valid.').catch(console.error);
+                    }
+                }
+            }
+            if (!role_in_use) {
+                await this_role.delete('This role is no longer in use.').catch(console.error);
+            }
+        }
+    }
+
+    // Remove empty play channels
+    for (let this_channel of this_guild.channels.cache.array()) {
+        if (this_channel.type == 'voice' && this_channel.name.startsWith(vr_prefix)) {
+            if (this_channel.members.size == 0) {
+                await this_channel.delete('This channel is no longer in use.').catch(console.error);
+            }
+        }
+    }
 });
 
 // Audit logs
@@ -109,8 +143,8 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
         if (description.length > 0) description.push(' ');
         description.push(`**Role**`);
         let added = new Array(), removed = new Array();
-        for (let this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()){
-            if (newMember.roles.cache.has(this_role.id)){
+        for (let this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
+            if (newMember.roles.cache.has(this_role.id)) {
                 added.push(this_role);
             } else {
                 removed.push(this_role);
@@ -127,8 +161,127 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
     g_interface.log(embed);
 });
 
-client.on('presenceUpdate', (oldMember, newMember) => {
-    let this_member = client.guilds.cache.get('351178660725915649').members.cache.get(newMember.user.id);
+client.on('presenceUpdate', async (oldMember, newMember) => {
+    // Skip Offline Online Event
+    if (!oldMember || !newMember) return;
+    let this_member = newMember.member;
+
+    function array_difference(a1, a2) {
+        let a = [], diff = [];
+        for (let i = 0; i < a1.length; i++) {
+            a[a1[i]] = true;
+        }
+        for (let i = 0; i < a2.length; i++) {
+            if (a[a2[i]]) {
+                delete a[a2[i]];
+            } else {
+                a[a2[i]] = true;
+            }
+        }
+        for (let k in a) {
+            diff.push(k);
+        }
+        return diff;
+    }
+
+    let oldA = oldMember.activities.map(activity => activity.name);
+    let newA = newMember.activities.map(activity => activity.name);
+    let diff = array_difference(oldA, newA);
+
+    for (let this_activity_name of diff) {
+        let newActivity = newMember.activities.find(activity => activity.name == this_activity_name);
+        let oldActivity = oldMember.activities.find(activity => activity.name == this_activity_name);
+        let this_activity = newActivity ? newActivity : oldActivity;
+        let this_game = this_activity.name.trim();
+        let this_vr_name = vr_prefix + this_game;
+        let this_voice_role = this_member.guild.roles.cache.find(role => role.name == this_vr_name);
+
+        if (this_activity.type == 'PLAYING') {
+            if (newActivity) {
+                // Check if the title of the game is not null and is not one of the ignored titles
+                if (this_game && !ignored_titles.includes(this_game)) {
+                    // Check if user doesn't have this mentionable role
+                    if (!this_member.roles.cache.find(role => role.name == this_game)) {
+                        // Get the equivalent role of this game
+                        let this_mentionable_role = this_member.guild.roles.cache.find(role => role.name == this_game);
+                        // Check if this role exists
+                        if (this_mentionable_role) {
+                            // Assign role to this member
+                            await this_member.roles.add(this_mentionable_role);
+                        } else {
+                            // Create role on this guild
+                            await this_member.guild.roles.create({
+                                data: {
+                                    name: this_game,
+                                    color: '0x00ffff',
+                                    mentionable: true
+                                },
+                                reason: `A new game is played by (${this_member.user.tag}).`
+                            }).then(async function (this_mentionable_role) {
+                                // Assign role to this member
+                                await this_member.roles.add(this_mentionable_role);
+                            });
+                        }
+                    }
+
+
+                    // Check if this role doesn't exists
+                    if (!this_voice_role) {
+                        // Get reference role
+                        let play_role = this_member.guild.roles.cache.find(role => role.name == '<PLAYROLES>');
+                        // Create role on this guild
+                        await this_member.guild.roles.create({
+                            data: {
+                                name: this_vr_name,
+                                color: '0x7b00ff',
+                                mentionable: true,
+                                position: play_role.position,
+                                hoist: true
+                            },
+                            reason: `A new game is played by (${this_member.user.tag}).`
+                        }).then(async function (voice_role) {
+                            this_voice_role = voice_role;
+                        });
+                    }
+
+                    // Check if user doesn't have this voice room role
+                    if (!this_member.roles.cache.find(role => role == this_voice_role)) {
+                        // Assign role to this member
+                        await this_member.roles.add(this_voice_role);
+                    }
+                }
+            } else {
+                // Remove role
+                await this_member.roles.remove(this_voice_role, 'This role is no longer valid.').catch(console.error);
+                // Check if the role is still in use
+                let role_in_use = false;
+                for (let this_guild_member of this_member.guild.members.cache.array()) {
+                    if (!role_in_use && this_guild_member.roles.cache.find(role => role == this_voice_role)) {
+                        role_in_use = true;
+                    }
+                }
+                if (!role_in_use) {
+                    await this_voice_role.delete('This role is no longer in use.').catch(console.error);
+                }
+            }
+        }
+    }
+});
+
+client.on('voiceStateUpdate', (oldState, newState) => {
+    let newChannel = newState.channel;
+    let oldChannel = oldState.channel;
+
+    if (newChannel){
+        if (newChannel.name.startsWith(vr_prefix) && newChannel.members.size == 0) {
+            newChannel.delete('This channel is no longer in use.').catch(console.error);
+        }
+    }
+    if (oldChannel){
+        if (oldChannel.name.startsWith(vr_prefix) && oldChannel.members.size == 0) {
+            oldChannel.delete('This channel is no longer in use.').catch(console.error);
+        }
+    }
 });
 
 client.on('error', console.error);
