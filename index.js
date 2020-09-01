@@ -64,12 +64,16 @@ client.once('ready', async () => {
                                 // Assign role to this member
                                 await this_member.roles.add(this_mentionable_role);
                             } else {
+                                // Get reference role
+                                let play_role = this_member.guild.roles.cache.find(role => role.name == '<PLAYROLES>');
                                 // Create role on this guild
                                 await this_member.guild.roles.create({
                                     data: {
                                         name: this_game,
                                         color: '0x00ffff',
-                                        mentionable: true
+                                        mentionable: true,
+                                        position: play_role.position,
+                                        hoist: true
                                     },
                                     reason: `A new game is played by (${this_member.user.tag}).`
                                 }).then(async function (this_mentionable_role) {
@@ -78,7 +82,6 @@ client.once('ready', async () => {
                                 });
                             }
                         }
-
 
                         // Check if this role doesn't exists
                         if (!this_voice_role) {
@@ -111,7 +114,6 @@ client.once('ready', async () => {
     }
 
     // Remove unused play roles
-
     for (let this_role of this_guild.roles.cache.array()) {
         if (this_role.name.startsWith(vr_prefix)) {
             // Check if the role is still in use
@@ -273,6 +275,40 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
     }
 });
 
+client.on('guildMemberAdd', async member => {
+    let this_guild = client.guilds.cache.get('351178660725915649');
+    let staff_channel = this_guild.channels.cache.get('749763548090990613');
+    let this_member = this_guild.members.cache.get(member.id);
+
+    if (this_member && !this_member.user.bot) {
+        if (!this_member.roles.cache.find(role => role.id == '722699433225224233')) {
+            let today = new Date();
+            let diffMs = (today - this_member.user.createdAt);
+            let diffDays = Math.floor(diffMs / 86400000)
+            let diffHrs = Math.floor((diffMs % 86400000) / 3600000)
+            let diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000);
+            let created_on = diffDays + " days " + diffHrs + " hours " + diffMins + " minutes";
+
+            let embed = new MessageEmbed
+            embed.setAuthor(this_member.user.tag);
+            embed.setTitle('Quarantine Gaming Member Approval');
+            embed.setThumbnail(this_member.user.displayAvatarURL());
+            embed.addFields([
+                { name: 'Username:', value: this_member.user.username },
+                { name: 'Account Created:', value: created_on },
+                { name: 'Moderation:', value: '✅ - Approve     ❌ - Kick     ⛔ - Ban', inline: true }
+            ]);
+            embed.setFooter('Warning: These actions are irreversible!');
+            embed.setTimestamp(new Date());
+            return await staff_channel.send(embed).then(async this_message => {
+                await this_message.react('✅');
+                await this_message.react('❌');
+                await this_message.react('⛔');
+            });
+        }
+    }
+});
+
 client.on('presenceUpdate', async (oldMember, newMember) => {
     if (newMember.user.bot) return;
     try {
@@ -310,15 +346,8 @@ client.on('presenceUpdate', async (oldMember, newMember) => {
             let this_vr_name = vr_prefix + this_game;
             let this_voice_role = this_member.guild.roles.cache.find(role => role.name == this_vr_name);
 
-            console.log('-------------')
-            console.log(newActivity)
-            console.log(oldActivity)
-            console.log(this_activity)
-            console.log(this_vr_name)
-            console.log(this_voice_role)
             if (this_activity.type == 'PLAYING') {
                 if (newActivity) {
-                    console.log('++++++++++++');
                     // Check if the title of the game is not null and is not one of the ignored titles
                     if (this_game && !ignored_titles.includes(this_game)) {
                         // Check if user doesn't have this mentionable role
@@ -372,7 +401,6 @@ client.on('presenceUpdate', async (oldMember, newMember) => {
                         }
                     }
                 } else {
-                    console.log('==========');
                     // Remove role
                     await this_member.roles.remove(this_voice_role, 'This role is no longer valid.').catch(console.error);
                     // Check if the role is still in use
@@ -448,13 +476,15 @@ client.on('messageReactionAdd', async (reaction, user) => {
                 return;
             }
         }
-        if (reaction.message.author.bot) {
-            switch (reaction.message.embeds[0].title) {
+        let this_message = reaction.message;
+        let this_guild = client.guilds.cache.get(this_message.guild.id);
+        let this_member;
+        if (this_message.author.bot) {
+            switch (this_message.embeds[0].title) {
                 case 'Unlock NSFW Bots and Channel':
                     switch (reaction.emoji.name) {
                         case '🔴':
-                            let this_guild = client.guilds.cache.get(reaction.message.guild.id);
-                            let this_member = this_guild.members.cache.get(user.id);
+                            this_member = this_guild.members.cache.get(user.id);
                             let this_role = this_guild.roles.cache.find(role => role.id == '700481554132107414');
                             if (this_role && !this_member.roles.cache.has(this_role.id)) {
                                 await this_member.roles.add(this_role.id).catch(console.error);
@@ -463,8 +493,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
                     }
                     break;
                 case 'Get the latest information for your selected subscriptions':
-                    let this_guild = client.guilds.cache.get(reaction.message.guild.id);
-                    let this_member = this_guild.members.cache.get(user.id);
+                    this_member = this_guild.members.cache.get(user.id);
                     let this_role;
                     switch (reaction.emoji.name) {
                         case '1️⃣':
@@ -482,6 +511,49 @@ client.on('messageReactionAdd', async (reaction, user) => {
                     }
                     if (this_role && !this_member.roles.cache.has(this_role.id)) {
                         await this_member.roles.add(this_role.id).catch(console.error);
+                    }
+                    break;
+                case 'Quarantine Gaming Member Approval':
+                    this_member = this_guild.members.cache.find(member => member.user.tag == this_message.embeds[0].author.name);
+                    switch (reaction.emoji.name) {
+                        case '✅':
+                            if (this_member && !this_member.roles.cache.has('722699433225224233')) {
+                                await this_member.roles.add('722699433225224233')
+                                    .then(async () => {
+                                        await this_message.reactions.removeAll()
+                                            .then(async message => {
+                                                let final = message.embeds[0]
+                                                    .spliceFields(2, 1)
+                                                    .addField('Action Taken:', 'Approved ✅');
+                                                await message.edit(final);
+                                            });
+                                    }).catch(console.error);
+                            }
+                            break;
+                        case '❌':
+                            if (this_member) await this_member.kick()
+                                .then(async () => {
+                                    await this_message.reactions.removeAll()
+                                        .then(async message => {
+                                            let final = message.embeds[0]
+                                                .spliceFields(2, 1)
+                                                .addField('Action Taken:', 'Kicked ❌');
+                                            await message.edit(final);
+                                        });
+                                }).catch(console.error)
+                            break;
+                        case '⛔':
+                            if (this_member) await this_member.ban()
+                                .then(async () => {
+                                    await this_message.reactions.removeAll()
+                                        .then(async message => {
+                                            let final = message.embeds[0]
+                                                .spliceFields(2, 1)
+                                                .addField('Action Taken:', 'Banned ⛔');
+                                            await message.edit(final);
+                                        });
+                                }).catch(console.error)
+                            break;
                     }
                     break;
             }
