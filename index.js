@@ -39,6 +39,11 @@ client.registry
 
 client.once('ready', async () => {
     console.log('-------------{  Startup  }-------------');
+    // Set the bot's activity
+    client.user.setActivity('!help', {
+        type: 'LISTENING'
+    });
+
     interface.init(client);
     await db.init(client);
     await feed.start();
