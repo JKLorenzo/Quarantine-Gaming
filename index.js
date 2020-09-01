@@ -15,7 +15,7 @@ const ignored_titles = [
     'StartupWindow', 'Error', 'modlauncher', 'BlueStacks', 'NoxPlayer'
 ];
 const client = new CommandoClient({
-    commandPrefix: 'sudo ',
+    commandPrefix: '!',
     owner: '393013053488103435',
     partials: [
         'MESSAGE', 'REACTION'
