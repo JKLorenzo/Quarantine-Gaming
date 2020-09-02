@@ -24,15 +24,16 @@ module.exports = class CleanUp extends Command {
 		message.delete();
 		let remaining = count;
 		let deleted = 0;
-
-		await message.channel.bulkDelete(remaining).then(messages => {
-			deleted += messages.size
-			remaining -= deleted;
-		}).catch(() => { });
-
 		async function removeMessages(number_of_messages) {
 			if (number_of_messages > 0) {
-				await message.channel.messages.fetch({ limit: number_of_messages }).then(async messages => {
+				await message.channel.bulkDelete(number_of_messages).then(messages => {
+					deleted += messages.size
+					remaining -= deleted;
+					number_of_messages -= deleted;
+				}).catch(() => { });
+			}
+			if (number_of_messages > 0) {
+				await message.channel.messages.fetch({ limit: 1 }).then(async messages => {
 					if (messages.size > 0) {
 						for (let this_message of messages) {
 							await this_message[1].delete().then(() => {
