@@ -188,6 +188,7 @@ client.once('ready', async () => {
     client.user.setActivity('!help', {
         type: 'LISTENING'
     });
+    interface.log('-------------{  Startup  }-------------');
 });
 
 // Audit logs
@@ -281,7 +282,7 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
         if (newMember.roles.cache.size != oldMember.roles.cache.size) {
             let added = new Array(), removed = new Array();
             for (let this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
-                if (!this_role.name.startsWith(vr_prefix)){
+                if (!this_role.name.startsWith(vr_prefix)) {
                     if (newMember.roles.cache.has(this_role.id)) {
                         added.push(this_role);
                     } else {
