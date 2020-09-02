@@ -99,14 +99,15 @@ function FreeGameUpdates(client) {
             { name: '1️⃣ - Steam: Free Game Updates', value: 'Notifies you with Steam games and DLCs that are currently free.' },
             { name: '2️⃣ - Epic: Free Game Updates', value: 'Notifies you with Epic games and DLCs that are currently free.' },
             { name: '3️⃣ - GOG: Free Game Updates', value: 'Notifies you with GOG games and DLCs that are currently free.' },
-            { name: '4️⃣ - Console: Free Game Updates', value: 'Notifies you with games and DLCs that are currently free for Xbox(One/360), PlayStation(3/4/Vita), and Wii(U/3DS/Switch).' }
+            { name: '4️⃣ - Console: Free Game Updates', value: 'Notifies you with games and DLCs that are currently free for Xbox(One/360), PlayStation(3/4/Vita), and Wii(U/3DS/Switch).' },
+            { name: '5️⃣ - UPlay: Free Game Updates', value: 'Notifies you with Ubisoft games and DLCs that are currently free.' },
         ])
         .setImage('https://media.playstation.com/is/image/SCEA/playstation-vue-hero-banner-desktop-01-us-22jan19?$native_nt$')
         .setFooter('Update your role by reacting below.');
 
-    let reactions = ['1️⃣', '2️⃣', '3️⃣', '4️⃣'];
+    let reactions = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'];
     return {
         message: embed,
         reactions: reactions
-    }
+    };
 }

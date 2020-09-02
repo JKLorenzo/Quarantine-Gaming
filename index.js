@@ -155,7 +155,7 @@ client.on('channelCreate', channel => {
         let this_channel = client.guilds.cache.get('351178660725915649').channels.cache.get(channel.id);
 
         if (!this_channel) return;
-        
+
         let description = new Array();
         description.push(`**Name**: ${this_channel.name}`);
         if (this_channel.parent && this_channel.parent.name) description.push(`**Category**: ${this_channel.parent.name}`);
@@ -504,7 +504,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
                             break;
                     }
                     break;
-                case 'Get the latest information for your selected subscriptions':
+                case 'Subscribe to get updated':
                     this_member = this_guild.members.cache.get(user.id);
                     let this_role;
                     switch (reaction.emoji.name) {
@@ -519,6 +519,9 @@ client.on('messageReactionAdd', async (reaction, user) => {
                             break;
                         case '4️⃣':
                             this_role = this_guild.roles.cache.find(role => role.id == '722691724572491776');
+                            break;
+                        case '5️⃣':
+                            this_role = this_guild.roles.cache.find(role => role.id == '750517524738605087');
                             break;
                     }
                     if (this_role && !this_member.roles.cache.has(this_role.id)) {
@@ -610,7 +613,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
                             break;
                     }
                     break;
-                case 'Get the latest information for your selected subscriptions':
+                case 'Subscribe to get updated':
                     let this_guild = client.guilds.cache.get(reaction.message.guild.id);
                     let this_member = this_guild.members.cache.get(user.id);
                     let this_role;
@@ -626,6 +629,9 @@ client.on('messageReactionRemove', async (reaction, user) => {
                             break;
                         case '4️⃣':
                             this_role = this_guild.roles.cache.find(role => role.id == '722691724572491776');
+                            break;
+                        case '5️⃣':
+                            this_role = this_guild.roles.cache.find(role => role.id == '750517524738605087');
                             break;
                     }
                     if (this_role && this_member.roles.cache.has(this_role.id)) {

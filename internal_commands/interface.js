@@ -341,32 +341,29 @@ async function process_push() {
             let mentionables = [];
             // Sets the url to lower case to remove case sensitivity and concatenate a space to disable undefined error
             let _url = no_url ? ' ' : url.toLowerCase();
-            // Console keywords
-            let Console_URLs = ['playstation.com', 'wii.com', 'xbox.com'];
-            let Console_KWs = ['playstation', 'wii', 'ps3', 'ps4', 'xbox'];
-
-            // Checks if the title or the url contains the word steam
+            
             if (_url.indexOf('steampowered.com') !== -1) {
                 // Add steam to the mentionable array
                 mentionables[mentionables.length] = 'steam';
                 // Set the color
                 color.add(0, 157, 255);
             }
-            // Checks if the title or the url contains the word epic
+
             if (_url.indexOf('epicgames.com') !== -1) {
                 // Add epic to the mentionable array
                 mentionables[mentionables.length] = 'epic';
                 // Set the color
                 color.add(157, 255, 0);
             }
-            // Checks if the title or the url contains the word gog
+
             if (_url.indexOf('gog.com') !== -1) {
                 // Add gog to the mentionable array
                 mentionables[mentionables.length] = 'gog';
                 // Set the color
                 color.add(157, 0, 255)
             }
-            // Checks if the title or the url contains these words
+
+            let Console_URLs = ['playstation.com', 'wii.com', 'xbox.com'];
             for (let Console_URL of Console_URLs) {
                 if (_url.indexOf(Console_URL) !== -1) {
                     // Add console to the mentionable array
@@ -374,6 +371,13 @@ async function process_push() {
                     // Set the color
                     color.add(200, 80, 200)
                 }
+            }
+
+            if (_url.indexOf('ubisoft.com') !== -1) {
+                // Add gog to the mentionable array
+                mentionables[mentionables.length] = 'uplay';
+                // Set the color
+                color.add(200, 120, 255)
             }
 
             // Status
@@ -387,30 +391,25 @@ async function process_push() {
                 // Check if this notification has duplicates
                 if (!g_db.hasRecords(safe_notification)) {
                     let this_mentionables = new Array();
-                    // Update database
                     await g_db.pushNotification(safe_notification);
-                    // Set the color of the embeds
                     output.setColor(color.toHex());
-                    // Check if the this guild's steam mentionable-role is not null and that the mentionables contains steam
+
                     if (mentionables.includes('steam')) {
-                        // Concatenate the steam role to the to-be-mentioned roles
                         this_mentionables.push(`<@&722645979248984084>`);
                     }
-                    // Check if the this guild's epic mentionable-role is not null and that the mentionables contains epic
                     if (mentionables.includes('epic')) {
-                        // Concatenate the epic role to the to-be-mentioned roles
                         this_mentionables.push(`<@&722691589813829672>`);
                     }
-                    // Check if the this guild's gog mentionable-role is not null and that the mentionables contains gog
                     if (mentionables.includes('gog')) {
-                        // Concatenate the gog role to the to-be-mentioned roles
                         this_mentionables.push(`<@&722691679542312970>`);
                     }
-                    // Check if the this guild's console mentionable-role is not null and that the mentionables contains console
                     if (mentionables.includes('console')) {
-                        // Concatenate the console role to the to-be-mentioned roles
                         this_mentionables.push(`<@&722691724572491776>`);
                     }
+                    if (mentionables.includes('uplay')) {
+                        this_mentionables.push(`<@&750517524738605087>`);
+                    }
+
                     // Checks if the to-be-mentioned roles is not null
                     if (this_mentionables) {
                         // Send the embed to the guild's specified channel
