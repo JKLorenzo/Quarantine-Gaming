@@ -279,15 +279,19 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
 
         // Role
         if (newMember.roles.cache.size != oldMember.roles.cache.size) {
-            if (description.length > 0) description.push(' ');
-            description.push(`**Role**`);
             let added = new Array(), removed = new Array();
             for (let this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
-                if (newMember.roles.cache.has(this_role.id)) {
-                    added.push(this_role);
-                } else {
-                    removed.push(this_role);
+                if (!this_role.name.startsWith(vr_prefix)){
+                    if (newMember.roles.cache.has(this_role.id)) {
+                        added.push(this_role);
+                    } else {
+                        removed.push(this_role);
+                    }
                 }
+            }
+            if (added.length > 0 || removed.length > 0) {
+                if (description.length > 0) description.push(' ');
+                description.push(`**Role**`);
             }
             if (added.length > 0) description.push(`Added: ${added.join(', ')}`);
             if (removed.length > 0) description.push(`Removed: ${removed.join(', ')}`);
