@@ -11,7 +11,7 @@ function htmlEntities(str) {
 async function get(init = false) {
     console.log('**Updating Feed**');
     try {
-        await fetch('https://www.reddit.com/r/FreeGameFindings/new/.json?limit=25&sort=new')
+        await fetch('https://www.reddit.com/r/FreeGameFindings/new/.json?limit=10&sort=new')
             .then(data => data.json())
             .then(async data => {
                 for (let child of data.data.children) {
@@ -34,7 +34,7 @@ async function get(init = false) {
                     }
 
                     let subscriptions = client.guilds.cache.get('351178660725915649').channels.cache.get('699763763859161108');
-                    await subscriptions.messages.fetch({ limit: 25 }).then(async messages => {
+                    await subscriptions.messages.fetch({ limit: 5 }).then(async messages => {
                         let this_messages = new Array();
                         messages.map(msg => {
                             if (msg.author.bot && msg.embeds[0].url == item_details.url) {
