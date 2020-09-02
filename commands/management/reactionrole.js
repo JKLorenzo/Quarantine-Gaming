@@ -42,9 +42,21 @@ module.exports = class ReactionRole extends Command {
             case 'create':
                 await message.say(output.message).then(async this_message => {
                     for (let this_reaction of output.reactions) {
-                        await this_message.react(this_reaction);
+                        await this_message.react(this_reaction).catch(error => {
+                            g_interface.on_error({
+                                name: 'run -> .react(this_reaction) [case create]',
+                                location: 'reactionrole.js',
+                                error: error
+                            });
+                        });
                     }
-                }).catch(console.error);
+                }).catch(error => {
+                    g_interface.on_error({
+                        name: 'run -> .say(output.message) [case create]',
+                        location: 'reactionrole.js',
+                        error: error
+                    });
+                });
                 break;
             case 'update':
                 await message.channel.messages.fetch({ limit: 25 }).then(async messages => {
@@ -59,9 +71,21 @@ module.exports = class ReactionRole extends Command {
                         let this_message = this_messages[0];
                         await this_message.edit(output.message).then(async this_message => {
                             for (let this_reaction of output.reactions) {
-                                await this_message.react(this_reaction);
+                                await this_message.react(this_reaction).catch(error => {
+                                    g_interface.on_error({
+                                        name: 'run -> .react(this_reaction) [case update]',
+                                        location: 'reactionrole.js',
+                                        error: error
+                                    });
+                                });
                             }
-                        }).catch(console.error);
+                        }).catch(error => {
+                            g_interface.on_error({
+                                name: 'run -> .edit(output.message) [case update]',
+                                location: 'reactionrole.js',
+                                error: error
+                            });
+                        });
                     }
                 });
                 break;

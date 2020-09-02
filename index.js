@@ -2,8 +2,10 @@ const { CommandoClient } = require('discord.js-commando');
 const path = require('path');
 const { MessageEmbed } = require('discord.js');
 const db = require(path.join(__dirname, 'internal_commands', 'database.js'));
-const interface = require(path.join(__dirname, 'internal_commands', 'interface.js'))
-const feed = require(path.join(__dirname, 'internal_commands', 'feed.js'))
+const interface = require(path.join(__dirname, 'internal_commands', 'interface.js'));
+const feed = require(path.join(__dirname, 'internal_commands', 'feed.js'));
+const fgu = require(path.join(__dirname, 'internal_commands', 'fgu.js'));
+const dynamic_channel = require(path.join(__dirname, 'internal_commands', 'dynamic_channel.js'));
 
 // Global Variables
 global.rootDir = path.resolve(__dirname);
@@ -39,40 +41,32 @@ client.registry
 
 client.once('ready', async () => {
     console.log('-------------{  Startup  }-------------');
-    // Set the bot's activity
-    client.user.setActivity('!help', {
-        type: 'LISTENING'
-    });
-
     interface.init(client);
-    await db.init(client);
-    await feed.start(client);
-
-    let this_guild = client.guilds.cache.get('351178660725915649');
+    dynamic_channel.init(client);
+    db.init(client);
+    fgu.init(client);
+    feed.init(client);
 
     // Add play roles
-    for (let this_member of this_guild.members.cache.array()) {
+    for (let this_member of g_interface.get('guild').members.cache.array()) {
         if (!this_member.user.bot) {
             for (let this_activity of this_member.presence.activities) {
                 if (this_activity.type == 'PLAYING') {
                     let this_game = this_activity.name.trim();
                     let this_vr_name = vr_prefix + this_game;
-                    let this_voice_role = this_member.guild.roles.cache.find(role => role.name == this_vr_name);
+                    let this_voice_role = g_interface.get('guild').roles.cache.find(role => role.name == this_vr_name);
                     // Check if the title of the game is not null and is not one of the ignored titles
                     if (this_game && !ignored_titles.includes(this_game)) {
                         // Check if user doesn't have this mentionable role
                         if (!this_member.roles.cache.find(role => role.name == this_game)) {
                             // Get the equivalent role of this game
-                            let this_mentionable_role = this_member.guild.roles.cache.find(role => role.name == this_game);
+                            let this_mentionable_role = g_interface.get('guild').roles.cache.find(role => role.name == this_game);
                             // Check if this role exists
-                            if (this_mentionable_role) {
-                                // Assign role to this member
-                                await this_member.roles.add(this_mentionable_role);
-                            } else {
+                            if (!this_mentionable_role) {
                                 // Get reference role
-                                let play_role = this_member.guild.roles.cache.find(role => role.name == '<PLAYROLES>');
+                                let play_role = g_interface.get('guild').roles.cache.find(role => role.name == '<PLAYROLES>');
                                 // Create role on this guild
-                                await this_member.guild.roles.create({
+                                await g_interface.get('guild').roles.create({
                                     data: {
                                         name: this_game,
                                         color: '0x00ffff',
@@ -81,19 +75,32 @@ client.once('ready', async () => {
                                         hoist: true
                                     },
                                     reason: `A new game is played by (${this_member.user.tag}).`
-                                }).then(async function (this_mentionable_role) {
-                                    // Assign role to this member
-                                    await this_member.roles.add(this_mentionable_role);
+                                }).then(async function (this_created_role) {
+                                    this_mentionable_role = this_created_role;
+                                }).catch(error => {
+                                    g_interface.on_error({
+                                        name: 'ready -> .create(this_game)',
+                                        location: 'index.js',
+                                        error: error
+                                    });
                                 });
                             }
+                            // Assign role to this member
+                            await this_member.roles.add(this_mentionable_role).catch(error => {
+                                g_interface.on_error({
+                                    name: 'ready -> .add(this_mentionable_role)',
+                                    location: 'index.js',
+                                    error: error
+                                });
+                            });
                         }
 
                         // Check if this role doesn't exists
                         if (!this_voice_role) {
                             // Get reference role
-                            let play_role = this_member.guild.roles.cache.find(role => role.name == '<PLAYROLES>');
+                            let play_role = g_interface.get('guild').roles.cache.find(role => role.name == '<PLAYROLES>');
                             // Create role on this guild
-                            await this_member.guild.roles.create({
+                            await g_interface.get('guild').roles.create({
                                 data: {
                                     name: this_vr_name,
                                     color: '0x7b00ff',
@@ -104,13 +111,25 @@ client.once('ready', async () => {
                                 reason: `A new game is played by (${this_member.user.tag}).`
                             }).then(async function (voice_role) {
                                 this_voice_role = voice_role;
+                            }).catch(error => {
+                                g_interface.on_error({
+                                    name: 'ready -> .create(this_vr_name)',
+                                    location: 'index.js',
+                                    error: error
+                                });
                             });
                         }
 
                         // Check if user doesn't have this voice room role
                         if (!this_member.roles.cache.find(role => role == this_voice_role)) {
                             // Assign role to this member
-                            await this_member.roles.add(this_voice_role);
+                            await this_member.roles.add(this_voice_role).catch(error => {
+                                g_interface.on_error({
+                                    name: 'ready -> .add(this_voice_role)',
+                                    location: 'index.js',
+                                    error: error
+                                });
+                            });
                         }
                     }
                 }
@@ -119,40 +138,63 @@ client.once('ready', async () => {
     }
 
     // Remove unused play roles
-    for (let this_role of this_guild.roles.cache.array()) {
+    for (let this_role of g_interface.get('guild').roles.cache.array()) {
         if (this_role.name.startsWith(vr_prefix)) {
             // Check if the role is still in use
             let role_in_use = false;
-            for (let this_member of this_guild.members.cache.array()) {
+            for (let this_member of g_interface.get('guild').members.cache.array()) {
                 if (this_member.roles.cache.find(role => role == this_role)) {
                     if (this_member.presence.activities.map(activity => activity.name.trim()).includes(this_role.name.substring(vr_prefix.length))) {
                         role_in_use = true;
                     } else {
-                        await this_member.roles.remove(this_role, 'This role is no longer valid.').catch(console.error);
+                        await this_member.roles.remove(this_role, 'This role is no longer valid.').catch(error => {
+                            g_interface.on_error({
+                                name: 'ready -> .remove(this_role)',
+                                location: 'index.js',
+                                error: error
+                            });
+                        });
                     }
                 }
             }
             if (!role_in_use) {
-                await this_role.delete('This role is no longer in use.').catch(console.error);
+                await this_role.delete('This role is no longer in use.').catch(error => {
+                    g_interface.on_error({
+                        name: 'ready -> .delete(this_role)',
+                        location: 'index.js',
+                        error: error
+                    });
+                });
             }
         }
     }
 
     // Remove empty play channels
-    for (let this_channel of this_guild.channels.cache.array()) {
+    for (let this_channel of g_interface.get('guild').channels.cache.array()) {
         if (this_channel.type == 'voice' && this_channel.name.startsWith(vr_prefix)) {
             if (this_channel.members.size == 0) {
-                await this_channel.delete('This channel is no longer in use.').catch(console.error);
+                await this_channel.delete('This channel is no longer in use.').catch(error => {
+                    g_interface.on_error({
+                        name: 'ready -> .delete(this_channel)',
+                        location: 'index.js',
+                        error: error
+                    });
+                });
             }
         }
     }
+
+    // Set the bot's activity
+    client.user.setActivity('!help', {
+        type: 'LISTENING'
+    });
 });
 
 // Audit logs
 client.on('channelCreate', channel => {
     if (!channel || !channel.id) return;
     try {
-        let this_channel = client.guilds.cache.get('351178660725915649').channels.cache.get(channel.id);
+        let this_channel = g_interface.get('guild').channels.cache.get(channel.id);
 
         if (!this_channel) return;
 
@@ -163,7 +205,7 @@ client.on('channelCreate', channel => {
         description.push(` `);
 
         for (let overwrite of this_channel.permissionOverwrites) {
-            description.push(`**Permission override for ${this_channel.guild.roles.cache.get(overwrite[0])}:**`)
+            description.push(`**Permission override for ${g_interface.get('guild').roles.cache.get(overwrite[0])}:**`)
             for (let permission of overwrite[1].allow.toArray()) {
                 description.push(`${permission.substring(0, 1).toUpperCase() + permission.slice(1).toLowerCase()}: ✅`);
             }
@@ -181,17 +223,11 @@ client.on('channelCreate', channel => {
         embed.setColor('#64ff64');
         g_interface.log(embed);
     } catch (error) {
-        let embed = new MessageEmbed()
-            .setAuthor(`channelCreate`)
-            .setTitle(`Index.js Error`)
-            .setDescription(`An error occured while performing channelCreate function on index.js.`)
-            .addField('Error Message', error)
-            .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Antu_dialog-error.svg/1024px-Antu_dialog-error.svg.png')
-            .setColor('#FF0000');
-
-        g_interface.log(embed);
-        console.log(`An error occured while performing channelCreate function on index.js.`);
-        console.log(`\n${error}\n`);
+        g_interface.on_error({
+            name: 'guildMemberUpdate',
+            location: 'index.js',
+            error: error
+        });
     }
 });
 
@@ -209,17 +245,11 @@ client.on('channelDelete', channel => {
         embed.setColor('#ff6464');
         g_interface.log(embed);
     } catch (error) {
-        let embed = new MessageEmbed()
-            .setAuthor(`channelDelete`)
-            .setTitle(`Index.js Error`)
-            .setDescription(`An error occured while performing channelDelete function on index.js.`)
-            .addField('Error Message', error)
-            .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Antu_dialog-error.svg/1024px-Antu_dialog-error.svg.png')
-            .setColor('#FF0000');
-
-        g_interface.log(embed);
-        console.log(`An error occured while performing channelDelete function on index.js.`);
-        console.log(`\n${error}\n`);
+        g_interface.on_error({
+            name: 'guildMemberUpdate',
+            location: 'index.js',
+            error: error
+        });
     }
 });
 
@@ -269,24 +299,17 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
         embed.setColor('#6464ff');
         if (description.length > 0) g_interface.log(embed);
     } catch (error) {
-        let embed = new MessageEmbed()
-            .setAuthor(`guildMemberUpdate`)
-            .setTitle(`Index.js Error`)
-            .setDescription(`An error occured while performing guildMemberUpdate function on index.js.`)
-            .addField('Error Message', error)
-            .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Antu_dialog-error.svg/1024px-Antu_dialog-error.svg.png')
-            .setColor('#FF0000');
-
-        g_interface.log(embed);
-        console.log(`An error occured while performing guildMemberUpdate function on index.js.`);
-        console.log(`\n${error}\n`);
+        g_interface.on_error({
+            name: 'guildMemberUpdate',
+            location: 'index.js',
+            error: error
+        });
     }
 });
 
 client.on('guildMemberAdd', async member => {
-    let this_guild = client.guilds.cache.get('351178660725915649');
-    let staff_channel = this_guild.channels.cache.get('749763548090990613');
-    let this_member = this_guild.members.cache.get(member.id);
+    let staff_channel = g_interface.get('guild').channels.cache.get('749763548090990613');
+    let this_member = g_interface.get('guild').members.cache.get(member.id);
 
     if (this_member && !this_member.user.bot) {
         if (!this_member.roles.cache.find(role => role.id == '722699433225224233')) {
@@ -316,7 +339,7 @@ client.on('guildMemberAdd', async member => {
             let dm = new Array();
             dm.push(`Hi ${member.user.username}, and welcome to **Quarantine Gaming**!`);
             dm.push('Please wait while our staff is processing your membership approval. See you soon!');
-            return await (await member.createDM().catch(console.error)).send(dm.join('\n')).catch(console.error);
+            g_interface.dm(member, dm.join('\n'));
         }
     }
 });
@@ -356,7 +379,7 @@ client.on('presenceUpdate', async (oldMember, newMember) => {
             let this_activity = newActivity ? newActivity : oldActivity;
             let this_game = this_activity.name.trim();
             let this_vr_name = vr_prefix + this_game;
-            let this_voice_role = this_member.guild.roles.cache.find(role => role.name == this_vr_name);
+            let this_voice_role = g_interface.get('guild').roles.cache.find(role => role.name == this_vr_name);
 
             if (this_activity.type == 'PLAYING') {
                 if (newActivity) {
@@ -365,34 +388,44 @@ client.on('presenceUpdate', async (oldMember, newMember) => {
                         // Check if user doesn't have this mentionable role
                         if (!this_member.roles.cache.find(role => role.name == this_game)) {
                             // Get the equivalent role of this game
-                            let this_mentionable_role = this_member.guild.roles.cache.find(role => role.name == this_game);
+                            let this_mentionable_role = g_interface.get('guild').roles.cache.find(role => role.name == this_game);
                             // Check if this role exists
-                            if (this_mentionable_role) {
-                                // Assign role to this member
-                                await this_member.roles.add(this_mentionable_role);
-                            } else {
+                            if (!this_mentionable_role) {
                                 // Create role on this guild
-                                await this_member.guild.roles.create({
+                                await g_interface.get('guild').roles.create({
                                     data: {
                                         name: this_game,
                                         color: '0x00ffff',
                                         mentionable: true
                                     },
                                     reason: `A new game is played by (${this_member.user.tag}).`
-                                }).then(async function (this_mentionable_role) {
-                                    // Assign role to this member
-                                    await this_member.roles.add(this_mentionable_role);
+                                }).then(function (this_created_role) {
+                                    this_mentionable_role = this_created_role;
+                                }).catch(error => {
+                                    g_interface.on_error({
+                                        name: 'presenceUpdate -> .create(data, reason)',
+                                        location: 'index.js',
+                                        error: error
+                                    });
                                 });
                             }
+                            // Assign role to this member
+                            await this_member.roles.add(this_mentionable_role).catch(error => {
+                                g_interface.on_error({
+                                    name: 'presenceUpdate -> .add(this_mentionable_role)',
+                                    location: 'index.js',
+                                    error: error
+                                });
+                            });
                         }
 
 
                         // Check if this role doesn't exists
                         if (!this_voice_role) {
                             // Get reference role
-                            let play_role = this_member.guild.roles.cache.find(role => role.name == '<PLAYROLES>');
+                            let play_role = g_interface.get('guild').roles.cache.find(role => role.name == '<PLAYROLES>');
                             // Create role on this guild
-                            await this_member.guild.roles.create({
+                            await g_interface.get('guild').roles.create({
                                 data: {
                                     name: this_vr_name,
                                     color: '0x7b00ff',
@@ -401,79 +434,101 @@ client.on('presenceUpdate', async (oldMember, newMember) => {
                                     hoist: true
                                 },
                                 reason: `A new game is played by (${this_member.user.tag}).`
-                            }).then(async function (voice_role) {
+                            }).then(function (voice_role) {
                                 this_voice_role = voice_role;
+                            }).catch(error => {
+                                g_interface.on_error({
+                                    name: 'presenceUpdate -> .create(this_vr_name)',
+                                    location: 'index.js',
+                                    error: error
+                                });
                             });
                         }
 
                         // Check if user doesn't have this voice room role
                         if (!this_member.roles.cache.find(role => role == this_voice_role)) {
                             // Assign role to this member
-                            await this_member.roles.add(this_voice_role);
+                            await this_member.roles.add(this_voice_role).catch(error => {
+                                g_interface.on_error({
+                                    name: 'presenceUpdate -> .add(this_voice_role)',
+                                    location: 'index.js',
+                                    error: error
+                                });
+                            });
                         }
                     }
                 } else {
                     // Remove role
-                    await this_member.roles.remove(this_voice_role, 'This role is no longer valid.').catch(console.error);
+                    await this_member.roles.remove(this_voice_role, 'This role is no longer valid.').catch(error => {
+                        g_interface.on_error({
+                            name: 'presenceUpdate -> .remove(this_voice_role)',
+                            location: 'index.js',
+                            error: error
+                        });
+                    });
                     // Check if the role is still in use
                     let role_in_use = false;
-                    for (let this_guild_member of this_member.guild.members.cache.array()) {
+                    for (let this_guild_member of g_interface.get('guild').members.cache.array()) {
                         if (this_guild_member.roles.cache.find(role => role == this_voice_role)) {
                             if (this_guild_member.presence.activities.map(activity => activity.name.trim()).includes(this_voice_role.name.substring(vr_prefix.length))) {
                                 role_in_use = true;
                             } else {
-                                await this_guild_member.roles.remove(this_voice_role, 'This role is no longer valid.').catch(console.error);
+                                await this_guild_member.roles.remove(this_voice_role, 'This role is no longer valid.').catch(error => {
+                                    g_interface.on_error({
+                                        name: 'presenceUpdate -> .remove(this_voice_role)',
+                                        location: 'index.js',
+                                        error: error
+                                    });
+                                });
                             }
                         }
                     }
                     if (!role_in_use && this_voice_role) {
-                        await this_voice_role.delete('This role is no longer in use.').catch(console.error);
+                        await this_voice_role.delete('This role is no longer in use.').catch(error => {
+                            g_interface.on_error({
+                                name: 'presenceUpdate -> .delete(this_voice_role)',
+                                location: 'index.js',
+                                error: error
+                            });
+                        });
                     }
                 }
             }
         }
     } catch (error) {
-        let embed = new MessageEmbed()
-            .setAuthor(`presenceUpdate`)
-            .setTitle(`Index.js Error`)
-            .setDescription(`An error occured while performing presenceUpdate function on index.js.`)
-            .addField('Error Message', error)
-            .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Antu_dialog-error.svg/1024px-Antu_dialog-error.svg.png')
-            .setColor('#FF0000');
-
-        g_interface.log(embed);
-        console.log(`An error occured while performing presenceUpdate function on index.js.`);
-        console.log(`\n${error}\n`);
+        g_interface.on_error({
+            name: 'presenceUpdate',
+            location: 'index.js',
+            error: error
+        });
     }
 });
 
 client.on('voiceStateUpdate', (oldState, newState) => {
-    try {
-        let newChannel = newState.channel;
-        let oldChannel = oldState.channel;
+    let newChannel = newState.channel;
+    let oldChannel = oldState.channel;
 
-        if (newChannel) {
-            if (newChannel.name.startsWith(vr_prefix) && newChannel.members.size == 0) {
-                newChannel.delete('This channel is no longer in use.').catch(console.error);
-            }
+    if (newChannel) {
+        if (newChannel.name.startsWith(vr_prefix) && newChannel.members.size == 0) {
+            newChannel.delete('This channel is no longer in use.').catch(error => {
+                g_interface.on_error({
+                    name: 'voiceStateUpdate -> .delete(newChannel)',
+                    location: 'index.js',
+                    error: error
+                });
+            });
         }
-        if (oldChannel) {
-            if (oldChannel.name.startsWith(vr_prefix) && oldChannel.members.size == 0) {
-                oldChannel.delete('This channel is no longer in use.').catch(console.error);
-            }
+    }
+    if (oldChannel) {
+        if (oldChannel.name.startsWith(vr_prefix) && oldChannel.members.size == 0) {
+            oldChannel.delete('This channel is no longer in use.').catch(error => {
+                g_interface.on_error({
+                    name: 'voiceStateUpdate -> .delete(oldChannel)',
+                    location: 'index.js',
+                    error: error
+                });
+            });
         }
-    } catch (error) {
-        let embed = new MessageEmbed()
-            .setAuthor(`voiceStateUpdate`)
-            .setTitle(`Index.js Error`)
-            .setDescription(`An error occured while performing voiceStateUpdate function on index.js.`)
-            .addField('Error Message', error)
-            .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Antu_dialog-error.svg/1024px-Antu_dialog-error.svg.png')
-            .setColor('#FF0000');
-
-        g_interface.log(embed);
-        console.log(`An error occured while performing voiceStateUpdate function on index.js.`);
-        console.log(`\n${error}\n`);
     }
 });
 
@@ -481,51 +536,64 @@ client.on('messageReactionAdd', async (reaction, user) => {
     try {
         if (user.bot) return;
         if (reaction.partial) {
-            try {
-                await reaction.fetch();
-            } catch (error) {
-                console.log('Error while fetching reaction role: ', error);
+            await reaction.fetch().catch(error => {
+                g_interface.on_error({
+                    name: 'messageReactionAdd -> .fetch(reaction)',
+                    location: 'index.js',
+                    error: error
+                });
                 return;
-            }
+            });
         }
         let this_message = reaction.message;
-        let this_guild = client.guilds.cache.get(this_message.guild.id);
         let this_member;
         if (this_message.author.bot) {
             switch (this_message.embeds[0].title) {
                 case 'Unlock NSFW Bots and Channel':
                     switch (reaction.emoji.name) {
                         case '🔴':
-                            this_member = this_guild.members.cache.get(user.id);
-                            let this_role = this_guild.roles.cache.find(role => role.id == '700481554132107414');
+                            this_member = g_interface.get('guild').members.cache.get(user.id);
+                            let this_role = g_interface.get('guild').roles.cache.find(role => role.id == '700481554132107414');
                             if (this_role && !this_member.roles.cache.has(this_role.id)) {
-                                await this_member.roles.add(this_role.id).catch(console.error);
+                                await this_member.roles.add(this_role.id).catch(error => {
+                                    g_interface.on_error({
+                                        name: 'messageReactionAdd -> .add(this_role.id) [case nsfw]',
+                                        location: 'index.js',
+                                        error: error
+                                    });
+                                });
                             }
                             break;
                     }
                     break;
                 case 'Subscribe to get updated':
-                    this_member = this_guild.members.cache.get(user.id);
+                    this_member = g_interface.get('guild').members.cache.get(user.id);
                     let this_role;
                     switch (reaction.emoji.name) {
                         case '1️⃣':
-                            this_role = this_guild.roles.cache.find(role => role.id == '722645979248984084');
+                            this_role = g_interface.get('guild').roles.cache.find(role => role.id == '722645979248984084');
                             break;
                         case '2️⃣':
-                            this_role = this_guild.roles.cache.find(role => role.id == '722691589813829672');
+                            this_role = g_interface.get('guild').roles.cache.find(role => role.id == '722691589813829672');
                             break;
                         case '3️⃣':
-                            this_role = this_guild.roles.cache.find(role => role.id == '722691679542312970');
+                            this_role = g_interface.get('guild').roles.cache.find(role => role.id == '722691679542312970');
                             break;
                         case '4️⃣':
-                            this_role = this_guild.roles.cache.find(role => role.id == '722691724572491776');
+                            this_role = g_interface.get('guild').roles.cache.find(role => role.id == '722691724572491776');
                             break;
                         case '5️⃣':
-                            this_role = this_guild.roles.cache.find(role => role.id == '750517524738605087');
+                            this_role = g_interface.get('guild').roles.cache.find(role => role.id == '750517524738605087');
                             break;
                     }
                     if (this_role && !this_member.roles.cache.has(this_role.id)) {
-                        await this_member.roles.add(this_role.id).catch(console.error);
+                        await this_member.roles.add(this_role.id).catch(error => {
+                            g_interface.on_error({
+                                name: 'messageReactionAdd -> .add(this_role.id) [case subscribe]',
+                                location: 'index.js',
+                                error: error
+                            });
+                        });
                     }
                     break;
                 case 'Quarantine Gaming Member Approval':
@@ -533,58 +601,100 @@ client.on('messageReactionAdd', async (reaction, user) => {
                     switch (reaction.emoji.name) {
                         case '✅':
                             if (this_member && !this_member.roles.cache.has('722699433225224233')) {
-                                await this_member.roles.add('722699433225224233')
-                                    .then(async () => {
-                                        await this_message.reactions.removeAll()
-                                            .then(async message => {
-                                                let final = message.embeds[0]
-                                                    .spliceFields(2, 1)
-                                                    .addField('Action Taken:', 'Approved ✅');
-                                                await message.edit(final);
+                                await this_member.roles.add('722699433225224233').then(async () => {
+                                    await this_message.reactions.removeAll().then(async message => {
+                                        let final = message.embeds[0]
+                                            .spliceFields(2, 1)
+                                            .addField('Action Taken:', 'Approved ✅');
+                                        await message.edit(final).catch(error => {
+                                            g_interface.on_error({
+                                                name: 'messageReactionAdd -> .edit(final) [case approve]',
+                                                location: 'index.js',
+                                                error: error
                                             });
-                                    }).catch(console.error);
+                                        });
+                                    }).catch(error => {
+                                        g_interface.on_error({
+                                            name: 'messageReactionAdd -> .removeAll(reactions) [case approve]',
+                                            location: 'index.js',
+                                            error: error
+                                        });
+                                    });
+                                }).catch(error => {
+                                    g_interface.on_error({
+                                        name: 'messageReactionAdd -> .add(722699433225224233) [case approve]',
+                                        location: 'index.js',
+                                        error: error
+                                    });
+                                });
                             }
                             break;
                         case '❌':
-                            if (this_member) await this_member.kick()
-                                .then(async () => {
-                                    await this_message.reactions.removeAll()
-                                        .then(async message => {
-                                            let final = message.embeds[0]
-                                                .spliceFields(2, 1)
-                                                .addField('Action Taken:', 'Kicked ❌');
-                                            await message.edit(final);
+                            if (this_member) await this_member.kick().then(async () => {
+                                await this_message.reactions.removeAll().then(async message => {
+                                    let final = message.embeds[0]
+                                        .spliceFields(2, 1)
+                                        .addField('Action Taken:', 'Kicked ❌');
+                                    await message.edit(final).catch(error => {
+                                        g_interface.on_error({
+                                            name: 'messageReactionAdd -> .edit(final) [case kick]',
+                                            location: 'index.js',
+                                            error: error
                                         });
-                                }).catch(console.error)
+                                    });
+                                }).catch(error => {
+                                    g_interface.on_error({
+                                        name: 'messageReactionAdd -> .removeAll(reactions) [case kick]',
+                                        location: 'index.js',
+                                        error: error
+                                    });
+                                });
+                            }).catch(error => {
+                                g_interface.on_error({
+                                    name: 'messageReactionAdd -> .kick(this_member) [case kick]',
+                                    location: 'index.js',
+                                    error: error
+                                });
+                            })
                             break;
                         case '⛔':
-                            if (this_member) await this_member.ban()
-                                .then(async () => {
-                                    await this_message.reactions.removeAll()
-                                        .then(async message => {
-                                            let final = message.embeds[0]
-                                                .spliceFields(2, 1)
-                                                .addField('Action Taken:', 'Banned ⛔');
-                                            await message.edit(final);
+                            if (this_member) await this_member.ban().then(async () => {
+                                await this_message.reactions.removeAll().then(async message => {
+                                    let final = message.embeds[0]
+                                        .spliceFields(2, 1)
+                                        .addField('Action Taken:', 'Banned ⛔');
+                                    await message.edit(final).catch(error => {
+                                        g_interface.on_error({
+                                            name: 'messageReactionAdd -> .edit(final) [case ban]',
+                                            location: 'index.js',
+                                            error: error
                                         });
-                                }).catch(console.error)
+                                    });
+                                }).catch(error => {
+                                    g_interface.on_error({
+                                        name: 'messageReactionAdd -> .removeAll(reaction) [case ban]',
+                                        location: 'index.js',
+                                        error: error
+                                    });
+                                });
+                            }).catch(error => {
+                                g_interface.on_error({
+                                    name: 'messageReactionAdd -> .ban(this_member) [case ban]',
+                                    location: 'index.js',
+                                    error: error
+                                });
+                            })
                             break;
                     }
                     break;
             }
         }
     } catch (error) {
-        let embed = new MessageEmbed()
-            .setAuthor(`messageReactionAdd`)
-            .setTitle(`Index.js Error`)
-            .setDescription(`An error occured while performing messageReactionAdd function on index.js.`)
-            .addField('Error Message', error)
-            .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Antu_dialog-error.svg/1024px-Antu_dialog-error.svg.png')
-            .setColor('#FF0000');
-
-        g_interface.log(embed);
-        console.log(`An error occured while performing messageReactionAdd function on index.js.`);
-        console.log(`\n${error}\n`);
+        g_interface.on_error({
+            name: 'messageReactionAdd',
+            location: 'index.js',
+            error: error
+        });
     }
 });
 
@@ -592,69 +702,82 @@ client.on('messageReactionRemove', async (reaction, user) => {
     try {
         if (user.bot) return;
         if (reaction.partial) {
-            try {
-                await reaction.fetch();
-            } catch (error) {
-                console.log('Error while fetching reaction role: ', error);
+            await reaction.fetch().catch(error => {
+                g_interface.on_error({
+                    name: 'messageReactionRemove -> .fetch(reaction)',
+                    location: 'index.js',
+                    error: error
+                });
                 return;
-            }
+            });
         }
         if (reaction.message.author.bot) {
             switch (reaction.message.embeds[0].title) {
                 case 'Unlock NSFW Bots and Channel':
                     switch (reaction.emoji.name) {
                         case '🔴':
-                            let this_guild = client.guilds.cache.get(reaction.message.guild.id);
-                            let this_member = this_guild.members.cache.get(user.id);
-                            let this_role = this_guild.roles.cache.find(role => role.id == '700481554132107414');
+                            let this_member = g_interface.get('guild').members.cache.get(user.id);
+                            let this_role = g_interface.get('guild').roles.cache.find(role => role.id == '700481554132107414');
                             if (this_role && this_member.roles.cache.has(this_role.id)) {
-                                await this_member.roles.remove(this_role.id).catch(console.error);
+                                await this_member.roles.remove(this_role.id).catch(error => {
+                                    g_interface.on_error({
+                                        name: 'messageReactionRemove -> .remove(this_role.id) [case nsfw]',
+                                        location: 'index.js',
+                                        error: error
+                                    });
+                                });
                             }
                             break;
                     }
                     break;
                 case 'Subscribe to get updated':
-                    let this_guild = client.guilds.cache.get(reaction.message.guild.id);
-                    let this_member = this_guild.members.cache.get(user.id);
+                    let this_member = g_interface.get('guild').members.cache.get(user.id);
                     let this_role;
                     switch (reaction.emoji.name) {
                         case '1️⃣':
-                            this_role = this_guild.roles.cache.find(role => role.id == '722645979248984084');
+                            this_role = g_interface.get('guild').roles.cache.find(role => role.id == '722645979248984084');
                             break;
                         case '2️⃣':
-                            this_role = this_guild.roles.cache.find(role => role.id == '722691589813829672');
+                            this_role = g_interface.get('guild').roles.cache.find(role => role.id == '722691589813829672');
                             break;
                         case '3️⃣':
-                            this_role = this_guild.roles.cache.find(role => role.id == '722691679542312970');
+                            this_role = g_interface.get('guild').roles.cache.find(role => role.id == '722691679542312970');
                             break;
                         case '4️⃣':
-                            this_role = this_guild.roles.cache.find(role => role.id == '722691724572491776');
+                            this_role = g_interface.get('guild').roles.cache.find(role => role.id == '722691724572491776');
                             break;
                         case '5️⃣':
-                            this_role = this_guild.roles.cache.find(role => role.id == '750517524738605087');
+                            this_role = g_interface.get('guild').roles.cache.find(role => role.id == '750517524738605087');
                             break;
                     }
                     if (this_role && this_member.roles.cache.has(this_role.id)) {
-                        await this_member.roles.remove(this_role.id).catch(console.error);
+                        await this_member.roles.remove(this_role.id).catch(error => {
+                            g_interface.on_error({
+                                name: 'messageReactionRemove -> .remove(this_role.id) [case subscribe]',
+                                location: 'index.js',
+                                error: error
+                            });
+                        });
                     }
                     break;
             }
         }
     } catch (error) {
-        let embed = new MessageEmbed()
-            .setAuthor(`messageReactionRemove`)
-            .setTitle(`Index.js Error`)
-            .setDescription(`An error occured while performing messageReactionRemove function on index.js.`)
-            .addField('Error Message', error)
-            .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Antu_dialog-error.svg/1024px-Antu_dialog-error.svg.png')
-            .setColor('#FF0000');
-
-        g_interface.log(embed);
-        console.log(`An error occured while performing messageReactionRemove function on index.js.`);
-        console.log(`\n${error}\n`);
+        g_interface.on_error({
+            name: 'messageReactionRemove',
+            location: 'index.js',
+            error: error
+        });
     }
-})
+});
 
-client.on('error', console.error);
+client.on('error', error => {
+    console.log(error);
+    g_interface.on_error({
+        name: 'client error',
+        location: 'index.js',
+        error: error
+    });
+});
 
 client.login(process.env.BOT_TOKEN);

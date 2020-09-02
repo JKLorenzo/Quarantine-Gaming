@@ -26,6 +26,6 @@ module.exports = class Say extends Command {
 
     async run(message, { channel, content }) {
         message.delete();
-        return message.guild.channels.cache.get(channel.id).send(`${content}`);
+        return g_interface.get('guild').channels.cache.get(channel.id).send(`${content}`);
     }
 };

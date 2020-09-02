@@ -3,7 +3,7 @@ const { MessageEmbed } = require('discord.js');
 let client, notifications = new Array();
 
 // Initialize module
-const init = async function (this_client) {
+const init = function (this_client) {
     client = this_client;
 }
 // Notification Region
@@ -58,17 +58,11 @@ const hasRecords = function (notification) {
             return 100 * ((longerLength - costs[shorter.length]) / longerLength);
         }
     } catch (error) {
-        let embed = new MessageEmbed()
-            .setAuthor(`Has Records`)
-            .setTitle(`Database.js Error`)
-            .setDescription(`An error occured while performing hasRecords function on database.js.`)
-            .addField('Error Message', error)
-            .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Antu_dialog-error.svg/1024px-Antu_dialog-error.svg.png')
-            .setColor('#FF0000');
-
-        g_interface.log(embed);
-        console.log(`An error occured while performing hasRecords function on database.js.`);
-        console.log(`\n${error}\n`);
+        this.g_interface.on_error({
+            name: 'hasRecords',
+            location: 'database.js',
+            error: error
+        });
     }
 }
 

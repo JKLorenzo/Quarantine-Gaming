@@ -36,8 +36,20 @@ module.exports = class Edit extends Command {
             });
             if (this_messages.length > 0) {
                 let this_message = this_messages[0];
-                await this_message.edit(content).catch(console.error);
+                await this_message.edit(content).catch(error => {
+                    g_interface.on_error({
+                        name: 'run -> .edit(content)',
+                        location: 'edit.js',
+                        error: error
+                    });
+                });
             }
+        }).catch(error => {
+            g_interface.on_error({
+                name: 'run -> .fetch(messages)',
+                location: 'edit.js',
+                error: error
+            });
         });
     }
 };
