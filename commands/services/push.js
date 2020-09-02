@@ -31,7 +31,7 @@ module.exports = class PushCommand extends Command {
                         function htmlEntities(str) {
                             return String(str).replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"');
                         }
-                        g_interface.push({
+                        g_fgu.push({
                             title: htmlEntities(item.title),
                             url: item.url,
                             author: item.author,

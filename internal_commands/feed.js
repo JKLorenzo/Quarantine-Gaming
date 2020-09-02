@@ -23,7 +23,7 @@ async function get(init = false) {
             if (!results.includes(item_details.title)) {
                 results.push(item_details.title);
                 if (!init) {
-                    g_interface.push(item_details);
+                    g_fgu.push(item_details);
                 }
             }
 

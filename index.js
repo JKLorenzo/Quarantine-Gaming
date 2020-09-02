@@ -10,6 +10,7 @@ const dynamic_channel = require(path.join(__dirname, 'internal_commands', 'dynam
 // Global Variables
 global.rootDir = path.resolve(__dirname);
 global.g_db = db;
+global.g_fgu = fgu;
 global.g_interface = interface;
 global.g_ignored_titles = [
     'StartupWindow', 'Error', 'modlauncher', 'BlueStacks', 'NoxPlayer', 'Wallpaper Engine'
