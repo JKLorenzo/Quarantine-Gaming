@@ -466,7 +466,7 @@ client.on('presenceUpdate', async (oldMember, newMember) => {
                     // Remove role
                     await this_member.roles.remove(this_voice_role, 'This role is no longer valid.').catch(error => {
                         g_interface.on_error({
-                            name: 'presenceUpdate -> .remove(this_voice_role)',
+                            name: 'presenceUpdate -> .remove(this_voice_role) [user]',
                             location: 'index.js',
                             error: error
                         });
@@ -480,7 +480,7 @@ client.on('presenceUpdate', async (oldMember, newMember) => {
                             } else {
                                 await this_guild_member.roles.remove(this_voice_role, 'This role is no longer valid.').catch(error => {
                                     g_interface.on_error({
-                                        name: 'presenceUpdate -> .remove(this_voice_role)',
+                                        name: 'presenceUpdate -> .remove(this_voice_role) [member]',
                                         location: 'index.js',
                                         error: error
                                     });
