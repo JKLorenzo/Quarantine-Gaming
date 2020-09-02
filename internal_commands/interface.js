@@ -374,7 +374,6 @@ async function process_push() {
             }
 
             if (_url.indexOf('ubisoft.com') !== -1) {
-                // Add gog to the mentionable array
                 mentionables[mentionables.length] = 'uplay';
                 // Set the color
                 color.add(200, 120, 255)
