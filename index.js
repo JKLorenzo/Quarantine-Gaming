@@ -11,11 +11,11 @@ const dynamic_channel = require(path.join(__dirname, 'internal_commands', 'dynam
 global.rootDir = path.resolve(__dirname);
 global.g_db = db;
 global.g_interface = interface;
-
-const vr_prefix = 'Play ';
-const ignored_titles = [
-    'StartupWindow', 'Error', 'modlauncher', 'BlueStacks', 'NoxPlayer'
+global.g_ignored_titles = [
+    'StartupWindow', 'Error', 'modlauncher', 'BlueStacks', 'NoxPlayer', 'Wallpaper Engine'
 ];
+global.g_vrprefix = 'Play ';
+
 const client = new CommandoClient({
     commandPrefix: '!',
     owner: '393013053488103435',
@@ -53,10 +53,10 @@ client.once('ready', async () => {
             for (let this_activity of this_member.presence.activities) {
                 if (this_activity.type == 'PLAYING') {
                     let this_game = this_activity.name.trim();
-                    let this_vr_name = vr_prefix + this_game;
+                    let this_vr_name = g_vrprefix + this_game;
                     let this_voice_role = g_interface.get('guild').roles.cache.find(role => role.name == this_vr_name);
                     // Check if the title of the game is not null and is not one of the ignored titles
-                    if (this_game && !ignored_titles.includes(this_game)) {
+                    if (this_game && !g_ignored_titles.includes(this_game)) {
                         // Check if user doesn't have this mentionable role
                         if (!this_member.roles.cache.find(role => role.name == this_game)) {
                             // Get the equivalent role of this game
@@ -139,12 +139,12 @@ client.once('ready', async () => {
 
     // Remove unused play roles
     for (let this_role of g_interface.get('guild').roles.cache.array()) {
-        if (this_role.name.startsWith(vr_prefix)) {
+        if (this_role.name.startsWith(g_vrprefix)) {
             // Check if the role is still in use
             let role_in_use = false;
             for (let this_member of g_interface.get('guild').members.cache.array()) {
                 if (this_member.roles.cache.find(role => role == this_role)) {
-                    if (this_member.presence.activities.map(activity => activity.name.trim()).includes(this_role.name.substring(vr_prefix.length))) {
+                    if (this_member.presence.activities.map(activity => activity.name.trim()).includes(this_role.name.substring(g_vrprefix.length))) {
                         role_in_use = true;
                     } else {
                         await this_member.roles.remove(this_role, 'This role is no longer valid.').catch(error => {
@@ -171,7 +171,7 @@ client.once('ready', async () => {
 
     // Remove empty play channels
     for (let this_channel of g_interface.get('guild').channels.cache.array()) {
-        if (this_channel.type == 'voice' && this_channel.name.startsWith(vr_prefix)) {
+        if (this_channel.type == 'voice' && this_channel.name.startsWith(g_vrprefix)) {
             if (this_channel.members.size == 0) {
                 await this_channel.delete('This channel is no longer in use.').catch(error => {
                     g_interface.on_error({
@@ -282,7 +282,7 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
         if (newMember.roles.cache.size != oldMember.roles.cache.size) {
             let added = new Array(), removed = new Array();
             for (let this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
-                if (!this_role.name.startsWith(vr_prefix)) {
+                if (!this_role.name.startsWith(g_vrprefix)) {
                     if (newMember.roles.cache.has(this_role.id)) {
                         added.push(this_role);
                     } else {
@@ -383,13 +383,13 @@ client.on('presenceUpdate', async (oldMember, newMember) => {
             if (oldMember) oldActivity = oldMember.activities.find(activity => activity.name == this_activity_name);
             let this_activity = newActivity ? newActivity : oldActivity;
             let this_game = this_activity.name.trim();
-            let this_vr_name = vr_prefix + this_game;
+            let this_vr_name = g_vrprefix + this_game;
             let this_voice_role = g_interface.get('guild').roles.cache.find(role => role.name == this_vr_name);
 
             if (this_activity.type == 'PLAYING') {
                 if (newActivity) {
                     // Check if the title of the game is not null and is not one of the ignored titles
-                    if (this_game && !ignored_titles.includes(this_game)) {
+                    if (this_game && !g_ignored_titles.includes(this_game)) {
                         // Check if user doesn't have this mentionable role
                         if (!this_member.roles.cache.find(role => role.name == this_game)) {
                             // Get the equivalent role of this game
@@ -475,7 +475,7 @@ client.on('presenceUpdate', async (oldMember, newMember) => {
                     let role_in_use = false;
                     for (let this_guild_member of g_interface.get('guild').members.cache.array()) {
                         if (this_guild_member.roles.cache.find(role => role == this_voice_role)) {
-                            if (this_guild_member.presence.activities.map(activity => activity.name.trim()).includes(this_voice_role.name.substring(vr_prefix.length))) {
+                            if (this_guild_member.presence.activities.map(activity => activity.name.trim()).includes(this_voice_role.name.substring(g_vrprefix.length))) {
                                 role_in_use = true;
                             } else {
                                 await this_guild_member.roles.remove(this_voice_role, 'This role is no longer valid.').catch(error => {
@@ -514,7 +514,7 @@ client.on('voiceStateUpdate', (oldState, newState) => {
     let oldChannel = oldState.channel;
 
     if (newChannel) {
-        if (newChannel.name.startsWith(vr_prefix) && newChannel.members.size == 0) {
+        if (newChannel.name.startsWith(g_vrprefix) && newChannel.members.size == 0) {
             newChannel.delete('This channel is no longer in use.').catch(error => {
                 g_interface.on_error({
                     name: 'voiceStateUpdate -> .delete(newChannel)',
@@ -525,7 +525,7 @@ client.on('voiceStateUpdate', (oldState, newState) => {
         }
     }
     if (oldChannel) {
-        if (oldChannel.name.startsWith(vr_prefix) && oldChannel.members.size == 0) {
+        if (oldChannel.name.startsWith(g_vrprefix) && oldChannel.members.size == 0) {
             oldChannel.delete('This channel is no longer in use.').catch(error => {
                 g_interface.on_error({
                     name: 'voiceStateUpdate -> .delete(oldChannel)',

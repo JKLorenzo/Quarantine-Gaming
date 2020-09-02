@@ -1,6 +1,4 @@
-const { MessageEmbed } = require('discord.js');
 let client;
-const vr_prefix = 'Play ';
 async function updateGuild() {
     // Transfer members from generic voice rooms to dynamic voice rooms
     for (let this_channel of g_interface.get('guild').channels.cache.array()) {
@@ -33,7 +31,7 @@ async function updateGuild() {
                     let are_playing = true;
                     for (let this_member of this_channel.members.array()) {
                         for (let this_activity of this_member.presence.activities) {
-                            if (this_activity.name == baseline_role.name.substring(vr_prefix.length)) {
+                            if (this_activity.name == baseline_role.name.substring(g_vrprefix.length)) {
                                 let today = new Date();
                                 let diffMins = Math.round((today - this_activity.createdAt) / 60000); // minutes
                                 if (diffMins < 5) {
@@ -47,8 +45,8 @@ async function updateGuild() {
                         // Create
                         await g_interface.get('guild').channels.create(baseline_role.name, {
                             type: 'voice',
-                            topic: `Voice room dedicated for ${baseline_role.name.substring(vr_prefix.length)} players.`,
-                            reason: `${baseline_role.name.substring(vr_prefix.length)} is being played by members in a voice room.`,
+                            topic: `Voice room dedicated for ${baseline_role.name.substring(g_vrprefix.length)} players.`,
+                            reason: `${baseline_role.name.substring(g_vrprefix.length)} is being played by members in a voice room.`,
                             parent: g_interface.get('guild').channels.cache.find(channel => channel.name.toLowerCase() == 'dedicated voice channels').id,
                             permissionOverwrites: [
                                 {
