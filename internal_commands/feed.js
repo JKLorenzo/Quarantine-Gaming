@@ -49,7 +49,7 @@ async function get(init = false) {
                                 .addFields([
                                     { name: 'Validity', value: `${item_details.validity} %`, inline: true },
                                     { name: 'Score', value: `${item_details.score}`, inline: true },
-                                    { name: 'Details', value: `${item_details.description}`},
+                                    { name: 'Details', value: `${item_details.description}`}
                                 ])
                                 .setTimestamp();
                             } else {

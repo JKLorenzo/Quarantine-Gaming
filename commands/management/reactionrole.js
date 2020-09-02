@@ -7,21 +7,27 @@ module.exports = class ReactionRole extends Command {
             name: 'reactionrole',
             group: 'management',
             memberName: 'reactionrole',
-            description: 'Sends a reaction role to the channel.',
+            description: 'Sends or updates a reaction role to the channel.',
             userPermissions: ["ADMINISTRATOR"],
             guildOnly: true,
             args: [
                 {
+                    key: 'mode',
+                    prompt: 'Create or update?',
+                    type: 'string',
+                    oneOf: ['create', 'update']
+                },
+                {
                     key: 'type',
-                    prompt: 'Enter the type of reaction role to send.',
+                    prompt: 'nsfw or fgu?',
                     type: 'string',
                     oneOf: ['nsfw', 'fgu']
-                },
+                }
             ]
         });
     }
 
-    async run(message, { type }) {
+    async run(message, { mode, type }) {
         message.delete();
         let output;
         switch (type) {
@@ -32,11 +38,34 @@ module.exports = class ReactionRole extends Command {
                 output = FreeGameUpdates(this.client);
                 break;
         }
-        return await message.say(output.message).then(async this_message => {
-            for (let this_reaction of output.reactions) {
-                await this_message.react(this_reaction);
-            }
-        })
+        switch (mode) {
+            case 'create':
+                await message.say(output.message).then(async this_message => {
+                    for (let this_reaction of output.reactions) {
+                        await this_message.react(this_reaction);
+                    }
+                }).catch(console.error);
+                break;
+            case 'update':
+                await message.channel.messages.fetch({ limit: 25 }).then(async messages => {
+                    let this_messages = new Array();
+                    messages.map(msg => {
+                        if (msg.embeds.length == 0 || !msg.author.bot) return msg;
+                        if (msg.embeds[0].author.name == output.message.author.name) {
+                            this_messages.push(msg);
+                        }
+                    });
+                    if (this_messages.length > 0) {
+                        let this_message = this_messages[0];
+                        await this_message.edit(output.message).then(async this_message => {
+                            for (let this_reaction of output.reactions) {
+                                await this_message.react(this_reaction);
+                            }
+                        }).catch(console.error);
+                    }
+                });
+                break;
+        }
     }
 };
 

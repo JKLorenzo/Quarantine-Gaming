@@ -217,7 +217,7 @@ async function process_push() {
                         // Get the hostname of the url
                         let hostname = new URL(url).hostname;
                         // Set the footer of the output embed with the hostname and its icon
-                        output.setFooter(hostname, getIcon(hostname));
+                        output.setFooter(`${hostname} | Updated as of `, getIcon(hostname));
                     } else {
                         // Set the identifier to true
                         no_url = true;
