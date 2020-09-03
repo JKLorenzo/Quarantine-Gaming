@@ -170,7 +170,6 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
 });
 
 client.on('guildMemberAdd', async member => {
-    let staff_channel = g_interface.get('guild').channels.cache.get('749763548090990613');
     let this_member = g_interface.get('guild').members.cache.get(member.id);
 
     if (this_member && !this_member.user.bot) {
@@ -193,7 +192,7 @@ client.on('guildMemberAdd', async member => {
             ]);
             embed.setFooter('Warning: These actions are irreversible!');
             embed.setTimestamp(new Date());
-            await staff_channel.send(embed).then(async this_message => {
+            await g_interface.get('interface').send(embed).then(async this_message => {
                 await this_message.react('✅');
                 await this_message.react('❌');
                 await this_message.react('⛔');

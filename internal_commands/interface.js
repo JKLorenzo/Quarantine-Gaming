@@ -1,12 +1,13 @@
 const { MessageEmbed } = require('discord.js');
 
-let client, this_guild, this_log, this_subscription;
+let client, this_guild, this_log, this_subscription, this_interface;
 
 const init = function (this_client) {
     client = this_client;
     this_guild = this_client.guilds.cache.get('351178660725915649');
     this_log = this_guild.channels.cache.get('722760285622108210');
-    this_subscription = this_guild.channels.cache.get('699763763859161108')
+    this_subscription = this_guild.channels.cache.get('699763763859161108');
+    this_interface = this_guild.channels.cache.get('749763548090990613');
 }
 
 const get = function (name) {
@@ -17,6 +18,8 @@ const get = function (name) {
             return this_log;
         case 'subscription':
             return this_subscription;
+        case 'interface':
+            return this_interface;
     }
 }
 
