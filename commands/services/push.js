@@ -37,7 +37,8 @@ module.exports = class PushCommand extends Command {
                             author: item.author,
                             description: htmlEntities(item.selftext),
                             validity: item.upvote_ratio * 100,
-                            score: item.score
+                            score: item.score,
+                            flair: item.link_flair_text
                         });
                     }
                 }

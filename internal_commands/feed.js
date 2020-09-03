@@ -17,7 +17,8 @@ async function get(init = false) {
                 author: item.author,
                 description: htmlEntities(item.selftext),
                 validity: item.upvote_ratio * 100,
-                score: item.score
+                score: item.score,
+                flair: item.link_flair_text
             };
 
             if (!results.includes(item_details.title)) {
@@ -52,6 +53,9 @@ async function get(init = false) {
                                 { name: 'Score', value: `${item_details.score}`, inline: true }
                             ])
                             .setTimestamp();
+                    }
+                    if (this_message.flair) {
+                        this_message.embeds[0].setDescription(this_message.flair);
                     }
                     await this_message.edit({ content: this_message.content, embed: this_message.embeds[0] }).catch(error => {
                         g_interface.on_error({
