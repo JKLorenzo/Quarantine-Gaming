@@ -27,12 +27,6 @@ function getIcon(hostname) {
         icon_url = 'https://vignette.wikia.nocookie.net/ichc-channel/images/e/e2/Ubisoft_round_icon_by_slamiticon-d66j9vs.png/revision/latest/scale-to-width-down/220?cb=20160328232011';
     } else if (contains('microsoft')) {
         icon_url = 'https://cdn0.iconfinder.com/data/icons/shift-free/32/Microsoft-512.png';
-    } else if (contains('intel')) {
-        icon_url = 'https://cdn2.iconfinder.com/data/icons/metro-uinvert-dock/256/Intel.png';
-    } else if (contains('gleam')) {
-        icon_url = 'https://apps.shopifycdn.com/listing_images/8dc670630c433c7c7d2fc8d93581762a/icon/f60f22399e98992a330e0d12e91b5a25.png';
-    } else if (contains('grabthegames')) {
-        icon_url = 'https://scontent.fmnl6-2.fna.fbcdn.net/v/t31.0-8/24254693_2201298796677818_7066385480118918221_o.jpg?_nc_cat=109&_nc_sid=85a577&_nc_eui2=AeGMkbuMWJXXgQbEX2PGAQaTUdcu0yrTgjFR1y7TKtOCMaSCoX8TNVA7K7PcDrhyWDLouN_xjEsPa_RJTAw1SCIN&_nc_ohc=AIMdmiqIii8AX_AkFNM&_nc_ht=scontent.fmnl6-2.fna&oh=e918a376f6cad8bdbcadab90e7807285&oe=5F281495';
     } else if (contains('discord')) {
         icon_url = 'https://i1.pngguru.com/preview/373/977/320/discord-for-macos-white-and-blue-logo-art.jpg';
     } else {

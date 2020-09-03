@@ -113,19 +113,29 @@ function NSFW(client) {
 }
 
 function FreeGameUpdates(client) {
+    let description = new Array();
+    description.push('All notifications will be made available in the <#699763763859161108> channel.');
+    description.push(' ');
+    description.push('1️⃣ - <@&722645979248984084>');
+    description.push('Notifies you with Steam games and DLCs that are currently free.');
+    description.push(' ');
+    description.push('2️⃣ - <@&722691589813829672>');
+    description.push('Notifies you with Epic games and DLCs that are currently free.');
+    description.push(' ');
+    description.push('3️⃣ - <@&722691679542312970>');
+    description.push('Notifies you with GOG games and DLCs that are currently free.');
+    description.push(' ');
+    description.push('4️⃣ - <@&722691724572491776>');
+    description.push('Notifies you with games and DLCs that are currently free for Xbox(One/360), PlayStation(3/4/Vita), and Wii(U/3DS/Switch).');
+    description.push(' ');
+    description.push('5️⃣ - <@&750517524738605087>');
+    description.push('Notifies you with Ubisoft games and DLCs that are currently free.');
     let embed = new MessageEmbed()
         .setColor('#ffff00')
         .setAuthor('Quarantine Gaming Role Notification Subscription')
         .setTitle('Subscribe to get updated')
         .setThumbnail(client.user.displayAvatarURL())
-        .setDescription('All notifications will be made available in the <#699763763859161108> channel.')
-        .addFields([
-            { name: '1️⃣ - Steam: Free Game Updates', value: 'Notifies you with Steam games and DLCs that are currently free.' },
-            { name: '2️⃣ - Epic: Free Game Updates', value: 'Notifies you with Epic games and DLCs that are currently free.' },
-            { name: '3️⃣ - GOG: Free Game Updates', value: 'Notifies you with GOG games and DLCs that are currently free.' },
-            { name: '4️⃣ - Console: Free Game Updates', value: 'Notifies you with games and DLCs that are currently free for Xbox(One/360), PlayStation(3/4/Vita), and Wii(U/3DS/Switch).' },
-            { name: '5️⃣ - UPlay: Free Game Updates', value: 'Notifies you with Ubisoft games and DLCs that are currently free.' },
-        ])
+        .setDescription(description.join('\n'))
         .setImage('https://media.playstation.com/is/image/SCEA/playstation-vue-hero-banner-desktop-01-us-22jan19?$native_nt$')
         .setFooter('Update your role by reacting below.');
 
