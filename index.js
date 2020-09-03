@@ -127,21 +127,12 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
         embed.setTitle('Guild Member Update');
 
         let description = new Array();
-        // Avatar
-        if (newMember.user.displayAvatarURL() != oldMember.user.displayAvatarURL()) {
+        // Display Name
+        if (newMember.displayName != oldMember.displayName) {
             if (description.length > 0) description.push(' ');
-            description.push(`**Avatar**`);
-            description.push(`New: ${newMember.user.displayAvatarURL()}`);
-            description.push(`Old: ${oldMember.user.displayAvatarURL()}`);
-            embed.setThumbnail(newMember.user.displayAvatarURL());
-        }
-
-        // Name
-        if (newMember.user.username != oldMember.user.username) {
-            if (description.length > 0) description.push(' ');
-            description.push(`**Name**`);
-            description.push(`New: ${newMember.user.username}`);
-            description.push(`Old: ${oldMember.user.username}`);
+            description.push(`**Display Name**`);
+            description.push(`Old: ${oldMember.displayName}`);
+            description.push(`New: ${newMember.displayName}`);
         }
 
         // Role
@@ -494,5 +485,41 @@ client.on('error', error => {
         error: error
     });
 });
+
+client.on('userUpdate', (oldUser, newUser) => {
+    try {
+        let embed = new MessageEmbed();
+        embed.setAuthor(newUser.username, oldUser.displayAvatarURL());
+        embed.setTitle('User Update');
+
+        let description = new Array();
+        // Avatar
+        if (oldUser.displayAvatarURL() != newUser.displayAvatarURL()) {
+            description.push(`**Avatar**`);
+            description.push(`New: [Avatar Link](${newUser.displayAvatarURL()})`);
+            embed.setThumbnail(newUser.displayAvatarURL());
+        }
+
+        // Username
+        if (oldUser.username != newUser.username) {
+            if (description.length > 0) description.push(' ');
+            description.push(`**Username**`);
+            description.push(`Old: ${oldUser.username}`);
+            description.push(`New: ${newUser.username}`);
+        }
+
+        embed.setDescription(description.join('\n'));
+        embed.setFooter(`${newUser.tag} (${newUser.id})`);
+        embed.setTimestamp(new Date());
+        embed.setColor('#6464ff');
+        if (description.length > 0) g_interface.log(embed);
+    } catch (error) {
+        g_interface.on_error({
+            name: 'guildMemberUpdate',
+            location: 'index.js',
+            error: error
+        });
+    }
+})
 
 client.login(process.env.BOT_TOKEN);
