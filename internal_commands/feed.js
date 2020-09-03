@@ -54,7 +54,7 @@ async function get(init = false) {
                             ])
                             .setTimestamp();
                     }
-                    if (this_message.flair) {
+                    if (item_details.flair) {
                         this_message.embeds[0].setDescription(this_message.flair);
                     }
                     await this_message.edit({ content: this_message.content, embed: this_message.embeds[0] }).catch(error => {
