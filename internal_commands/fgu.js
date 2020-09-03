@@ -65,7 +65,13 @@ async function process_push() {
             // Stores the output message as an embed
             let output = new MessageEmbed().setTimestamp();
             output.setAuthor('Quarantine Gaming: Free Game/DLC Notification', client.user.displayAvatarURL());
-            if (flair) output.setDescription(`(${flair})[${permalink}]`);
+            if (flair){
+                if (flair.indexOf('Read Comments') != -1 || flair.indexOf('Regional Issues') != -1) {
+                    output.setDescription(`(${flair})[${permalink}]`);
+                } else {
+                    output.setDescription(flair);
+                }
+            } 
             output.addFields([
                 { name: 'Author', value: author, inline: true },
                 { name: 'Validity', value: `${validity} %`, inline: true },

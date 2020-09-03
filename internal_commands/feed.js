@@ -57,7 +57,11 @@ async function get(init = false) {
                             .setTimestamp();
                     }
                     if (item_details.flair) {
-                        this_message.embeds[0].setDescription(`[${item_details.flair}](${item_details.permalink})`);
+                        if (item_details.flair.indexOf('Read Comments') != -1 || item_details.flair.indexOf('Regional Issues') != -1) {
+                            this_message.embeds[0].setDescription(`[${item_details.flair}](${item_details.permalink})`);
+                        } else {
+                            this_message.embeds[0].setDescription(item_details.flair);
+                        }
                     }
                     await this_message.edit({ content: this_message.content, embed: this_message.embeds[0] }).catch(error => {
                         g_interface.on_error({
