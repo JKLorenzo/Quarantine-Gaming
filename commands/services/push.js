@@ -24,7 +24,7 @@ module.exports = class PushCommand extends Command {
     async run(message, { link }) {
         message.delete();
         try {
-            await fetch('https://www.reddit.com/r/FreeGameFindings/new/.json?limit=20&sort=new').then(data => data.json()).then(data => {
+            await fetch('https://www.reddit.com/r/FreeGameFindings/new/.json?limit=25&sort=new').then(data => data.json()).then(data => {
                 for (let child of data.data.children) {
                     let item = child.data;
                     if (item.url == link) {
@@ -38,7 +38,8 @@ module.exports = class PushCommand extends Command {
                             description: htmlEntities(item.selftext),
                             validity: item.upvote_ratio * 100,
                             score: item.score,
-                            flair: item.link_flair_text
+                            flair: item.link_flair_text,
+                            permalink: `https://www.reddit.com${item.permalink}`
                         });
                     }
                 }

@@ -60,11 +60,12 @@ async function process_push() {
             let validity = this_notification.validity;
             let score = this_notification.score;
             let flair = this_notification.flair;
+            let permalink = this_notification.permalink;
 
             // Stores the output message as an embed
             let output = new MessageEmbed().setTimestamp();
             output.setAuthor('Quarantine Gaming: Free Game/DLC Notification', client.user.displayAvatarURL());
-            if (flair) output.setDescription(flair);
+            if (flair) output.setDescription(`(${flair})[${permalink}]`);
             output.addFields([
                 { name: 'Author', value: author, inline: true },
                 { name: 'Validity', value: `${validity} %`, inline: true },

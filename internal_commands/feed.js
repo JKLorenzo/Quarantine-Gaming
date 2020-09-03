@@ -8,7 +8,7 @@ function htmlEntities(str) {
 
 async function get(init = false) {
     console.log('**Updating Feed**');
-    await fetch('https://www.reddit.com/r/FreeGameFindings/new/.json?limit=10&sort=new').then(data => data.json()).then(async data => {
+    await fetch('https://www.reddit.com/r/FreeGameFindings/new/.json?limit=25&sort=new').then(data => data.json()).then(async data => {
         for (let child of data.data.children) {
             let item = child.data;
             let item_details = {
@@ -18,7 +18,8 @@ async function get(init = false) {
                 description: htmlEntities(item.selftext),
                 validity: item.upvote_ratio * 100,
                 score: item.score,
-                flair: item.link_flair_text
+                flair: item.link_flair_text,
+                permalink: `https://www.reddit.com${item.permalink}`
             };
 
             if (!results.includes(item_details.title)) {
@@ -28,10 +29,11 @@ async function get(init = false) {
                 }
             }
 
+
             await g_interface.get('subscription').messages.fetch({ limit: 5 }).then(async messages => {
                 let this_messages = new Array();
                 messages.map(msg => {
-                    if (msg.author.bot && msg.embeds[0].url == item_details.url) {
+                    if (msg.author.id == client.user.id && msg.embeds.length > 0 && msg.embeds[0].author.name == 'Quarantine Gaming: Free Game/DLC Notification' && msg.embeds[0].url == item_details.url) {
                         this_messages.push(msg);
                     }
                     return msg;
@@ -55,7 +57,7 @@ async function get(init = false) {
                             .setTimestamp();
                     }
                     if (item_details.flair) {
-                        this_message.embeds[0].setDescription(item_details.flair);
+                        this_message.embeds[0].setDescription(`[${item_details.flair}](${item_details.permalink})`);
                     }
                     await this_message.edit({ content: this_message.content, embed: this_message.embeds[0] }).catch(error => {
                         g_interface.on_error({
