@@ -463,7 +463,7 @@ client.on('presenceUpdate', async (oldMember, newMember) => {
                             });
                         }
                     }
-                } else {
+                } else if (this_voice_role) {
                     // Remove role
                     await this_member.roles.remove(this_voice_role, 'This role is no longer valid.').catch(error => {
                         g_interface.on_error({
@@ -489,7 +489,7 @@ client.on('presenceUpdate', async (oldMember, newMember) => {
                             }
                         }
                     }
-                    if (!role_in_use && this_voice_role) {
+                    if (!role_in_use) {
                         await this_voice_role.delete('This role is no longer in use.').catch(error => {
                             g_interface.on_error({
                                 name: 'presenceUpdate -> .delete(this_voice_role)',
