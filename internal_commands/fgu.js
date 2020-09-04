@@ -64,7 +64,7 @@ async function process_push() {
 
             // Stores the output message as an embed
             let output = new MessageEmbed().setTimestamp();
-            output.setAuthor('Quarantine Gaming: Free Game/DLC Notification', client.user.displayAvatarURL());
+            output.setAuthor('Quarantine Gaming: Free Game/DLC Notification');
             if (flair){
                 if (flair.indexOf('Read Comments') != -1 || flair.indexOf('Regional Issues') != -1) {
                     output.setDescription(`(${flair})[${permalink}]`);
