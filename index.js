@@ -302,7 +302,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
                     }
                     break;
                 case 'Quarantine Gaming Member Approval':
-                    this_member = this_guild.members.cache.find(member => member.user.tag == this_message.embeds[0].author.name);
+                    this_member = g_interface.get('guild').members.cache.find(member => member.user.tag == this_message.embeds[0].author.name);
                     switch (reaction.emoji.name) {
                         case '✅':
                             if (this_member && !this_member.roles.cache.has('722699433225224233')) {
