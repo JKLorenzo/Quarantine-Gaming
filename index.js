@@ -41,7 +41,7 @@ client.registry
     })
     .registerCommandsIn(path.join(__dirname, 'commands'));
 
-client.once('ready', async () => {
+client.once('ready', () => {
     console.log('-------------{  Startup  }-------------');
     interface.init(client);
     db.init(client);
@@ -120,6 +120,42 @@ client.on('channelDelete', channel => {
     }
 });
 
+client.on('userUpdate', (oldUser, newUser) => {
+    try {
+        let embed = new MessageEmbed();
+        embed.setAuthor(newUser.username, oldUser.displayAvatarURL());
+        embed.setTitle('User Update');
+
+        let description = new Array();
+        // Avatar
+        if (oldUser.displayAvatarURL() != newUser.displayAvatarURL()) {
+            description.push(`**Avatar**`);
+            description.push(`New: [Avatar Link](${newUser.displayAvatarURL()})`);
+            embed.setThumbnail(newUser.displayAvatarURL());
+        }
+
+        // Username
+        if (oldUser.username != newUser.username) {
+            if (description.length > 0) description.push(' ');
+            description.push(`**Username**`);
+            description.push(`Old: ${oldUser.username}`);
+            description.push(`New: ${newUser.username}`);
+        }
+
+        embed.setDescription(description.join('\n'));
+        embed.setFooter(`${newUser.tag} (${newUser.id})`);
+        embed.setTimestamp(new Date());
+        embed.setColor('#6464ff');
+        if (description.length > 0) g_interface.log(embed);
+    } catch (error) {
+        g_interface.on_error({
+            name: 'guildMemberUpdate',
+            location: 'index.js',
+            error: error
+        });
+    }
+});
+
 client.on('guildMemberUpdate', (oldMember, newMember) => {
     try {
         let embed = new MessageEmbed();
@@ -139,7 +175,7 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
         if (newMember.roles.cache.size != oldMember.roles.cache.size) {
             let added = new Array(), removed = new Array();
             for (let this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
-                if (!this_role.name.startsWith(g_vrprefix)) {
+                if (!this_role.name.startsWith(g_vrprefix) && !this_role.name.startsWith('Text')) {
                     if (newMember.roles.cache.has(this_role.id)) {
                         added.push(this_role);
                     } else {
@@ -209,32 +245,8 @@ client.on('presenceUpdate', (oldData, newData) => {
     dynamic_roles.update(oldData, newData);
 });
 
-client.on('voiceStateUpdate', (oldState, newState) => {
-    let newChannel = newState.channel;
-    let oldChannel = oldState.channel;
-
-    if (newChannel) {
-        if (newChannel.name.startsWith(g_vrprefix) && newChannel.members.size == 0) {
-            newChannel.delete('This channel is no longer in use.').catch(error => {
-                g_interface.on_error({
-                    name: 'voiceStateUpdate -> .delete(newChannel)',
-                    location: 'index.js',
-                    error: error
-                });
-            });
-        }
-    }
-    if (oldChannel) {
-        if (oldChannel.name.startsWith(g_vrprefix) && oldChannel.members.size == 0) {
-            oldChannel.delete('This channel is no longer in use.').catch(error => {
-                g_interface.on_error({
-                    name: 'voiceStateUpdate -> .delete(oldChannel)',
-                    location: 'index.js',
-                    error: error
-                });
-            });
-        }
-    }
+client.on('voiceStateUpdate', async (oldState, newState) => {
+    dynamic_channels.update(oldState, newState);
 });
 
 client.on('messageReactionAdd', async (reaction, user) => {
@@ -484,41 +496,5 @@ client.on('error', error => {
         error: error
     });
 });
-
-client.on('userUpdate', (oldUser, newUser) => {
-    try {
-        let embed = new MessageEmbed();
-        embed.setAuthor(newUser.username, oldUser.displayAvatarURL());
-        embed.setTitle('User Update');
-
-        let description = new Array();
-        // Avatar
-        if (oldUser.displayAvatarURL() != newUser.displayAvatarURL()) {
-            description.push(`**Avatar**`);
-            description.push(`New: [Avatar Link](${newUser.displayAvatarURL()})`);
-            embed.setThumbnail(newUser.displayAvatarURL());
-        }
-
-        // Username
-        if (oldUser.username != newUser.username) {
-            if (description.length > 0) description.push(' ');
-            description.push(`**Username**`);
-            description.push(`Old: ${oldUser.username}`);
-            description.push(`New: ${newUser.username}`);
-        }
-
-        embed.setDescription(description.join('\n'));
-        embed.setFooter(`${newUser.tag} (${newUser.id})`);
-        embed.setTimestamp(new Date());
-        embed.setColor('#6464ff');
-        if (description.length > 0) g_interface.log(embed);
-    } catch (error) {
-        g_interface.on_error({
-            name: 'guildMemberUpdate',
-            location: 'index.js',
-            error: error
-        });
-    }
-})
 
 client.login(process.env.BOT_TOKEN);
