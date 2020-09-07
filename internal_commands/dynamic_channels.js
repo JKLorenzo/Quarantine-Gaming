@@ -168,81 +168,83 @@ async function updateChannel() {
         let newState = this_data.new;
         let oldState = this_data.old;
 
-        if (oldState.channel && oldState.channel.parentID == parentID) {
-            let text_channel = g_interface.get('guild').channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == oldState.channelID);
-            let text_role = g_interface.get('guild').roles.cache.get(text_channel.topic.split(' ')[1]);
-            if (oldState.channel.members.size > 0) {
-                await newState.member.roles.remove(text_role).catch(error => {
-                    g_interface.on_error({
-                        name: 'updateChannel -> .remove(text_role)',
-                        location: 'dynamic_channels.js',
-                        error: error
+        if (oldState.channel != newState.channel) {
+            if (oldState.channel && oldState.channel.parentID == parentID) {
+                let text_channel = g_interface.get('guild').channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == oldState.channelID);
+                let text_role = g_interface.get('guild').roles.cache.get(text_channel.topic.split(' ')[1]);
+                if (oldState.channel.members.size > 0) {
+                    await newState.member.roles.remove(text_role).catch(error => {
+                        g_interface.on_error({
+                            name: 'updateChannel -> .remove(text_role)',
+                            location: 'dynamic_channels.js',
+                            error: error
+                        });
                     });
-                });
-                let embed = new MessageEmbed();
-                embed.setAuthor('Quarantine Gaming Dedicated Channels');
-                embed.setTitle(oldState.channel.name);
-                embed.setDescription(`${oldState.member} left this channel.`);
-                embed.setThumbnail(newState.member.user.displayAvatarURL());
-                embed.setFooter(`${newState.member.user.tag} (${newState.member.user.id})`);
-                embed.setTimestamp();
-                await text_channel.send(embed).catch(error => {
-                    g_interface.on_error({
-                        name: 'updateChannel -> .send(embed)',
-                        location: 'dynamic_channels.js',
-                        error: error
+                    let embed = new MessageEmbed();
+                    embed.setAuthor('Quarantine Gaming Dedicated Channels');
+                    embed.setTitle(oldState.channel.name);
+                    embed.setDescription(`${oldState.member} left this channel.`);
+                    embed.setThumbnail(newState.member.user.displayAvatarURL());
+                    embed.setFooter(`${newState.member.user.tag} (${newState.member.user.id})`);
+                    embed.setTimestamp();
+                    await text_channel.send(embed).catch(error => {
+                        g_interface.on_error({
+                            name: 'updateChannel -> .send(embed)',
+                            location: 'dynamic_channels.js',
+                            error: error
+                        });
                     });
-                });
-            } else {
-                await oldState.channel.delete('This channel is no longer in use.').catch(error => {
-                    g_interface.on_error({
-                        name: 'updateChannel -> .delete(voice_channel)',
-                        location: 'dynamic_channels.js',
-                        error: error
+                } else {
+                    await oldState.channel.delete('This channel is no longer in use.').catch(error => {
+                        g_interface.on_error({
+                            name: 'updateChannel -> .delete(voice_channel)',
+                            location: 'dynamic_channels.js',
+                            error: error
+                        });
                     });
-                });
-                await text_channel.delete('This channel is no longer in use.').catch(error => {
-                    g_interface.on_error({
-                        name: 'updateChannel -> .delete(text_channel)',
-                        location: 'dynamic_channels.js',
-                        error: error
+                    await text_channel.delete('This channel is no longer in use.').catch(error => {
+                        g_interface.on_error({
+                            name: 'updateChannel -> .delete(text_channel)',
+                            location: 'dynamic_channels.js',
+                            error: error
+                        });
                     });
-                });
-                await text_role.delete('This role is no longer in use.').catch(error => {
-                    g_interface.on_error({
-                        name: 'updateChannel -> .delete(text_role)',
-                        location: 'dynamic_channels.js',
-                        error: error
+                    await text_role.delete('This role is no longer in use.').catch(error => {
+                        g_interface.on_error({
+                            name: 'updateChannel -> .delete(text_role)',
+                            location: 'dynamic_channels.js',
+                            error: error
+                        });
                     });
-                });
+                }
             }
-        }
 
-        if (newState.channel && newState.channel.parentID == parentID) {
-            let text_channel = g_interface.get('guild').channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == newState.channelID);
-            let text_role = g_interface.get('guild').roles.cache.get(text_channel.topic.split(' ')[1]);
-            if (!newState.member.roles.cache.find(role => role == text_role)) {
-                await newState.member.roles.add(text_role).catch(error => {
-                    g_interface.on_error({
-                        name: 'updateChannel -> .add(text_role)',
-                        location: 'dynamic_channels.js',
-                        error: error
+            if (newState.channel && newState.channel.parentID == parentID) {
+                let text_channel = g_interface.get('guild').channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == newState.channelID);
+                let text_role = g_interface.get('guild').roles.cache.get(text_channel.topic.split(' ')[1]);
+                if (!newState.member.roles.cache.find(role => role == text_role)) {
+                    await newState.member.roles.add(text_role).catch(error => {
+                        g_interface.on_error({
+                            name: 'updateChannel -> .add(text_role)',
+                            location: 'dynamic_channels.js',
+                            error: error
+                        });
                     });
-                });
-                let embed = new MessageEmbed();
-                embed.setAuthor('Quarantine Gaming Dedicated Channels');
-                embed.setTitle(newState.channel.name);
-                embed.setDescription(`${newState.member} joined this channel.`);
-                embed.setThumbnail(newState.member.user.displayAvatarURL());
-                embed.setFooter(`${newState.member.user.tag} (${newState.member.user.id})`);
-                embed.setTimestamp();
-                await text_channel.send({ content: newState.member, embed: embed }).catch(error => {
-                    g_interface.on_error({
-                        name: 'updateChannel -> .send(embed)',
-                        location: 'dynamic_channels.js',
-                        error: error
+                    let embed = new MessageEmbed();
+                    embed.setAuthor('Quarantine Gaming Dedicated Channels');
+                    embed.setTitle(newState.channel.name);
+                    embed.setDescription(`${newState.member} joined this channel.`);
+                    embed.setThumbnail(newState.member.user.displayAvatarURL());
+                    embed.setFooter(`${newState.member.user.tag} (${newState.member.user.id})`);
+                    embed.setTimestamp();
+                    await text_channel.send({ content: newState.member, embed: embed }).catch(error => {
+                        g_interface.on_error({
+                            name: 'updateChannel -> .send(embed)',
+                            location: 'dynamic_channels.js',
+                            error: error
+                        });
                     });
-                });
+                }
             }
         }
     }
