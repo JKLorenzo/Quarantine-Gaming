@@ -61,8 +61,8 @@ async function updateMember() {
                                         this_mentionable_role = this_created_role;
                                     }).catch(error => {
                                         g_interface.on_error({
-                                            name: 'presenceUpdate -> .create(data, reason)',
-                                            location: 'index.js',
+                                            name: 'updateMember -> .create(data, reason)',
+                                            location: 'dynamic_roles.js',
                                             error: error
                                         });
                                     });
@@ -70,13 +70,12 @@ async function updateMember() {
                                 // Assign role to this member
                                 await this_member.roles.add(this_mentionable_role).catch(error => {
                                     g_interface.on_error({
-                                        name: 'presenceUpdate -> .add(this_mentionable_role)',
-                                        location: 'index.js',
+                                        name: 'updateMember -> .add(this_mentionable_role)',
+                                        location: 'dynamic_roles.js',
                                         error: error
                                     });
                                 });
                             }
-
 
                             // Check if this role doesn't exists
                             if (!this_voice_role) {
@@ -96,8 +95,8 @@ async function updateMember() {
                                     this_voice_role = voice_role;
                                 }).catch(error => {
                                     g_interface.on_error({
-                                        name: 'presenceUpdate -> .create(this_vr_name)',
-                                        location: 'index.js',
+                                        name: 'updateMember -> .create(this_vr_name)',
+                                        location: 'dynamic_roles.js',
                                         error: error
                                     });
                                 });
@@ -108,8 +107,8 @@ async function updateMember() {
                                 // Assign role to this member
                                 await this_member.roles.add(this_voice_role).catch(error => {
                                     g_interface.on_error({
-                                        name: 'presenceUpdate -> .add(this_voice_role)',
-                                        location: 'index.js',
+                                        name: 'updateMember -> .add(this_voice_role)',
+                                        location: 'dynamic_roles.js',
                                         error: error
                                     });
                                 });
@@ -119,8 +118,8 @@ async function updateMember() {
                         // Remove role
                         await this_member.roles.remove(this_voice_role, 'This role is no longer valid.').catch(error => {
                             g_interface.on_error({
-                                name: 'presenceUpdate -> .remove(this_voice_role) [user]',
-                                location: 'index.js',
+                                name: 'updateMember -> .remove(this_voice_role) [user]',
+                                location: 'dynamic_roles.js',
                                 error: error
                             });
                         });
@@ -133,8 +132,8 @@ async function updateMember() {
                                 } else {
                                     await this_guild_member.roles.remove(this_voice_role, 'This role is no longer valid.').catch(error => {
                                         g_interface.on_error({
-                                            name: 'presenceUpdate -> .remove(this_voice_role) [member]',
-                                            location: 'index.js',
+                                            name: 'updateMember -> .remove(this_voice_role) [member]',
+                                            location: 'dynamic_roles.js',
                                             error: error
                                         });
                                     });
@@ -144,8 +143,8 @@ async function updateMember() {
                         if (!role_in_use) {
                             await this_voice_role.delete('This role is no longer in use.').catch(error => {
                                 g_interface.on_error({
-                                    name: 'presenceUpdate -> .delete(this_voice_role)',
-                                    location: 'index.js',
+                                    name: 'updateMember -> .delete(this_voice_role)',
+                                    location: 'dynamic_roles.js',
                                     error: error
                                 });
                             });
@@ -191,8 +190,8 @@ const init = async function () {
                                     this_mentionable_role = this_created_role;
                                 }).catch(error => {
                                     g_interface.on_error({
-                                        name: 'ready -> .create(this_game)',
-                                        location: 'index.js',
+                                        name: 'init -> .create(this_game)',
+                                        location: 'dynamic_roles.js',
                                         error: error
                                     });
                                 });
@@ -200,8 +199,8 @@ const init = async function () {
                             // Assign role to this member
                             await this_member.roles.add(this_mentionable_role).catch(error => {
                                 g_interface.on_error({
-                                    name: 'ready -> .add(this_mentionable_role)',
-                                    location: 'index.js',
+                                    name: 'init -> .add(this_mentionable_role)',
+                                    location: 'dynamic_roles.js',
                                     error: error
                                 });
                             });
@@ -225,8 +224,8 @@ const init = async function () {
                                 this_voice_role = voice_role;
                             }).catch(error => {
                                 g_interface.on_error({
-                                    name: 'ready -> .create(this_vr_name)',
-                                    location: 'index.js',
+                                    name: 'init -> .create(this_vr_name)',
+                                    location: 'dynamic_roles.js',
                                     error: error
                                 });
                             });
@@ -237,8 +236,8 @@ const init = async function () {
                             // Assign role to this member
                             await this_member.roles.add(this_voice_role).catch(error => {
                                 g_interface.on_error({
-                                    name: 'ready -> .add(this_voice_role)',
-                                    location: 'index.js',
+                                    name: 'init -> .add(this_voice_role)',
+                                    location: 'dynamic_roles.js',
                                     error: error
                                 });
                             });
@@ -261,8 +260,8 @@ const init = async function () {
                     } else {
                         await this_member.roles.remove(this_role, 'This role is no longer valid.').catch(error => {
                             g_interface.on_error({
-                                name: 'ready -> .remove(this_role)',
-                                location: 'index.js',
+                                name: 'init -> .remove(this_role)',
+                                location: 'dynamic_roles.js',
                                 error: error
                             });
                         });
@@ -270,10 +269,11 @@ const init = async function () {
                 }
             }
             if (!role_in_use) {
+                console.log(`Delete: ${this_role.name}`)
                 await this_role.delete('This role is no longer in use.').catch(error => {
                     g_interface.on_error({
-                        name: 'ready -> .delete(this_role)',
-                        location: 'index.js',
+                        name: 'init -> .delete(this_role)',
+                        location: 'dynamic_roles.js',
                         error: error
                     });
                 });
@@ -287,8 +287,8 @@ const init = async function () {
             if (this_channel.members.size == 0) {
                 await this_channel.delete('This channel is no longer in use.').catch(error => {
                     g_interface.on_error({
-                        name: 'ready -> .delete(this_channel)',
-                        location: 'index.js',
+                        name: 'init -> .delete(this_channel)',
+                        location: 'dynamic_roles.js',
                         error: error
                     });
                 });
