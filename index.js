@@ -57,69 +57,6 @@ client.once('ready', () => {
     interface.log('-------------{  Startup  }-------------');
 });
 
-// Audit logs
-client.on('channelCreate', channel => {
-    if (!channel || !channel.id) return;
-    try {
-        let this_channel = g_interface.get('guild').channels.cache.get(channel.id);
-
-        if (!this_channel) return;
-
-        let description = new Array();
-        description.push(`**Name**: ${this_channel.name}`);
-        if (this_channel.parent && this_channel.parent.name) description.push(`**Category**: ${this_channel.parent.name}`);
-
-        description.push(` `);
-
-        for (let overwrite of this_channel.permissionOverwrites) {
-            description.push(`**Permission override for ${g_interface.get('guild').roles.cache.get(overwrite[0])}:**`)
-            for (let permission of overwrite[1].allow.toArray()) {
-                description.push(`${permission.substring(0, 1).toUpperCase() + permission.slice(1).toLowerCase()}: ✅`);
-            }
-            for (let permission of overwrite[1].deny.toArray()) {
-                description.push(`${permission.substring(0, 1).toUpperCase() + permission.slice(1).toLowerCase()}: ❌`);
-            }
-            description.push(` `);
-        }
-
-        let embed = new MessageEmbed();
-        embed.setTitle(`${this_channel.type.substring(0, 1).toUpperCase()}${this_channel.type.substring(1)} Channel Created`);
-        embed.setDescription(description.join('\n'));
-        embed.setFooter(`Channel ID: ${this_channel.id}`);
-        embed.setTimestamp(new Date());
-        embed.setColor('#64ff64');
-        g_interface.log(embed);
-    } catch (error) {
-        g_interface.on_error({
-            name: 'guildMemberUpdate',
-            location: 'index.js',
-            error: error
-        });
-    }
-});
-
-client.on('channelDelete', channel => {
-    try {
-        let description = new Array();
-        description.push(`**Name**: ${channel.name}`);
-        if (channel.parent.name) description.push(`**Category**: ${channel.parent.name}`);
-
-        let embed = new MessageEmbed();
-        embed.setTitle(`${channel.type.substring(0, 1).toUpperCase()}${channel.type.substring(1)} Channel Deleted`);
-        embed.setDescription(description.join('\n'));
-        embed.setFooter(`Channel ID: ${channel.id}`);
-        embed.setTimestamp(new Date());
-        embed.setColor('#ff6464');
-        g_interface.log(embed);
-    } catch (error) {
-        g_interface.on_error({
-            name: 'guildMemberUpdate',
-            location: 'index.js',
-            error: error
-        });
-    }
-});
-
 client.on('userUpdate', (oldUser, newUser) => {
     try {
         let embed = new MessageEmbed();
@@ -149,7 +86,7 @@ client.on('userUpdate', (oldUser, newUser) => {
         if (description.length > 0) g_interface.log(embed);
     } catch (error) {
         g_interface.on_error({
-            name: 'guildMemberUpdate',
+            name: 'userUpdate',
             location: 'index.js',
             error: error
         });
@@ -218,16 +155,18 @@ client.on('guildMemberAdd', async member => {
             let created_on = diffDays + " days " + diffHrs + " hours " + diffMins + " minutes";
 
             let embed = new MessageEmbed
-            embed.setAuthor(this_member.user.tag);
-            embed.setTitle('Quarantine Gaming Member Approval');
+            embed.setAuthor('Quarantine Gaming Member Approval');
+            embed.setTitle(this_member.displayName);
             embed.setThumbnail(this_member.user.displayAvatarURL());
             embed.addFields([
                 { name: 'Username:', value: this_member.user.username },
+                { name: 'Tagname:', value: this_member.user.tag },
                 { name: 'Account Created:', value: created_on },
-                { name: 'Moderation:', value: '✅ - Approve     ❌ - Kick     ⛔ - Ban', inline: true }
+                { name: 'Moderation:', value: '✅ - Approve     ❌ - Kick     ⛔ - Ban'}
             ]);
             embed.setFooter('Warning: These actions are irreversible!');
             embed.setTimestamp(new Date());
+            embed.setColor('#25c059');
             await g_interface.get('interface').send(embed).then(async this_message => {
                 await this_message.react('✅');
                 await this_message.react('❌');
@@ -265,8 +204,8 @@ client.on('messageReactionAdd', async (reaction, user) => {
         let this_message = reaction.message;
         let this_member;
         if (this_message.author.bot) {
-            switch (this_message.embeds[0].title) {
-                case 'Unlock NSFW Bots and Channel':
+            switch (this_message.embeds[0].author.name) {
+                case 'Quarantine Gaming NSFW Content':
                     switch (reaction.emoji.name) {
                         case '🔴':
                             this_member = g_interface.get('guild').members.cache.get(user.id);
@@ -283,7 +222,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
                             break;
                     }
                     break;
-                case 'Subscribe to get updated':
+                case 'Quarantine Gaming Role Notification Subscription':
                     this_member = g_interface.get('guild').members.cache.get(user.id);
                     let this_role;
                     switch (reaction.emoji.name) {
@@ -429,8 +368,8 @@ client.on('messageReactionRemove', async (reaction, user) => {
             });
         }
         if (reaction.message.author.bot) {
-            switch (reaction.message.embeds[0].title) {
-                case 'Unlock NSFW Bots and Channel':
+            switch (reaction.message.embeds[0].author.name) {
+                case 'Quarantine Gaming NSFW Content':
                     switch (reaction.emoji.name) {
                         case '🔴':
                             let this_member = g_interface.get('guild').members.cache.get(user.id);
@@ -447,7 +386,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
                             break;
                     }
                     break;
-                case 'Subscribe to get updated':
+                case 'Quarantine Gaming Role Notification Subscription':
                     let this_member = g_interface.get('guild').members.cache.get(user.id);
                     let this_role;
                     switch (reaction.emoji.name) {

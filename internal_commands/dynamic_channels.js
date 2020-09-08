@@ -106,12 +106,13 @@ async function updateGuild() {
                                     embed.setAuthor('Quarantine Gaming Dedicated Channels');
                                     embed.setTitle(`Voice and Text Channels for ${baseline_role.name.substring(g_vrprefix.length)}`);
                                     let channel_desc = new Array();
-                                    channel_desc.push('Only members who are in this voice channel can view this text channel.');
-                                    channel_desc.push('Members who are playing the same game this channel is hosting are allowed to join.');
-                                    channel_desc.push('These channels will automatically be deleted once everyone is disconnected from this voice channel.');
+                                    channel_desc.push('• Only members who are in this voice channel can view this text channel.');
+                                    channel_desc.push(`• Members who have ${baseline_role} role are allowed to join.`);
+                                    channel_desc.push(`• ${voice_channel} and ${text_channel} channels will automatically be deleted once everyone is disconnected from ${voice_channel} channel.`);
                                     channel_desc.push('\n');
                                     channel_desc.push('Note: <@&749235255944413234> and <@&700397445506531358> can interact with these channels.');
-                                    embed.setDescription(channel_desc.join('\n'));
+                                    embed.setDescription(channel_desc.join('\n\n'));
+                                    embed.setColor('#7b00ff');
                                     await text_channel.send(embed).catch(error => {
                                         g_interface.on_error({
                                             name: 'updateChannel -> .send(embed)',
@@ -187,6 +188,7 @@ async function updateChannel() {
                     embed.setThumbnail(newState.member.user.displayAvatarURL());
                     embed.setFooter(`${newState.member.user.tag} (${newState.member.user.id})`);
                     embed.setTimestamp();
+                    embed.setColor('#7b00ff');
                     await text_channel.send(embed).catch(error => {
                         g_interface.on_error({
                             name: 'updateChannel -> .send(embed)',
@@ -237,7 +239,8 @@ async function updateChannel() {
                     embed.setThumbnail(newState.member.user.displayAvatarURL());
                     embed.setFooter(`${newState.member.user.tag} (${newState.member.user.id})`);
                     embed.setTimestamp();
-                    await text_channel.send({ content: newState.member, embed: embed }).catch(error => {
+                    embed.setColor('#7b00ff');
+                    await text_channel.send({ content: newState.member.displayName, embed: embed }).catch(error => {
                         g_interface.on_error({
                             name: 'updateChannel -> .send(embed)',
                             location: 'dynamic_channels.js',
@@ -306,15 +309,17 @@ const init = async function (this_client) {
 }
 
 const update = function (oldState, newState) {
-    let this_data = {
-        old: oldState,
-        new: newState
-    }
-
-    toUpdate.push(this_data);
-    if (!isUpdating) {
-        isUpdating = true;
-        updateChannel();
+    if (!(oldState.member.user.bot || newState.member.user.bot)) {
+        let this_data = {
+            old: oldState,
+            new: newState
+        }
+    
+        toUpdate.push(this_data);
+        if (!isUpdating) {
+            isUpdating = true;
+            updateChannel();
+        }
     }
 }
 
