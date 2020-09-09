@@ -156,13 +156,13 @@ client.on('guildMemberAdd', async member => {
 
             let embed = new MessageEmbed
             embed.setAuthor('Quarantine Gaming Member Approval');
-            embed.setTitle(this_member.displayName);
+            embed.setTitle(this_member.user.tag);
             embed.setThumbnail(this_member.user.displayAvatarURL());
             embed.addFields([
                 { name: 'Username:', value: this_member.user.username },
-                { name: 'Tagname:', value: this_member.user.tag },
+                { name: 'Display Name:', value: this_member.displayName },
                 { name: 'Account Created:', value: created_on },
-                { name: 'Moderation:', value: '✅ - Approve     ❌ - Kick     ⛔ - Ban'}
+                { name: 'Moderation:', value: '✅ - Approve     ❌ - Kick     ⛔ - Ban' }
             ]);
             embed.setFooter('Warning: These actions are irreversible!');
             embed.setTimestamp(new Date());
@@ -253,94 +253,98 @@ client.on('messageReactionAdd', async (reaction, user) => {
                     }
                     break;
                 case 'Quarantine Gaming Member Approval':
-                    this_member = g_interface.get('guild').members.cache.find(member => member.user.tag == this_message.embeds[0].author.name);
-                    switch (reaction.emoji.name) {
-                        case '✅':
-                            if (this_member && !this_member.roles.cache.has('722699433225224233')) {
-                                await this_member.roles.add('722699433225224233').then(async () => {
-                                    await this_message.reactions.removeAll().then(async message => {
-                                        let final = message.embeds[0]
-                                            .spliceFields(2, 1)
-                                            .addField('Action Taken:', 'Approved ✅');
-                                        await message.edit(final).catch(error => {
+                    this_member = g_interface.get('guild').members.cache.find(member => member.user.tag == this_message.embeds[0].title);
+                    if (this_member) {
+                        switch (reaction.emoji.name) {
+                            case '✅':
+                                if (!this_member.roles.cache.has('722699433225224233')) {
+                                    await this_member.roles.add('722699433225224233').then(async () => {
+                                        await this_message.reactions.removeAll().then(async message => {
+                                            let final = message.embeds[0]
+                                                .spliceFields(2, 1)
+                                                .addField('Action Taken:', 'Approved ✅');
+                                            await message.edit(final).catch(error => {
+                                                g_interface.on_error({
+                                                    name: 'messageReactionAdd -> .edit(final) [case approve]',
+                                                    location: 'index.js',
+                                                    error: error
+                                                });
+                                            });
+                                        }).catch(error => {
                                             g_interface.on_error({
-                                                name: 'messageReactionAdd -> .edit(final) [case approve]',
+                                                name: 'messageReactionAdd -> .removeAll(reactions) [case approve]',
                                                 location: 'index.js',
                                                 error: error
                                             });
                                         });
                                     }).catch(error => {
                                         g_interface.on_error({
-                                            name: 'messageReactionAdd -> .removeAll(reactions) [case approve]',
+                                            name: 'messageReactionAdd -> .add(722699433225224233) [case approve]',
                                             location: 'index.js',
                                             error: error
                                         });
                                     });
-                                }).catch(error => {
-                                    g_interface.on_error({
-                                        name: 'messageReactionAdd -> .add(722699433225224233) [case approve]',
-                                        location: 'index.js',
-                                        error: error
-                                    });
-                                });
-                            }
-                            break;
-                        case '❌':
-                            if (this_member) await this_member.kick().then(async () => {
-                                await this_message.reactions.removeAll().then(async message => {
-                                    let final = message.embeds[0]
-                                        .spliceFields(2, 1)
-                                        .addField('Action Taken:', 'Kicked ❌');
-                                    await message.edit(final).catch(error => {
+                                }
+                                break;
+                            case '❌':
+                                await this_member.kick().then(async () => {
+                                    await this_message.reactions.removeAll().then(async message => {
+                                        let final = message.embeds[0]
+                                            .spliceFields(2, 1)
+                                            .addField('Action Taken:', 'Kicked ❌');
+                                        await message.edit(final).catch(error => {
+                                            g_interface.on_error({
+                                                name: 'messageReactionAdd -> .edit(final) [case kick]',
+                                                location: 'index.js',
+                                                error: error
+                                            });
+                                        });
+                                    }).catch(error => {
                                         g_interface.on_error({
-                                            name: 'messageReactionAdd -> .edit(final) [case kick]',
+                                            name: 'messageReactionAdd -> .removeAll(reactions) [case kick]',
                                             location: 'index.js',
                                             error: error
                                         });
                                     });
                                 }).catch(error => {
                                     g_interface.on_error({
-                                        name: 'messageReactionAdd -> .removeAll(reactions) [case kick]',
+                                        name: 'messageReactionAdd -> .kick(this_member) [case kick]',
                                         location: 'index.js',
                                         error: error
                                     });
-                                });
-                            }).catch(error => {
-                                g_interface.on_error({
-                                    name: 'messageReactionAdd -> .kick(this_member) [case kick]',
-                                    location: 'index.js',
-                                    error: error
-                                });
-                            })
-                            break;
-                        case '⛔':
-                            if (this_member) await this_member.ban().then(async () => {
-                                await this_message.reactions.removeAll().then(async message => {
-                                    let final = message.embeds[0]
-                                        .spliceFields(2, 1)
-                                        .addField('Action Taken:', 'Banned ⛔');
-                                    await message.edit(final).catch(error => {
+                                })
+                                break;
+                            case '⛔':
+                                await this_member.ban().then(async () => {
+                                    await this_message.reactions.removeAll().then(async message => {
+                                        let final = message.embeds[0]
+                                            .spliceFields(2, 1)
+                                            .addField('Action Taken:', 'Banned ⛔');
+                                        await message.edit(final).catch(error => {
+                                            g_interface.on_error({
+                                                name: 'messageReactionAdd -> .edit(final) [case ban]',
+                                                location: 'index.js',
+                                                error: error
+                                            });
+                                        });
+                                    }).catch(error => {
                                         g_interface.on_error({
-                                            name: 'messageReactionAdd -> .edit(final) [case ban]',
+                                            name: 'messageReactionAdd -> .removeAll(reaction) [case ban]',
                                             location: 'index.js',
                                             error: error
                                         });
                                     });
                                 }).catch(error => {
                                     g_interface.on_error({
-                                        name: 'messageReactionAdd -> .removeAll(reaction) [case ban]',
+                                        name: 'messageReactionAdd -> .ban(this_member) [case ban]',
                                         location: 'index.js',
                                         error: error
                                     });
-                                });
-                            }).catch(error => {
-                                g_interface.on_error({
-                                    name: 'messageReactionAdd -> .ban(this_member) [case ban]',
-                                    location: 'index.js',
-                                    error: error
-                                });
-                            })
-                            break;
+                                })
+                                break;
+                        }
+                    } else {
+                        g_interface.get('interface').send(`I can't find this user. A manual action is required.`);
                     }
                     break;
             }
