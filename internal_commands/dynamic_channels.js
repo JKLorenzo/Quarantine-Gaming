@@ -108,8 +108,7 @@ async function updateGuild() {
                                     let channel_desc = new Array();
                                     channel_desc.push('• Only members who are in this voice channel can view this text channel.');
                                     channel_desc.push(`• Members who have ${baseline_role} role are allowed to join.`);
-                                    channel_desc.push(`• ${voice_channel} and ${text_channel} channels will automatically be deleted once everyone is disconnected from ${voice_channel} channel.`);
-                                    channel_desc.push('\n');
+                                    channel_desc.push(`• ${voice_channel} and ${text_channel} channels will automatically be deleted once everyone is disconnected from these channel.`);
                                     channel_desc.push('Note: <@&749235255944413234> and <@&700397445506531358> can interact with these channels.');
                                     embed.setDescription(channel_desc.join('\n\n'));
                                     embed.setColor('#7b00ff');
@@ -240,7 +239,7 @@ async function updateChannel() {
                     embed.setFooter(`${newState.member.user.tag} (${newState.member.user.id})`);
                     embed.setTimestamp();
                     embed.setColor('#7b00ff');
-                    await text_channel.send({ content: newState.member.displayName, embed: embed }).catch(error => {
+                    await text_channel.send(embed).catch(error => {
                         g_interface.on_error({
                             name: 'updateChannel -> .send(embed)',
                             location: 'dynamic_channels.js',
