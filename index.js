@@ -53,7 +53,7 @@ client.once('ready', () => {
     embed.setImage('https://static1.squarespace.com/static/599bfc6803596ef973b3fade/t/59c92bcb7131a5680294f694/1506356179370/dribble-startup.gif');
     embed.setFooter('Initializing all modules...');
     embed.setTimestamp();
-    await interface.log(embed);
+    interface.log(embed);
 
 
     db.init(client);
