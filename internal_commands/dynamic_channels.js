@@ -109,10 +109,14 @@ async function updateGuild() {
                                     channel_desc.push('• Only members who are in this voice channel can view this text channel.');
                                     channel_desc.push(`• Members who have ${baseline_role} role are allowed to join.`);
                                     channel_desc.push(`• ${text_channel} voice and text channels will automatically be deleted once everyone is disconnected from these channels.`);
+                                    channel_desc.push(`• You can transfer anyone from another voice channel to this voice channel, regardless of roles, by typing "!transfer <@member>". Ex: !transfer <@749563476707377222>`);
+                                    channel_desc.push(`• You can also transfer multiple users at once by typing "!transfer <@member_1> <@member_2> <@member_3>".`);
                                     channel_desc.push('Note: <@&749235255944413234> and <@&700397445506531358> can interact with these channels.');
                                     embed.setDescription(channel_desc.join('\n\n'));
                                     embed.setColor('#7b00ff');
-                                    await text_channel.send(embed).catch(error => {
+                                    await text_channel.send(embed).then(message => {
+                                        message.pin();
+                                    }).catch(error => {
                                         g_interface.on_error({
                                             name: 'updateChannel -> .send(embed)',
                                             location: 'dynamic_channels.js',
