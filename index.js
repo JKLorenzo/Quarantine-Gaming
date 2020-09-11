@@ -171,7 +171,7 @@ client.on('guildMemberAdd', async member => {
             embed.setTitle(this_member.displayName);
             embed.setThumbnail(this_member.user.displayAvatarURL());
             embed.addFields([
-                { name: 'Username:', value: this_member.user.username },
+                { name: 'User:', value: this_member },
                 { name: 'Tagname', value: this_member.user.tag },
                 { name: 'Account Created:', value: created_on },
                 { name: 'Moderation:', value: '✅ - Approve     ❌ - Kick     ⛔ - Ban' }
@@ -273,8 +273,11 @@ client.on('messageReactionAdd', async (reaction, user) => {
                                     await this_member.roles.add('722699433225224233').then(async () => {
                                         await this_message.reactions.removeAll().then(async message => {
                                             let final = message.embeds[0]
-                                                .spliceFields(2, 1)
-                                                .addField('Action Taken:', 'Approved ✅');
+                                                .spliceFields(3, 1)
+                                                .addFields(
+                                                    { name: 'Action Taken:', value: 'Approved ✅' },
+                                                    { name: 'Moderator:', value: user },
+                                                );
                                             await message.edit(final).catch(error => {
                                                 g_interface.on_error({
                                                     name: 'messageReactionAdd -> .edit(final) [case approve]',
@@ -302,8 +305,11 @@ client.on('messageReactionAdd', async (reaction, user) => {
                                 await this_member.kick().then(async () => {
                                     await this_message.reactions.removeAll().then(async message => {
                                         let final = message.embeds[0]
-                                            .spliceFields(2, 1)
-                                            .addField('Action Taken:', 'Kicked ❌');
+                                            .spliceFields(3, 1)
+                                            .addFields(
+                                                { name: 'Action Taken:', value: 'Kicked ❌' },
+                                                { name: 'Moderator:', value: user },
+                                            );
                                         await message.edit(final).catch(error => {
                                             g_interface.on_error({
                                                 name: 'messageReactionAdd -> .edit(final) [case kick]',
@@ -330,8 +336,11 @@ client.on('messageReactionAdd', async (reaction, user) => {
                                 await this_member.ban().then(async () => {
                                     await this_message.reactions.removeAll().then(async message => {
                                         let final = message.embeds[0]
-                                            .spliceFields(2, 1)
-                                            .addField('Action Taken:', 'Banned ⛔');
+                                            .spliceFields(3, 1)
+                                            .addFields(
+                                                { name: 'Action Taken:', value: 'Banned ⛔' },
+                                                { name: 'Moderator:', value: user },
+                                            );
                                         await message.edit(final).catch(error => {
                                             g_interface.on_error({
                                                 name: 'messageReactionAdd -> .edit(final) [case ban]',
