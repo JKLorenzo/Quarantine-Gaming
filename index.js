@@ -44,6 +44,18 @@ client.registry
 client.once('ready', () => {
     console.log('-------------{  Startup  }-------------');
     interface.init(client);
+
+    let embed = new MessageEmbed();
+    embed.setColor('#ffff00');
+    embed.setAuthor('Quarantine Gaming', client.user.displayAvatarURL());
+    embed.setTitle('Startup Initiated');
+    embed.addField('Reason', 'Heroku Cloud Platform Server Dyno Restart was requested.');
+    embed.setImage('https://static1.squarespace.com/static/599bfc6803596ef973b3fade/t/59c92bcb7131a5680294f694/1506356179370/dribble-startup.gif');
+    embed.setFooter('Initializing all modules...');
+    embed.setTimestamp();
+    await interface.log(embed);
+
+
     db.init(client);
     fgu.init(client);
     feed.init(client);
@@ -54,7 +66,6 @@ client.once('ready', () => {
     client.user.setActivity('!help', {
         type: 'LISTENING'
     });
-    interface.log('-------------{  Startup  }-------------');
 });
 
 client.on('userUpdate', (oldUser, newUser) => {
@@ -156,15 +167,15 @@ client.on('guildMemberAdd', async member => {
 
             let embed = new MessageEmbed
             embed.setAuthor('Quarantine Gaming Member Approval');
-            embed.setTitle(this_member.user.tag);
+            embed.setTitle(this_member.displayName);
             embed.setThumbnail(this_member.user.displayAvatarURL());
             embed.addFields([
                 { name: 'Username:', value: this_member.user.username },
-                { name: 'Display Name:', value: this_member.displayName },
+                { name: 'Tagname', value: this_member.user.tag },
                 { name: 'Account Created:', value: created_on },
                 { name: 'Moderation:', value: '✅ - Approve     ❌ - Kick     ⛔ - Ban' }
             ]);
-            embed.setFooter('Warning: These actions are irreversible!');
+            embed.setFooter(this_member.user.id);
             embed.setTimestamp(new Date());
             embed.setColor('#25c059');
             await g_interface.get('interface').send(embed).then(async this_message => {
@@ -253,7 +264,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
                     }
                     break;
                 case 'Quarantine Gaming Member Approval':
-                    this_member = g_interface.get('guild').members.cache.find(member => member.user.tag == this_message.embeds[0].title);
+                    this_member = g_interface.get('guild').members.cache.find(member => member.user.id == this_message.embeds[0].footer);
                     if (this_member) {
                         switch (reaction.emoji.name) {
                             case '✅':

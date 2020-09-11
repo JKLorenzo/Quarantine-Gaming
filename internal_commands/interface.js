@@ -24,7 +24,7 @@ const get = function (name) {
 }
 
 const log = async function (message) {
-    get('log').send(message).catch(error => {
+    await get('log').send(message).catch(error => {
         on_error({
             name: 'log',
             location: 'interface.js',
@@ -41,13 +41,13 @@ const on_error = async function (details) {
         .addField('Error Message', details.error)
         .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Antu_dialog-error.svg/1024px-Antu_dialog-error.svg.png')
         .setColor('#FF0000');
-    log({ content: '<@393013053488103435>', embed: embed });
+    await log({ content: '<@393013053488103435>', embed: embed });
     console.log(`An error occured while performing ${details.name} function on ${details.location}.`);
     console.log(details.error);
 }
 
 const subscription = async function (message) {
-    get('subscription').send(message).catch(error => {
+    await get('subscription').send(message).catch(error => {
         on_error({
             name: 'subscription',
             location: 'interface.js',
@@ -57,20 +57,22 @@ const subscription = async function (message) {
 }
 
 const dm = async function (member, message) {
-    let dm_channel = await member.createDM().catch(error => {
+    await member.createDM().then(dm_channel => {
+        await dm_channel.send(message).catch(error => {
+            on_error({
+                name: 'dm -> .send()',
+                location: 'interface.js',
+                error: error
+            });
+        });
+    }).catch(error => {
         on_error({
             name: 'dm -> .createDM()',
             location: 'interface.js',
             error: error
         });
     });
-    await dm_channel.send(message).catch(error => {
-        on_error({
-            name: 'dm -> .send()',
-            location: 'interface.js',
-            error: error
-        });
-    })
+
 }
 
 // Interface Module Functions
