@@ -71,7 +71,8 @@ client.once('ready', () => {
 client.on('userUpdate', (oldUser, newUser) => {
     try {
         let embed = new MessageEmbed();
-        embed.setAuthor(newUser.username, oldUser.displayAvatarURL());
+        let this_member = g_interface.get('guild').members.cache.find(member => member.user.tag == newUser.tag);
+        embed.setAuthor(this_member.displayName, oldUser.displayAvatarURL());
         embed.setTitle('User Update');
 
         let description = new Array();
@@ -107,7 +108,7 @@ client.on('userUpdate', (oldUser, newUser) => {
 client.on('guildMemberUpdate', (oldMember, newMember) => {
     try {
         let embed = new MessageEmbed();
-        embed.setAuthor(newMember.user.username, newMember.user.displayAvatarURL());
+        embed.setAuthor(newMember.displayName, newMember.user.displayAvatarURL());
         embed.setTitle('Guild Member Update');
 
         let description = new Array();
