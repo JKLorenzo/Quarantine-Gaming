@@ -57,7 +57,7 @@ const subscription = async function (message) {
 }
 
 const dm = async function (member, message) {
-    await member.createDM().then(dm_channel => {
+    await member.createDM().then(async dm_channel => {
         await dm_channel.send(message).catch(error => {
             on_error({
                 name: 'dm -> .send()',
