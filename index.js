@@ -50,7 +50,6 @@ client.once('ready', () => {
     embed.setAuthor('Quarantine Gaming', client.user.displayAvatarURL());
     embed.setTitle('Startup Initiated');
     embed.addField('Reason', process.env.STARTUP_REASON);
-    embed.setImage('https://static1.squarespace.com/static/599bfc6803596ef973b3fade/t/59c92bcb7131a5680294f694/1506356179370/dribble-startup.gif');
     interface.log(embed);
 
 

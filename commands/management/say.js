@@ -6,7 +6,7 @@ module.exports = class Say extends Command {
             name: 'say',
             group: 'management',
             memberName: 'say',
-            description: 'Sends a message to a channel.',
+            description: 'Send a message to a channel.',
             userPermissions: ["ADMINISTRATOR"],
             guildOnly: true,
             args: [

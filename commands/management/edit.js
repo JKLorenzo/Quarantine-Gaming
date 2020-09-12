@@ -6,7 +6,7 @@ module.exports = class Edit extends Command {
             name: 'edit',
             group: 'management',
             memberName: 'edit',
-            description: 'Edits a message to on a channel.',
+            description: 'Edit a text message sent by this bot.',
             userPermissions: ["ADMINISTRATOR"],
             guildOnly: true,
             args: [
