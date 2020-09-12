@@ -18,7 +18,7 @@ module.exports = class AmongUs extends Command {
             .setColor('#ffff00')
             .setAuthor('Quarantine Gaming Experience')
             .setTitle('Among Us')
-            .setThumbnail(client.user.displayAvatarURL())
+            .setThumbnail('https://yt3.ggpht.com/a/AATXAJw5JZ2TM56V4OVFQnVUrOZ5_E2ULtrusmsTdrQatA=s900-c-k-c0xffffffff-no-rj-mo')
             .setDescription('Mute or unmute all members from your voice channel.')
             .addField('Actions:', '🟠 - Mute        🟢 - Unmute')
             .setImage('https://i.pinimg.com/736x/75/69/4f/75694f713b0ab52bf2065ebee0d80f57.jpg');
