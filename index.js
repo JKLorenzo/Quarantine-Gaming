@@ -49,10 +49,8 @@ client.once('ready', () => {
     embed.setColor('#ffff00');
     embed.setAuthor('Quarantine Gaming', client.user.displayAvatarURL());
     embed.setTitle('Startup Initiated');
-    embed.addField('Reason', 'Heroku Cloud Platform Server Dyno Restart was requested.');
+    embed.addField('Reason', process.env.STARTUP_REASON);
     embed.setImage('https://static1.squarespace.com/static/599bfc6803596ef973b3fade/t/59c92bcb7131a5680294f694/1506356179370/dribble-startup.gif');
-    embed.setFooter('Initializing all modules...');
-    embed.setTimestamp();
     interface.log(embed);
 
 
@@ -368,6 +366,28 @@ client.on('messageReactionAdd', async (reaction, user) => {
                         g_interface.get('interface').send(`I can't find this user. A manual action is required.`);
                     }
                     break;
+                case 'Quarantine Gaming Experience':
+                    this_member = g_interface.get('guild').members.cache.get(user.id);
+                    switch (this_message.embeds[0].title) {
+                        case 'Among Us':
+                            let this_channel = this_member.voice.channel;
+                            if (this_channel) {
+                                switch (reaction.emoji.name) {
+                                    case '🟠':
+                                        for (let this_entry of this_channel.members) {
+                                            this_entry[1].voice.setMute(true).catch(error => { });
+                                        }
+                                        break;
+                                    case '🟢':
+                                        for (let this_entry of this_channel.members) {
+                                            this_entry[1].voice.setMute(false).catch(error => { });
+                                        }
+                                        break;
+                                }
+                            }
+                            break;
+                    }
+                    break;
             }
         }
     } catch (error) {
@@ -392,12 +412,14 @@ client.on('messageReactionRemove', async (reaction, user) => {
                 return;
             });
         }
-        if (reaction.message.author.bot) {
-            switch (reaction.message.embeds[0].author.name) {
+        let this_message = reaction.message;
+        let this_member;
+        if (this_message.author.bot) {
+            switch (this_message.embeds[0].author.name) {
                 case 'Quarantine Gaming NSFW Content':
                     switch (reaction.emoji.name) {
                         case '🔴':
-                            let this_member = g_interface.get('guild').members.cache.get(user.id);
+                            this_member = g_interface.get('guild').members.cache.get(user.id);
                             let this_role = g_interface.get('guild').roles.cache.find(role => role.id == '700481554132107414');
                             if (this_role && this_member.roles.cache.has(this_role.id)) {
                                 await this_member.roles.remove(this_role.id).catch(error => {
@@ -412,7 +434,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
                     }
                     break;
                 case 'Quarantine Gaming Role Notification Subscription':
-                    let this_member = g_interface.get('guild').members.cache.get(user.id);
+                    this_member = g_interface.get('guild').members.cache.get(user.id);
                     let this_role;
                     switch (reaction.emoji.name) {
                         case '1️⃣':
@@ -439,6 +461,28 @@ client.on('messageReactionRemove', async (reaction, user) => {
                                 error: error
                             });
                         });
+                    }
+                    break;
+                case 'Quarantine Gaming Experience':
+                    this_member = g_interface.get('guild').members.cache.get(user.id);
+                    switch (this_message.embeds[0].title) {
+                        case 'Among Us':
+                            let this_channel = this_member.voice.channel;
+                            if (this_channel) {
+                                switch (reaction.emoji.name) {
+                                    case '🟠':
+                                        for (let this_entry of this_channel.members) {
+                                            this_entry[1].voice.setMute(true).catch(error => { });
+                                        }
+                                        break;
+                                    case '🟢':
+                                        for (let this_entry of this_channel.members) {
+                                            this_entry[1].voice.setMute(false).catch(error => { });
+                                        }
+                                        break;
+                                }
+                            }
+                            break;
                     }
                     break;
             }
