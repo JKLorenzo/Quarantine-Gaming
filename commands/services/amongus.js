@@ -7,7 +7,7 @@ module.exports = class AmongUs extends Command {
             name: 'amongus',
             group: 'services',
             memberName: 'amongus',
-            description: 'Mute or unmute all members on your voice channel.',
+            description: 'Among Us Discord Extension.',
             guildOnly: true
         });
     }
@@ -17,11 +17,15 @@ module.exports = class AmongUs extends Command {
         let embed = new MessageEmbed()
             .setColor('#ffff00')
             .setAuthor('Quarantine Gaming Experience')
-            .setTitle('Among Us')
             .setThumbnail('https://yt3.ggpht.com/a/AATXAJw5JZ2TM56V4OVFQnVUrOZ5_E2ULtrusmsTdrQatA=s900-c-k-c0xffffffff-no-rj-mo')
-            .setDescription('Mute or unmute all members on your voice channel.')
-            .addField('Actions:', '🟠 - Mute     🟢 - Unmute')
-            .setImage('https://i.pinimg.com/736x/75/69/4f/75694f713b0ab52bf2065ebee0d80f57.jpg');
+            .setTitle('Among Us')
+            .setDescription('Voice channel audio control extension.')
+            .addFields(
+                { name: 'Actions:', value: '🟠 - Mute', inline: true },
+                { name: '\u200b', value: '🟢 - Unmute', inline: true }
+            )
+            .setImage('https://i.pinimg.com/736x/75/69/4f/75694f713b0ab52bf2065ebee0d80f57.jpg')
+            .setFooter('Mute or unmute all members on your current voice channel.');
 
         let reactions = new Array();
         reactions.push('🟠');

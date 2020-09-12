@@ -9,151 +9,171 @@ async function updateGuild() {
         if (this_channel.type == 'voice' && this_channel.name.startsWith('Voice Room')) {
             if (this_channel.members.size > 1) {
                 // Get baseline activity
-                let baseline_role;
+                let baseline_role, same_acitivities, diff_acitivities;
                 for (let this_member of this_channel.members.array()) {
-                    let member_roles = new Array();
-                    if (!baseline_role) {
-                        for (let this_role of this_member.roles.cache.array()) {
-                            if (this_role.name.startsWith('Play')) {
-                                member_roles.push(this_role);
-                            }
-                        }
-                        if (member_roles.length == 1) {
-                            baseline_role = member_roles.pop();
-                        }
-                    }
-                }
-                if (baseline_role) {
-                    // Check if all members have the same activity
-                    let same_acitivities = true;
-                    for (let this_member of this_channel.members.array()) {
-                        if (same_acitivities && !this_member.roles.cache.find(role => role == baseline_role)) {
-                            same_acitivities = false;
-                        }
-                    }
-                    // Check if all members are playing more than 5 minutes
-                    let are_playing = true;
-                    for (let this_member of this_channel.members.array()) {
-                        for (let this_activity of this_member.presence.activities) {
-                            if (this_activity.name == baseline_role.name.substring(g_vrprefix.length)) {
-                                let today = new Date();
-                                let diffMins = Math.round((today - this_activity.createdAt) / 60000); // minutes
-                                if (diffMins < 1) {
-                                    are_playing = false;
+                    for (let this_role of this_member.roles.cache.array()) {
+                        if (!baseline_role && this_role.name.startsWith('Play')) {
+                            // Check how many users have the same roles
+                            same_acitivities = 0;
+                            diff_acitivities = 0;
+                            for (let this_member of this_channel.members.array()) {
+                                if (this_member.roles.cache.find(role => role == this_role)) {
+                                    same_acitivities++;
+                                } else {
+                                    diff_acitivities++;
                                 }
                             }
-                        }
-                    }
-
-                    if (same_acitivities && are_playing) {
-                        // Create voice channel
-                        await g_interface.get('guild').channels.create(baseline_role.name.substring(g_vrprefix.length), {
-                            type: 'voice',
-                            topic: `Voice room dedicated for ${baseline_role.name.substring(g_vrprefix.length)} players.`,
-                            reason: `${baseline_role.name.substring(g_vrprefix.length)} is being played by members in a voice room.`,
-                            parent: parentID,
-                            position: 1,
-                            permissionOverwrites: [
-                                {
-                                    id: g_interface.get('guild').roles.everyone.id,
-                                    deny: ["CONNECT"]
-                                },
-                                {
-                                    id: g_interface.get('guild').roles.cache.find(role => role.name.toLowerCase() == 'music bots').id,
-                                    allow: ["CONNECT"]
-                                },
-                                {
-                                    id: baseline_role.id,
-                                    allow: ["CONNECT"]
-                                }
-                            ]
-                        }).then(async voice_channel => {
-                            // Create text role
-                            await g_interface.get('guild').roles.create({
-                                data: {
-                                    name: `Text ${voice_channel.id}`,
-                                    color: '0x7b00ff'
-                                }
-                            }).then(async function (text_role) {
-                                // Create text channel
+                            if (same_acitivities > 1 && same_acitivities > diff_acitivities) {
+                                baseline_role = this_role;
+                                // Create voice channel
                                 await g_interface.get('guild').channels.create(baseline_role.name.substring(g_vrprefix.length), {
-                                    type: 'text',
+                                    type: 'voice',
+                                    topic: `Voice room dedicated for ${baseline_role.name.substring(g_vrprefix.length)} players.`,
+                                    reason: `${baseline_role.name.substring(g_vrprefix.length)} is being played by members in a voice room.`,
                                     parent: parentID,
                                     position: 1,
                                     permissionOverwrites: [
                                         {
                                             id: g_interface.get('guild').roles.everyone.id,
-                                            deny: ["VIEW_CHANNEL"]
+                                            deny: ["CONNECT"]
                                         },
                                         {
                                             id: g_interface.get('guild').roles.cache.find(role => role.name.toLowerCase() == 'music bots').id,
-                                            allow: ["VIEW_CHANNEL"]
+                                            allow: ["CONNECT"]
                                         },
                                         {
-                                            id: text_role.id,
-                                            allow: ["VIEW_CHANNEL"]
+                                            id: baseline_role.id,
+                                            allow: ["CONNECT"]
                                         }
                                     ]
-                                }).then(async text_channel => {
-                                    await text_channel.setTopic(`${voice_channel.id} ${text_role.id}`).catch(error => {
-                                        g_interface.on_error({
-                                            name: 'updateGuild -> .setTopic(text_channel)',
-                                            location: 'dynamic_channels.js',
-                                            error: error
-                                        });
-                                    });
-                                    let embed = new MessageEmbed();
-                                    embed.setAuthor('Quarantine Gaming Dedicated Channels');
-                                    embed.setTitle(`Voice and Text Channels for ${baseline_role.name.substring(g_vrprefix.length)}`);
-                                    let channel_desc = new Array();
-                                    channel_desc.push('• Only members who are in this voice channel can view this text channel.');
-                                    channel_desc.push(`• Members who have ${baseline_role} role are allowed to join.`);
-                                    channel_desc.push(`• ${text_channel} voice and text channels will automatically be deleted once everyone is disconnected from these channels.`);
-                                    channel_desc.push(`• You can transfer anyone from another voice channel to this voice channel, regardless of roles, by typing "!transfer <@member>". Ex: !transfer <@749563476707377222>`);
-                                    channel_desc.push(`• You can also transfer multiple users at once by typing "!transfer <@member_1> <@member_2> <@member_3>".`);
-                                    channel_desc.push('Note: <@&749235255944413234> and <@&700397445506531358> can interact with these channels.');
-                                    embed.setDescription(channel_desc.join('\n\n'));
-                                    embed.setColor('#7b00ff');
-                                    await text_channel.send(embed).then(message => {
-                                        message.pin();
-                                    }).catch(error => {
-                                        g_interface.on_error({
-                                            name: 'updateChannel -> .send(embed)',
-                                            location: 'dynamic_channels.js',
-                                            error: error
-                                        });
-                                    });
-                                    // Transfer
-                                    for (let this_member of this_channel.members.array()) {
-                                        await this_member.voice.setChannel(voice_channel).catch(error => {
+                                }).then(async voice_channel => {
+                                    // Create text role
+                                    await g_interface.get('guild').roles.create({
+                                        data: {
+                                            name: `Text ${voice_channel.id}`,
+                                            color: '0x7b00ff'
+                                        }
+                                    }).then(async function (text_role) {
+                                        // Create text channel
+                                        await g_interface.get('guild').channels.create(baseline_role.name.substring(g_vrprefix.length), {
+                                            type: 'text',
+                                            parent: parentID,
+                                            position: 1,
+                                            permissionOverwrites: [
+                                                {
+                                                    id: g_interface.get('guild').roles.everyone.id,
+                                                    deny: ["VIEW_CHANNEL"]
+                                                },
+                                                {
+                                                    id: g_interface.get('guild').roles.cache.find(role => role.name.toLowerCase() == 'music bots').id,
+                                                    allow: ["VIEW_CHANNEL"]
+                                                },
+                                                {
+                                                    id: text_role.id,
+                                                    allow: ["VIEW_CHANNEL"]
+                                                }
+                                            ]
+                                        }).then(async text_channel => {
+                                            await text_channel.setTopic(`${voice_channel.id} ${text_role.id}`).catch(error => {
+                                                g_interface.on_error({
+                                                    name: 'updateGuild -> .setTopic(text_channel)',
+                                                    location: 'dynamic_channels.js',
+                                                    error: error
+                                                });
+                                            });
+                                            let embed = new MessageEmbed();
+                                            embed.setAuthor('Quarantine Gaming Dedicated Channels');
+                                            embed.setTitle(`Voice and Text Channels for ${baseline_role.name.substring(g_vrprefix.length)}`);
+                                            let channel_desc = new Array();
+                                            channel_desc.push('• Only members who are in this voice channel can view this text channel.');
+                                            channel_desc.push(`• Members who have ${baseline_role} role are allowed to join.`);
+                                            channel_desc.push(`• ${text_channel} voice and text channels will automatically be deleted once everyone is disconnected from these channels.`);
+                                            channel_desc.push(`• You can transfer anyone from another voice channel to this voice channel, regardless of roles, by doing "!transfer <@member>".\n\u200b\u200bEx: "!transfer <@749563476707377222>"`);
+                                            channel_desc.push(`• You can also transfer multiple users at once.\n\u200b\u200bEx: "!transfer <@749563476707377222> <@749563476707377222> <@749563476707377222>"`);
+                                            channel_desc.push('Note: <@&749235255944413234> and <@&700397445506531358> can interact with these channels.');
+                                            embed.setDescription(channel_desc.join('\n\n'));
+                                            embed.setColor('#7b00ff');
+                                            await text_channel.send(embed).then(message => {
+                                                message.pin();
+                                            }).catch(error => {
+                                                g_interface.on_error({
+                                                    name: 'updateChannel -> .send(embed)',
+                                                    location: 'dynamic_channels.js',
+                                                    error: error
+                                                });
+                                            });
+                                            // Add Quarantine Gaming Experience if available
+                                            switch (baseline_role.name.substring(g_vrprefix.length)) {
+                                                case 'Among Us':
+                                                    let embed = new MessageEmbed()
+                                                        .setColor('#ffff00')
+                                                        .setAuthor('Quarantine Gaming Experience')
+                                                        .setThumbnail('https://yt3.ggpht.com/a/AATXAJw5JZ2TM56V4OVFQnVUrOZ5_E2ULtrusmsTdrQatA=s900-c-k-c0xffffffff-no-rj-mo')
+                                                        .setTitle('Among Us')
+                                                        .setDescription('Voice channel audio control extension.')
+                                                        .addFields(
+                                                            { name: 'Actions:', value: '🟠 - Mute', inline: true },
+                                                            { name: '\u200b', value: '🟢 - Unmute', inline: true }
+                                                        )
+                                                        .setImage('https://i.pinimg.com/736x/75/69/4f/75694f713b0ab52bf2065ebee0d80f57.jpg')
+                                                        .setFooter('Mute or unmute all members on your current voice channel.');
+
+                                                    let reactions = new Array();
+                                                    reactions.push('🟠');
+                                                    reactions.push('🟢');
+                                                    await text_channel.send(embed).then(async this_message => {
+                                                        await this_message.pin();
+                                                        for (let this_reaction of reactions) {
+                                                            await this_message.react(this_reaction).catch(error => {
+                                                                g_interface.on_error({
+                                                                    name: 'run -> .react(this_reaction)',
+                                                                    location: 'dynamic_channels.js',
+                                                                    error: error
+                                                                });
+                                                            });
+                                                        }
+                                                    }).catch(error => {
+                                                        g_interface.on_error({
+                                                            name: 'run -> .say(message)',
+                                                            location: 'dynamic_channels.js',
+                                                            error: error
+                                                        });
+                                                    });
+                                                    break;
+                                            }
+                                            // Transfer
+                                            for (let this_member of this_channel.members.array()) {
+                                                await this_member.voice.setChannel(voice_channel).catch(error => {
+                                                    g_interface.on_error({
+                                                        name: 'updateGuild -> .setChannel(voice_channel)',
+                                                        location: 'dynamic_channels.js',
+                                                        error: error
+                                                    });
+                                                });
+                                            }
+                                        }).catch(error => {
                                             g_interface.on_error({
-                                                name: 'updateGuild -> .setChannel(voice_channel)',
+                                                name: 'updateGuild -> .create(text_channel)',
                                                 location: 'dynamic_channels.js',
                                                 error: error
                                             });
                                         });
-                                    }
+                                    }).catch(error => {
+                                        g_interface.on_error({
+                                            name: 'updateGuild -> .create(text_role)',
+                                            location: 'dynamic_channels.js',
+                                            error: error
+                                        });
+                                    });
                                 }).catch(error => {
                                     g_interface.on_error({
-                                        name: 'updateGuild -> .create(text_channel)',
+                                        name: 'updateGuild -> .create(voice_channel)',
                                         location: 'dynamic_channels.js',
                                         error: error
                                     });
                                 });
-                            }).catch(error => {
-                                g_interface.on_error({
-                                    name: 'updateGuild -> .create(text_role)',
-                                    location: 'dynamic_channels.js',
-                                    error: error
-                                });
-                            });
-                        }).catch(error => {
-                            g_interface.on_error({
-                                name: 'updateGuild -> .create(voice_channel)',
-                                location: 'dynamic_channels.js',
-                                error: error
-                            });
-                        });
+                            }
+                        }
                     }
                 }
             }
@@ -317,7 +337,7 @@ const update = function (oldState, newState) {
             old: oldState,
             new: newState
         }
-    
+
         toUpdate.push(this_data);
         if (!isUpdating) {
             isUpdating = true;

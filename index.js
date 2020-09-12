@@ -18,6 +18,9 @@ global.g_db = db;
 global.g_fgu = fgu;
 global.g_interface = interface;
 
+// Variables
+let updating = false;
+
 const client = new CommandoClient({
     commandPrefix: '!',
     owner: '393013053488103435',
@@ -366,25 +369,52 @@ client.on('messageReactionAdd', async (reaction, user) => {
                     }
                     break;
                 case 'Quarantine Gaming Experience':
-                    this_member = g_interface.get('guild').members.cache.get(user.id);
-                    switch (this_message.embeds[0].title) {
-                        case 'Among Us':
-                            let this_channel = this_member.voice.channel;
-                            if (this_channel) {
-                                switch (reaction.emoji.name) {
-                                    case '🟠':
-                                        for (let this_entry of this_channel.members) {
-                                            this_entry[1].voice.setMute(true).catch(error => { });
+                    if (!updating) {
+                        updating = true;
+                        switch (this_message.embeds[0].title) {
+                            case 'Among Us':
+                                // Delete reactions
+                                await this_message.reactions.removeAll().then(async message => {
+                                    this_member = g_interface.get('guild').members.cache.get(user.id);
+                                    let this_channel = this_member.voice.channel;
+                                    if (this_channel) {
+                                        // Apply reaction effect
+                                        switch (reaction.emoji.name) {
+                                            case '🟠':
+                                                for (let this_entry of this_channel.members) {
+                                                    await this_entry[1].voice.setMute(true).catch(error => { });
+                                                }
+                                                break;
+                                            case '🟢':
+                                                for (let this_entry of this_channel.members) {
+                                                    await this_entry[1].voice.setMute(false).catch(error => { });
+                                                }
+                                                break;
                                         }
-                                        break;
-                                    case '🟢':
-                                        for (let this_entry of this_channel.members) {
-                                            this_entry[1].voice.setMute(false).catch(error => { });
-                                        }
-                                        break;
-                                }
-                            }
-                            break;
+                                    }
+                                    // Add reactions
+                                    let reactions = new Array();
+                                    reactions.push('🟠');
+                                    reactions.push('🟢');
+                                    for (let this_reaction of reactions) {
+                                        await message.react(this_reaction).catch(error => {
+                                            g_interface.on_error({
+                                                name: 'run -> .react(this_reaction)',
+                                                location: 'amongus.js',
+                                                error: error
+                                            });
+                                        });
+                                    }
+                                }).catch(error => {
+                                    g_interface.on_error({
+                                        name: 'messageReactionAdd -> .removeAll(reaction) [among us]',
+                                        location: 'index.js',
+                                        error: error
+                                    });
+                                });
+                                break;
+                        }
+                        updating = false;
                     }
                     break;
             }
@@ -460,28 +490,6 @@ client.on('messageReactionRemove', async (reaction, user) => {
                                 error: error
                             });
                         });
-                    }
-                    break;
-                case 'Quarantine Gaming Experience':
-                    this_member = g_interface.get('guild').members.cache.get(user.id);
-                    switch (this_message.embeds[0].title) {
-                        case 'Among Us':
-                            let this_channel = this_member.voice.channel;
-                            if (this_channel) {
-                                switch (reaction.emoji.name) {
-                                    case '🟠':
-                                        for (let this_entry of this_channel.members) {
-                                            this_entry[1].voice.setMute(true).catch(error => { });
-                                        }
-                                        break;
-                                    case '🟢':
-                                        for (let this_entry of this_channel.members) {
-                                            this_entry[1].voice.setMute(false).catch(error => { });
-                                        }
-                                        break;
-                                }
-                            }
-                            break;
                     }
                     break;
             }
