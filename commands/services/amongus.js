@@ -5,7 +5,7 @@ module.exports = class AmongUs extends Command {
     constructor(client) {
         super(client, {
             name: 'amongus',
-            group: 'management',
+            group: 'services',
             memberName: 'amongus',
             description: 'Mute or unmute all members on your voice channel.',
             guildOnly: true
