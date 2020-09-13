@@ -74,11 +74,13 @@ async function get(init = false) {
             });
         }
     }).catch(error => {
-        g_interface.on_error({
-            name: 'get -> fetch()',
-            location: 'feed.js',
-            error: error
-        });
+        if (!error.indexOf('getaddrinfo EAI_AGAIN') !== -1) {
+            g_interface.on_error({
+                name: 'get -> fetch()',
+                location: 'feed.js',
+                error: error
+            });
+        }
     });
 }
 
