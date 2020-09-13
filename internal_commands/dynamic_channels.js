@@ -17,9 +17,10 @@ async function updateGuild() {
                             same_acitivities = 0;
                             diff_acitivities = 0;
                             for (let this_member of this_channel.members.array()) {
+
                                 if (this_member.roles.cache.find(role => role == this_role)) {
                                     same_acitivities++;
-                                } else {
+                                } else if (this_member.roles.cache.find(role => role.name.startsWith('Play'))) {
                                     diff_acitivities++;
                                 }
                             }
