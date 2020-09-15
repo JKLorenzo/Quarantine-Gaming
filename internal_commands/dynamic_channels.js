@@ -100,8 +100,8 @@ async function updateGuild() {
                                             embed.setAuthor('Quarantine Gaming Dedicated Channels');
                                             embed.setTitle(`Voice and Text Channels for ${baseline_role.name.substring(g_vrprefix.length)}`);
                                             let channel_desc = new Array();
-                                            channel_desc.push('• Only members who are in this voice channel can view this text channel.');
-                                            channel_desc.push(`• Members who have ${baseline_role} role are allowed to join.`);
+                                            channel_desc.push(`• This channel is **play-role open**. Members who have ${baseline_role} role are allowed to join.`);
+                                            channel_desc.push(`• Only members who are in this voice channel can view this text channel.`);
                                             channel_desc.push(`• ${text_channel} voice and text channels will automatically be deleted once everyone is disconnected from these channels.`);
                                             channel_desc.push(`• You can transfer anyone from another voice channel to this voice channel, regardless of roles, by doing "!transfer <@member>".\n\u200b\u200bEx: "!transfer <@749563476707377222>"`);
                                             channel_desc.push(`• You can also transfer multiple users at once.\n\u200b\u200bEx: "!transfer <@749563476707377222> <@749563476707377222> <@749563476707377222>"`);

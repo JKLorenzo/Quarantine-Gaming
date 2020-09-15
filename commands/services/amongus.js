@@ -13,7 +13,6 @@ module.exports = class AmongUs extends Command {
     }
 
     async run(message) {
-        message.delete().catch(error => { });
         let embed = new MessageEmbed()
             .setColor('#ffff00')
             .setAuthor('Quarantine Gaming Experience')
