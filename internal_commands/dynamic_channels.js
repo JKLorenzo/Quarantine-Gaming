@@ -6,7 +6,8 @@ const parentID = '749231470396309535';
 async function updateGuild() {
     // Transfer members from generic voice rooms to dynamic voice rooms
     for (let this_channel of g_interface.get('guild').channels.cache.array()) {
-        if (this_channel.type == 'voice' && this_channel.name.startsWith('Voice Room')) {
+        // Disregard Pandora's Box and Couchlockszx
+        if (this_channel.type == 'voice' && this_channel.id != '747005488197009568' && this_channel.id != '663443529170681857') {
             if (this_channel.members.size > 1) {
                 // Get baseline activity
                 let baseline_role, same_acitivities, diff_acitivities;
@@ -17,7 +18,6 @@ async function updateGuild() {
                             same_acitivities = 0;
                             diff_acitivities = 0;
                             for (let this_member of this_channel.members.array()) {
-
                                 if (this_member.roles.cache.find(role => role == this_role)) {
                                     same_acitivities++;
                                 } else if (this_member.roles.cache.find(role => role.name.startsWith('Play'))) {
@@ -30,7 +30,7 @@ async function updateGuild() {
                                 await g_interface.get('guild').channels.create(baseline_role.name.substring(g_vrprefix.length), {
                                     type: 'voice',
                                     topic: `Voice room dedicated for ${baseline_role.name.substring(g_vrprefix.length)} players.`,
-                                    reason: `${baseline_role.name.substring(g_vrprefix.length)} is being played by members in a voice room.`,
+                                    reason: `${baseline_role.name.substring(g_vrprefix.length)} is being played by members in a voice channel.`,
                                     parent: parentID,
                                     position: 1,
                                     permissionOverwrites: [
@@ -75,6 +75,7 @@ async function updateGuild() {
                                                 }
                                             ]
                                         }).then(async text_channel => {
+                                            // Set link
                                             await text_channel.setTopic(`${voice_channel.id} ${text_role.id}`).catch(error => {
                                                 g_interface.on_error({
                                                     name: 'updateGuild -> .setTopic(text_channel)',
@@ -82,6 +83,19 @@ async function updateGuild() {
                                                     error: error
                                                 });
                                             });
+
+                                            // Transfer members
+                                            for (let this_member of this_channel.members.array()) {
+                                                await this_member.voice.setChannel(voice_channel).catch(error => {
+                                                    g_interface.on_error({
+                                                        name: 'updateGuild -> .setChannel(voice_channel)',
+                                                        location: 'dynamic_channels.js',
+                                                        error: error
+                                                    });
+                                                });
+                                            }
+
+                                            // Set info
                                             let embed = new MessageEmbed();
                                             embed.setAuthor('Quarantine Gaming Dedicated Channels');
                                             embed.setTitle(`Voice and Text Channels for ${baseline_role.name.substring(g_vrprefix.length)}`);
@@ -103,6 +117,7 @@ async function updateGuild() {
                                                     error: error
                                                 });
                                             });
+
                                             // Add Quarantine Gaming Experience if available
                                             switch (baseline_role.name.substring(g_vrprefix.length)) {
                                                 case 'Among Us':
@@ -141,16 +156,6 @@ async function updateGuild() {
                                                         });
                                                     });
                                                     break;
-                                            }
-                                            // Transfer
-                                            for (let this_member of this_channel.members.array()) {
-                                                await this_member.voice.setChannel(voice_channel).catch(error => {
-                                                    g_interface.on_error({
-                                                        name: 'updateGuild -> .setChannel(voice_channel)',
-                                                        location: 'dynamic_channels.js',
-                                                        error: error
-                                                    });
-                                                });
                                             }
                                         }).catch(error => {
                                             g_interface.on_error({

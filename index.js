@@ -375,21 +375,26 @@ client.on('messageReactionAdd', async (reaction, user) => {
                             case 'Among Us':
                                 // Delete reactions
                                 await this_message.reactions.removeAll().then(async message => {
-                                    this_member = g_interface.get('guild').members.cache.get(user.id);
-                                    let this_channel = this_member.voice.channel;
+                                    let this_channel = g_interface.get('guild').members.cache.get(user.id).voice.channel;
                                     if (this_channel) {
-                                        // Apply reaction effect
+                                        // Get members
+                                        let channel_members = new Array();
+                                        for (let this_entry of this_channel.members) {
+                                            channel_members.push(this_entry[1]);
+                                        }
+                                        // Get reaction effect
+                                        let effect = false;
                                         switch (reaction.emoji.name) {
                                             case '🟠':
-                                                for (let this_entry of this_channel.members) {
-                                                    await this_entry[1].voice.setMute(true).catch(error => { });
-                                                }
+                                                effect = true;
                                                 break;
                                             case '🟢':
-                                                for (let this_entry of this_channel.members) {
-                                                    await this_entry[1].voice.setMute(false).catch(error => { });
-                                                }
+                                                effect = false;
                                                 break;
+                                        }
+                                        // Apply reaction effect
+                                        for (let this_channel_member of channel_members) {
+                                            await this_channel_member.voice.setMute(effect).catch(console.error);
                                         }
                                     }
                                     // Add reactions
