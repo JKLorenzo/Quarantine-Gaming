@@ -396,7 +396,9 @@ client.on('messageReactionAdd', async (reaction, user) => {
                                         }
                                         // Apply reaction effect
                                         for (let this_channel_member of channel_members) {
-                                            await this_channel_member.voice.setMute(effect).catch(console.error);
+                                            if (!this_channel_member.user.bot) {
+                                                await this_channel_member.voice.setMute(effect).catch(console.error);
+                                            }
                                         }
                                     }
                                     // Add reactions
