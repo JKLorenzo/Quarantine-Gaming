@@ -34,7 +34,7 @@ module.exports = class DedicateCommand extends Command {
                     deny: ["CONNECT"]
                 },
                 {
-                    id: g_interface.get('guild').roles.cache.find(role => role.name.toLowerCase() == 'music bots').id,
+                    id: '700397445506531358',
                     allow: ["CONNECT"]
                 }
             ]
@@ -57,7 +57,7 @@ module.exports = class DedicateCommand extends Command {
                             deny: ["VIEW_CHANNEL"]
                         },
                         {
-                            id: g_interface.get('guild').roles.cache.find(role => role.name.toLowerCase() == 'music bots').id,
+                            id: '700397445506531358',
                             allow: ["VIEW_CHANNEL"]
                         },
                         {
