@@ -1,5 +1,6 @@
 const { CommandoClient } = require('discord.js-commando');
 const path = require('path');
+const OpusScript = require('opusscript');
 const { MessageEmbed } = require('discord.js');
 const db = require(path.join(__dirname, 'internal_commands', 'database.js'));
 const interface = require(path.join(__dirname, 'internal_commands', 'interface.js'));
@@ -7,6 +8,7 @@ const feed = require(path.join(__dirname, 'internal_commands', 'feed.js'));
 const fgu = require(path.join(__dirname, 'internal_commands', 'fgu.js'));
 const dynamic_roles = require(path.join(__dirname, 'internal_commands', 'dynamic_roles.js'));
 const dynamic_channels = require(path.join(__dirname, 'internal_commands', 'dynamic_channels.js'));
+
 
 // Global Variables
 global.g_vrprefix = 'Play ';
