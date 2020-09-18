@@ -6,13 +6,13 @@ module.exports = class CleanUp extends Command {
 			name: 'cleanup',
 			group: 'management',
 			memberName: 'clean',
-			description: 'Removes n number of messages.',
+			description: '[Admin Only] Removes a number of messages on the current channel.',
 			userPermissions: ["ADMINISTRATOR"],
 			guildOnly: true,
 			args: [
 				{
 					key: 'count',
-					prompt: 'Enter number of messages to delete.',
+					prompt: 'Enter the number of messages to delete.',
 					type: 'integer',
 					validate: arg => arg > 0
 				},

@@ -1,12 +1,12 @@
 const { Command } = require('discord.js-commando');
 
-module.exports = class Say extends Command {
+module.exports = class Send extends Command {
     constructor(client) {
         super(client, {
-            name: 'say',
+            name: 'send',
             group: 'management',
-            memberName: 'say',
-            description: 'Send a message to a channel.',
+            memberName: 'send',
+            description: '[Admin Only] Send a message to a channel as Quarantine Gaming.',
             userPermissions: ["ADMINISTRATOR"],
             guildOnly: true,
             args: [

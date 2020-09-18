@@ -1,9 +1,9 @@
 const { MessageEmbed } = require('discord.js');
+const googleTTS = require('google-tts-api');
 
-let client, this_guild, this_log, this_subscription, this_interface;
+let this_guild, this_log, this_subscription, this_interface;
 
 const init = function (this_client) {
-    client = this_client;
     this_guild = this_client.guilds.cache.get('351178660725915649');
     this_log = this_guild.channels.cache.get('722760285622108210');
     this_subscription = this_guild.channels.cache.get('699763763859161108');
@@ -75,6 +75,39 @@ const dm = async function (member, message) {
 
 }
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+let is_saying = false;
+const say = async function (message, channel) {
+    while (is_saying) {
+        await sleep(500);
+    }
+    is_saying = true;
+
+    return new Promise(async (resolve, reject) => {
+        try {
+            await googleTTS(message).then(async (url) => {
+                await channel.join().then(async connection => {
+                    const dispatcher = await connection.play(url);
+                    dispatcher.on('speaking', async speaking => {
+                        if (!speaking) {
+                            await sleep(1000);
+                            await channel.leave();
+                            is_saying = false;
+                            resolve();
+                        }
+                    });
+                });
+            });
+        } catch (error) {
+            is_saying = false;
+            reject(error);
+        };
+    });
+}
+
 // Interface Module Functions
 module.exports = {
     init,
@@ -82,5 +115,6 @@ module.exports = {
     log,
     on_error,
     subscription,
-    dm
+    dm,
+    say
 }

@@ -6,7 +6,7 @@ module.exports = class TransferCommand extends Command {
             name: 'transfer',
             group: 'services',
             memberName: 'transfer',
-            description: 'Transfer a user/users to your current voice channel regardless of roles.',
+            description: 'Transfer a user/users to your current voice channel.',
             guildOnly: true,
             args: [
                 {

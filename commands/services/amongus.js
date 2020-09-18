@@ -7,7 +7,7 @@ module.exports = class AmongUs extends Command {
             name: 'amongus',
             group: 'services',
             memberName: 'amongus',
-            description: 'Among Us Discord Extension.',
+            description: 'Manually summon the Audio Control Extension Feature for Among Us on you current text channel.',
             guildOnly: true
         });
     }

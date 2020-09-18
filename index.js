@@ -403,33 +403,21 @@ client.on('messageReactionAdd', async (reaction, user) => {
                                         }
 
                                         // Notify voice channel
-                                        await googleTTS(`${effect ? 'You are muted' : 'You can speak now'}.`).then(async (url) => {
-                                            await this_channel.join().then(async connection => {
-                                                const dispatcher = await connection.play(url);
-                                                dispatcher.on('speaking', speaking => {
-                                                    if (!speaking) {
-                                                        setTimeout(async () => {
-                                                            // Leave the channel
-                                                            this_channel.leave();
+                                        await g_interface.say(`${effect ? 'You are muted' : 'You can speak now'}.`, this_channel);
 
-                                                            // Add reactions
-                                                            let reactions = new Array();
-                                                            reactions.push('🟠');
-                                                            reactions.push('🟢');
-                                                            for (let this_reaction of reactions) {
-                                                                await message.react(this_reaction).catch(error => {
-                                                                    g_interface.on_error({
-                                                                        name: 'run -> .react(this_reaction)',
-                                                                        location: 'amongus.js',
-                                                                        error: error
-                                                                    });
-                                                                });
-                                                            }
-                                                        }, 1000);
-                                                    }
+                                        // Add reactions
+                                        let reactions = new Array();
+                                        reactions.push('🟠');
+                                        reactions.push('🟢');
+                                        for (let this_reaction of reactions) {
+                                            await message.react(this_reaction).catch(error => {
+                                                g_interface.on_error({
+                                                    name: 'run -> .react(this_reaction)',
+                                                    location: 'amongus.js',
+                                                    error: error
                                                 });
                                             });
-                                        });
+                                        }
                                     }
                                 }).catch(error => {
                                     g_interface.on_error({

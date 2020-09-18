@@ -109,72 +109,60 @@ async function updateGuild() {
                                             });
 
                                             // Notify voice channel
-                                            await googleTTS(`Transferring to ${baseline_role.name.substring(g_vrprefix.length)} dedicated channel. Please wait.`).then(async (url) => {
-                                                await this_channel.join().then(async connection => {
-                                                    const dispatcher = await connection.play(url);
-                                                    dispatcher.on('speaking', speaking => {
-                                                        if (!speaking) {
-                                                            setTimeout(async () => {
-                                                                // Leave the channel
-                                                                await this_channel.leave();
+                                            await g_interface.say(`Transferring to ${baseline_role.name.substring(g_vrprefix.length)} dedicated channel. Please wait.`, this_channel);
 
-                                                                // Transfer members
-                                                                for (let this_member of this_channel.members.array()) {
-                                                                    if (this_member.user.id != '749563476707377222') {
-                                                                        await this_member.voice.setChannel(voice_channel).catch(error => {
-                                                                            g_interface.on_error({
-                                                                                name: 'updateGuild -> .setChannel(voice_channel)',
-                                                                                location: 'dynamic_channels.js',
-                                                                                error: error
-                                                                            });
-                                                                        });
-                                                                    }
-                                                                }
-
-                                                                // Add Quarantine Gaming Experience if available
-                                                                switch (baseline_role.name.substring(g_vrprefix.length)) {
-                                                                    case 'Among Us':
-                                                                        let embed = new MessageEmbed()
-                                                                            .setColor('#ffff00')
-                                                                            .setAuthor('Quarantine Gaming Experience')
-                                                                            .setThumbnail('https://yt3.ggpht.com/a/AATXAJw5JZ2TM56V4OVFQnVUrOZ5_E2ULtrusmsTdrQatA=s900-c-k-c0xffffffff-no-rj-mo')
-                                                                            .setTitle('Among Us')
-                                                                            .setDescription('Voice channel audio control extension.')
-                                                                            .addFields(
-                                                                                { name: 'Actions:', value: '🟠 - Mute', inline: true },
-                                                                                { name: '\u200b', value: '🟢 - Unmute', inline: true }
-                                                                            )
-                                                                            .setImage('https://i.pinimg.com/736x/75/69/4f/75694f713b0ab52bf2065ebee0d80f57.jpg')
-                                                                            .setFooter('Mute or unmute all members on your current voice channel.');
-
-                                                                        let reactions = new Array();
-                                                                        reactions.push('🟠');
-                                                                        reactions.push('🟢');
-                                                                        await text_channel.send(embed).then(async this_message => {
-                                                                            await this_message.pin();
-                                                                            for (let this_reaction of reactions) {
-                                                                                await this_message.react(this_reaction).catch(error => {
-                                                                                    g_interface.on_error({
-                                                                                        name: 'run -> .react(this_reaction)',
-                                                                                        location: 'dynamic_channels.js',
-                                                                                        error: error
-                                                                                    });
-                                                                                });
-                                                                            }
-                                                                        }).catch(error => {
-                                                                            g_interface.on_error({
-                                                                                name: 'run -> .say(message)',
-                                                                                location: 'dynamic_channels.js',
-                                                                                error: error
-                                                                            });
-                                                                        });
-                                                                        break;
-                                                                }
-                                                            }, 1000);
-                                                        }
+                                            // Transfer members
+                                            for (let this_member of this_channel.members.array()) {
+                                                if (this_member.user.id != '749563476707377222') {
+                                                    await this_member.voice.setChannel(voice_channel).catch(error => {
+                                                        g_interface.on_error({
+                                                            name: 'updateGuild -> .setChannel(voice_channel)',
+                                                            location: 'dynamic_channels.js',
+                                                            error: error
+                                                        });
                                                     });
-                                                });
-                                            }).catch(console.error);
+                                                }
+                                            }
+
+                                            // Add Quarantine Gaming Experience if available
+                                            switch (baseline_role.name.substring(g_vrprefix.length)) {
+                                                case 'Among Us':
+                                                    let embed = new MessageEmbed()
+                                                        .setColor('#ffff00')
+                                                        .setAuthor('Quarantine Gaming Experience')
+                                                        .setThumbnail('https://yt3.ggpht.com/a/AATXAJw5JZ2TM56V4OVFQnVUrOZ5_E2ULtrusmsTdrQatA=s900-c-k-c0xffffffff-no-rj-mo')
+                                                        .setTitle('Among Us')
+                                                        .setDescription('Voice channel audio control extension.')
+                                                        .addFields(
+                                                            { name: 'Actions:', value: '🟠 - Mute', inline: true },
+                                                            { name: '\u200b', value: '🟢 - Unmute', inline: true }
+                                                        )
+                                                        .setImage('https://i.pinimg.com/736x/75/69/4f/75694f713b0ab52bf2065ebee0d80f57.jpg')
+                                                        .setFooter('Mute or unmute all members on your current voice channel.');
+
+                                                    let reactions = new Array();
+                                                    reactions.push('🟠');
+                                                    reactions.push('🟢');
+                                                    await text_channel.send(embed).then(async this_message => {
+                                                        await this_message.pin();
+                                                        for (let this_reaction of reactions) {
+                                                            await this_message.react(this_reaction).catch(error => {
+                                                                g_interface.on_error({
+                                                                    name: 'run -> .react(this_reaction)',
+                                                                    location: 'dynamic_channels.js',
+                                                                    error: error
+                                                                });
+                                                            });
+                                                        }
+                                                    }).catch(error => {
+                                                        g_interface.on_error({
+                                                            name: 'run -> .say(message)',
+                                                            location: 'dynamic_channels.js',
+                                                            error: error
+                                                        });
+                                                    });
+                                                    break;
+                                            }
                                         }).catch(error => {
                                             g_interface.on_error({
                                                 name: 'updateGuild -> .create(text_channel)',

@@ -1,14 +1,13 @@
 const { Command } = require('discord.js-commando');
-const { MessageEmbed } = require('discord.js');
 const fetch = require('node-fetch');
 
 module.exports = class PushCommand extends Command {
     constructor(client) {
         super(client, {
             name: 'push',
-            group: 'services',
+            group: 'management',
             memberName: 'push',
-            description: 'Accepts manual push commands of free game updates.',
+            description: '[Admin Only] Manually push a free game update link.',
             guildOnly: true,
             userPermissions: ["ADMINISTRATOR"],
             args: [

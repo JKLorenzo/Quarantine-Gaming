@@ -7,7 +7,7 @@ module.exports = class CheckRole extends Command {
             name: 'checkrole',
             group: 'management',
             memberName: 'checkrole',
-            description: 'Gets the permissions of a role in the target channel.',
+            description: '[Admin Only] Gets the permissions of a role in the target channel.',
             guildOnly: true,
             args: [
                 {
