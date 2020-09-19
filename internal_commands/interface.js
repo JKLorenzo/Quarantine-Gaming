@@ -24,7 +24,7 @@ const get = function (name) {
 }
 
 const log = async function (message) {
-    await get('log').send(message).catch(error => {
+    await this_log.send(message).catch(error => {
         on_error({
             name: 'log',
             location: 'interface.js',
@@ -47,7 +47,7 @@ const on_error = async function (details) {
 }
 
 const subscription = async function (message) {
-    await get('subscription').send(message).catch(error => {
+    await this_subscription.send(message).catch(error => {
         on_error({
             name: 'subscription',
             location: 'interface.js',
@@ -75,11 +75,21 @@ const dm = async function (member, message) {
 
 }
 
-function sleep(ms) {
+const sleep = function (ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 let is_saying = false;
+const format_words = [
+    { original: 'VALORANT', formatted: 'Valorant' },
+    { original: 'TEKKEN', formatted: 'Tekken' },
+    { original: 'ROBLOX', formatted: 'Roblox' },
+    { original: 'MONSTER HUNTER: WORLD', formatted: 'Monster Hunter: World' },
+    { original: 'DOOMEternal', formatted: 'Doom Eternal' },
+    { original: 'FINAL FANTASY XIV', formatted: 'Final Fantasy 14' },
+    { original: 'Total War: WARHAMMER II', formatted: 'Total War: War Hammer 2' },
+    { original: 'A Total War Saga: TROY', formatted: 'A Total War Saga: Troy' }
+];
 const say = async function (message, channel) {
     while (is_saying) {
         await sleep(500);
@@ -88,8 +98,13 @@ const say = async function (message, channel) {
 
     return new Promise(async (resolve, reject) => {
         try {
-            await googleTTS(message).then(async (url) => {
-                await channel.join().then(async connection => {
+            // Format words
+            for (let word of format_words) {
+                message = message.split(word.original).join(word.formatted);
+            }
+            // Begin TTS
+            await channel.join().then(async connection => {
+                await googleTTS(message).then(async (url) => {
                     const dispatcher = await connection.play(url);
                     dispatcher.on('speaking', async speaking => {
                         if (!speaking) {
@@ -116,5 +131,6 @@ module.exports = {
     on_error,
     subscription,
     dm,
-    say
+    say,
+    sleep
 }

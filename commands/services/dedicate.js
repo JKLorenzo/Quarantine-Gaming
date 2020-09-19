@@ -24,6 +24,16 @@ module.exports = class DedicateCommand extends Command {
     async run(message, { name }) {
         // Get current voice channel
         let this_channel = message.member.voice.channel;
+
+        // Notify voice channel
+        await g_interface.say(`Transferring to ${name} dedicated channel. Please wait.`, this_channel).catch(error => {
+            g_interface.on_error({
+                name: 'updateChannel -> .say()',
+                location: 'dedicate.js',
+                error: error
+            });
+        });
+
         // Create voice channel
         await g_interface.get('guild').channels.create(name, {
             type: 'voice',
@@ -72,12 +82,10 @@ module.exports = class DedicateCommand extends Command {
                     await text_channel.setTopic(`${voice_channel.id} ${text_role.id}`).catch(error => {
                         g_interface.on_error({
                             name: 'updateGuild -> .setTopic(text_channel)',
-                            location: 'dynamic_channels.js',
+                            location: 'dedicate.js',
                             error: error
                         });
                     });
-
-
 
                     // Set info
                     let embed = new MessageEmbed();
@@ -97,13 +105,10 @@ module.exports = class DedicateCommand extends Command {
                     }).catch(error => {
                         g_interface.on_error({
                             name: 'updateChannel -> .send(embed)',
-                            location: 'dynamic_channels.js',
+                            location: 'dedicate.js',
                             error: error
                         });
                     });
-
-                    // Notify voice channel
-                    await g_interface.say(`Transferring to ${name} dedicated channel. Please wait.`, this_channel);
 
                     // Transfer members
                     for (let this_member of this_channel.members.array()) {
@@ -111,7 +116,7 @@ module.exports = class DedicateCommand extends Command {
                             await this_member.voice.setChannel(voice_channel).catch(error => {
                                 g_interface.on_error({
                                     name: 'updateGuild -> .setChannel(voice_channel)',
-                                    location: 'dynamic_channels.js',
+                                    location: 'dedicate.js',
                                     error: error
                                 });
                             });
@@ -143,7 +148,7 @@ module.exports = class DedicateCommand extends Command {
                                     await this_message.react(this_reaction).catch(error => {
                                         g_interface.on_error({
                                             name: 'run -> .react(this_reaction)',
-                                            location: 'dynamic_channels.js',
+                                            location: 'dedicate.js',
                                             error: error
                                         });
                                     });
@@ -151,7 +156,7 @@ module.exports = class DedicateCommand extends Command {
                             }).catch(error => {
                                 g_interface.on_error({
                                     name: 'run -> .say(message)',
-                                    location: 'dynamic_channels.js',
+                                    location: 'dedicate.js',
                                     error: error
                                 });
                             });
@@ -160,21 +165,21 @@ module.exports = class DedicateCommand extends Command {
                 }).catch(error => {
                     g_interface.on_error({
                         name: 'updateGuild -> .create(text_channel)',
-                        location: 'dynamic_channels.js',
+                        location: 'dedicate.js',
                         error: error
                     });
                 });
             }).catch(error => {
                 g_interface.on_error({
                     name: 'updateGuild -> .create(text_role)',
-                    location: 'dynamic_channels.js',
+                    location: 'dedicate.js',
                     error: error
                 });
             });
         }).catch(error => {
             g_interface.on_error({
                 name: 'updateGuild -> .create(voice_channel)',
-                location: 'dynamic_channels.js',
+                location: 'dedicate.js',
                 error: error
             });
         });

@@ -25,7 +25,7 @@ async function updateGuild() {
                                     diff_acitivities++;
                                 }
                             }
-                            if (same_acitivities > 1 && same_acitivities > diff_acitivities && this_role.name.substring(g_vrprefix.length) != this_channel.name) {
+                            if (same_acitivities > 1 && same_acitivities > diff_acitivities && !this_role.name.substring(g_vrprefix.length).startsWith(this_channel.name)) {
                                 baseline_role = this_role;
                                 // Create voice channel
                                 await g_interface.get('guild').channels.create(baseline_role.name.substring(g_vrprefix.length), {
@@ -109,7 +109,13 @@ async function updateGuild() {
                                             });
 
                                             // Notify voice channel
-                                            await g_interface.say(`Transferring to ${baseline_role.name.substring(g_vrprefix.length)} dedicated channel. Please wait.`, this_channel);
+                                            await g_interface.say(`Transferring to ${baseline_role.name.substring(g_vrprefix.length)} dedicated channel. Please wait.`, this_channel).catch(error => {
+                                                g_interface.on_error({
+                                                    name: 'updateGuild -> .say()',
+                                                    location: 'dynamic_channels.js',
+                                                    error: error
+                                                });
+                                            });
 
                                             // Transfer members
                                             for (let this_member of this_channel.members.array()) {

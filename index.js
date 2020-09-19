@@ -171,7 +171,7 @@ client.on('guildMemberAdd', async member => {
 
             let embed = new MessageEmbed
             embed.setAuthor('Quarantine Gaming Member Approval');
-            embed.setTitle(this_member.displayName);
+            embed.setTitle('Member Details:');
             embed.setThumbnail(this_member.user.displayAvatarURL());
             embed.addFields([
                 { name: 'User:', value: this_member },
@@ -179,8 +179,8 @@ client.on('guildMemberAdd', async member => {
                 { name: 'Account Created:', value: created_on },
                 { name: 'Moderation:', value: '✅ - Approve     ❌ - Kick     ⛔ - Ban' }
             ]);
-            embed.setFooter(this_member.user.id);
-            embed.setTimestamp(new Date());
+            embed.setFooter(`User ID: ${this_member.user.id}`);
+            embed.setTimestamp();
             embed.setColor('#25c059');
             await g_interface.get('interface').send(embed).then(async this_message => {
                 await this_message.react('✅');
@@ -268,7 +268,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
                     }
                     break;
                 case 'Quarantine Gaming Member Approval':
-                    this_member = g_interface.get('guild').members.cache.find(member => member.user.id == this_message.embeds[0].footer.text);
+                    this_member = g_interface.get('guild').members.cache.find(member => member.user.id == this_message.embeds[0].footer.text.substring(9));
                     if (this_member) {
                         switch (reaction.emoji.name) {
                             case '✅':
@@ -280,7 +280,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
                                                 .addFields(
                                                     { name: 'Action Taken:', value: 'Approved ✅' },
                                                     { name: 'Moderator:', value: user },
-                                                );
+                                                ).setTimestamp();
                                             await message.edit(final).catch(error => {
                                                 g_interface.on_error({
                                                     name: 'messageReactionAdd -> .edit(final) [case approve]',
@@ -312,7 +312,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
                                             .addFields(
                                                 { name: 'Action Taken:', value: 'Kicked ❌' },
                                                 { name: 'Moderator:', value: user },
-                                            );
+                                            ).setTimestamp();
                                         await message.edit(final).catch(error => {
                                             g_interface.on_error({
                                                 name: 'messageReactionAdd -> .edit(final) [case kick]',
@@ -343,7 +343,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
                                             .addFields(
                                                 { name: 'Action Taken:', value: 'Banned ⛔' },
                                                 { name: 'Moderator:', value: user },
-                                            );
+                                            ).setTimestamp();
                                         await message.edit(final).catch(error => {
                                             g_interface.on_error({
                                                 name: 'messageReactionAdd -> .edit(final) [case ban]',
@@ -368,7 +368,27 @@ client.on('messageReactionAdd', async (reaction, user) => {
                                 break;
                         }
                     } else {
-                        g_interface.get('interface').send(`I can't find this user. A manual action is required.`);
+                        await this_message.reactions.removeAll().then(async message => {
+                            let final = message.embeds[0]
+                                .spliceFields(3, 1)
+                                .addFields(
+                                    { name: 'Action Taken:', value: 'None. User not found ⚠' },
+                                    { name: 'Moderator:', value: user },
+                                ).setTimestamp();
+                            await message.edit(final).catch(error => {
+                                g_interface.on_error({
+                                    name: 'messageReactionAdd -> .edit(final) [case none]',
+                                    location: 'index.js',
+                                    error: error
+                                });
+                            });
+                        }).catch(error => {
+                            g_interface.on_error({
+                                name: 'messageReactionAdd -> .removeAll(reaction) [case none]',
+                                location: 'index.js',
+                                error: error
+                            });
+                        });
                     }
                     break;
                 case 'Quarantine Gaming Experience':
@@ -385,6 +405,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
                                         for (let this_entry of this_channel.members) {
                                             channel_members.push(this_entry[1]);
                                         }
+
                                         // Get reaction effect
                                         let effect = false;
                                         switch (reaction.emoji.name) {
@@ -395,15 +416,31 @@ client.on('messageReactionAdd', async (reaction, user) => {
                                                 effect = false;
                                                 break;
                                         }
+
+                                        // Notify voice channel
+                                        await g_interface.say(effect ? 'Muting in 5 seconds' : 'Unmuting', this_channel).catch(error => {
+                                            g_interface.on_error({
+                                                name: 'messageReactionAdd -> .say() [among us]',
+                                                location: 'index.js',
+                                                error: error
+                                            });
+                                        });
+
+                                        // Sleep
+                                        if (effect) await g_interface.sleep(5000);
+
                                         // Apply reaction effect
                                         for (let this_channel_member of channel_members) {
                                             if (!this_channel_member.user.bot) {
-                                                await this_channel_member.voice.setMute(effect).catch(console.error);
+                                                await this_channel_member.voice.setMute(effect).catch(error => {
+                                                    g_interface.on_error({
+                                                        name: `messageReactionAdd -> .setMute(${this_channel_member}) [among us]`,
+                                                        location: 'index.js',
+                                                        error: error
+                                                    });
+                                                });
                                             }
                                         }
-
-                                        // Notify voice channel
-                                        await g_interface.say(`${effect ? 'You are muted' : 'You can speak now'}.`, this_channel);
 
                                         // Add reactions
                                         let reactions = new Array();
@@ -412,8 +449,8 @@ client.on('messageReactionAdd', async (reaction, user) => {
                                         for (let this_reaction of reactions) {
                                             await message.react(this_reaction).catch(error => {
                                                 g_interface.on_error({
-                                                    name: 'run -> .react(this_reaction)',
-                                                    location: 'amongus.js',
+                                                    name: 'messageReactionAdd -> .react(this_reaction) [among us]',
+                                                    location: 'index.js',
                                                     error: error
                                                 });
                                             });
