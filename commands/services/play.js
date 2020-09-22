@@ -32,7 +32,6 @@ module.exports = class PlayCommand extends Command {
     }
 
     async run(message, { role, count }) {
-        message.delete().catch(console.error);
         let role_id = `${role}`.substring(3, `${role}`.length - 1);
         let this_role = g_interface.get('guild').roles.cache.find(role => role.id == role_id);
         let embed = new MessageEmbed();
@@ -51,7 +50,10 @@ module.exports = class PlayCommand extends Command {
         embed.setColor('#7b00ff')
 
         let emoji = g_interface.get('guild').emojis.cache.find(emoji => emoji.name == this_role.name.split(' ').join('').split(':').join('').split('-').join(''));
-        await message.say({ content: this_role, embed: embed }).then(async message => {
+        if (emoji) {
+            embed.setThumbnail(emoji.url);
+        }
+        await message.say(embed).then(async message => {
             if (emoji) {
                 await message.react(emoji).catch(error => {
                     g_interface.on_error({
