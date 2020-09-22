@@ -19,7 +19,6 @@ const queue = function (data) {
 async function beginProcess() {
     is_processing = true;
     while (coordinator_queue.length > 0) {
-        console.log(`Processing`);
         let this_data = coordinator_queue.shift();
         let status = this_data.status;
         let message = this_data.message;
@@ -32,7 +31,7 @@ async function beginProcess() {
             case 1:
                 let inserted = false;
                 for (let field of embed.fields) {
-                    if (field.value) {
+                    if (field.value != '\u200b') {
                         players.push(field.value);
                         if (field.value.indexOf(member.id) !== -1) {
                             inserted = true;
@@ -43,30 +42,30 @@ async function beginProcess() {
                 embed = embed.spliceFields(0, max);
                 if (embed.description.indexOf('is looking for') !== -1) {
                     for (let i = 1; i <= max; i++) {
-                        if (players[i - 1]) {
-                            embed.addField(`Player ${i}`, players[i - 1]);
+                        if (i <= players.length) {
+                            embed.addField(`Player ${i}:`, players[i - 1]);
                         } else {
                             if (!inserted) {
-                                embed.addField(`Player ${i}`, member);
+                                embed.addField(`Player ${i}:`, member.toString());
                                 inserted = true;
                             } else {
-                                embed.addField(`Player ${i}`, '\u200b');
+                                embed.addField(`Player ${i}:`, '\u200b');
                             }
                         }
                     }
                 } else {
                     let i = 1;
                     for (i = 1; i <= players.length; i++) {
-                        embed.addField(`Player ${i}`, players[i - 1]);
+                        embed.addField(`Player ${i}:`, players[i - 1]);
                     }
                     if (!inserted) {
-                        embed.addField(`Player ${i}`, member);
+                        embed.addField(`Player ${i}:`, member.toString());
                     }
                 }
                 break;
             case 0:
                 for (let field of embed.fields) {
-                    if (field.value && !(field.value.indexOf(member.id) !== -1)) {
+                    if (field.value && field.value != '\u200b' && !(field.value.indexOf(member.id) !== -1)) {
                         players.push(field.value);
                     }
                 }
@@ -74,15 +73,15 @@ async function beginProcess() {
                 embed = embed.spliceFields(0, max);
                 if (embed.description.indexOf('is looking for') !== -1) {
                     for (let i = 1; i <= max; i++) {
-                        if (players[i - 1]) {
-                            embed.addField(`Player ${i}`, players[i - 1]);
+                        if (i <= players.length) {
+                            embed.addField(`Player ${i}:`, players[i - 1]);
                         } else {
-                            embed.addField(`Player ${i}`, '\u200b');
+                            embed.addField(`Player ${i}:`, '\u200b');
                         }
                     }
                 } else {
                     for (let i = 1; i <= players.length; i++) {
-                        embed.addField(`Player ${i}`, players[i - 1]);
+                        embed.addField(`Player ${i}:`, players[i - 1]);
                     }
                 }
                 break;
@@ -94,7 +93,6 @@ async function beginProcess() {
                 error: error
             });
         });
-        console.log(`Continue`);
     }
     is_processing = false;
 }
