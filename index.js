@@ -7,6 +7,7 @@ const db = require(path.join(__dirname, 'internal_commands', 'database.js'));
 const interface = require(path.join(__dirname, 'internal_commands', 'interface.js'));
 const feed = require(path.join(__dirname, 'internal_commands', 'feed.js'));
 const fgu = require(path.join(__dirname, 'internal_commands', 'fgu.js'));
+const coordinator = require(path.join(__dirname, 'internal_commands', 'coordinator.js'));
 const dynamic_roles = require(path.join(__dirname, 'internal_commands', 'dynamic_roles.js'));
 const dynamic_channels = require(path.join(__dirname, 'internal_commands', 'dynamic_channels.js'));
 
@@ -51,13 +52,14 @@ client.once('ready', () => {
     console.log('-------------{  Startup  }-------------');
     interface.init(client);
 
-    let embed = new MessageEmbed();
-    embed.setColor('#ffff00');
-    embed.setAuthor('Quarantine Gaming', client.user.displayAvatarURL());
-    embed.setTitle('Startup Initiated');
-    embed.addField('Reason', process.env.STARTUP_REASON);
-    interface.log(embed);
-
+    if (process.env.STARTUP_REASON) {
+        let embed = new MessageEmbed();
+        embed.setColor('#ffff00');
+        embed.setAuthor('Quarantine Gaming', client.user.displayAvatarURL());
+        embed.setTitle('Startup Initiated');
+        embed.addField('Reason', process.env.STARTUP_REASON);
+        interface.log(embed);
+    }
 
     db.init(client);
     fgu.init(client);
@@ -468,6 +470,16 @@ client.on('messageReactionAdd', async (reaction, user) => {
                         updating = false;
                     }
                     break;
+                case 'Quarantine Gaming: Game Coordinator':
+                    let this_reaction = this_message.reactions.cache.find(reaction => reaction.me)
+                    if (reaction.emoji.name == this_reaction.emoji.name && !(this_message.embeds[0].description.indexOf(user.id) !== -1)) {
+                        coordinator.queue({
+                            status: 1,
+                            message: this_message,
+                            member: g_interface.get('guild').members.cache.get(user.id)
+                        });
+                    }
+                    break;
             }
         }
     } catch (error) {
@@ -540,6 +552,16 @@ client.on('messageReactionRemove', async (reaction, user) => {
                                 location: 'index.js',
                                 error: error
                             });
+                        });
+                    }
+                    break;
+                case 'Quarantine Gaming: Game Coordinator':
+                    let this_reaction = this_message.reactions.cache.find(reaction => reaction.me)
+                    if (reaction.emoji.name == this_reaction.emoji.name && !(this_message.embeds[0].description.indexOf(user.id) !== -1)) {
+                        coordinator.queue({
+                            status: 0,
+                            message: this_message,
+                            member: g_interface.get('guild').members.cache.get(user.id)
                         });
                     }
                     break;
