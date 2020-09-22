@@ -17,15 +17,20 @@ module.exports = class PlayCommand extends Command {
                     validate: role => {
                         let role_id = `${role}`.substring(3, `${role}`.length - 1);
                         let this_role = g_interface.get('guild').roles.cache.find(role => role.id == role_id);
-                        return this_role.hexColor == '#00ffff'
+                        if (this_role) {
+                            return this_role.hexColor == '#00ffff'
+                        } else {
+                            return false;
+                        }
+
                     }
                 },
                 {
                     key: 'count',
-                    prompt: "[Optional] Enter the number of players you're looking for. (Inlcuding you. Must be more than 1.)",
+                    prompt: "[Optional] Enter the number of players you're looking for, including yourself. (Range 2 - 25)",
                     type: 'integer',
                     default: 16856654,
-                    validate: count => count > 1
+                    validate: count => (count > 1 && count < 26) || count == 16856654
                 }
             ]
         });
@@ -39,13 +44,13 @@ module.exports = class PlayCommand extends Command {
         embed.setAuthor('Quarantine Gaming: Game Coordinator');
         embed.setTitle(this_role.name);
         embed.addField(`Player 1:`, this_member.toString());
-        if (count > 1 && count != 16856654) {
+        if (count == 16856654) {
+            embed.setDescription(`${this_member.displayName} wants to play ${this_role}.`);
+        } else {
             embed.setDescription(`${this_member.displayName} is looking for **${count - 1}** other ${this_role} players.`);
             for (let i = 2; i <= count; i++) {
                 embed.addField(`Player ${i}:`, '\u200B');
             }
-        } else {
-            embed.setDescription(`${this_member.displayName} wants to play ${this_role}.`);
         }
         embed.setFooter('Secure your slot by reacting below.');
         embed.setColor('#7b00ff');

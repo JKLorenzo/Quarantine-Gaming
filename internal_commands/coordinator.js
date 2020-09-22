@@ -27,12 +27,16 @@ async function beginProcess() {
 
         let players = [];
         let max = embed.fields.length;
+        let cur = 0;
+        let has_caps = false;
+
         switch (status) {
             case 1:
                 let inserted = false;
                 for (let field of embed.fields) {
                     if (field.value != '\u200b') {
                         players.push(field.value);
+                        cur++;
                         if (field.value.indexOf(member.id) !== -1) {
                             inserted = true;
                         }
@@ -41,12 +45,14 @@ async function beginProcess() {
 
                 embed = embed.spliceFields(0, max);
                 if (embed.description.indexOf('is looking for') !== -1) {
+                    has_caps = true;
                     for (let i = 1; i <= max; i++) {
                         if (i <= players.length) {
                             embed.addField(`Player ${i}:`, players[i - 1]);
                         } else {
                             if (!inserted) {
                                 embed.addField(`Player ${i}:`, member.toString());
+                                cur++;
                                 inserted = true;
                             } else {
                                 embed.addField(`Player ${i}:`, '\u200b');
@@ -72,6 +78,7 @@ async function beginProcess() {
 
                 embed = embed.spliceFields(0, max);
                 if (embed.description.indexOf('is looking for') !== -1) {
+                    has_caps = true;
                     for (let i = 1; i <= max; i++) {
                         if (i <= players.length) {
                             embed.addField(`Player ${i}:`, players[i - 1]);
@@ -86,7 +93,11 @@ async function beginProcess() {
                 }
                 break;
         }
-        await message.edit({ content: message.content, embed: embed }).catch(error => {
+        await message.edit(embed).then(message => {
+            if (status && has_caps && max == cur) {
+                await message.reactions.removeAll().catch(console.error);
+            }
+        }).catch(error => {
             g_interface.on_error({
                 name: 'beginProcess -> .edit()',
                 location: 'coordinator.js',
