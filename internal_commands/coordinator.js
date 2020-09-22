@@ -93,7 +93,7 @@ async function beginProcess() {
                 }
                 break;
         }
-        await message.edit(embed).then(message => {
+        await message.edit(embed).then(async message => {
             if (status && has_caps && max == cur) {
                 await message.reactions.removeAll().catch(console.error);
             }
