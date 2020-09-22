@@ -92,7 +92,7 @@ async function beginProcess() {
                 }
                 break;
         }
-        if (status && has_caps && max == cur) {
+        if (status && has_caps && max == players.length) {
             embed.setFooter('Closed. This bracket is now full.');
         }
         await message.edit(embed).then(async message => {
@@ -101,7 +101,9 @@ async function beginProcess() {
                 let inviter_id = players[0].substring(2, players[0].length - 1);
                 let inviter = g_interface.get('guild').members.cache.find(member => member.id == inviter_id);
                 if (inviter) {
-                    g_interface.dm(inviter, `Your ${embed.title} bracket is now full.\n\n**Members:**\n${players.splice(1).join('\n')}`);
+                    embed.setDescription('Your team members are listed below.');
+                    embed.setFooter('Game On!');
+                    g_interface.dm(inviter, { content: `Your ${embed.title} bracket is now full.`, embed: embed });
                 }
             }
         }).catch(error => {

@@ -27,10 +27,10 @@ module.exports = class PlayCommand extends Command {
                 },
                 {
                     key: 'count',
-                    prompt: "[Optional] Enter the number of players you're looking for, including yourself. (Range 2 - 25)",
+                    prompt: "[Optional] Enter the number of players you're looking for, including yourself. (Range: 2 - 25; Default: 0)",
                     type: 'integer',
-                    default: 16856654,
-                    validate: count => (count > 1 && count < 26) || count == 16856654
+                    default: 0,
+                    validate: count => (count > 1 && count < 26) || count == 0
                 }
             ]
         });
@@ -44,7 +44,7 @@ module.exports = class PlayCommand extends Command {
         embed.setAuthor('Quarantine Gaming: Game Coordinator');
         embed.setTitle(this_role.name);
         embed.addField(`Player 1:`, this_member.toString());
-        if (count == 16856654) {
+        if (count == 0) {
             embed.setDescription(`${this_member.displayName} wants to play ${this_role}.`);
         } else {
             embed.setDescription(`${this_member.displayName} is looking for **${count - 1}** other ${this_role} player${count == 2 ? '' : 's'}.`);
@@ -56,8 +56,11 @@ module.exports = class PlayCommand extends Command {
         embed.setColor('#7b00ff');
 
         let emoji = g_interface.get('guild').emojis.cache.find(emoji => emoji.name == this_role.name.split(' ').join('').split(':').join('').split('-').join(''));
+        let qg_emoji = g_interface.get('guild').emojis.cache.find(emoji => emoji.name == 'quarantinegaming');
         if (emoji) {
             embed.setThumbnail(emoji.url);
+        } else {
+            embed.setThumbnail(qg_emoji.url);
         }
         await message.say(embed).then(async message => {
             if (emoji) {
@@ -69,7 +72,7 @@ module.exports = class PlayCommand extends Command {
                     });
                 });
             } else {
-                await message.react('Ⓜ').catch(error => {
+                await message.react(qg_emoji).catch(error => {
                     g_interface.on_error({
                         name: 'run -> .react(default)',
                         location: 'play.js',
