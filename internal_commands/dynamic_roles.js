@@ -86,7 +86,6 @@ async function updateMember() {
                                     data: {
                                         name: this_vr_name,
                                         color: '0x7b00ff',
-                                        mentionable: true,
                                         position: play_role.position,
                                         hoist: true
                                     },
@@ -174,15 +173,12 @@ const init = async function () {
                             let this_mentionable_role = g_interface.get('guild').roles.cache.find(role => role.name == this_game);
                             // Check if this role exists
                             if (!this_mentionable_role) {
-                                // Get reference role
-                                let play_role = g_interface.get('guild').roles.cache.find(role => role.name == '<PLAYROLES>');
                                 // Create role on this guild
                                 await g_interface.get('guild').roles.create({
                                     data: {
                                         name: this_game,
                                         color: '0x00ffff',
                                         mentionable: true,
-                                        position: play_role.position,
                                         hoist: true
                                     },
                                     reason: `A new game is played by (${this_member.user.tag}).`
@@ -215,7 +211,6 @@ const init = async function () {
                                 data: {
                                     name: this_vr_name,
                                     color: '0x7b00ff',
-                                    mentionable: true,
                                     position: play_role.position,
                                     hoist: true
                                 },
