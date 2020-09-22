@@ -70,7 +70,7 @@ async function beginProcess() {
                 break;
             case 0:
                 for (let field of embed.fields) {
-                    if (field.value && field.value != '\u200b' && !(field.value.indexOf(member.id) !== -1)) {
+                    if (field.value && field.value != '\u200b' && (!(field.value.indexOf(member.id) !== -1) || embed.description.indexOf(member.displayName) !== -1)) {
                         players.push(field.value);
                     }
                 }
