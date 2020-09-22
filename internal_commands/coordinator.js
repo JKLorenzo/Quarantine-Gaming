@@ -8,7 +8,6 @@ const init = function (this_client) {
 }
 
 const queue = function (data) {
-    console.log(data);
     coordinator_queue.push(data);
 
     if (!is_processing) {
@@ -47,12 +46,12 @@ async function beginProcess() {
                 if (embed.description.indexOf('is looking for') !== -1) {
                     has_caps = true;
                     for (let i = 1; i <= max; i++) {
-                        if (i <= players.length) {
+                        if (i <= cur) {
                             embed.addField(`Player ${i}:`, players[i - 1]);
                         } else {
                             if (!inserted) {
                                 embed.addField(`Player ${i}:`, member.toString());
-                                cur++;
+                                players.push(member.toString());
                                 inserted = true;
                             } else {
                                 embed.addField(`Player ${i}:`, '\u200b');
@@ -61,7 +60,7 @@ async function beginProcess() {
                     }
                 } else {
                     let i = 1;
-                    for (i = 1; i <= players.length; i++) {
+                    for (i = 1; i <= cur; i++) {
                         embed.addField(`Player ${i}:`, players[i - 1]);
                     }
                     if (!inserted) {
@@ -93,9 +92,17 @@ async function beginProcess() {
                 }
                 break;
         }
+        if (status && has_caps && max == cur) {
+            embed.setFooter('Closed. This bracket is now full.');
+        }
         await message.edit(embed).then(async message => {
-            if (status && has_caps && max == cur) {
+            if (status && has_caps && max == players.length) {
                 await message.reactions.removeAll().catch(console.error);
+                let inviter_id = players[0].substring(2, players[0].length - 1);
+                let inviter = g_interface.get('guild').members.cache.find(member => member.id == inviter_id);
+                if (inviter) {
+                    g_interface.dm(inviter, `Your ${embed.title} bracket is now full.\n\n**Members:**\n${players.splice(1).join('\n')}`);
+                }
             }
         }).catch(error => {
             g_interface.on_error({

@@ -47,7 +47,7 @@ module.exports = class PlayCommand extends Command {
         if (count == 16856654) {
             embed.setDescription(`${this_member.displayName} wants to play ${this_role}.`);
         } else {
-            embed.setDescription(`${this_member.displayName} is looking for **${count - 1}** other ${this_role} players.`);
+            embed.setDescription(`${this_member.displayName} is looking for **${count - 1}** other ${this_role} player${count == 2 ? '' : 's'}.`);
             for (let i = 2; i <= count; i++) {
                 embed.addField(`Player ${i}:`, '\u200B');
             }
