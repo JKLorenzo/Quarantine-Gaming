@@ -50,7 +50,7 @@ module.exports = class PlayCommand extends Command {
         embed.setFooter('Secure your slot by reacting below.')
         embed.setColor('#7b00ff')
 
-        let emoji = g_interface.get('guild').emojis.cache.find(emoji => emoji.name == this_role.name.split(' ').join('').split(':').join(''));
+        let emoji = g_interface.get('guild').emojis.cache.find(emoji => emoji.name == this_role.name.split(' ').join('').split(':').join('').split('-').join(''));
         await message.say({ content: this_role, embed: embed }).then(async message => {
             if (emoji) {
                 await message.react(emoji).catch(error => {
