@@ -37,6 +37,7 @@ module.exports = class PlayCommand extends Command {
     }
 
     async run(message, { role, count }) {
+        message.delete({ timeout: 300000, reason: 'Timed Out' }).catch(console.error);
         let role_id = `${role}`.substring(3, `${role}`.length - 1);
         let this_role = g_interface.get('guild').roles.cache.find(role => role.id == role_id);
         let this_member = g_interface.get('guild').member(message.author);
