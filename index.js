@@ -239,7 +239,7 @@ client.on('guildMemberAdd', async member => {
             });
             let dm = new Array();
             dm.push(`Hi ${member.user.username}, and welcome to **Quarantine Gaming**!`);
-            dm.push(`Please wait while our staff is processing your membership approval.`);
+            dm.push('Please wait while our staff is processing your membership approval. We hope to you soon!');
             g_interface.dm(member, dm.join('\n'));
         }
     }
