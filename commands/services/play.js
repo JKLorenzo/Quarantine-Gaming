@@ -63,6 +63,7 @@ module.exports = class PlayCommand extends Command {
             embed.setThumbnail(qg_emoji.url);
         }
         await message.say(embed).then(async message => {
+            message.delete({ timeout: 600000, reason: 'Timed Out' }).catch(console.error);
             if (emoji) {
                 await message.react(emoji).catch(error => {
                     g_interface.on_error({
