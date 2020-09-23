@@ -52,7 +52,7 @@ module.exports = class PlayCommand extends Command {
                 embed.addField(`Player ${i}:`, '\u200B');
             }
         }
-        embed.setFooter('Secure your slot by reacting below.');
+        embed.setFooter(`Join this bracket by reacting below.`);
         embed.setColor('#7b00ff');
 
         let emoji = g_interface.get('guild').emojis.cache.find(emoji => emoji.name == this_role.name.split(' ').join('').split(':').join('').split('-').join(''));

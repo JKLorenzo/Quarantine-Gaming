@@ -1,5 +1,3 @@
-const { MessageEmbed } = require('discord.js');
-
 let client, coordinator_queue = new Array(), is_processing = false;
 
 // Initialize module
