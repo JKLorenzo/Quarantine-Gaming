@@ -72,10 +72,9 @@ client.once('ready', () => {
 
 client.on('message', async message => {
     // Coordinator
-    let words = message.content.split(' ');
-    let first_word = words.length > 0 ? words[0] : '';
-    if (first_word && first_word.startsWith('<@&') && first_word.endsWith('>')) {
-        let role_id = first_word.slice(3, first_word.length - 1);
+    let this_message = message.content.split(' ').join('');
+    if (this_message && this_message.startsWith('<@&') && this_message.endsWith('>')) {
+        let role_id = this_message.slice(3, this_message.length - 1);
         let this_role = g_interface.get('guild').roles.cache.find(role => role.id == role_id);
         if (this_role && this_role.hexColor == '#00ffff') {
             let this_member = g_interface.get('guild').member(message.author);
@@ -223,17 +222,15 @@ client.on('guildMemberAdd', async member => {
             let created_on = diffDays + " days " + diffHrs + " hours " + diffMins + " minutes";
 
             let embed = new MessageEmbed
-            embed.setAuthor('Quarantine Gaming Member Approval');
-            embed.setTitle('Member Details:');
+            embed.setAuthor('Quarantine Gaming: Member Approval');
+            embed.setTitle('Member Details');
             embed.setThumbnail(this_member.user.displayAvatarURL());
             embed.addFields([
                 { name: 'User:', value: this_member },
-                { name: 'Tagname', value: this_member.user.tag },
+                { name: 'ID:', value: this_member.id },
                 { name: 'Account Created:', value: created_on },
                 { name: 'Moderation:', value: '✅ - Approve     ❌ - Kick     ⛔ - Ban' }
             ]);
-            embed.setFooter(`User ID: ${this_member.user.id}`);
-            embed.setTimestamp();
             embed.setColor('#25c059');
             await g_interface.get('interface').send(embed).then(async this_message => {
                 await this_message.react('✅');
@@ -242,7 +239,7 @@ client.on('guildMemberAdd', async member => {
             });
             let dm = new Array();
             dm.push(`Hi ${member.user.username}, and welcome to **Quarantine Gaming**!`);
-            dm.push('Please wait while our staff is processing your membership approval. See you soon!');
+            dm.push(`Please wait while our staff is processing your membership approval.`);
             g_interface.dm(member, dm.join('\n'));
         }
     }
@@ -273,7 +270,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
         let this_member;
         if (this_message.author.id == client.user.id) {
             switch (this_message.embeds[0].author.name) {
-                case 'Quarantine Gaming NSFW Content':
+                case 'Quarantine Gaming: NSFW Content':
                     switch (reaction.emoji.name) {
                         case '🔴':
                             this_member = g_interface.get('guild').members.cache.get(user.id);
@@ -290,7 +287,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
                             break;
                     }
                     break;
-                case 'Quarantine Gaming Role Notification Subscription':
+                case 'Quarantine Gaming: Free Game Updates':
                     this_member = g_interface.get('guild').members.cache.get(user.id);
                     let this_role;
                     switch (reaction.emoji.name) {
@@ -320,8 +317,8 @@ client.on('messageReactionAdd', async (reaction, user) => {
                         });
                     }
                     break;
-                case 'Quarantine Gaming Member Approval':
-                    this_member = g_interface.get('guild').members.cache.find(member => member.user.id == this_message.embeds[0].footer.text.substring(9));
+                case 'Quarantine Gaming: Member Approval':
+                    this_member = g_interface.get('guild').members.cache.find(member => member.user.id == this_message.embeds[0].fields[1].value);
                     if (this_member) {
                         switch (reaction.emoji.name) {
                             case '✅':
@@ -341,6 +338,12 @@ client.on('messageReactionAdd', async (reaction, user) => {
                                                     error: error
                                                 });
                                             });
+                                            let dm_msg = [
+                                                `Hooraaay! 🥳 Your membership request has been approved! You will now have access to all features of this server!`,
+                                                `Do *!help* on our #general🔗 text channel to know more about these features.`,
+                                                `Thank you for joining **Quarantine Gaming**! Game On!`
+                                            ]
+                                            g_interface.dm(this_member, dm_msg.join('\n'));
                                         }).catch(error => {
                                             g_interface.on_error({
                                                 name: 'messageReactionAdd -> .removeAll(reactions) [case approve]',
@@ -444,7 +447,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
                         });
                     }
                     break;
-                case 'Quarantine Gaming Experience':
+                case 'Quarantine Gaming: Experience':
                     if (!updating) {
                         updating = true;
                         switch (this_message.embeds[0].title) {
@@ -559,7 +562,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
         let this_member;
         if (this_message.author.id == client.user.id) {
             switch (this_message.embeds[0].author.name) {
-                case 'Quarantine Gaming NSFW Content':
+                case 'Quarantine Gaming: NSFW Content':
                     switch (reaction.emoji.name) {
                         case '🔴':
                             this_member = g_interface.get('guild').members.cache.get(user.id);
@@ -576,7 +579,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
                             break;
                     }
                     break;
-                case 'Quarantine Gaming Role Notification Subscription':
+                case 'Quarantine Gaming: Free Game Updates':
                     this_member = g_interface.get('guild').members.cache.get(user.id);
                     let this_role;
                     switch (reaction.emoji.name) {

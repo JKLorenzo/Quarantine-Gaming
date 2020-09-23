@@ -25,7 +25,7 @@ module.exports = class Edit extends Command {
     }
 
     async run(message, { messageID, content }) {
-        message.delete();
+        message.delete({ timeout: 5000 }).catch(console.error)
         await message.channel.messages.fetch({ limit: 50 }).then(async messages => {
             let this_messages = new Array();
             messages.map(msg => {

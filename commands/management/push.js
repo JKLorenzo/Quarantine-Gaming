@@ -21,7 +21,7 @@ module.exports = class PushCommand extends Command {
     }
 
     async run(message, { link }) {
-        message.delete();
+        message.delete({ timeout: 5000 }).catch(console.error)
         try {
             await fetch('https://www.reddit.com/r/FreeGameFindings/new/.json?limit=25&sort=new').then(data => data.json()).then(data => {
                 for (let child of data.data.children) {

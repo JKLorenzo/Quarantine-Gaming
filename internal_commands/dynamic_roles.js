@@ -160,7 +160,7 @@ const init = async function () {
     for (let this_member of g_interface.get('guild').members.cache.array()) {
         if (!this_member.user.bot) {
             for (let this_activity of this_member.presence.activities) {
-                if (this_activity.type == 'PLAYING') {
+                if (this_activity.applicationID && this_activity.type == 'PLAYING') {
                     let this_game = this_activity.name.trim();
                     let this_vr_name = g_vrprefix + this_game;
                     let this_voice_role = g_interface.get('guild').roles.cache.find(role => role.name == this_vr_name);
