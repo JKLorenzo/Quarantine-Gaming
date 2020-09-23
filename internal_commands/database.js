@@ -1,5 +1,3 @@
-const { MessageEmbed } = require('discord.js');
-
 let client, notifications = new Array();
 
 // Initialize module

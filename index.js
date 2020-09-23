@@ -15,7 +15,7 @@ const dynamic_channels = require(path.join(__dirname, 'internal_commands', 'dyna
 // Global Variables
 global.g_vrprefix = 'Play ';
 global.g_ignored_titles = [
-    'StartupWindow', 'Error', 'modlauncher', 'BlueStacks', 'NoxPlayer', 'Wallpaper Engine'
+    'StartupWindow', 'Error', 'modlauncher', 'BlueStacks', 'NoxPlayer', 'Wallpaper Engine', 'Mozilla Firefox'
 ];
 global.rootDir = path.resolve(__dirname);
 global.g_db = db;
