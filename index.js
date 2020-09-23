@@ -76,7 +76,7 @@ client.on('message', async message => {
     let first_word = words.length > 0 ? words[0] : '';
     if (first_word && first_word.startsWith('<@&') && first_word.endsWith('>')) {
         let role_id = first_word.slice(3, first_word.length - 1);
-        let this_role = g_interface.get('guild').roles.cache.find(role => role.id = role_id);
+        let this_role = g_interface.get('guild').roles.cache.find(role => role.id == role_id);
         if (this_role && this_role.hexColor == '#00ffff') {
             let this_member = g_interface.get('guild').member(message.author);
             let embed = new MessageEmbed();
