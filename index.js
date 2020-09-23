@@ -472,7 +472,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
                     break;
                 case 'Quarantine Gaming: Game Coordinator':
                     let this_reaction = this_message.reactions.cache.find(reaction => reaction.me)
-                    if (reaction.emoji.name == this_reaction.emoji.name && !(this_message.embeds[0].description.indexOf(user.id) !== -1)) {
+                    if (this_reaction && reaction.emoji.name == this_reaction.emoji.name && !(this_message.embeds[0].description.indexOf(user.id) !== -1)) {
                         coordinator.queue({
                             status: 1,
                             message: this_message,
@@ -557,7 +557,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
                     break;
                 case 'Quarantine Gaming: Game Coordinator':
                     let this_reaction = this_message.reactions.cache.find(reaction => reaction.me)
-                    if (reaction.emoji.name == this_reaction.emoji.name && !(this_message.embeds[0].description.indexOf(user.id) !== -1)) {
+                    if (this_reaction && reaction.emoji.name == this_reaction.emoji.name && !(this_message.embeds[0].description.indexOf(user.id) !== -1)) {
                         coordinator.queue({
                             status: 0,
                             message: this_message,
