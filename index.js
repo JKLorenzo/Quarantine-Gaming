@@ -220,7 +220,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
         }
         let this_message = reaction.message;
         let this_member;
-        if (this_message.author.bot) {
+        if (this_message.author.id == client.user.id) {
             switch (this_message.embeds[0].author.name) {
                 case 'Quarantine Gaming NSFW Content':
                     switch (reaction.emoji.name) {
@@ -471,7 +471,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
                     }
                     break;
                 case 'Quarantine Gaming: Game Coordinator':
-                    let this_reaction = this_message.reactions.cache.find(reaction => reaction.me)
+                    let this_reaction = this_message.reactions.cache.find(reaction => reaction.me);
                     if (this_reaction && reaction.emoji.name == this_reaction.emoji.name && !(this_message.embeds[0].description.indexOf(user.id) !== -1)) {
                         coordinator.queue({
                             status: 1,
@@ -506,7 +506,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
         }
         let this_message = reaction.message;
         let this_member;
-        if (this_message.author.bot) {
+        if (this_message.author.id == client.user.id) {
             switch (this_message.embeds[0].author.name) {
                 case 'Quarantine Gaming NSFW Content':
                     switch (reaction.emoji.name) {
@@ -556,7 +556,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
                     }
                     break;
                 case 'Quarantine Gaming: Game Coordinator':
-                    let this_reaction = this_message.reactions.cache.find(reaction => reaction.me)
+                    let this_reaction = this_message.reactions.cache.find(reaction => reaction.me);
                     if (this_reaction && reaction.emoji.name == this_reaction.emoji.name && !(this_message.embeds[0].description.indexOf(user.id) !== -1)) {
                         coordinator.queue({
                             status: 0,
