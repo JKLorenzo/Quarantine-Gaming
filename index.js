@@ -1,7 +1,5 @@
 const { CommandoClient } = require('discord.js-commando');
 const path = require('path');
-const OpusScript = require('opusscript');
-const googleTTS = require('google-tts-api');
 const { MessageEmbed } = require('discord.js');
 const db = require(path.join(__dirname, 'internal_commands', 'database.js'));
 const interface = require(path.join(__dirname, 'internal_commands', 'interface.js'));
@@ -10,7 +8,6 @@ const fgu = require(path.join(__dirname, 'internal_commands', 'fgu.js'));
 const coordinator = require(path.join(__dirname, 'internal_commands', 'coordinator.js'));
 const dynamic_roles = require(path.join(__dirname, 'internal_commands', 'dynamic_roles.js'));
 const dynamic_channels = require(path.join(__dirname, 'internal_commands', 'dynamic_channels.js'));
-
 
 // Global Variables
 global.g_vrprefix = 'Play ';
@@ -72,6 +69,60 @@ client.once('ready', () => {
         type: 'LISTENING'
     });
 });
+
+client.on('message', async message => {
+    // Coordinator
+    let words = message.content.split(' ');
+    let first_word = words.length > 0 ? words[0] : '';
+    if (first_word && first_word.startsWith('<@&') && first_word.endsWith('>')) {
+        let role_id = first_word.slice(3, first_word.length - 1);
+        let this_role = g_interface.get('guild').roles.cache.find(role => role.id = role_id);
+        if (this_role && this_role.hexColor == '#00ffff') {
+            let this_member = g_interface.get('guild').member(message.author);
+            let embed = new MessageEmbed();
+            embed.setAuthor('Quarantine Gaming: Game Coordinator');
+            embed.setTitle(this_role.name);
+            embed.setDescription(`${this_member.displayName} wants to play ${this_role}.`);
+            embed.addField(`Player 1:`, this_member.toString());
+            embed.setFooter(`Join this bracket by reacting below.`);
+            embed.setColor('#7b00ff');
+
+            let emoji = g_interface.get('guild').emojis.cache.find(emoji => emoji.name == this_role.name.split(' ').join('').split(':').join('').split('-').join(''));
+            let qg_emoji = g_interface.get('guild').emojis.cache.find(emoji => emoji.name == 'quarantinegaming');
+            if (emoji) {
+                embed.setThumbnail(emoji.url);
+            } else {
+                embed.setThumbnail(qg_emoji.url);
+            }
+            await message.channel.send(embed).then(async message => {
+                message.delete({ timeout: 600000, reason: 'Timed Out' }).catch(console.error);
+                if (emoji) {
+                    await message.react(emoji).catch(error => {
+                        g_interface.on_error({
+                            name: 'message -> .react(custom)',
+                            location: 'index.js',
+                            error: error
+                        });
+                    });
+                } else {
+                    await message.react(qg_emoji).catch(error => {
+                        g_interface.on_error({
+                            name: 'message -> .react(default)',
+                            location: 'index.js',
+                            error: error
+                        });
+                    });
+                }
+            }).catch(error => {
+                g_interface.on_error({
+                    name: 'message -> .say()',
+                    location: 'index.js',
+                    error: error
+                });
+            });
+        }
+    }
+})
 
 client.on('userUpdate', (oldUser, newUser) => {
     try {
