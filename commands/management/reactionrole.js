@@ -1,6 +1,7 @@
 const { Command } = require('discord.js-commando');
 const { MessageEmbed } = require('discord.js');
 
+let mode;
 module.exports = class ReactionRole extends Command {
     constructor(client) {
         super(client, {
@@ -15,20 +16,33 @@ module.exports = class ReactionRole extends Command {
                     key: 'mode',
                     prompt: 'Create or update?',
                     type: 'string',
-                    oneOf: ['create', 'update']
+                    oneOf: ['create', 'update'],
+                    validate: this_mode => {
+                        mode = this_mode;
+                        return this_mode == 'create' || this_mode == 'update';
+                    }
                 },
                 {
                     key: 'type',
                     prompt: 'nsfw or fgu?',
                     type: 'string',
                     oneOf: ['nsfw', 'fgu']
+                },
+                {
+                    key: 'msgID',
+                    prompt: 'Message ID',
+                    type: 'string',
+                    validate: msgID => {
+                        if (mode == 'create' || (msgID && msgID.length > 0)) return true;
+                        return false;
+                    }
                 }
             ]
         });
     }
 
-    async run(message, { mode, type }) {
-        message.delete();
+    async run(message, { mode, type, msgID }) {
+        message.delete({ timeout: 5000 }).catch(console.error)
         let output;
         switch (type) {
             case 'nsfw':
@@ -63,7 +77,7 @@ module.exports = class ReactionRole extends Command {
                     let this_messages = new Array();
                     messages.map(msg => {
                         if (msg.embeds.length == 0 || !msg.author.bot) return msg;
-                        if (msg.embeds[0].author.name == output.message.author.name) {
+                        if (msg.id == msgID) {
                             this_messages.push(msg);
                         }
                     });
@@ -96,7 +110,7 @@ module.exports = class ReactionRole extends Command {
 function NSFW(client) {
     let embed = new MessageEmbed()
         .setColor('#ffff00')
-        .setAuthor('Quarantine Gaming NSFW Content')
+        .setAuthor('Quarantine Gaming: NSFW Content')
         .setTitle('Unlock NSFW Bots and Channel')
         .setThumbnail(client.user.displayAvatarURL())
         .setDescription('<@&700486309655085107> and <#699847972623482931> channel will be unlocked after getting the <@&700481554132107414> role.')
@@ -132,7 +146,7 @@ function FreeGameUpdates(client) {
     description.push('Notifies you with Ubisoft games and DLCs that are currently free.');
     let embed = new MessageEmbed()
         .setColor('#ffff00')
-        .setAuthor('Quarantine Gaming Role Notification Subscription')
+        .setAuthor('Quarantine Gaming: Free Game Updates')
         .setTitle('Subscribe to get updated')
         .setThumbnail(client.user.displayAvatarURL())
         .setDescription(description.join('\n'))

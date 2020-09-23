@@ -200,7 +200,7 @@ async function beginDedicate() {
 
                         // Set info
                         let embed = new MessageEmbed();
-                        embed.setAuthor('Quarantine Gaming Dedicated Channels');
+                        embed.setAuthor('Quarantine Gaming: Dedicated Channels');
                         embed.setTitle(`Voice and Text Channels for ${this_name}`);
                         let channel_desc = new Array();
                         channel_desc.push(`• Only members who are in this voice channel can view this text channel.`);
@@ -257,7 +257,7 @@ async function beginDedicate() {
                             case 'among us':
                                 let embed = new MessageEmbed()
                                     .setColor('#ffff00')
-                                    .setAuthor('Quarantine Gaming Experience')
+                                    .setAuthor('Quarantine Gaming: Experience')
                                     .setThumbnail('https://yt3.ggpht.com/a/AATXAJw5JZ2TM56V4OVFQnVUrOZ5_E2ULtrusmsTdrQatA=s900-c-k-c0xffffffff-no-rj-mo')
                                     .setTitle('Among Us')
                                     .setDescription('Voice channel audio control extension.')

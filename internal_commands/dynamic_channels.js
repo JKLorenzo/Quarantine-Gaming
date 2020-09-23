@@ -59,7 +59,7 @@ async function updateChannel() {
                         });
                     });
                     let embed = new MessageEmbed();
-                    embed.setAuthor('Quarantine Gaming Dedicated Channels');
+                    embed.setAuthor('Quarantine Gaming: Dedicated Channels');
                     embed.setTitle(oldState.channel.name);
                     embed.setDescription(`${oldState.member} left this channel.`);
                     embed.setThumbnail(newState.member.user.displayAvatarURL());
@@ -109,7 +109,7 @@ async function updateChannel() {
                 // Notify member
                 if (streamers.length > 0) {
                     let embed = new MessageEmbed();
-                    embed.setAuthor('Quarantine Gaming Information');
+                    embed.setAuthor('Quarantine Gaming: Information');
                     embed.setTitle(`${streamers.length > 1 ? `${streamers.map(member => member.displayName).join(' and ')} are` : `${streamers.map(member => member.displayName)} is`} currently Streaming`);
                     embed.setDescription('Please observe proper behavior on your current voice channel.')
                     embed.setImage('https://pa1.narvii.com/6771/d33918fa87ad0d84b7dc854dcbf6a8545c73f94d_hq.gif');
@@ -136,7 +136,7 @@ async function updateChannel() {
                             });
                         });
                         let embed = new MessageEmbed();
-                        embed.setAuthor('Quarantine Gaming Dedicated Channels');
+                        embed.setAuthor('Quarantine Gaming: Dedicated Channels');
                         embed.setTitle(newState.channel.name);
                         embed.setDescription(`${newState.member} joined this channel.`);
                         embed.setThumbnail(newState.member.user.displayAvatarURL());
