@@ -35,8 +35,7 @@ async function updateMember() {
                 if (newData) newActivity = newData.activities.find(activity => activity.name == this_activity_name);
                 if (oldData) oldActivity = oldData.activities.find(activity => activity.name == this_activity_name);
                 let this_activity = newActivity ? newActivity : oldActivity;
-
-                if (this_activity.type == 'PLAYING') {
+                if (this_activity.applicationID && this_activity.type == 'PLAYING') {
                     let this_game = this_activity.name.trim();
                     let this_vr_name = g_vrprefix + this_game;
                     let this_voice_role = g_interface.get('guild').roles.cache.find(role => role.name == this_vr_name);
