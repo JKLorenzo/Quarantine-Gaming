@@ -163,6 +163,14 @@ async function beginDedicate() {
                     }
                 ]
             }).then(async voice_channel => {
+                // Set bitrate
+                voice_channel.setBitrate(128000).catch(error => {
+                    on_error({
+                        name: 'beginDedicate -> .setBitrate()',
+                        location: 'interface.js',
+                        error: error
+                    });
+                });
                 // Create text role
                 await this_guild.roles.create({
                     data: {
