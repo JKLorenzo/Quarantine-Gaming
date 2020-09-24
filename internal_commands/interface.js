@@ -1,5 +1,6 @@
 const { MessageEmbed } = require('discord.js');
 const googleTTS = require('google-tts-api');
+const OpusScript = require('opusscript'); // for TTS
 
 let this_guild, this_log, this_subscription, this_interface;
 
