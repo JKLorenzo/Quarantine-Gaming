@@ -57,7 +57,7 @@ async function get(init = false) {
                             .setTimestamp();
                     }
                     if (item_details.flair) {
-                        if (item_details.flair.indexOf('Read Comments') != -1 || item_details.flair.indexOf('Regional Issues') != -1) {
+                        if (item_details.flair.toLowerCase().indexOf('comment') != -1 || item_details.flair.toLowerCase().indexOf('issue') != -1) {
                             this_message.embeds[0].setDescription(`[${item_details.flair}](${item_details.permalink})`);
                         } else {
                             this_message.embeds[0].setDescription(item_details.flair);
