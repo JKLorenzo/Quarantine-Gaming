@@ -20,7 +20,7 @@ module.exports = class DedicateCommand extends Command {
     }
 
     run(message, { name }) {
-        message.delete({ timeout: 5000 }).catch(console.error)
+        message.delete({ timeout: 5000 }).catch(console.error);
         g_interface.dedicate(message.member, name);
         return;
     }

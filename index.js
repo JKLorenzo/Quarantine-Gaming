@@ -77,6 +77,7 @@ client.on('message', async message => {
         let role_id = this_message.slice(3, this_message.length - 1);
         let this_role = g_interface.get('guild').roles.cache.find(role => role.id == role_id);
         if (this_role && this_role.hexColor == '#00ffff') {
+            message.delete({ timeout: 5000 }).catch(console.error);
             let this_member = g_interface.get('guild').member(message.author);
             let embed = new MessageEmbed();
             embed.setAuthor('Quarantine Gaming: Game Coordinator');

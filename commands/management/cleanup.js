@@ -21,7 +21,7 @@ module.exports = class CleanUp extends Command {
 	}
 
 	async run(message, { count }) {
-		message.delete({ timeout: 5000 }).catch(console.error)
+		message.delete({ timeout: 5000 }).catch(console.error);
 		let remaining = count;
 		let deleted = 0;
 		async function removeMessages(number_of_messages) {

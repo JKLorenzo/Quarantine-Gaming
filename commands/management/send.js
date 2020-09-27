@@ -26,7 +26,7 @@ module.exports = class Send extends Command {
     }
 
     async run(message, { channel, content }) {
-        message.delete({ timeout: 5000 }).catch(console.error)
+        message.delete({ timeout: 5000 }).catch(console.error);
         if (content == 'guidelines') {
             let embed = new MessageEmbed();
             embed.setAuthor('Discord', 'http://orig08.deviantart.net/5d90/f/2016/099/d/a/discord_token_icon_light_by_flexo013-d9y9q3w.png');
