@@ -34,7 +34,8 @@ client.registry
     .registerDefaultTypes()
     .registerGroups([
         ['management', 'Server Management'],
-        ['services', 'Server Services']
+        ['services', 'Server Services'],
+        ['experience', 'Game Experience Extensions']
     ])
     .registerDefaultGroups()
     .registerDefaultCommands({

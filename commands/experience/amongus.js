@@ -5,9 +5,9 @@ module.exports = class AmongUs extends Command {
     constructor(client) {
         super(client, {
             name: 'amongus',
-            group: 'services',
+            group: 'experience',
             memberName: 'amongus',
-            description: 'Manually summon the Audio Control Extension Feature for Among Us on you current text channel.',
+            description: 'Manually summon the audio control extension feature for Among Us on you current text channel.',
             guildOnly: true
         });
     }
