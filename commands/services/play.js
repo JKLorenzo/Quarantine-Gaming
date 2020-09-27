@@ -37,7 +37,7 @@ module.exports = class PlayCommand extends Command {
     }
 
     async run(message, { role, count }) {
-        message.delete({ timeout: 5000 }).catch(console.error);
+        message.delete({ timeout: 250 }).catch(console.error);
         let role_id = `${role}`.substring(3, `${role}`.length - 1);
         let this_role = g_interface.get('guild').roles.cache.find(role => role.id == role_id);
         let this_member = g_interface.get('guild').member(message.author);
@@ -63,8 +63,8 @@ module.exports = class PlayCommand extends Command {
         } else {
             embed.setThumbnail(qg_emoji.url);
         }
-        await message.say(embed).then(async message => {
-            message.delete({ timeout: 600000, reason: 'Timed Out' }).catch(console.error);
+        await g_interface.get('gaming').send({ content: `Inviting all ${this_role} players!`, embed: embed }).then(async message => {
+            message.delete({ timeout: 1800000, reason: 'Timed Out' }).catch(console.error);
             if (emoji) {
                 await message.react(emoji).catch(error => {
                     g_interface.on_error({

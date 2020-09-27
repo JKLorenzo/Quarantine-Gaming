@@ -98,7 +98,7 @@ async function beginProcess() {
             if (status && has_caps && max == players.length) {
                 embed.setFooter('Closed. This bracket is now full.');
             }
-            await message.edit(embed).then(async message => {
+            await message.edit({ content: message.content, embed: embed }).then(async message => {
                 // Notify join
                 if (inviter) {
                     await g_interface.dm(inviter, `${member} ${status ? 'joined' : 'left'} your bracket. ${players.length > 1 ? `${players.length} players total.` : ''}`);
