@@ -46,10 +46,10 @@ module.exports = class ReactionRole extends Command {
         let output;
         switch (type) {
             case 'nsfw':
-                output = NSFW(this.client);
+                output = NSFW();
                 break;
             case 'fgu':
-                output = FreeGameUpdates(this.client);
+                output = FreeGameUpdates();
                 break;
         }
         switch (mode) {
@@ -107,12 +107,12 @@ module.exports = class ReactionRole extends Command {
     }
 };
 
-function NSFW(client) {
+function NSFW() {
     let embed = new MessageEmbed()
         .setColor('#ffff00')
         .setAuthor('Quarantine Gaming: NSFW Content')
         .setTitle('Unlock NSFW Bots and Channel')
-        .setThumbnail(client.user.displayAvatarURL())
+        .setThumbnail(g_client.user.displayAvatarURL())
         .setDescription('<@&700486309655085107> and <#699847972623482931> channel will be unlocked after getting the <@&700481554132107414> role.')
         .addField('🔴 - Not Safe For Work (NSFW)', 'The marked content may contain nudity, intense sexuality, profanity, violence or other potentially disturbing subject matter.')
         .setImage('https://s3.amazonaws.com/sofontsy-files-us/wp-content/uploads/2019/02/07163845/NSFW-Bundle_banner.jpg')
@@ -126,7 +126,7 @@ function NSFW(client) {
     }
 }
 
-function FreeGameUpdates(client) {
+function FreeGameUpdates() {
     let description = new Array();
     description.push('All notifications will be made available in the <#699763763859161108> channel.');
     description.push(' ');
@@ -148,7 +148,7 @@ function FreeGameUpdates(client) {
         .setColor('#ffff00')
         .setAuthor('Quarantine Gaming: Free Game Updates')
         .setTitle('Subscribe to get updated')
-        .setThumbnail(client.user.displayAvatarURL())
+        .setThumbnail(g_client.user.displayAvatarURL())
         .setDescription(description.join('\n'))
         .setImage('https://media.playstation.com/is/image/SCEA/playstation-vue-hero-banner-desktop-01-us-22jan19?$native_nt$')
         .setFooter('Update your role by reacting below.');

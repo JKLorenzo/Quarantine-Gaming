@@ -26,7 +26,7 @@ module.exports = class CheckRole extends Command {
 
     async run(message, { role, channel }) {
         message.delete({ timeout: 5000 }).catch(console.error);
-        let permissions = g_interface.get('guild').channels.cache.get(channel.id).permissionsFor(role);
+        let permissions = g_interface.vars().guild.channels.cache.get(channel.id).permissionsFor(role);
         const generalPermissions = [
             'CREATE_INSTANT_INVITE', 'MANAGE_CHANNELS', 'MANAGE_ROLES', 'MANAGE_WEBHOOKS'
         ]
@@ -65,7 +65,7 @@ module.exports = class CheckRole extends Command {
         let embed = new MessageEmbed();
         embed.setTitle(`**${role.name} Role**`);
         embed.setDescription(output.map(data => `${data.name}: ${data.value ? '✅' : '❌'}`));
-        embed.setAuthor('Quarantine Gaming: Role Information', this.client.user.displayAvatarURL());
+        embed.setAuthor('Quarantine Gaming: Role Information', g_client.user.displayAvatarURL());
         embed.setFooter(`On ${channel.name} channel`);
         embed.setTimestamp(new Date());
         return message.say(embed);

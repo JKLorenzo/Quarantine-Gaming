@@ -38,18 +38,18 @@ async function updateMember() {
                 if (this_activity.applicationID && this_activity.type == 'PLAYING') {
                     let this_game = this_activity.name.trim();
                     let this_vr_name = g_vrprefix + this_game;
-                    let this_voice_role = g_interface.get('guild').roles.cache.find(role => role.name == this_vr_name);
+                    let this_voice_role = g_interface.vars().guild.roles.cache.find(role => role.name == this_vr_name);
                     if (newActivity) {
                         // Check if the title of the game is not null and is not one of the ignored titles
                         if (this_game && !g_ignored_titles.includes(this_game)) {
                             // Check if user doesn't have this mentionable role
                             if (!this_member.roles.cache.find(role => role.name == this_game)) {
                                 // Get the equivalent role of this game
-                                let this_mentionable_role = g_interface.get('guild').roles.cache.find(role => role.name == this_game);
+                                let this_mentionable_role = g_interface.vars().guild.roles.cache.find(role => role.name == this_game);
                                 // Check if this role exists
                                 if (!this_mentionable_role) {
                                     // Create role on this guild
-                                    await g_interface.get('guild').roles.create({
+                                    await g_interface.vars().guild.roles.create({
                                         data: {
                                             name: this_game,
                                             color: '0x00ffff',
@@ -79,9 +79,9 @@ async function updateMember() {
                             // Check if this role doesn't exists
                             if (!this_voice_role) {
                                 // Get reference role
-                                let play_role = g_interface.get('guild').roles.cache.find(role => role.name == '<PLAYROLES>');
+                                let play_role = g_interface.vars().guild.roles.cache.find(role => role.name == '<PLAYROLES>');
                                 // Create role on this guild
-                                await g_interface.get('guild').roles.create({
+                                await g_interface.vars().guild.roles.create({
                                     data: {
                                         name: this_vr_name,
                                         color: '0x7b00ff',
@@ -123,7 +123,7 @@ async function updateMember() {
                         });
                         // Check if the role is still in use
                         let role_in_use = false;
-                        for (let this_guild_member of g_interface.get('guild').members.cache.array()) {
+                        for (let this_guild_member of g_interface.vars().guild.members.cache.array()) {
                             if (this_guild_member.roles.cache.find(role => role == this_voice_role)) {
                                 if (this_guild_member.presence.activities.map(activity => activity.name.trim()).includes(this_voice_role.name.substring(g_vrprefix.length))) {
                                     role_in_use = true;
@@ -157,23 +157,23 @@ async function updateMember() {
 
 const init = async function () {
     // Add play roles
-    for (let this_member of g_interface.get('guild').members.cache.array()) {
+    for (let this_member of g_interface.vars().guild.members.cache.array()) {
         if (!this_member.user.bot) {
             for (let this_activity of this_member.presence.activities) {
                 if (this_activity.applicationID && this_activity.type == 'PLAYING') {
                     let this_game = this_activity.name.trim();
                     let this_vr_name = g_vrprefix + this_game;
-                    let this_voice_role = g_interface.get('guild').roles.cache.find(role => role.name == this_vr_name);
+                    let this_voice_role = g_interface.vars().guild.roles.cache.find(role => role.name == this_vr_name);
                     // Check if the title of the game is not null and is not one of the ignored titles
                     if (this_game && !g_ignored_titles.includes(this_game)) {
                         // Check if user doesn't have this mentionable role
                         if (!this_member.roles.cache.find(role => role.name == this_game)) {
                             // Get the equivalent role of this game
-                            let this_mentionable_role = g_interface.get('guild').roles.cache.find(role => role.name == this_game);
+                            let this_mentionable_role = g_interface.vars().guild.roles.cache.find(role => role.name == this_game);
                             // Check if this role exists
                             if (!this_mentionable_role) {
                                 // Create role on this guild
-                                await g_interface.get('guild').roles.create({
+                                await g_interface.vars().guild.roles.create({
                                     data: {
                                         name: this_game,
                                         color: '0x00ffff',
@@ -204,9 +204,9 @@ const init = async function () {
                         // Check if this role doesn't exists
                         if (!this_voice_role) {
                             // Get reference role
-                            let play_role = g_interface.get('guild').roles.cache.find(role => role.name == '<PLAYROLES>');
+                            let play_role = g_interface.vars().guild.roles.cache.find(role => role.name == '<PLAYROLES>');
                             // Create role on this guild
-                            await g_interface.get('guild').roles.create({
+                            await g_interface.vars().guild.roles.create({
                                 data: {
                                     name: this_vr_name,
                                     color: '0x7b00ff',
@@ -243,11 +243,11 @@ const init = async function () {
     }
 
     // Remove unused play roles
-    for (let this_role of g_interface.get('guild').roles.cache.array()) {
+    for (let this_role of g_interface.vars().guild.roles.cache.array()) {
         if (this_role.name.startsWith(g_vrprefix)) {
             // Check if the role is still in use
             let role_in_use = false;
-            for (let this_member of g_interface.get('guild').members.cache.array()) {
+            for (let this_member of g_interface.vars().guild.members.cache.array()) {
                 if (this_member.roles.cache.find(role => role == this_role)) {
                     if (this_member.presence.activities.map(activity => activity.name.trim()).includes(this_role.name.substring(g_vrprefix.length))) {
                         role_in_use = true;
@@ -276,7 +276,7 @@ const init = async function () {
     }
 
     // Remove empty play channels
-    for (let this_channel of g_interface.get('guild').channels.cache.array()) {
+    for (let this_channel of g_interface.vars().guild.channels.cache.array()) {
         if (this_channel.type == 'voice' && this_channel.name.startsWith(g_vrprefix)) {
             if (this_channel.members.size == 0) {
                 await this_channel.delete('This channel is no longer in use.').catch(error => {

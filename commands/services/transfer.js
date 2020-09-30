@@ -20,11 +20,11 @@ module.exports = class TransferCommand extends Command {
 
     run(message, { users }) {
         message.delete({ timeout: 5000 }).catch(console.error);
-        let channel = g_interface.get('guild').members.cache.get(message.author.id).voice.channelID;
+        let channel = g_interface.vars().guild.members.cache.get(message.author.id).voice.channelID;
         if (channel) {
             for (let user of users.split(' ')) {
                 let user_id = user.split('<@').join('').split('>').join('').slice(1);
-                let this_member = g_interface.get('guild').members.cache.get(user_id);
+                let this_member = g_interface.vars().guild.members.cache.get(user_id);
                 if (this_member) {
                     if (this_member.voice.channelID) {
                         this_member.voice.setChannel(channel).then(member => {

@@ -1,9 +1,4 @@
-let client, coordinator_queue = new Array(), is_processing = false;
-
-// Initialize module
-const init = function (this_client) {
-    client = this_client;
-}
+let coordinator_queue = new Array(), is_processing = false;
 
 const queue = function (data) {
     coordinator_queue.push(data);
@@ -22,7 +17,7 @@ async function beginProcess() {
         let member = this_data.member;
         let embed = message.embeds[0];
         let inviter_id = embed.fields[0].value.substring(2, embed.fields[0].value.length - 1);
-        let inviter = g_interface.get('guild').members.cache.find(member => member.id == inviter_id);
+        let inviter = g_interface.vars().guild.members.cache.find(member => member.id == inviter_id);
 
         if (inviter_id != member.id) {
             let players = [];
@@ -126,6 +121,5 @@ async function beginProcess() {
 
 // Database Module Functions
 module.exports = {
-    init,
     queue
 }

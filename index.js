@@ -1,6 +1,6 @@
 const { CommandoClient } = require('discord.js-commando');
-const path = require('path');
 const { MessageEmbed } = require('discord.js');
+const path = require('path');
 const db = require(path.join(__dirname, 'internal_commands', 'database.js'));
 const interface = require(path.join(__dirname, 'internal_commands', 'interface.js'));
 const feed = require(path.join(__dirname, 'internal_commands', 'feed.js'));
@@ -8,6 +8,15 @@ const fgu = require(path.join(__dirname, 'internal_commands', 'fgu.js'));
 const coordinator = require(path.join(__dirname, 'internal_commands', 'coordinator.js'));
 const dynamic_roles = require(path.join(__dirname, 'internal_commands', 'dynamic_roles.js'));
 const dynamic_channels = require(path.join(__dirname, 'internal_commands', 'dynamic_channels.js'));
+const message_manager = require(path.join(__dirname, 'internal_commands', 'message_manager.js'));
+
+const client = new CommandoClient({
+    commandPrefix: '!',
+    owner: '393013053488103435',
+    partials: [
+        'MESSAGE', 'REACTION'
+    ]
+});
 
 // Global Variables
 global.g_vrprefix = 'Play ';
@@ -18,17 +27,11 @@ global.rootDir = path.resolve(__dirname);
 global.g_db = db;
 global.g_fgu = fgu;
 global.g_interface = interface;
+global.g_client = client;
 
 // Variables
 let updating = false;
 
-const client = new CommandoClient({
-    commandPrefix: '!',
-    owner: '393013053488103435',
-    partials: [
-        'MESSAGE', 'REACTION'
-    ]
-});
 
 client.registry
     .registerDefaultTypes()
@@ -48,7 +51,7 @@ client.registry
 
 client.once('ready', () => {
     console.log('-------------{  Startup  }-------------');
-    interface.init(client);
+    g_interface.init();
 
     if (process.env.STARTUP_REASON) {
         let embed = new MessageEmbed();
@@ -56,14 +59,12 @@ client.once('ready', () => {
         embed.setAuthor('Quarantine Gaming', client.user.displayAvatarURL());
         embed.setTitle('Startup Initiated');
         embed.addField('Reason', process.env.STARTUP_REASON);
-        interface.log(embed);
+        g_interface.log(embed);
     }
 
-    db.init(client);
-    fgu.init(client);
-    feed.init(client);
-    dynamic_roles.init(client);
-    dynamic_channels.init(client);
+    feed.init()
+    dynamic_roles.init();
+    dynamic_channels.init();
 
     // Set the bot's activity
     client.user.setActivity('!help', {
@@ -72,63 +73,13 @@ client.once('ready', () => {
 });
 
 client.on('message', async message => {
-    // Coordinator
-    let this_message = message.content.split(' ').join('');
-    if (this_message && this_message.startsWith('<@&') && this_message.endsWith('>') && message.author != client.user) {
-        let role_id = this_message.slice(3, this_message.length - 1);
-        let this_role = g_interface.get('guild').roles.cache.find(role => role.id == role_id);
-        if (this_role && this_role.hexColor == '#00ffff') {
-            message.delete({ timeout: 250 }).catch(console.error);
-            let this_member = g_interface.get('guild').member(message.author);
-            let embed = new MessageEmbed();
-            embed.setAuthor('Quarantine Gaming: Game Coordinator');
-            embed.setTitle(this_role.name);
-            embed.setDescription(`${this_member.displayName} wants to play ${this_role}.`);
-            embed.addField(`Player 1:`, this_member.toString());
-            embed.setFooter(`Join this bracket by reacting below.`);
-            embed.setColor('#7b00ff');
-
-            let emoji = g_interface.get('guild').emojis.cache.find(emoji => emoji.name == this_role.name.split(' ').join('').split(':').join('').split('-').join(''));
-            let qg_emoji = g_interface.get('guild').emojis.cache.find(emoji => emoji.name == 'quarantinegaming');
-            if (emoji) {
-                embed.setThumbnail(emoji.url);
-            } else {
-                embed.setThumbnail(qg_emoji.url);
-            }
-            await g_interface.get('gaming').send({ content: `Inviting all ${this_role} players!`, embed: embed }).then(async message => {
-                message.delete({ timeout: 1800000, reason: 'Timed Out' }).catch(console.error);
-                if (emoji) {
-                    await message.react(emoji).catch(error => {
-                        g_interface.on_error({
-                            name: 'message -> .react(custom)',
-                            location: 'index.js',
-                            error: error
-                        });
-                    });
-                } else {
-                    await message.react(qg_emoji).catch(error => {
-                        g_interface.on_error({
-                            name: 'message -> .react(default)',
-                            location: 'index.js',
-                            error: error
-                        });
-                    });
-                }
-            }).catch(error => {
-                g_interface.on_error({
-                    name: 'message -> .say()',
-                    location: 'index.js',
-                    error: error
-                });
-            });
-        }
-    }
-})
+    message_manager.manage(message);
+});
 
 client.on('userUpdate', (oldUser, newUser) => {
     try {
         let embed = new MessageEmbed();
-        let this_member = g_interface.get('guild').members.cache.find(member => member.user.tag == newUser.tag);
+        let this_member = g_interface.vars().guild.members.cache.find(member => member.user.tag == newUser.tag);
         embed.setAuthor(this_member.displayName, oldUser.displayAvatarURL());
         embed.setTitle('User Update');
 
@@ -212,7 +163,7 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
 });
 
 client.on('guildMemberAdd', async member => {
-    let this_member = g_interface.get('guild').members.cache.get(member.id);
+    let this_member = g_interface.vars().guild.members.cache.get(member.id);
 
     if (this_member && !this_member.user.bot) {
         if (!this_member.roles.cache.find(role => role.id == '722699433225224233')) {
@@ -234,7 +185,7 @@ client.on('guildMemberAdd', async member => {
                 { name: 'Moderation:', value: '✅ - Approve     ❌ - Kick     ⛔ - Ban' }
             ]);
             embed.setColor('#25c059');
-            await g_interface.get('interface').send(embed).then(async this_message => {
+            await g_interface.vars().staff.send(embed).then(async this_message => {
                 await this_message.react('✅');
                 await this_message.react('❌');
                 await this_message.react('⛔');
@@ -275,8 +226,8 @@ client.on('messageReactionAdd', async (reaction, user) => {
                 case 'Quarantine Gaming: NSFW Content':
                     switch (reaction.emoji.name) {
                         case '🔴':
-                            this_member = g_interface.get('guild').members.cache.get(user.id);
-                            let this_role = g_interface.get('guild').roles.cache.find(role => role.id == '700481554132107414');
+                            this_member = g_interface.vars().guild.members.cache.get(user.id);
+                            let this_role = g_interface.vars().guild.roles.cache.find(role => role.id == '700481554132107414');
                             if (this_role && !this_member.roles.cache.has(this_role.id)) {
                                 await this_member.roles.add(this_role.id).catch(error => {
                                     g_interface.on_error({
@@ -290,23 +241,23 @@ client.on('messageReactionAdd', async (reaction, user) => {
                     }
                     break;
                 case 'Quarantine Gaming: Free Game Updates':
-                    this_member = g_interface.get('guild').members.cache.get(user.id);
+                    this_member = g_interface.vars().guild.members.cache.get(user.id);
                     let this_role;
                     switch (reaction.emoji.name) {
                         case '1️⃣':
-                            this_role = g_interface.get('guild').roles.cache.find(role => role.id == '722645979248984084');
+                            this_role = g_interface.vars().guild.roles.cache.find(role => role.id == '722645979248984084');
                             break;
                         case '2️⃣':
-                            this_role = g_interface.get('guild').roles.cache.find(role => role.id == '722691589813829672');
+                            this_role = g_interface.vars().guild.roles.cache.find(role => role.id == '722691589813829672');
                             break;
                         case '3️⃣':
-                            this_role = g_interface.get('guild').roles.cache.find(role => role.id == '722691679542312970');
+                            this_role = g_interface.vars().guild.roles.cache.find(role => role.id == '722691679542312970');
                             break;
                         case '4️⃣':
-                            this_role = g_interface.get('guild').roles.cache.find(role => role.id == '722691724572491776');
+                            this_role = g_interface.vars().guild.roles.cache.find(role => role.id == '722691724572491776');
                             break;
                         case '5️⃣':
-                            this_role = g_interface.get('guild').roles.cache.find(role => role.id == '750517524738605087');
+                            this_role = g_interface.vars().guild.roles.cache.find(role => role.id == '750517524738605087');
                             break;
                     }
                     if (this_role && !this_member.roles.cache.has(this_role.id)) {
@@ -320,7 +271,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
                     }
                     break;
                 case 'Quarantine Gaming: Member Approval':
-                    this_member = g_interface.get('guild').members.cache.find(member => member.user.id == this_message.embeds[0].fields[1].value);
+                    this_member = g_interface.vars().guild.members.cache.find(member => member.user.id == this_message.embeds[0].fields[1].value);
                     if (this_member) {
                         switch (reaction.emoji.name) {
                             case '✅':
@@ -456,7 +407,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
                             case 'Among Us':
                                 // Delete reactions
                                 await this_message.reactions.removeAll().then(async message => {
-                                    let this_channel = g_interface.get('guild').members.cache.get(user.id).voice.channel;
+                                    let this_channel = g_interface.vars().guild.members.cache.get(user.id).voice.channel;
                                     if (this_channel) {
                                         // Get members
                                         let channel_members = new Array();
@@ -532,7 +483,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
                         coordinator.queue({
                             status: 1,
                             message: this_message,
-                            member: g_interface.get('guild').members.cache.get(user.id)
+                            member: g_interface.vars().guild.members.cache.get(user.id)
                         });
                     }
                     break;
@@ -567,8 +518,8 @@ client.on('messageReactionRemove', async (reaction, user) => {
                 case 'Quarantine Gaming: NSFW Content':
                     switch (reaction.emoji.name) {
                         case '🔴':
-                            this_member = g_interface.get('guild').members.cache.get(user.id);
-                            let this_role = g_interface.get('guild').roles.cache.find(role => role.id == '700481554132107414');
+                            this_member = g_interface.vars().guild.members.cache.get(user.id);
+                            let this_role = g_interface.vars().guild.roles.cache.find(role => role.id == '700481554132107414');
                             if (this_role && this_member.roles.cache.has(this_role.id)) {
                                 await this_member.roles.remove(this_role.id).catch(error => {
                                     g_interface.on_error({
@@ -582,23 +533,23 @@ client.on('messageReactionRemove', async (reaction, user) => {
                     }
                     break;
                 case 'Quarantine Gaming: Free Game Updates':
-                    this_member = g_interface.get('guild').members.cache.get(user.id);
+                    this_member = g_interface.vars().guild.members.cache.get(user.id);
                     let this_role;
                     switch (reaction.emoji.name) {
                         case '1️⃣':
-                            this_role = g_interface.get('guild').roles.cache.find(role => role.id == '722645979248984084');
+                            this_role = g_interface.vars().guild.roles.cache.find(role => role.id == '722645979248984084');
                             break;
                         case '2️⃣':
-                            this_role = g_interface.get('guild').roles.cache.find(role => role.id == '722691589813829672');
+                            this_role = g_interface.vars().guild.roles.cache.find(role => role.id == '722691589813829672');
                             break;
                         case '3️⃣':
-                            this_role = g_interface.get('guild').roles.cache.find(role => role.id == '722691679542312970');
+                            this_role = g_interface.vars().guild.roles.cache.find(role => role.id == '722691679542312970');
                             break;
                         case '4️⃣':
-                            this_role = g_interface.get('guild').roles.cache.find(role => role.id == '722691724572491776');
+                            this_role = g_interface.vars().guild.roles.cache.find(role => role.id == '722691724572491776');
                             break;
                         case '5️⃣':
-                            this_role = g_interface.get('guild').roles.cache.find(role => role.id == '750517524738605087');
+                            this_role = g_interface.vars().guild.roles.cache.find(role => role.id == '750517524738605087');
                             break;
                     }
                     if (this_role && this_member.roles.cache.has(this_role.id)) {
@@ -617,7 +568,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
                         coordinator.queue({
                             status: 0,
                             message: this_message,
-                            member: g_interface.get('guild').members.cache.get(user.id)
+                            member: g_interface.vars().guild.members.cache.get(user.id)
                         });
                     }
                     break;

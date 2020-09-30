@@ -16,7 +16,7 @@ module.exports = class StreamingCommand extends Command {
         let this_member = message.member;
         let this_channel = this_member.voice.channel;
         if (this_channel) {
-            let streaming_role = g_interface.get('guild').roles.cache.find(role => role.id == '757128062276993115');
+            let streaming_role = g_interface.vars().guild.roles.cache.find(role => role.id == '757128062276993115');
             if (!this_member.roles.cache.find(role => role == streaming_role)) {
                 // Add streaming role
                 await this_member.roles.add(streaming_role).catch(error => {

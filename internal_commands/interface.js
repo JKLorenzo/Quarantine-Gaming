@@ -2,33 +2,40 @@ const { MessageEmbed } = require('discord.js');
 const googleTTS = require('google-tts-api');
 const OpusScript = require('opusscript'); // for TTS
 
-let this_guild, this_log, this_subscription, this_interface, this_gaming;
+let guild, c_log, c_subscription, c_staff, c_gaming, c_announcement;
 
-const init = function (this_client) {
-    this_guild = this_client.guilds.cache.get('351178660725915649');
-    this_log = this_guild.channels.cache.get('722760285622108210');
-    this_subscription = this_guild.channels.cache.get('699763763859161108');
-    this_interface = this_guild.channels.cache.get('749763548090990613');
-    this_gaming = this_guild.channels.cache.get('759755324264808489');
+const init = function () {
+    guild = g_client.guilds.cache.get('351178660725915649');
+    c_log = guild.channels.cache.get('722760285622108210');
+    c_subscription = guild.channels.cache.get('699763763859161108');
+    c_staff = guild.channels.cache.get('749763548090990613');
+    c_gaming = guild.channels.cache.get('759755324264808489');
+    c_announcement = guild.channels.cache.get('759920653146652682');
 }
 
-const get = function (name) {
-    switch (name) {
-        case 'guild':
-            return this_guild;
-        case 'log':
-            return this_log;
-        case 'subscription':
-            return this_subscription;
-        case 'interface':
-            return this_interface;
-        case 'gaming':
-            return this_gaming;
+const vars = function () {
+    return {
+        guild: guild,
+        log: c_log,
+        subscription: c_subscription,
+        staff: c_staff,
+        gaming: c_gaming,
+        announcement: c_announcement
     }
 }
 
+const announce = async function (message) {
+    await c_announcement.send(message).catch(error => {
+        on_error({
+            name: 'announce',
+            location: 'interface.js',
+            error: error
+        });
+    });
+}
+
 const log = async function (message) {
-    await this_log.send(message).catch(error => {
+    await c_log.send(message).catch(error => {
         on_error({
             name: 'log',
             location: 'interface.js',
@@ -51,7 +58,7 @@ const on_error = async function (details) {
 }
 
 const subscription = async function (message) {
-    await this_subscription.send(message).catch(error => {
+    await c_subscription.send(message).catch(error => {
         on_error({
             name: 'subscription',
             location: 'interface.js',
@@ -203,7 +210,7 @@ async function beginDedicate() {
                     }).then(async text_channel => {
                         // Set link
                         await text_channel.setTopic(`${voice_channel.id} ${text_role.id}`).catch(error => {
-                            g_interface.on_error({
+                            on_error({
                                 name: 'updateGuild -> .setTopic(text_channel)',
                                 location: 'dynamic_channels.js',
                                 error: error
@@ -340,12 +347,12 @@ const dedicate = function (member, name) {
 // Interface Module Functions
 module.exports = {
     init,
-    get,
-    log,
+    vars,
     on_error,
-    subscription,
     dm,
     say,
+    announce,
     dedicate,
+    subscription,
     sleep
 }

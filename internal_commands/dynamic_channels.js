@@ -4,7 +4,7 @@ const parentID = '749231470396309535';
 
 async function updateGuild() {
     // Transfer members from generic voice rooms to dynamic voice rooms
-    for (let this_channel of g_interface.get('guild').channels.cache.array()) {
+    for (let this_channel of g_interface.vars().guild.channels.cache.array()) {
         // Disregard Pandora's Box and Couchlockszx
         if (this_channel.type == 'voice' && this_channel.id != '747005488197009568' && this_channel.id != '663443529170681857') {
             if (this_channel.members.size > 1) {
@@ -48,8 +48,8 @@ async function updateChannel() {
 
         if (oldState.channel != newState.channel) {
             if (oldState.channel && oldState.channel.parentID == parentID) {
-                let text_channel = g_interface.get('guild').channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == oldState.channelID);
-                let text_role = g_interface.get('guild').roles.cache.get(text_channel.topic.split(' ')[1]);
+                let text_channel = g_interface.vars().guild.channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == oldState.channelID);
+                let text_role = g_interface.vars().guild.roles.cache.get(text_channel.topic.split(' ')[1]);
                 if (oldState.channel.members.size > 0) {
                     await newState.member.roles.remove(text_role).catch(error => {
                         g_interface.on_error({
@@ -125,8 +125,8 @@ async function updateChannel() {
 
                 // Add member to a text channel when joining a dedicated channel
                 if (newState.channel.parentID == parentID) {
-                    let text_channel = g_interface.get('guild').channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == newState.channelID);
-                    let text_role = g_interface.get('guild').roles.cache.get(text_channel.topic.split(' ')[1]);
+                    let text_channel = g_interface.vars().guild.channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == newState.channelID);
+                    let text_role = g_interface.vars().guild.roles.cache.get(text_channel.topic.split(' ')[1]);
                     if (!newState.member.roles.cache.find(role => role == text_role)) {
                         await newState.member.roles.add(text_role).catch(error => {
                             g_interface.on_error({
@@ -172,16 +172,13 @@ async function updateChannel() {
 }
 
 // External Functions Region
-const init = async function (this_client) {
-    // Set the commando client instance
-    client = this_client;
-
-    for (let this_channel of g_interface.get('guild').channels.cache.array()) {
+const init = async function () {
+    for (let this_channel of g_interface.vars().guild.channels.cache.array()) {
         if (this_channel.parent && this_channel.parent.id == parentID) {
             if (this_channel.type == 'text') {
                 let data = this_channel.topic.split(' ');
-                let this_voice = g_interface.get('guild').channels.cache.get(data[0]);
-                let this_text = g_interface.get('guild').roles.cache.get(data[1]);
+                let this_voice = g_interface.vars().guild.channels.cache.get(data[0]);
+                let this_text = g_interface.vars().guild.roles.cache.get(data[1]);
 
                 // Give all channel members text roles
                 for (let this_member of this_voice.members.array()) {
@@ -197,7 +194,7 @@ const init = async function (this_client) {
                 }
 
                 // Remove role from all members not in the voice room
-                for (let this_member of g_interface.get('guild').members.cache.array()) {
+                for (let this_member of g_interface.vars().guild.members.cache.array()) {
                     if (this_member.roles.cache.find(role => role == this_text)) {
                         if (!this_member.voice) {
                             await this_member.roles.remove(this_text).catch(error => {

@@ -16,7 +16,7 @@ module.exports = class PlayCommand extends Command {
                     type: 'role',
                     validate: role => {
                         let role_id = `${role}`.substring(3, `${role}`.length - 1);
-                        let this_role = g_interface.get('guild').roles.cache.find(role => role.id == role_id);
+                        let this_role = g_interface.vars().guild.roles.cache.find(role => role.id == role_id);
                         if (this_role) {
                             return this_role.hexColor == '#00ffff'
                         } else {
@@ -39,8 +39,8 @@ module.exports = class PlayCommand extends Command {
     async run(message, { role, count }) {
         message.delete({ timeout: 250 }).catch(console.error);
         let role_id = `${role}`.substring(3, `${role}`.length - 1);
-        let this_role = g_interface.get('guild').roles.cache.find(role => role.id == role_id);
-        let this_member = g_interface.get('guild').member(message.author);
+        let this_role = g_interface.vars().guild.roles.cache.find(role => role.id == role_id);
+        let this_member = g_interface.vars().guild.member(message.author);
         let embed = new MessageEmbed();
         embed.setAuthor('Quarantine Gaming: Game Coordinator');
         embed.setTitle(this_role.name);
@@ -56,14 +56,14 @@ module.exports = class PlayCommand extends Command {
         embed.setFooter(`Join this bracket by reacting below.`);
         embed.setColor('#7b00ff');
 
-        let emoji = g_interface.get('guild').emojis.cache.find(emoji => emoji.name == this_role.name.split(' ').join('').split(':').join('').split('-').join(''));
-        let qg_emoji = g_interface.get('guild').emojis.cache.find(emoji => emoji.name == 'quarantinegaming');
+        let emoji = g_interface.vars().guild.emojis.cache.find(emoji => emoji.name == this_role.name.split(' ').join('').split(':').join('').split('-').join(''));
+        let qg_emoji = g_interface.vars().guild.emojis.cache.find(emoji => emoji.name == 'quarantinegaming');
         if (emoji) {
             embed.setThumbnail(emoji.url);
         } else {
             embed.setThumbnail(qg_emoji.url);
         }
-        await g_interface.get('gaming').send({ content: `Inviting all ${this_role} players!`, embed: embed }).then(async message => {
+        await g_interface.vars().gaming.send({ content: `Inviting all ${this_role} players!`, embed: embed }).then(async message => {
             message.delete({ timeout: 1800000, reason: 'Timed Out' }).catch(console.error);
             if (emoji) {
                 await message.react(emoji).catch(error => {

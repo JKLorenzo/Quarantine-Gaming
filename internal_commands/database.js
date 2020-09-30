@@ -1,9 +1,5 @@
-let client, notifications = new Array();
+let notifications = new Array();
 
-// Initialize module
-const init = function (this_client) {
-    client = this_client;
-}
 // Notification Region
 const pushNotification = async function (notification) {
     notifications.push(notification);
@@ -56,7 +52,7 @@ const hasRecords = function (notification) {
             return 100 * ((longerLength - costs[shorter.length]) / longerLength);
         }
     } catch (error) {
-        this.g_interface.on_error({
+        g_interface.on_error({
             name: 'hasRecords',
             location: 'database.js',
             error: error
@@ -66,7 +62,6 @@ const hasRecords = function (notification) {
 
 // Database Module Functions
 module.exports = {
-    init,
     pushNotification,
     hasRecords
 }

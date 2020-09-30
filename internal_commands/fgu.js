@@ -3,7 +3,7 @@ const fetch = require('node-fetch');
 const probe = require('probe-image-size');
 const gis = require('g-i-s');
 
-let client, is_pushing = false, to_push = new Array();
+let is_pushing = false, to_push = new Array();
 
 // Internal Functions Region
 function getIcon(hostname) {
@@ -297,11 +297,6 @@ async function process_push() {
     }
 }
 
-// External Functions Region
-const init = function (this_client) {
-    // Set the commando client instance
-    client = this_client;
-}
 const push = function (notification) {
     // Push this notification to the push array
     to_push.push(notification);
@@ -314,6 +309,5 @@ const push = function (notification) {
 
 // Interface Module Functions
 module.exports = {
-    init,
     push
 }

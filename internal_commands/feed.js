@@ -1,6 +1,6 @@
 const fetch = require('node-fetch');
 
-let client, results = new Array();
+let results = new Array();
 
 function htmlEntities(str) {
     return String(str).replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"');
@@ -30,10 +30,10 @@ async function get(init = false) {
             }
 
 
-            await g_interface.get('subscription').messages.fetch({ limit: 5 }).then(async messages => {
+            await g_interface.vars().subscription.messages.fetch({ limit: 10 }).then(async messages => {
                 let this_messages = new Array();
                 messages.map(msg => {
-                    if (msg.author.id == client.user.id && msg.embeds.length > 0 && msg.embeds[0].author.name == 'Quarantine Gaming: Free Game/DLC Notification' && msg.embeds[0].url == item_details.url) {
+                    if (msg.author.id == g_client.user.id && msg.embeds.length > 0 && msg.embeds[0].author.name == 'Quarantine Gaming: Free Game/DLC Notification' && msg.embeds[0].url == item_details.url) {
                         this_messages.push(msg);
                     }
                     return msg;
@@ -84,8 +84,7 @@ async function get(init = false) {
     });
 }
 
-const init = function (this_client) {
-    client = this_client;
+const init = function () {
     // First feed fetch
     get(true);
     // Future feed fetchs every 30 mins
