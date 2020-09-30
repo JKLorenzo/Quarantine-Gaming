@@ -349,6 +349,7 @@ module.exports = {
     init,
     vars,
     on_error,
+    log,
     dm,
     say,
     announce,

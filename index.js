@@ -185,7 +185,7 @@ client.on('guildMemberAdd', async member => {
                 { name: 'Moderation:', value: '✅ - Approve     ❌ - Kick     ⛔ - Ban' }
             ]);
             embed.setColor('#25c059');
-            await g_interface.vars().staff.send(embed).then(async this_message => {
+            await g_interface.vars().staff.send({ content: '<@&749235255944413234> action is required.', embed: embed }).then(async this_message => {
                 await this_message.react('✅');
                 await this_message.react('❌');
                 await this_message.react('⛔');
