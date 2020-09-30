@@ -154,13 +154,13 @@ async function beginDedicate() {
             });
 
             // Create voice channel
-            await this_guild.channels.create(this_name, {
+            await guild.channels.create(this_name, {
                 type: 'voice',
                 parent: parentID,
                 position: 1,
                 permissionOverwrites: [
                     {
-                        id: this_guild.roles.everyone.id,
+                        id: guild.roles.everyone.id,
                         deny: ["CONNECT"]
                     },
                     {
@@ -182,20 +182,20 @@ async function beginDedicate() {
                     });
                 });
                 // Create text role
-                await this_guild.roles.create({
+                await guild.roles.create({
                     data: {
                         name: `Text ${voice_channel.id}`,
                         color: '0x7b00ff'
                     }
                 }).then(async function (text_role) {
                     // Create text channel
-                    await this_guild.channels.create(this_name, {
+                    await guild.channels.create(this_name, {
                         type: 'text',
                         parent: parentID,
                         position: 1,
                         permissionOverwrites: [
                             {
-                                id: this_guild.roles.everyone.id,
+                                id: guild.roles.everyone.id,
                                 deny: ["VIEW_CHANNEL"]
                             },
                             {
