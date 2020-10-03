@@ -1,5 +1,4 @@
 const { Command } = require('discord.js-commando');
-const { MessageEmbed } = require('discord.js');
 
 module.exports = class PlayCommand extends Command {
     constructor(client) {
@@ -16,7 +15,7 @@ module.exports = class PlayCommand extends Command {
                     type: 'role',
                     validate: role => {
                         let role_id = `${role}`.substring(3, `${role}`.length - 1);
-                        let this_role = g_interface.vars().guild.roles.cache.find(role => role.id == role_id);
+                        let this_role = g_channels.get().guild.roles.cache.find(role => role.id == role_id);
                         if (this_role) {
                             return this_role.hexColor == '#00ffff'
                         } else {
@@ -37,57 +36,10 @@ module.exports = class PlayCommand extends Command {
     }
 
     async run(message, { role, count }) {
-        message.delete({ timeout: 250 }).catch(console.error);
+        message.delete({ timeout: 60000 }).catch(error => { });
         let role_id = `${role}`.substring(3, `${role}`.length - 1);
-        let this_role = g_interface.vars().guild.roles.cache.find(role => role.id == role_id);
-        let this_member = g_interface.vars().guild.member(message.author);
-        let embed = new MessageEmbed();
-        embed.setAuthor('Quarantine Gaming: Game Coordinator');
-        embed.setTitle(this_role.name);
-        embed.addField(`Player 1:`, this_member.toString());
-        if (count == 0) {
-            embed.setDescription(`${this_member.displayName} wants to play ${this_role}.`);
-        } else {
-            embed.setDescription(`${this_member.displayName} is looking for **${count - 1}** other ${this_role} player${count == 2 ? '' : 's'}.`);
-            for (let i = 2; i <= count; i++) {
-                embed.addField(`Player ${i}:`, '\u200B');
-            }
-        }
-        embed.setFooter(`Join this bracket by reacting below.`);
-        embed.setColor('#7b00ff');
-
-        let emoji = g_interface.vars().guild.emojis.cache.find(emoji => emoji.name == this_role.name.split(' ').join('').split(':').join('').split('-').join(''));
-        let qg_emoji = g_interface.vars().guild.emojis.cache.find(emoji => emoji.name == 'quarantinegaming');
-        if (emoji) {
-            embed.setThumbnail(emoji.url);
-        } else {
-            embed.setThumbnail(qg_emoji.url);
-        }
-        await g_interface.vars().gaming.send({ content: `Inviting all ${this_role} players!`, embed: embed }).then(async message => {
-            message.delete({ timeout: 1800000, reason: 'Timed Out' }).catch(console.error);
-            if (emoji) {
-                await message.react(emoji).catch(error => {
-                    g_interface.on_error({
-                        name: 'run -> .react(custom)',
-                        location: 'play.js',
-                        error: error
-                    });
-                });
-            } else {
-                await message.react(qg_emoji).catch(error => {
-                    g_interface.on_error({
-                        name: 'run -> .react(default)',
-                        location: 'play.js',
-                        error: error
-                    });
-                });
-            }
-        }).catch(error => {
-            g_interface.on_error({
-                name: 'run -> .say()',
-                location: 'play.js',
-                error: error
-            });
-        });
+        let this_role = g_channels.get().guild.roles.cache.find(role => role.id == role_id);
+        let this_member = g_channels.get().guild.member(message.author);
+        g_coordinator.invite(this_role, this_member, count);
     }
 };

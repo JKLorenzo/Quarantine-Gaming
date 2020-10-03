@@ -12,11 +12,11 @@ module.exports = class StreamingCommand extends Command {
     }
 
     async run(message) {
-        message.delete({ timeout: 5000 }).catch(console.error);
+        message.delete({ timeout: 5000 }).catch(error => { });
         let this_member = message.member;
         let this_channel = this_member.voice.channel;
         if (this_channel) {
-            let streaming_role = g_interface.vars().guild.roles.cache.find(role => role.id == '757128062276993115');
+            let streaming_role = g_channels.get().guild.roles.cache.find(role => role.id == '757128062276993115');
             if (!this_member.roles.cache.find(role => role == streaming_role)) {
                 // Add streaming role
                 await this_member.roles.add(streaming_role).catch(error => {

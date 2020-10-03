@@ -42,7 +42,7 @@ module.exports = class ReactionRole extends Command {
     }
 
     async run(message, { mode, type, msgID }) {
-        message.delete({ timeout: 5000 }).catch(console.error);
+        message.delete({ timeout: 5000 }).catch(error => { });
         let output;
         switch (type) {
             case 'nsfw':

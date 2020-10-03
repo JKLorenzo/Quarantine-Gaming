@@ -83,8 +83,8 @@ module.exports = class Message extends Command {
     }
 
     run(message, { mode, arg1, arg2 }) {
-        message.delete({ timeout: 250 }).catch(console.error);
-        let channel = g_interface.vars().guild.channels.cache.get(arg1.id);
+        message.delete({ timeout: 250 }).catch(error => { });
+        let channel = g_channels.get().guild.channels.cache.get(arg1.id);
         if (channel) {
             switch (mode) {
                 case 'send':
@@ -111,14 +111,14 @@ module.exports = class Message extends Command {
                     channel.messages.fetch(message_id).then(this_message => {
                         return this_message.edit(`${content}`).catch(error => {
                             message.say(`Uh oh! ${error}`).then(this_message => {
-                                this_message.delete({ timeout: 5000 }).catch(console.error);
+                                this_message.delete({ timeout: 5000 }).catch(error => { });
                             });
                         });
                     });
             }
         } else {
             return message.say(`I can't find the channel you're looking for.`).then(this_message => {
-                this_message.delete({ timeout: 5000 }).catch(console.error);
+                this_message.delete({ timeout: 5000 }).catch(error => { });
             });
         }
     }

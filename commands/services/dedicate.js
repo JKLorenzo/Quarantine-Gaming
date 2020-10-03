@@ -20,8 +20,8 @@ module.exports = class DedicateCommand extends Command {
     }
 
     run(message, { name }) {
-        message.delete({ timeout: 5000 }).catch(console.error);
-        g_interface.dedicate(message.member, name);
+        message.delete({ timeout: 5000 }).catch(error => { });
+        g_channels.dedicate(message.member, name);
         return;
     }
 };

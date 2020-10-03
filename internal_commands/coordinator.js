@@ -1,5 +1,57 @@
-let coordinator_queue = new Array(), is_processing = false;
+const { MessageEmbed } = require('discord.js');
 
+const invite = async function (role, member, count) {
+    let embed = new MessageEmbed();
+    embed.setAuthor('Quarantine Gaming: Game Coordinator');
+    embed.setTitle(role.name);
+    embed.addField(`Player 1:`, member.toString());
+    if (count == 0) {
+        embed.setDescription(`${member.displayName} wants to play ${role}.`);
+    } else {
+        embed.setDescription(`${member.displayName} is looking for **${count - 1}** other ${role} player${count == 2 ? '' : 's'}.`);
+        for (let i = 2; i <= count; i++) {
+            embed.addField(`Player ${i}:`, '\u200B');
+        }
+    }
+    embed.setFooter(`Join this bracket by reacting below.`);
+    embed.setColor('#7b00ff');
+
+    let emoji = g_channels.get().guild.emojis.cache.find(emoji => emoji.name == role.name.split(' ').join('').split(':').join('').split('-').join(''));
+    let qg_emoji = g_channels.get().guild.emojis.cache.find(emoji => emoji.name == 'quarantinegaming');
+    if (emoji) {
+        embed.setThumbnail(emoji.url);
+    } else {
+        embed.setThumbnail(qg_emoji.url);
+    }
+    await g_channels.get().gaming.send({ content: `Inviting all ${role} players!`, embed: embed }).then(async message => {
+        message.delete({ timeout: 1800000, reason: 'Timed Out' }).catch(error => { });
+        if (emoji) {
+            await message.react(emoji).catch(error => {
+                g_interface.on_error({
+                    name: 'run -> .react(custom)',
+                    location: 'play.js',
+                    error: error
+                });
+            });
+        } else {
+            await message.react(qg_emoji).catch(error => {
+                g_interface.on_error({
+                    name: 'run -> .react(default)',
+                    location: 'play.js',
+                    error: error
+                });
+            });
+        }
+    }).catch(error => {
+        g_interface.on_error({
+            name: 'run -> .say()',
+            location: 'play.js',
+            error: error
+        });
+    });
+}
+
+let coordinator_queue = new Array(), is_processing = false;
 const queue = function (data) {
     coordinator_queue.push(data);
 
@@ -17,7 +69,7 @@ async function beginProcess() {
         let member = this_data.member;
         let embed = message.embeds[0];
         let inviter_id = embed.fields[0].value.substring(2, embed.fields[0].value.length - 1);
-        let inviter = g_interface.vars().guild.members.cache.find(member => member.id == inviter_id);
+        let inviter = g_channels.get().guild.members.cache.find(member => member.id == inviter_id);
 
         if (inviter_id != member.id) {
             let players = [];
@@ -100,7 +152,7 @@ async function beginProcess() {
                 }
                 // Notify full
                 if (status && has_caps && max == players.length) {
-                    await message.reactions.removeAll().catch(console.error);
+                    await message.reactions.removeAll().catch(error => { });
                     if (inviter) {
                         embed.setDescription('Your team members are listed below.');
                         embed.setFooter('Game On!');
@@ -121,5 +173,6 @@ async function beginProcess() {
 
 // Database Module Functions
 module.exports = {
+    invite,
     queue
 }

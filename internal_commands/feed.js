@@ -30,7 +30,7 @@ async function get(init = false) {
             }
 
 
-            await g_interface.vars().subscription.messages.fetch({ limit: 10 }).then(async messages => {
+            await g_channels.get().subscription.messages.fetch({ limit: 10 }).then(async messages => {
                 let this_messages = new Array();
                 messages.map(msg => {
                     if (msg.author.id == g_client.user.id && msg.embeds.length > 0 && msg.embeds[0].author.name == 'Quarantine Gaming: Free Game/DLC Notification' && msg.embeds[0].url == item_details.url) {
