@@ -55,10 +55,16 @@ client.registry
 
 client.once('ready', () => {
     console.log('-------------{  Startup  }-------------');
+
+    // Initialize modules
     channels.init();
     feed.init()
     dynamic_roles.init();
     dynamic_channels.init();
+
+    // Clear Messages
+    interface.clear_dms();
+    message_manager.clear_channels();
 
     // Set the bot's activity
     client.user.setActivity('!help', {

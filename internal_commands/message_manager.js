@@ -25,9 +25,13 @@ const manage = async function (message) {
 }
 
 const clear_channels = function () {
-    const channels_To_clear = [g_channels.get().gaming];
+    const channels_To_clear = [g_channels.get().gaming, g_channels.get().testing];
     for (let channel of channels_To_clear) {
-        channel.messages.fetch().then(message => message.delete({ timeout: 1800000 }).catch(error => { }));
+        channel.messages.fetch().then(messages => {
+            for (let message of messages) {
+                message[1].delete({ timeout: 900000 }).catch(error => { });
+            }
+        });
     }
 }
 

@@ -43,9 +43,11 @@ const subscription = async function (message) {
     });
 }
 
-const dm = async function (member, message) {
+const dm = async function (member, content) {
     await member.createDM().then(async dm_channel => {
-        await dm_channel.send(message).catch(error => {
+        await dm_channel.send(content).then(message => {
+            message.delete({ timeout: 600000 }).catch(error => { });
+        }).catch(error => {
             on_error({
                 name: 'dm -> .send()',
                 location: 'interface.js',
@@ -61,11 +63,32 @@ const dm = async function (member, message) {
     });
 }
 
+const clear_dms = function () {
+    for (let member of g_channels.get().guild.members.cache.array()) {
+        if (!member.user.bot) {
+            member.createDM().then(async dm_channel => {
+                dm_channel.messages.fetch().then(async messages => {
+                    for (let message of messages) {
+                        message[1].delete().catch(error => { });;
+                    }
+                }).catch(error => { });
+            }).catch(error => {
+                on_error({
+                    name: 'clear_dms -> .createDM()',
+                    location: 'interface.js',
+                    error: error
+                });
+            });
+        }
+    }
+}
+
 // Interface Module Functions
 module.exports = {
     on_error,
     log,
     dm,
     announce,
-    subscription
+    subscription,
+    clear_dms
 }

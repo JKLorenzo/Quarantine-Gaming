@@ -20,14 +20,14 @@ module.exports = class TransferCommand extends Command {
 
     run(message, { users }) {
         message.delete({ timeout: 60000 }).catch(error => { });
-        let channel = g_channels.get().guild.members.cache.get(message.author.id).voice.channelID;
+        let channel = g_channels.get().guild.member(message.author).voice.channel;
         if (channel) {
             for (let user of users.split(' ')) {
                 let user_id = user.split('<@').join('').split('>').join('').slice(1);
                 let this_member = g_channels.get().guild.members.cache.get(user_id);
                 if (this_member) {
                     if (this_member.voice.channelID) {
-                        this_member.voice.setChannel(channel).then(member => {
+                        this_member.voice.setChannel(channel.id).then(member => {
                             g_interface.dm(member, `You have been transfered by ${message.author} to ${channel.name}.`);
                         }).catch(error => { });
                     } else {
@@ -42,7 +42,7 @@ module.exports = class TransferCommand extends Command {
                 }
             }
         } else {
-            message.channel.send('Join a voice channel first before inviting someone.').then(this_message => {
+            message.channel.send('You must be active to any voice channels before you can trasfer other members.').then(this_message => {
                 this_message.delete({ timeout: 5000 }).catch(error => { });
             });
         }
