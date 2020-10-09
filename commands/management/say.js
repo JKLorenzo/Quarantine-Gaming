@@ -8,7 +8,6 @@ module.exports = class Say extends Command {
             memberName: 'say',
             description: "[Admin Only] Say a message to a voice channel using Quarantine Gaming's TTS.",
             userPermissions: ["ADMINISTRATOR"],
-            guildOnly: true,
             args: [
                 {
                     key: 'channelID',

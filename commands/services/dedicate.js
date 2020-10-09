@@ -7,7 +7,6 @@ module.exports = class DedicateCommand extends Command {
             group: 'services',
             memberName: 'dedicate',
             description: 'Manually create a dedicated voice and text channel.',
-            guildOnly: true,
             args: [
                 {
                     key: 'name',

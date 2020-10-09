@@ -8,7 +8,6 @@ module.exports = class PushCommand extends Command {
             group: 'management',
             memberName: 'push',
             description: '[Admin Only] Manually push a free game update link.',
-            guildOnly: true,
             userPermissions: ["ADMINISTRATOR"],
             args: [
                 {

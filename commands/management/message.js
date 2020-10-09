@@ -56,7 +56,6 @@ module.exports = class Message extends Command {
             memberName: 'message',
             description: '[Admin Only] Send or update a message to a channel as Quarantine Gaming.',
             userPermissions: ["ADMINISTRATOR"],
-            guildOnly: true,
             args: [
                 {
                     key: 'mode',
