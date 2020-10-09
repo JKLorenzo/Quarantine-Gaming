@@ -54,7 +54,7 @@ const init = async function () {
 const pushNotification = async function (notification) {
     notifications.push(notification);
 
-    Online_Database.notifications.doc(notification.id).set({
+    DB.notifications.doc(notification.id).set({
         title: notification.title,
         url: notification.link,
         author: notification.author,

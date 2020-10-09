@@ -2,20 +2,20 @@ let isUpdating = false, toUpdate = new Array();
 
 async function updateMember() {
     while (toUpdate.length > 0) {
-        const this_data = toUpdate.pop();
+        const this_data = toUpdate.shift();
         const oldData = this_data.old;
         const newData = this_data.new;
         let this_member = newData.member ? newData.member : oldData.member;
         if (!this_member.user.bot) {
             let oldA = [], newA = [];
-            if (oldData) oldA = oldData.activities.map(activity => activity.name);
-            if (newData) newA = newData.activities.map(activity => activity.name);
+            if (oldData) oldA = oldData.activities.map(activity => activity.name.trim());
+            if (newData) newA = newData.activities.map(activity => activity.name.trim());
             let diff = g_functions.array_difference(oldA, newA);
 
             for (let this_activity_name of diff) {
                 let newActivity, oldActivity
-                if (newData) newActivity = newData.activities.find(activity => activity.name == this_activity_name);
-                if (oldData) oldActivity = oldData.activities.find(activity => activity.name == this_activity_name);
+                if (newData) newActivity = newData.activities.find(activity => activity.name.trim() == this_activity_name);
+                if (oldData) oldActivity = oldData.activities.find(activity => activity.name.trim() == this_activity_name);
                 let this_activity = newActivity ? newActivity : oldActivity;
                 if (this_activity.applicationID && this_activity.type == 'PLAYING') {
                     let this_game_name = this_activity.name.trim();
