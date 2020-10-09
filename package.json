@@ -22,7 +22,7 @@
     "firebase-admin": "^9.2.0",
     "g-i-s": "^2.1.6",
     "google-tts-api": "0.0.4",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "opusscript": "0.0.7",
     "probe-image-size": "^5.0.0"
   }
