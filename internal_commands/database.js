@@ -38,17 +38,12 @@ const init = async function () {
         const this_notif = {
             id: o_notif.id,
             title: data.title,
-            url: data.link,
+            url: data.url,
             author: data.author,
-            description: data.description,
-            validity: data.validity,
-            score: data.score,
-            flair: data.flair,
-            permalink: data.permalink,
-            index: data.index
+            permalink: data.permalink
         };
 
-        if (this_notif.index > index) index = this_notif.index;
+        if (data.index > index) index = data.index;
         notifications.push(this_notif);
     }
 
@@ -63,10 +58,6 @@ const pushNotification = async function (notification) {
         title: notification.title,
         url: notification.link,
         author: notification.author,
-        description: notification.description,
-        validity: notification.validity,
-        score: notification.score,
-        flair: notification.flair,
         permalink: notification.permalink,
         index: ++index
     });

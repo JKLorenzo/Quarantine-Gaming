@@ -65,13 +65,13 @@ async function process_push() {
             // Stores the output message as an embed
             let output = new MessageEmbed().setTimestamp();
             output.setAuthor('Quarantine Gaming: Free Game/DLC Notification');
-            if (flair){
+            if (flair) {
                 if (flair.indexOf('Read Comments') != -1 || flair.indexOf('Regional Issues') != -1) {
                     output.setDescription(`(${flair})[${permalink}]`);
                 } else {
                     output.setDescription(flair);
                 }
-            } 
+            }
             output.addFields([
                 { name: 'Author', value: author, inline: true },
                 { name: 'Validity', value: `${validity} %`, inline: true },
@@ -254,35 +254,39 @@ async function process_push() {
                 // Create the final notification to be used
                 let safe_notification = {
                     title: no_title ? '' : safe_title ? safe_title : title,
-                    link: no_url ? '' : output.url,
+                    url: no_url ? '' : output.url,
                     image: output.image.url
                 };
-                // Check if this notification has duplicates
-                if (!g_db.hasRecords(safe_notification)) {
-                    let this_mentionables = new Array();
-                    await g_db.pushNotification(safe_notification);
-                    output.setColor(color.toHex());
+                let this_mentionables = new Array();
 
-                    if (mentionables.includes('steam')) {
-                        this_mentionables.push(`<@&722645979248984084>`);
-                    }
-                    if (mentionables.includes('epic')) {
-                        this_mentionables.push(`<@&722691589813829672>`);
-                    }
-                    if (mentionables.includes('gog')) {
-                        this_mentionables.push(`<@&722691679542312970>`);
-                    }
-                    if (mentionables.includes('console')) {
-                        this_mentionables.push(`<@&722691724572491776>`);
-                    }
-                    if (mentionables.includes('uplay')) {
-                        this_mentionables.push(`<@&750517524738605087>`);
-                    }
+                output.setColor(color.toHex());
 
-                    // Checks if the to-be-mentioned roles is not null
-                    if (this_mentionables) {
-                        await g_interface.subscription({ content: this_mentionables.join(', '), embed: output });
-                    }
+                if (mentionables.includes('steam')) {
+                    this_mentionables.push(`<@&722645979248984084>`);
+                }
+                if (mentionables.includes('epic')) {
+                    this_mentionables.push(`<@&722691589813829672>`);
+                }
+                if (mentionables.includes('gog')) {
+                    this_mentionables.push(`<@&722691679542312970>`);
+                }
+                if (mentionables.includes('console')) {
+                    this_mentionables.push(`<@&722691724572491776>`);
+                }
+                if (mentionables.includes('uplay')) {
+                    this_mentionables.push(`<@&750517524738605087>`);
+                }
+
+                // Checks if the to-be-mentioned roles is not null
+                if (this_mentionables) {
+                    let sent_message = await g_interface.subscription({ content: this_mentionables.join(', '), embed: output });
+                    await g_db.pushNotification({
+                        id: sent_message.id,
+                        title: no_title ? '' : safe_title ? safe_title : title,
+                        url: url,
+                        author: author,
+                        permalink: permalink
+                    });
                 }
             }
         } while (to_push.length > 0);

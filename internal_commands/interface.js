@@ -34,11 +34,11 @@ const on_error = async function (details) {
 }
 
 const subscription = async function (message) {
-    await g_channels.get().subscription.send(message).catch(error => {
-        on_error({
-            name: 'subscription',
-            location: 'interface.js',
-            error: error
+    return new Promise(async (resolve, reject) => {
+        await g_channels.get().subscription.send(message).then(message => {
+            resolve(message);
+        }).catch(error => {
+            reject(error);
         });
     });
 }

@@ -1,16 +1,15 @@
 const fetch = require('node-fetch');
 
-let results = new Array();
-
 function htmlEntities(str) {
     return String(str).replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"');
 }
 
-async function get(init = false) {
+async function get() {
     console.log('**Updating Feed**');
     await fetch('https://www.reddit.com/r/FreeGameFindings/new/.json?limit=25&sort=new').then(data => data.json()).then(async data => {
         for (let child of data.data.children) {
             let item = child.data;
+
             let item_details = {
                 title: htmlEntities(item.title),
                 url: item.url,
@@ -19,27 +18,18 @@ async function get(init = false) {
                 validity: item.upvote_ratio * 100,
                 score: item.score,
                 flair: item.link_flair_text,
-                permalink: `https://www.reddit.com${item.permalink}`
+                permalink: `https://www.reddit.com${item.permalink}`,
+                createdAt: item.created_utc
             };
 
-            if (!results.includes(item_details.title)) {
-                results.push(item_details.title);
-                if (!init) {
-                    g_fgu.push(item_details);
-                }
-            }
+            let today = new Date();
+            let published = new Date(item_details.createdAt * 1000);
+            let elapsedMinutes = Math.floor((today - published) / 60000);
 
-
-            await g_channels.get().subscription.messages.fetch({ limit: 10 }).then(async messages => {
-                let this_messages = new Array();
-                messages.map(msg => {
-                    if (msg.author.id == g_client.user.id && msg.embeds.length > 0 && msg.embeds[0].author.name == 'Quarantine Gaming: Free Game/DLC Notification' && msg.embeds[0].url == item_details.url) {
-                        this_messages.push(msg);
-                    }
-                    return msg;
-                });
-                if (this_messages.length > 0) {
-                    let this_message = this_messages[0];
+            let this_notif = g_db.hasRecords(item_details);
+            if (this_notif) {
+                // Update
+                await g_channels.get().subscription.messages.fetch(this_notif.id).then(async this_message => {
                     if (item_details.description) {
                         this_message.embeds[0].spliceFields(1, 3)
                             .addFields([
@@ -70,8 +60,11 @@ async function get(init = false) {
                             error: error
                         });
                     });
-                }
-            });
+                });
+            } else if (elapsedMinutes >= 30 && elapsedMinutes <= 90) {
+                // Push
+                g_fgu.push(item_details);
+            }
         }
     }).catch(error => {
         if (!error.indexOf('getaddrinfo EAI_AGAIN') !== -1) {
@@ -86,7 +79,7 @@ async function get(init = false) {
 
 const init = function () {
     // First feed fetch
-    get(true);
+    get();
     // Future feed fetchs every 30 mins
     setInterval(() => {
         get();

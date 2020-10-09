@@ -53,11 +53,12 @@ client.registry
     })
     .registerCommandsIn(path.join(__dirname, 'commands'));
 
-client.once('ready', () => {
+client.once('ready', async () => {
     console.log('-------------{  Startup  }-------------');
 
     // Initialize modules
     channels.init();
+    await db.init();
     feed.init()
     dynamic_roles.init();
     dynamic_channels.init();
