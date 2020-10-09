@@ -66,7 +66,7 @@ async function process_push() {
             let output = new MessageEmbed().setTimestamp();
             output.setAuthor('Quarantine Gaming: Free Game/DLC Notification');
             if (flair) {
-                if (flair.indexOf('Read Comments') != -1 || flair.indexOf('Regional Issues') != -1) {
+                if (flair.toLowerCase().indexOf('comment') !== -1 || flair.toLowerCase().indexOf('issue') !== -1) {
                     output.setDescription(`(${flair})[${permalink}]`);
                 } else {
                     output.setDescription(flair);
@@ -222,72 +222,48 @@ async function process_push() {
             let _url = no_url ? ' ' : url.toLowerCase();
 
             if (_url.indexOf('steampowered.com') !== -1) {
-                mentionables[mentionables.length] = 'steam';
+                mentionables.push(`<@&722645979248984084>`);
                 color.add(0, 157, 255);
             }
 
             if (_url.indexOf('epicgames.com') !== -1) {
-                mentionables[mentionables.length] = 'epic';
+                mentionables.push(`<@&722691589813829672>`);
                 color.add(157, 255, 0);
             }
 
             if (_url.indexOf('gog.com') !== -1) {
-                mentionables[mentionables.length] = 'gog';
+                mentionables.push(`<@&722691679542312970>`);
                 color.add(157, 0, 255)
             }
 
             let Console_URLs = ['playstation.com', 'wii.com', 'xbox.com'];
             for (let Console_URL of Console_URLs) {
                 if (_url.indexOf(Console_URL) !== -1) {
+                    if (!mentionables.includes('<@&722691724572491776>')) {
+                        mentionables.push(`<@&722691724572491776>`);
+                    }
                     mentionables[mentionables.length] = 'console';
                     color.add(200, 80, 200)
                 }
             }
 
             if (_url.indexOf('ubisoft.com') !== -1) {
-                mentionables[mentionables.length] = 'uplay';
+                mentionables.push(`<@&750517524738605087>`);
                 color.add(200, 120, 255)
             }
 
+            output.setColor(color.toHex());
+
             // Status
             if (!(no_title || filtered_content.length > 0 || no_url || mentionables.length == 0)) {
-                // Create the final notification to be used
-                let safe_notification = {
+                let sent_message = await g_interface.subscription({ content: mentionables.join(', '), embed: output });
+                await g_db.pushNotification({
+                    id: sent_message.id,
                     title: no_title ? '' : safe_title ? safe_title : title,
-                    url: no_url ? '' : output.url,
-                    image: output.image.url
-                };
-                let this_mentionables = new Array();
-
-                output.setColor(color.toHex());
-
-                if (mentionables.includes('steam')) {
-                    this_mentionables.push(`<@&722645979248984084>`);
-                }
-                if (mentionables.includes('epic')) {
-                    this_mentionables.push(`<@&722691589813829672>`);
-                }
-                if (mentionables.includes('gog')) {
-                    this_mentionables.push(`<@&722691679542312970>`);
-                }
-                if (mentionables.includes('console')) {
-                    this_mentionables.push(`<@&722691724572491776>`);
-                }
-                if (mentionables.includes('uplay')) {
-                    this_mentionables.push(`<@&750517524738605087>`);
-                }
-
-                // Checks if the to-be-mentioned roles is not null
-                if (this_mentionables) {
-                    let sent_message = await g_interface.subscription({ content: this_mentionables.join(', '), embed: output });
-                    await g_db.pushNotification({
-                        id: sent_message.id,
-                        title: no_title ? '' : safe_title ? safe_title : title,
-                        url: url,
-                        author: author,
-                        permalink: permalink
-                    });
-                }
+                    url: url,
+                    author: author,
+                    permalink: permalink
+                });
             }
         } while (to_push.length > 0);
         // Reset the status to false

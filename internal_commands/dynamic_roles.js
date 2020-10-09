@@ -18,22 +18,22 @@ async function updateMember() {
                 if (oldData) oldActivity = oldData.activities.find(activity => activity.name == this_activity_name);
                 let this_activity = newActivity ? newActivity : oldActivity;
                 if (this_activity.applicationID && this_activity.type == 'PLAYING') {
-                    let this_game = this_activity.name.trim();
-                    let this_vr_name = g_vrprefix + this_game;
-                    let this_voice_role = g_channels.get().guild.roles.cache.find(role => role.name == this_vr_name);
+                    let this_game_name = this_activity.name.trim();
+                    let this_play_name = g_vrprefix + this_game_name;
+                    let this_play_role = g_channels.get().guild.roles.cache.find(role => role.name == this_play_name);
                     if (newActivity) {
                         // Check if the title of the game is not null and is not one of the ignored titles
-                        if (this_game && !g_ignored_titles.includes(this_game)) {
+                        if (this_game_name && !g_ignored_titles.includes(this_game_name)) {
                             // Check if user doesn't have this mentionable role
-                            if (!this_member.roles.cache.find(role => role.name == this_game)) {
+                            if (!this_member.roles.cache.find(role => role.name == this_game_name)) {
                                 // Get the equivalent role of this game
-                                let this_mentionable_role = g_channels.get().guild.roles.cache.find(role => role.name == this_game);
+                                let this_mentionable_role = g_channels.get().guild.roles.cache.find(role => role.name == this_game_name);
                                 // Check if this role exists
                                 if (!this_mentionable_role) {
                                     // Create role on this guild
                                     await g_channels.get().guild.roles.create({
                                         data: {
-                                            name: this_game,
+                                            name: this_game_name,
                                             color: '0x00ffff',
                                             mentionable: true
                                         },
@@ -59,23 +59,23 @@ async function updateMember() {
                             }
 
                             // Check if this role doesn't exists
-                            if (!this_voice_role) {
+                            if (!this_play_role) {
                                 // Get reference role
                                 let play_role = g_channels.get().guild.roles.cache.find(role => role.name == '<PLAYROLES>');
                                 // Create role on this guild
                                 await g_channels.get().guild.roles.create({
                                     data: {
-                                        name: this_vr_name,
+                                        name: this_play_name,
                                         color: '0x7b00ff',
                                         position: play_role.position,
                                         hoist: true
                                     },
                                     reason: `A new game is played by (${this_member.user.tag}).`
-                                }).then(function (voice_role) {
-                                    this_voice_role = voice_role;
+                                }).then(function (play_role) {
+                                    this_play_role = play_role;
                                 }).catch(error => {
                                     g_interface.on_error({
-                                        name: 'updateMember -> .create(this_vr_name)',
+                                        name: 'updateMember -> .create(this_play_name)',
                                         location: 'dynamic_roles.js',
                                         error: error
                                     });
@@ -83,22 +83,22 @@ async function updateMember() {
                             }
 
                             // Check if user doesn't have this voice room role
-                            if (!this_member.roles.cache.find(role => role == this_voice_role)) {
+                            if (!this_member.roles.cache.find(role => role == this_play_role)) {
                                 // Assign role to this member
-                                await this_member.roles.add(this_voice_role).catch(error => {
+                                await this_member.roles.add(this_play_role).catch(error => {
                                     g_interface.on_error({
-                                        name: 'updateMember -> .add(this_voice_role)',
+                                        name: 'updateMember -> .add(this_play_role)',
                                         location: 'dynamic_roles.js',
                                         error: error
                                     });
                                 });
                             }
                         }
-                    } else if (this_voice_role) {
+                    } else if (this_play_role) {
                         // Remove role
-                        await this_member.roles.remove(this_voice_role, 'This role is no longer valid.').catch(error => {
+                        await this_member.roles.remove(this_play_role, 'This role is no longer valid.').catch(error => {
                             g_interface.on_error({
-                                name: 'updateMember -> .remove(this_voice_role) [user]',
+                                name: 'updateMember -> .remove(this_play_role) [user]',
                                 location: 'dynamic_roles.js',
                                 error: error
                             });
@@ -106,13 +106,13 @@ async function updateMember() {
                         // Check if the role is still in use
                         let role_in_use = false;
                         for (let this_guild_member of g_channels.get().guild.members.cache.array()) {
-                            if (this_guild_member.roles.cache.find(role => role == this_voice_role)) {
-                                if (this_guild_member.presence.activities.map(activity => activity.name.trim()).includes(this_voice_role.name.substring(g_vrprefix.length))) {
+                            if (this_guild_member.roles.cache.find(role => role == this_play_role)) {
+                                if (this_guild_member.presence.activities.map(activity => activity.name.trim()).includes(this_play_role.name.substring(g_vrprefix.length))) {
                                     role_in_use = true;
                                 } else {
-                                    await this_guild_member.roles.remove(this_voice_role, 'This role is no longer valid.').catch(error => {
+                                    await this_guild_member.roles.remove(this_play_role, 'This role is no longer valid.').catch(error => {
                                         g_interface.on_error({
-                                            name: 'updateMember -> .remove(this_voice_role) [member]',
+                                            name: 'updateMember -> .remove(this_play_role) [member]',
                                             location: 'dynamic_roles.js',
                                             error: error
                                         });
@@ -121,9 +121,9 @@ async function updateMember() {
                             }
                         }
                         if (!role_in_use) {
-                            await this_voice_role.delete('This role is no longer in use.').catch(error => {
+                            await this_play_role.delete('This role is no longer in use.').catch(error => {
                                 g_interface.on_error({
-                                    name: 'updateMember -> .delete(this_voice_role)',
+                                    name: 'updateMember -> .delete(this_play_role)',
                                     location: 'dynamic_roles.js',
                                     error: error
                                 });
@@ -143,21 +143,21 @@ const init = async function () {
         if (!this_member.user.bot) {
             for (let this_activity of this_member.presence.activities) {
                 if (this_activity.applicationID && this_activity.type == 'PLAYING') {
-                    let this_game = this_activity.name.trim();
-                    let this_vr_name = g_vrprefix + this_game;
-                    let this_voice_role = g_channels.get().guild.roles.cache.find(role => role.name == this_vr_name);
+                    let this_game_name = this_activity.name.trim();
+                    let this_play_name = g_vrprefix + this_game_name;
+                    let this_play_role = g_channels.get().guild.roles.cache.find(role => role.name == this_play_name);
                     // Check if the title of the game is not null and is not one of the ignored titles
-                    if (this_game && !g_ignored_titles.includes(this_game)) {
+                    if (this_game_name && !g_ignored_titles.includes(this_game_name)) {
                         // Check if user doesn't have this mentionable role
-                        if (!this_member.roles.cache.find(role => role.name == this_game)) {
+                        if (!this_member.roles.cache.find(role => role.name == this_game_name)) {
                             // Get the equivalent role of this game
-                            let this_mentionable_role = g_channels.get().guild.roles.cache.find(role => role.name == this_game);
+                            let this_mentionable_role = g_channels.get().guild.roles.cache.find(role => role.name == this_game_name);
                             // Check if this role exists
                             if (!this_mentionable_role) {
                                 // Create role on this guild
                                 await g_channels.get().guild.roles.create({
                                     data: {
-                                        name: this_game,
+                                        name: this_game_name,
                                         color: '0x00ffff',
                                         mentionable: true,
                                         hoist: true
@@ -167,7 +167,7 @@ const init = async function () {
                                     this_mentionable_role = this_created_role;
                                 }).catch(error => {
                                     g_interface.on_error({
-                                        name: 'init -> .create(this_game)',
+                                        name: 'init -> .create(this_game_name)',
                                         location: 'dynamic_roles.js',
                                         error: error
                                     });
@@ -184,23 +184,23 @@ const init = async function () {
                         }
 
                         // Check if this role doesn't exists
-                        if (!this_voice_role) {
+                        if (!this_play_role) {
                             // Get reference role
                             let play_role = g_channels.get().guild.roles.cache.find(role => role.name == '<PLAYROLES>');
                             // Create role on this guild
                             await g_channels.get().guild.roles.create({
                                 data: {
-                                    name: this_vr_name,
+                                    name: this_play_name,
                                     color: '0x7b00ff',
                                     position: play_role.position,
                                     hoist: true
                                 },
                                 reason: `A new game is played by (${this_member.user.tag}).`
-                            }).then(async function (voice_role) {
-                                this_voice_role = voice_role;
+                            }).then(async function (play_role) {
+                                this_play_role = play_role;
                             }).catch(error => {
                                 g_interface.on_error({
-                                    name: 'init -> .create(this_vr_name)',
+                                    name: 'init -> .create(this_play_name)',
                                     location: 'dynamic_roles.js',
                                     error: error
                                 });
@@ -208,11 +208,11 @@ const init = async function () {
                         }
 
                         // Check if user doesn't have this voice room role
-                        if (!this_member.roles.cache.find(role => role == this_voice_role)) {
+                        if (!this_member.roles.cache.find(role => role == this_play_role)) {
                             // Assign role to this member
-                            await this_member.roles.add(this_voice_role).catch(error => {
+                            await this_member.roles.add(this_play_role).catch(error => {
                                 g_interface.on_error({
-                                    name: 'init -> .add(this_voice_role)',
+                                    name: 'init -> .add(this_play_role)',
                                     location: 'dynamic_roles.js',
                                     error: error
                                 });
