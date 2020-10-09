@@ -245,7 +245,6 @@ const init = async function () {
                 }
             }
             if (!role_in_use) {
-                console.log(`Delete: ${this_role.name}`)
                 await this_role.delete('This role is no longer in use.').catch(error => {
                     g_interface.on_error({
                         name: 'init -> .delete(this_role)',

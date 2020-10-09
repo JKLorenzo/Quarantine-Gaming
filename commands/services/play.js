@@ -30,16 +30,22 @@ module.exports = class PlayCommand extends Command {
                     type: 'integer',
                     default: 0,
                     validate: count => (count > 1 && count < 26) || count == 0
+                },
+                {
+                    key: 'reserved',
+                    prompt: "[Optional] Mention the user/users you want to reserve.",
+                    type: 'string',
+                    default: ''
                 }
             ]
         });
     }
 
-    async run(message, { role, count }) {
+    async run(message, { role, count, reserved }) {
         message.delete({ timeout: 60000 }).catch(error => { });
         let role_id = `${role}`.substring(3, `${role}`.length - 1);
         let this_role = g_channels.get().guild.roles.cache.find(role => role.id == role_id);
         let this_member = g_channels.get().guild.member(message.author);
-        g_coordinator.invite(this_role, this_member, count);
+        g_coordinator.invite(this_role, this_member, count, reserved);
     }
 };

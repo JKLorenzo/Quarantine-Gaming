@@ -2,10 +2,11 @@ const { MessageEmbed } = require("discord.js");
 let is_dedicating = false, dedicate_queue = new Array();
 const parentID = '749231470396309535';
 
-let guild, c_log, c_subscription, c_staff, c_gaming, c_announcement, c_testing;
+let guild, c_log, c_subscription, c_staff, c_gaming, c_announcement, c_testing, c_general;
 
 const init = function () {
     guild = g_client.guilds.cache.get('351178660725915649');
+    c_general = guild.channels.cache.get('749661539908190258');
     c_log = guild.channels.cache.get('722760285622108210');
     c_subscription = guild.channels.cache.get('699763763859161108');
     c_staff = guild.channels.cache.get('749763548090990613');
@@ -17,6 +18,7 @@ const init = function () {
 const get = function () {
     return {
         guild: guild,
+        general: c_general,
         log: c_log,
         subscription: c_subscription,
         staff: c_staff,

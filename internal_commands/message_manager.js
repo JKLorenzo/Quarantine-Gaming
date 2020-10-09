@@ -7,7 +7,7 @@ const manage = async function (message) {
 
     // Game Invites
     if (message.channel && message.channel.id == g_channels.get().gaming.id && (message.embeds.length == 0 || (message.embeds.length > 0 && message.embeds[0].author.name != 'Quarantine Gaming: Game Coordinator'))) {
-        g_interface.dm(g_channels.get().guild.member(message.author), `Hello there! You can't send any messages in ${message.channel} channel.`);
+        g_interface.dm(g_channels.get().guild.member(message.author), `Hello there! You can't send any messages in ${message.channel} channel. To invite players, do *!play* command in the ${g_channels.get().general} text channel.`);
         message.delete({ timeout: 250 }).catch(error => { });
     }
 
@@ -19,7 +19,7 @@ const manage = async function (message) {
         if (this_role && this_role.hexColor == '#00ffff') {
             message.delete({ timeout: 60000 }).catch(error => { });
             let this_member = g_channels.get().guild.member(message.author);
-            g_coordinator.invite(this_role, this_member, 0);
+            g_coordinator.invite(this_role, this_member, 0, '');
         }
     }
 }
