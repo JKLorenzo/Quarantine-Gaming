@@ -1,4 +1,5 @@
 const { Command } = require('discord.js-commando');
+const { MessageEmbed } = require("discord.js");
 
 module.exports = class DedicateCommand extends Command {
     constructor(client) {
@@ -20,7 +21,65 @@ module.exports = class DedicateCommand extends Command {
 
     run(message, { name }) {
         message.delete({ timeout: 5000 }).catch(error => { });
-        g_channels.dedicate(message.member, name);
+        if (name.toLowerCase() == 'lock' || name.toLowerCase() == 'unlock') {
+            if (message.member.voice.channel.parent == g_channels.get().dedicated) {
+                let text_channel = g_channels.get().guild.channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == message.member.voice.channel.id);
+                let embed = new MessageEmbed();
+                embed.setAuthor('Quarantine Gaming: Dedicated Channels');
+                embed.setThumbnail(message.author.displayAvatarURL());
+                embed.setFooter(`${message.author.tag} (${message.author.id})`);
+                embed.setTimestamp();
+                embed.setColor('#ffe500');
+                switch (name) {
+                    case 'lock':
+                        message.member.voice.channel.updateOverwrite('722699433225224233', {
+                            'CONNECT': false
+                        }).then(channel => {
+                            embed.setTitle(channel.name);
+                            embed.setDescription(`${message.author} locked this channel.`);
+                            text_channel.send(embed).catch(error => {
+                                g_interface.on_error({
+                                    name: 'run -> .send(embed) [case lock]',
+                                    location: 'dedicate.js',
+                                    error: error
+                                });
+                            });
+                        }).catch(error => {
+                            g_interface.on_error({
+                                name: 'run -> .updateOverwrite() [case lock]',
+                                location: 'dedicate.js',
+                                error: error
+                            });
+                        });
+                        break;
+                    case 'unlock':
+                        message.member.voice.channel.updateOverwrite('722699433225224233', {
+                            'CONNECT': true
+                        }).then(channel => {
+                            embed.setTitle(channel.name);
+                            embed.setDescription(`${message.author} unlocked this channel.`);
+                            text_channel.send(embed).catch(error => {
+                                g_interface.on_error({
+                                    name: 'run -> .send(embed) [case unlock]',
+                                    location: 'dedicate.js',
+                                    error: error
+                                });
+                            });
+                        }).catch(error => {
+                            g_interface.on_error({
+                                name: 'run -> .updateOverwrite() [case unlock]',
+                                location: 'dedicate.js',
+                                error: error
+                            });
+                        });
+                        break
+                }
+            } else {
+                message.say(`You must be active to one of the dedicated channels to lock or unlock a channel.`)
+            }
+        } else {
+            g_channels.dedicate(message.member, name);
+        }
         return;
     }
 };

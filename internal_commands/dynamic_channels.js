@@ -1,6 +1,5 @@
 const { MessageEmbed } = require("discord.js");
 let isUpdating = false, toUpdate = new Array();
-const parentID = '749231470396309535';
 
 async function updateGuild() {
     // Transfer members from generic voice rooms to dynamic voice rooms
@@ -47,7 +46,7 @@ async function updateChannel() {
         let oldState = this_data.old;
 
         if (oldState.channel != newState.channel) {
-            if (oldState.channel && oldState.channel.parentID == parentID) {
+            if (oldState.channel && oldState.channel == g_channels.get().dedicated) {
                 let text_channel = g_channels.get().guild.channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == oldState.channelID);
                 let text_role = g_channels.get().guild.roles.cache.get(text_channel.topic.split(' ')[1]);
                 if (oldState.channel.members.size > 0 && !(oldState.channel.members.size == 1 && oldState.channel.members.first().user.bot)) {
@@ -124,7 +123,7 @@ async function updateChannel() {
                 }
 
                 // Add member to a text channel when joining a dedicated channel
-                if (newState.channel.parentID == parentID) {
+                if (newState.channel == g_channels.get().dedicated) {
                     let text_channel = g_channels.get().guild.channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == newState.channelID);
                     let text_role = g_channels.get().guild.roles.cache.get(text_channel.topic.split(' ')[1]);
                     if (!newState.member.roles.cache.find(role => role == text_role)) {
@@ -174,7 +173,7 @@ async function updateChannel() {
 // External Functions Region
 const init = async function () {
     for (let this_channel of g_channels.get().guild.channels.cache.array()) {
-        if (this_channel.parent && this_channel.parent.id == parentID) {
+        if (this_channel.parent && this_channel.parent == g_channels.get().dedicated) {
             if (this_channel.type == 'text') {
                 let data = this_channel.topic.split(' ');
                 let this_voice = g_channels.get().guild.channels.cache.get(data[0]);

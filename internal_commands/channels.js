@@ -1,8 +1,7 @@
 const { MessageEmbed } = require("discord.js");
 let is_dedicating = false, dedicate_queue = new Array();
-const parentID = '749231470396309535';
 
-let guild, c_log, c_subscription, c_staff, c_gaming, c_announcement, c_testing, c_general;
+let guild, c_log, c_subscription, c_staff, c_gaming, c_announcement, c_testing, c_general, c_dedicated;
 
 const init = function () {
     guild = g_client.guilds.cache.get('351178660725915649');
@@ -13,6 +12,7 @@ const init = function () {
     c_gaming = guild.channels.cache.get('759755324264808489');
     c_announcement = guild.channels.cache.get('759920653146652682');
     c_testing = guild.channels.cache.get('749579412139278399');
+    c_dedicated = guild.channels.cache.get('749231470396309535');
 }
 
 const get = function () {
@@ -24,7 +24,8 @@ const get = function () {
         staff: c_staff,
         gaming: c_gaming,
         announcement: c_announcement,
-        testing: c_testing
+        testing: c_testing,
+        dedicated: c_dedicated
     }
 }
 
@@ -36,7 +37,7 @@ async function beginDedicate() {
         let this_channel = this_data.member.voice.channel;
 
         if (this_channel) {
-            if (this_channel.parent.id == parentID) {
+            if (this_channel.parent == g_channels.get().dedicated) {
                 // Rename channel
                 let text_channel = g_channels.get().guild.channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == this_channel.id);
                 text_channel.setName(this_name).catch(error => { });
@@ -77,7 +78,7 @@ async function beginDedicate() {
                 // Create voice channel
                 await guild.channels.create(this_name, {
                     type: 'voice',
-                    parent: parentID,
+                    parent: g_channels.get().dedicated.id,
                     position: 1,
                     permissionOverwrites: [
                         {
@@ -112,7 +113,7 @@ async function beginDedicate() {
                         // Create text channel
                         await guild.channels.create(this_name, {
                             type: 'text',
-                            parent: parentID,
+                            parent: g_channels.get().dedicated.id,
                             position: 1,
                             permissionOverwrites: [
                                 {
