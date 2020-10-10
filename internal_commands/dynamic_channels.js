@@ -46,7 +46,7 @@ async function updateChannel() {
         let oldState = this_data.old;
 
         if (oldState.channel != newState.channel) {
-            if (oldState.channel && oldState.channel == g_channels.get().dedicated) {
+            if (oldState.channel && oldState.channel.parent == g_channels.get().dedicated) {
                 let text_channel = g_channels.get().guild.channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == oldState.channelID);
                 let text_role = g_channels.get().guild.roles.cache.get(text_channel.topic.split(' ')[1]);
                 if (oldState.channel.members.size > 0 && !(oldState.channel.members.size == 1 && oldState.channel.members.first().user.bot)) {
@@ -123,7 +123,7 @@ async function updateChannel() {
                 }
 
                 // Add member to a text channel when joining a dedicated channel
-                if (newState.channel == g_channels.get().dedicated) {
+                if (newState.channel.parent == g_channels.get().dedicated) {
                     let text_channel = g_channels.get().guild.channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == newState.channelID);
                     let text_role = g_channels.get().guild.roles.cache.get(text_channel.topic.split(' ')[1]);
                     if (!newState.member.roles.cache.find(role => role == text_role)) {
