@@ -25,27 +25,34 @@ module.exports = class PlayCommand extends Command {
                     }
                 },
                 {
-                    key: 'count',
-                    prompt: "[Optional] Enter the number of players you're looking for, including yourself. (Range: 2 - 25; Default: 0)",
-                    type: 'integer',
-                    default: 0,
-                    validate: count => (count > 1 && count < 26) || count == 0
-                },
-                {
-                    key: 'reserved',
-                    prompt: "[Optional] Mention the user/users you want to reserve.",
+                    key: 'input',
+                    prompt: "[Optional] Enter the number of players you're looking for, including yourself. (Range: 2 - 25; Default: 0)\n\nor\n\n[Optional] Mention the user/users you want to reserve. The mentioned user/users will automatically be added to your bracket without needing them to react.\n\nor\n\nBoth.",
                     type: 'string',
-                    default: ''
+                    default: '0'
                 }
             ]
         });
     }
 
-    async run(message, { role, count, reserved }) {
+    async run(message, { role, input }) {
         message.delete({ timeout: 60000 }).catch(error => { });
-        let role_id = `${role}`.substring(3, `${role}`.length - 1);
-        let this_role = g_channels.get().guild.roles.cache.find(role => role.id == role_id);
-        let this_member = g_channels.get().guild.member(message.author);
+        const role_id = `${role}`.substring(3, `${role}`.length - 1);
+        const this_role = g_channels.get().guild.roles.cache.find(role => role.id == role_id);
+        const this_member = g_channels.get().guild.member(message.author);
+        function parse(string) {
+            const parsed = parseInt(string, 10);
+            if (isNaN(parsed)) return 0;
+            return parsed;
+        }
+        const args = input.split(' ');
+        const count = parse(args[0]);
+        const reserved = args.map(arg => {
+            if (arg.startsWith('<@') && arg.endsWith('>')) {
+                return arg + ' ';
+            } else {
+                return '';
+            }
+        }).join('');
         g_coordinator.invite(this_role, this_member, count, reserved);
     }
 };
