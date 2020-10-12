@@ -16,7 +16,7 @@ async function updateMember() {
             // DEBUGGING =============================================
             let embed = new MessageEmbed().setTimestamp();
             embed.setAuthor('Quarantine Gaming: Presence Debugging', g_client.user.displayAvatarURL());
-            embed.setTitle('Member Presence Update');
+            embed.setTitle('Presence Update');
             let description = new Array();
             description.push(`OLD DATA: ${oldA.join(', ')}`);
             description.push(`NEW DATA: ${newA.join(', ')}`);
@@ -31,8 +31,8 @@ async function updateMember() {
                 description.push(`New Activity: |${newActivity.name}|`);
                 description.push(`Old Activity: |${oldActivity.name}|`);
                 this_activity = newActivity ? newActivity : oldActivity;
-                description.push(`Selected: |${this_activity.name}|`);
-                description.push(this_activity.applicationID ? 'VERIFIED' : 'UNVERIFIED');
+                description.push(`Selected: ${newActivity ? 'New Activity': 'Old Activity'}`);
+                description.push(`GAME: ${this_activity.type == 'PLAYING' ? this_activity.applicationID ? 'VERIFIED' : 'UNVERIFIED' : 'NOT A GAME'}`);
                 if (this_activity.applicationID && this_activity.type == 'PLAYING') {
                     let this_game_name = this_activity.name.trim();
                     let this_play_name = g_vrprefix + this_game_name;
