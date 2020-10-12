@@ -20,17 +20,17 @@ async function updateMember() {
             let description = new Array();
             description.push(`OLD DATA: ${oldA.join(', ')}`);
             description.push(`NEW DATA: ${newA.join(', ')}`);
+            description.push(`TO PROCESS: ${diff.join(', ')}`);
 
-            let this_activity;
             for (let this_activity_name of diff) {
                 description.push(` `);
                 description.push(this_activity_name);
                 let newActivity, oldActivity
                 if (newData) newActivity = newData.activities.find(activity => activity.name.trim() == this_activity_name);
                 if (oldData) oldActivity = oldData.activities.find(activity => activity.name.trim() == this_activity_name);
-                description.push(`New Activity: |${newActivity.name}|`);
-                description.push(`Old Activity: |${oldActivity.name}|`);
-                this_activity = newActivity ? newActivity : oldActivity;
+                description.push(`New Activity Name: |${newActivity ? newActivity.name ? newActivity.name : 'NONE' : 'NULL'}|`);
+                description.push(`Old Activity Name: |${oldActivity ? oldActivity.name ? oldActivity.name : 'NONE' : 'NULL'}|`);
+                let this_activity = newActivity ? newActivity : oldActivity;
                 description.push(`Selected: ${newActivity ? 'New Activity': 'Old Activity'}`);
                 description.push(`GAME: ${this_activity.type == 'PLAYING' ? this_activity.applicationID ? 'VERIFIED' : 'UNVERIFIED' : 'NOT A GAME'}`);
                 if (this_activity.applicationID && this_activity.type == 'PLAYING') {
