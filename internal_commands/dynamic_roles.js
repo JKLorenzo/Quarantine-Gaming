@@ -1,3 +1,4 @@
+const { MessageEmbed } = require('discord.js');
 let isUpdating = false, toUpdate = new Array();
 
 async function updateMember() {
@@ -7,16 +8,31 @@ async function updateMember() {
         const newData = this_data.new;
         let this_member = newData.member ? newData.member : oldData.member;
         if (!this_member.user.bot) {
-            let oldA = [], newA = [];
+            let oldA = new Array(), newA = new Array();
             if (oldData) oldA = oldData.activities.map(activity => activity.name.trim());
             if (newData) newA = newData.activities.map(activity => activity.name.trim());
             let diff = g_functions.array_difference(oldA, newA);
 
+            // DEBUGGING =============================================
+            let embed = new MessageEmbed().setTimestamp();
+            embed.setAuthor('Quarantine Gaming: Presence Debugging', g_client.user.displayAvatarURL());
+            embed.setTitle('Member Presence Update');
+            let description = new Array();
+            description.push(`OLD DATA: ${oldA.join(', ')}`);
+            description.push(`NEW DATA: ${newA.join(', ')}`);
+
+            let this_activity;
             for (let this_activity_name of diff) {
+                description.push(` `);
+                description.push(this_activity_name);
                 let newActivity, oldActivity
                 if (newData) newActivity = newData.activities.find(activity => activity.name.trim() == this_activity_name);
                 if (oldData) oldActivity = oldData.activities.find(activity => activity.name.trim() == this_activity_name);
-                let this_activity = newActivity ? newActivity : oldActivity;
+                description.push(`New Activity: |${newActivity.name}|`);
+                description.push(`Old Activity: |${oldActivity.name}|`);
+                this_activity = newActivity ? newActivity : oldActivity;
+                description.push(`Selected: |${this_activity.name}|`);
+                description.push(this_activity.applicationID ? 'VERIFIED' : 'UNVERIFIED');
                 if (this_activity.applicationID && this_activity.type == 'PLAYING') {
                     let this_game_name = this_activity.name.trim();
                     let this_play_name = g_vrprefix + this_game_name;
@@ -132,6 +148,8 @@ async function updateMember() {
                     }
                 }
             }
+            embed.setDescription(description.join('\n'));
+            g_interface.log(embed);
         }
     }
     isUpdating = false;
