@@ -152,7 +152,7 @@ async function updateMember() {
                 }
             }
             embed.setDescription(description.join('\n'));
-            if (oldA.length > 0 || newA.length > 0) g_interface.log(embed);
+            if (oldA.length > 0 || newA.length > 0) g_channels.get().testing.send(embed);
         }
     }
     isUpdating = false;
