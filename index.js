@@ -24,7 +24,7 @@ const client = new CommandoClient({
 // Global Variables
 global.g_vrprefix = 'Play ';
 global.g_ignored_titles = [
-    'StartupWindow', 'Error', 'modlauncher', 'BlueStacks', 'NoxPlayer', 'Wallpaper Engine', 'Mozilla Firefox', 'Divinity Original Sin 2'
+    'StartupWindow', 'Error', 'modlauncher', 'BlueStacks', 'NoxPlayer', 'Wallpaper Engine'
 ];
 global.rootDir = path.resolve(__dirname);
 global.g_db = db;
