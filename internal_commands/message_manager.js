@@ -266,7 +266,7 @@ const reactionAdd = async function (reaction, user) {
                                         });
 
                                         // Sleep
-                                        if (effect) await g_interface.sleep(5000);
+                                        if (effect) await g_functions.sleep(5000);
 
                                         // Apply reaction effect
                                         for (let this_channel_member of channel_members) {
