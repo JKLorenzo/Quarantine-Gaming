@@ -22,10 +22,6 @@ const client = new CommandoClient({
 });
 
 // Global Variables
-global.g_vrprefix = 'Play ';
-global.g_ignored_titles = [
-    'StartupWindow', 'Error', 'modlauncher', 'BlueStacks', 'NoxPlayer', 'Wallpaper Engine'
-];
 global.rootDir = path.resolve(__dirname);
 global.g_db = db;
 global.g_fgu = fgu;
@@ -34,8 +30,8 @@ global.g_speech = speech;
 global.g_functions = functions;
 global.g_channels = channels;
 global.g_coordinator = coordinator;
+global.g_dynamic_roles = dynamic_roles;
 global.g_client = client;
-
 
 client.registry
     .registerDefaultTypes()
@@ -140,7 +136,7 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
         if (newMember.roles.cache.size != oldMember.roles.cache.size) {
             let added = new Array(), removed = new Array();
             for (let this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
-                if (!this_role.name.startsWith(g_vrprefix) && !this_role.name.startsWith('Text')) {
+                if (!this_role.name.startsWith('Play ') && !this_role.name.startsWith('Text')) {
                     if (newMember.roles.cache.has(this_role.id)) {
                         added.push(this_role);
                     } else {

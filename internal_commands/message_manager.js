@@ -257,7 +257,7 @@ const reactionAdd = async function (reaction, user) {
                                         }
 
                                         // Notify voice channel
-                                        await g_interface.say(effect ? 'Muting in 5 seconds' : 'Unmuting', this_channel).catch(error => {
+                                        await g_speech.say(effect ? 'Muting in 5 seconds' : 'Unmuting', this_channel).catch(error => {
                                             g_interface.on_error({
                                                 name: 'messageReactionAdd -> .say() [among us]',
                                                 location: 'message_manager.js',

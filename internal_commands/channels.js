@@ -106,8 +106,7 @@ async function beginDedicate() {
                     // Create text role
                     await guild.roles.create({
                         data: {
-                            name: `Text ${voice_channel.id}`,
-                            color: '0x7b00ff'
+                            name: `Text ${voice_channel.id}`
                         }
                     }).then(async function (text_role) {
                         // Create text channel

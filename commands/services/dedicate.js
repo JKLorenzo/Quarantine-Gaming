@@ -11,9 +11,9 @@ module.exports = class DedicateCommand extends Command {
             args: [
                 {
                     key: 'name',
-                    prompt: 'Enter the name of the channel.',
+                    prompt: 'Enter the name of the channel. The name must be within 1 to 30 characters long.',
                     type: 'string',
-                    validate: name => name.length > 0
+                    validate: name => name.length > 0 && name.length <= 30
                 }
             ]
         });

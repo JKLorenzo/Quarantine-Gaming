@@ -16,17 +16,16 @@ Firebase.initializeApp({
 });
 const Firestore = Firebase.firestore();
 const DB = {
-    notifications: Firestore.collection('notifications')
+    notifications: Firestore.collection('notifications'),
+    titles_blacklisted: Firestore.collection('t_blacklisted'),
+    titles_whitelisted: Firestore.collection('t_whitelisted')
 };
 
-let notifications = new Array(), index = 0;
+let notifications = new Array(), index = 0, blacklisted = new Array(), whitelisted = new Array();
 
 function trimNotif() {
-    // Remove all the expired notifications
     while (notifications.length > 5) {
-        // Remove the first notification from the local array and store it in a variable
         let expired_notif = notifications.shift();
-        // Remove the notification from the online database
         DB.notifications.doc(expired_notif.id).delete();
     }
 }
@@ -48,13 +47,23 @@ const init = async function () {
     }
 
     trimNotif();
+
+    const t_blacklisted = await DB.titles_blacklisted.get();
+    for (let title of t_blacklisted.docs) {
+        blacklisted.push(title.id);
+    }
+
+    const t_whitelisted = await DB.titles_whitelisted.get();
+    for (let title of t_whitelisted.docs) {
+        whitelisted.push(title.id);
+    }
 }
 
 // Notification Region
 const pushNotification = async function (notification) {
     notifications.push(notification);
 
-    DB.notifications.doc(notification.id).set({
+    await DB.notifications.doc(notification.id).set({
         title: notification.title,
         url: notification.link,
         author: notification.author,
@@ -76,9 +85,57 @@ const hasRecords = function (notification) {
     return false;
 }
 
+// Titles Region
+const titles = function () {
+    return {
+        blacklisted: blacklisted,
+        whitelisted: whitelisted
+    }
+}
+
+const pushBlacklisted = async function (name) {
+    name = name.toLowerCase();
+    let updated = false;
+    if (!blacklisted.includes(name)) {
+        blacklisted.push(name);
+        await DB.titles_blacklisted.doc(name).set({});
+        updated = true;
+    }
+
+    let index = whitelisted.indexOf(name);
+    if (index + 1){
+        whitelisted.splice(index, 1);
+        await DB.titles_whitelisted.doc(name).delete();
+        updated = true;
+    }
+    return updated;
+}
+
+const pushWhitelisted = async function (name) {
+    name = name.toLowerCase();
+    let updated = false;
+    if (!whitelisted.includes(name)) {
+        whitelisted.push(name);
+        await DB.titles_whitelisted.doc(name).set({});
+        updated = true;
+    } 
+
+    let index = blacklisted.indexOf(name);
+    if (index + 1){
+        blacklisted.splice(index, 1);
+        await DB.titles_blacklisted.doc(name).delete();
+        updated = true;
+    }
+
+    return updated;
+}
+
 // Database Module Functions
 module.exports = {
     init,
     pushNotification,
-    hasRecords
+    hasRecords,
+    titles,
+    pushBlacklisted,
+    pushWhitelisted
 }

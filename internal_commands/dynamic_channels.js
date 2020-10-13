@@ -11,20 +11,20 @@ async function updateGuild() {
                 let baseline_role, same_acitivities, diff_acitivities;
                 for (let this_member of this_channel.members.array()) {
                     for (let this_role of this_member.roles.cache.array()) {
-                        if (!baseline_role && this_role.name.startsWith('Play')) {
+                        if (!baseline_role && this_role.name.startsWith('Play ')) {
                             // Check how many users have the same roles
                             same_acitivities = 0;
                             diff_acitivities = 0;
                             for (let this_member of this_channel.members.array()) {
                                 if (this_member.roles.cache.find(role => role == this_role)) {
                                     same_acitivities++;
-                                } else if (this_member.roles.cache.find(role => role.name.startsWith('Play'))) {
+                                } else if (this_member.roles.cache.find(role => role.name.startsWith('Play '))) {
                                     diff_acitivities++;
                                 }
                             }
-                            if (same_acitivities > 1 && same_acitivities > diff_acitivities && !this_role.name.substring(g_vrprefix.length).startsWith(this_channel.name)) {
+                            if (same_acitivities > 1 && same_acitivities > diff_acitivities && !this_role.name.substring(5) == this_channel.name) {
                                 baseline_role = this_role;
-                                g_channels.dedicate(this_member, this_role.name.substring(g_vrprefix.length));
+                                g_channels.dedicate(this_member, this_role.name.substring(5));
                             }
                         }
                     }
