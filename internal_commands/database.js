@@ -23,7 +23,7 @@ const DB = {
 
 let notifications = new Array(), index = 0, blacklisted = new Array(), whitelisted = new Array();
 
-function trimNotif() {
+async function trimNotif() {
     while (notifications.length > 5) {
         let expired_notif = notifications.shift();
         DB.notifications.doc(expired_notif.id).delete();
@@ -46,7 +46,7 @@ const init = async function () {
         notifications.push(this_notif);
     }
 
-    trimNotif();
+    await trimNotif();
 
     const t_blacklisted = await DB.titles_blacklisted.get();
     for (let title of t_blacklisted.docs) {
@@ -65,13 +65,13 @@ const pushNotification = async function (notification) {
 
     await DB.notifications.doc(notification.id).set({
         title: notification.title,
-        url: notification.link,
+        url: notification.url,
         author: notification.author,
         permalink: notification.permalink,
         index: ++index
     });
 
-    trimNotif();
+    await trimNotif();
 }
 
 const hasRecords = function (notification) {
