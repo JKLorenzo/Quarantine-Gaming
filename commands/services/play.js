@@ -35,7 +35,7 @@ module.exports = class PlayCommand extends Command {
     }
 
     async run(message, { role, input }) {
-        message.delete({ timeout: 60000 }).catch(error => { });
+        message.delete({ timeout: 300000 }).catch(error => { });
         const role_id = `${role}`.substring(3, `${role}`.length - 1);
         const this_role = g_channels.get().guild.roles.cache.find(role => role.id == role_id);
         const this_member = g_channels.get().guild.member(message.author);
@@ -54,5 +54,6 @@ module.exports = class PlayCommand extends Command {
             }
         }).join('');
         g_coordinator.invite(this_role, this_member, count, reserved);
+        return message.say(`Got it! Your bracket will be available in the ${g_channels.get().gaming} channel.`).then(message => message.delete({ timeout: 300000 }).catch(error => { })).catch(error => { });
     }
 };

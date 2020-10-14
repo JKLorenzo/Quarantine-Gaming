@@ -224,7 +224,7 @@ const init = async function () {
 
     // Remove unused play roles
     for (let this_role of g_channels.get().guild.roles.cache.array()) {
-        if (this_role.hexColor == '#7b00ff' && this_role.name.startsWith('Play ')) {
+        if (this_role.hexColor == '#7b00ff' && this_role.name.startsWith('Play')) {
             // Check if the role is still in use
             let role_in_use = false;
             for (let this_member of g_channels.get().guild.members.cache.array()) {
