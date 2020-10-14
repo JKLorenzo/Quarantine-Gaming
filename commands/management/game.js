@@ -30,14 +30,12 @@ module.exports = class Game extends Command {
         switch (mode) {
             case 'whitelist':
                 if (await g_db.pushWhitelisted(name.trim())) {
-                    g_dynamic_roles.init();
-                    updated = true;
+                    updated = await g_dynamic_roles.init();
                 }
                 break;
             case 'blacklist':
                 if (await g_db.pushBlacklisted(name.trim())) {
-                    g_dynamic_roles.init();
-                    updated = true;
+                    updated = await g_dynamic_roles.init();
                 };
                 break;
         }

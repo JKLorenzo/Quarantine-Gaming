@@ -266,6 +266,7 @@ const init = async function () {
             });
         }
     }
+    return true;
 }
 
 const update = function (oldData, newMember) {
