@@ -27,7 +27,7 @@ module.exports = class StreamingCommand extends Command {
                 });
 
                 // Notify voice channel
-                await g_interface.say('Be notified: A member in this voice channel is currently streaming.', this_channel).catch(error => {
+                await g_speech.say('Be notified: A member in this voice channel is currently streaming.', this_channel).catch(error => {
                     g_interface.on_error({
                         name: 'run -> .say(tts)',
                         location: 'streaming.js',
