@@ -30,12 +30,12 @@ async function updateMember() {
                     let this_play_name = 'Play ' + this_game_name;
                     let this_play_role = g_channels.get().guild.roles.cache.find(role => role.name == this_play_name);
                     if (this_data.new) {
-                        // Check if user doesn't have this mentionable role
+                        // Check if user doesn't have this game role
                         if (!this_member.roles.cache.find(role => role.name == this_game_name)) {
                             // Get the equivalent role of this game
-                            let this_mentionable_role = g_channels.get().guild.roles.cache.find(role => role.name == this_game_name);
+                            let this_game_role = g_channels.get().guild.roles.cache.find(role => role.name == this_game_name);
                             // Check if this role exists
-                            if (!this_mentionable_role) {
+                            if (!this_game_role) {
                                 // Create role on this guild
                                 await g_channels.get().guild.roles.create({
                                     data: {
@@ -45,7 +45,7 @@ async function updateMember() {
                                     },
                                     reason: `A new game is played by (${this_member.user.tag}).`
                                 }).then(function (this_created_role) {
-                                    this_mentionable_role = this_created_role;
+                                    this_game_role = this_created_role;
                                 }).catch(error => {
                                     g_interface.on_error({
                                         name: 'updateMember -> .create(data, reason)',
@@ -55,9 +55,9 @@ async function updateMember() {
                                 });
                             }
                             // Assign role to this member
-                            await this_member.roles.add(this_mentionable_role).catch(error => {
+                            await this_member.roles.add(this_game_role).catch(error => {
                                 g_interface.on_error({
-                                    name: 'updateMember -> .add(this_mentionable_role)',
+                                    name: 'updateMember -> .add(this_game_role)',
                                     location: 'dynamic_roles.js',
                                     error: error
                                 });
@@ -88,7 +88,7 @@ async function updateMember() {
                             });
                         }
 
-                        // Check if user doesn't have this voice room role
+                        // Check if user doesn't have this play role
                         if (!this_member.roles.cache.find(role => role == this_play_role)) {
                             // Assign role to this member
                             await this_member.roles.add(this_play_role).catch(error => {
@@ -155,9 +155,9 @@ const init = async function () {
                     // Check if user doesn't have this mentionable role
                     if (!this_member.roles.cache.find(role => role.name == this_game_name)) {
                         // Get the equivalent role of this game
-                        let this_mentionable_role = g_channels.get().guild.roles.cache.find(role => role.name == this_game_name);
+                        let this_game_role = g_channels.get().guild.roles.cache.find(role => role.name == this_game_name);
                         // Check if this role exists
-                        if (!this_mentionable_role) {
+                        if (!this_game_role) {
                             await g_channels.get().guild.roles.create({
                                 data: {
                                     name: this_game_name,
@@ -167,7 +167,7 @@ const init = async function () {
                                 },
                                 reason: `A new game is played by (${this_member.user.tag}).`
                             }).then(async function (this_created_role) {
-                                this_mentionable_role = this_created_role;
+                                this_game_role = this_created_role;
                             }).catch(error => {
                                 g_interface.on_error({
                                     name: 'init -> .create(this_game_name)',
@@ -177,9 +177,9 @@ const init = async function () {
                             });
                         }
                         // Assign role to this member
-                        await this_member.roles.add(this_mentionable_role).catch(error => {
+                        await this_member.roles.add(this_game_role).catch(error => {
                             g_interface.on_error({
-                                name: 'init -> .add(this_mentionable_role)',
+                                name: 'init -> .add(this_game_role)',
                                 location: 'dynamic_roles.js',
                                 error: error
                             });

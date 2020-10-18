@@ -12,6 +12,7 @@ const message_manager = require(path.join(__dirname, 'internal_commands', 'messa
 const speech = require(path.join(__dirname, 'internal_commands', 'speech.js'));
 const functions = require(path.join(__dirname, 'internal_commands', 'functions.js'));
 const channels = require(path.join(__dirname, 'internal_commands', 'channels.js'));
+const roles = require(path.join(__dirname, 'internal_commands', 'roles.js'));
 
 const client = new CommandoClient({
     commandPrefix: '!',
@@ -29,8 +30,10 @@ global.g_interface = interface;
 global.g_speech = speech;
 global.g_functions = functions;
 global.g_channels = channels;
-global.g_coordinator = coordinator;
+global.g_roles = roles;
+global.g_dynamic_channels = dynamic_channels;
 global.g_dynamic_roles = dynamic_roles;
+global.g_coordinator = coordinator;
 global.g_client = client;
 
 client.registry
@@ -53,6 +56,7 @@ client.once('ready', async () => {
     console.log('-------------{  Startup  }-------------');
 
     // Initialize modules
+    roles.init();
     channels.init();
     await db.init();
     feed.init()
@@ -136,7 +140,7 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
         if (newMember.roles.cache.size != oldMember.roles.cache.size) {
             let added = new Array(), removed = new Array();
             for (let this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
-                if (!this_role.name.startsWith('Play ') && !this_role.name.startsWith('Text')) {
+                if (!this_role.name.startsWith('Play ') && !this_role.name.startsWith('Text') && this_role != g_roles.get().dedicated) {
                     if (newMember.roles.cache.has(this_role.id)) {
                         added.push(this_role);
                     } else {

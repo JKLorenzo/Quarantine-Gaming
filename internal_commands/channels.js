@@ -49,7 +49,9 @@ async function beginDedicate() {
                 embed.setTitle(`Voice and Text Channels for ${this_name}`);
                 let channel_desc = new Array();
                 channel_desc.push(`• Only members who are in this voice channel can view this text channel.`);
+                channel_desc.push(`• You can't view other dedicated channels once you're connected to a dedicated channel.`);
                 channel_desc.push(`• ${text_channel} voice and text channels will automatically be deleted once everyone is disconnected from these channels.`);
+                channel_desc.push(`• You can lock this channel by doing "!dedicate lock", and you can do "!dedicate unlock" to unlock it.`);
                 channel_desc.push(`• You can transfer anyone from another voice channel to this voice channel by doing "!transfer <@member>".\n\u200b\u200bEx: "!transfer <@749563476707377222>"`);
                 channel_desc.push(`• You can also transfer multiple users at once.\n\u200b\u200bEx: "!transfer <@749563476707377222> <@749563476707377222> <@749563476707377222>"`);
                 channel_desc.push('Note: <@&749235255944413234> and <@&700397445506531358> can interact with these channels.');
@@ -82,15 +84,19 @@ async function beginDedicate() {
                     position: 1,
                     permissionOverwrites: [
                         {
-                            id: guild.roles.everyone.id,
+                            id: g_roles.get().everyone.id,
                             deny: ["CONNECT"]
                         },
                         {
-                            id: '722699433225224233', // Member
+                            id: g_roles.get().dedicated.id,
+                            deny: ["VIEW_CHANNEL"]
+                        },
+                        {
+                            id: g_roles.get().member.id,
                             allow: ["CONNECT"]
                         },
                         {
-                            id: '700397445506531358', // Music
+                            id: g_roles.get().music.id,
                             allow: ["CONNECT"]
                         }
                     ]
@@ -116,16 +122,16 @@ async function beginDedicate() {
                             position: 1,
                             permissionOverwrites: [
                                 {
-                                    id: guild.roles.everyone.id,
+                                    id: g_roles.get().everyone.id,
                                     deny: ["VIEW_CHANNEL"]
                                 },
                                 {
-                                    id: '700397445506531358', // Music
+                                    id: g_roles.get().music.id,
                                     allow: ["VIEW_CHANNEL"]
                                 },
                                 {
                                     id: text_role.id,
-                                    allow: ["VIEW_CHANNEL"]
+                                    allow: ["VIEW_CHANNEL", "SEND_TTS_MESSAGES"]
                                 }
                             ]
                         }).then(async text_channel => {
@@ -163,7 +169,7 @@ async function beginDedicate() {
                             // Sort members
                             let streamers = [], members = [];
                             for (let this_member of this_channel.members.array()) {
-                                if (this_member.roles.cache.find(role => role.id == '757128062276993115')) {
+                                if (this_member.roles.cache.find(role => role == g_roles.get().streaming)) {
                                     streamers.push(this_member);
                                 } else {
                                     members.push(this_member);
@@ -181,7 +187,7 @@ async function beginDedicate() {
                             }
                             // Transfer members
                             for (let this_member of members) {
-                                if (this_member.user.id != '749563476707377222') {
+                                if (this_member.user.id != g_client.user.id) {
                                     await this_member.voice.setChannel(voice_channel).catch(error => {
                                         g_interface.on_error({
                                             name: 'beginDedicate -> .setChannel(voice_channel)',

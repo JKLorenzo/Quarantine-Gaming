@@ -41,7 +41,7 @@ async function updateGuild() {
 
 async function updateChannel() {
     while (toUpdate.length > 0) {
-        let this_data = toUpdate.pop();
+        let this_data = toUpdate.shift();
         let newState = this_data.new;
         let oldState = this_data.old;
 
@@ -122,8 +122,9 @@ async function updateChannel() {
                     });
                 }
 
-                // Add member to a text channel when joining a dedicated channel
+
                 if (newState.channel.parent == g_channels.get().dedicated) {
+                    // Add member to a text channel when joining a dedicated channel
                     let text_channel = g_channels.get().guild.channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == newState.channelID);
                     let text_role = g_channels.get().guild.roles.cache.get(text_channel.topic.split(' ')[1]);
                     if (!newState.member.roles.cache.find(role => role == text_role)) {
@@ -150,15 +151,45 @@ async function updateChannel() {
                             });
                         });
                     }
+                    // Hide all active dedicated channels
+                    if (!newState.member.roles.cache.find(role => role == g_roles.get().dedicated)) {
+                        await newState.member.roles.add(g_roles.get().dedicated).catch(error => {
+                            g_interface.on_error({
+                                name: 'updateChannel -> .add(dedicated_role)',
+                                location: 'dynamic_channels.js',
+                                error: error
+                            });
+                        });
+                    }
+                } else {
+                    // Show all active dedicated channels
+                    if (newState.member.roles.cache.find(role => role == g_roles.get().dedicated)) {
+                        await newState.member.roles.remove(g_roles.get().dedicated).catch(error => {
+                            g_interface.on_error({
+                                name: 'updateChannel -> .remove(dedicated_role)',
+                                location: 'dynamic_channels.js',
+                                error: error
+                            });
+                        });
+                    }
                 }
-
             } else {
                 // Check if member was streaming
-                let streaming_role = newState.member.roles.cache.find(role => role.id == '757128062276993115');
+                let streaming_role = newState.member.roles.cache.find(role => role == g_roles.get().streaming);
                 if (streaming_role) {
                     newState.member.roles.remove(streaming_role).catch(error => {
                         g_interface.on_error({
                             name: 'updateChannel -> .remove(streaming_role)',
+                            location: 'dynamic_channels.js',
+                            error: error
+                        });
+                    });
+                }
+                // Show all active dedicated channels
+                if (newState.member.roles.cache.find(role => role == g_roles.get().dedicated)) {
+                    await newState.member.roles.remove(g_roles.get().dedicated).catch(error => {
+                        g_interface.on_error({
+                            name: 'updateChannel -> .remove(dedicated_role)',
                             location: 'dynamic_channels.js',
                             error: error
                         });
@@ -179,12 +210,23 @@ const init = async function () {
                 let this_voice = g_channels.get().guild.channels.cache.get(data[0]);
                 let this_text = g_channels.get().guild.roles.cache.get(data[1]);
 
-                // Give all channel members text roles
+
                 for (let this_member of this_voice.members.array()) {
+                    // Give all channel members text roles
                     if (!this_member.roles.cache.find(role => role == this_text)) {
                         await this_member.roles.add(this_text).catch(error => {
                             g_interface.on_error({
                                 name: 'init -> .add(text_role)',
+                                location: 'dynamic_channels.js',
+                                error: error
+                            });
+                        });
+                    }
+                    // Hide all active dedicated channels
+                    if (!this_member.roles.cache.find(role => role == g_roles.get().dedicated)) {
+                        await this_member.roles.add(g_roles.get().dedicated).catch(error => {
+                            g_interface.on_error({
+                                name: 'init -> .add(dedicated_role)',
                                 location: 'dynamic_channels.js',
                                 error: error
                             });
@@ -195,7 +237,7 @@ const init = async function () {
                 // Remove role from all members not in the voice room
                 for (let this_member of g_channels.get().guild.members.cache.array()) {
                     if (this_member.roles.cache.find(role => role == this_text)) {
-                        if (!this_member.voice) {
+                        if (!this_member.voice || this_member.voice.channelID != this_voice.id) {
                             await this_member.roles.remove(this_text).catch(error => {
                                 g_interface.on_error({
                                     name: 'init -> .remove(text_role) [A]',
@@ -203,10 +245,15 @@ const init = async function () {
                                     error: error
                                 });
                             });
-                        } else if (this_member.voice.channelID != this_voice.id) {
-                            await this_member.roles.remove(this_text).catch(error => {
+                        }
+                    }
+
+                    // Show all active dedicated channels
+                    if (this_member.roles.cache.find(role => role == g_roles.get().dedicated)) {
+                        if (!this_member.voice || this_member.voice.channel.parent != g_channels.get().dedicated) {
+                            await this_member.roles.remove(g_roles.get().dedicated).catch(error => {
                                 g_interface.on_error({
-                                    name: 'init -> .remove(text_role) [B]',
+                                    name: 'init -> .remove(dedicated_role)',
                                     location: 'dynamic_channels.js',
                                     error: error
                                 });
