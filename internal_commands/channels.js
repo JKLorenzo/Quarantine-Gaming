@@ -49,7 +49,7 @@ async function beginDedicate() {
                 embed.setTitle(`Voice and Text Channels for ${this_name}`);
                 let channel_desc = new Array();
                 channel_desc.push(`• Only members who are in this voice channel can view this text channel.`);
-                channel_desc.push(`• You can't view other dedicated channels once you're connected to a dedicated channel.`);
+                channel_desc.push(`• You can't view other dedicated channels once you're connected to one.`);
                 channel_desc.push(`• ${text_channel} voice and text channels will automatically be deleted once everyone is disconnected from these channels.`);
                 channel_desc.push(`• You can lock this channel by doing "!dedicate lock", and you can do "!dedicate unlock" to unlock it.`);
                 channel_desc.push(`• You can transfer anyone from another voice channel to this voice channel by doing "!transfer <@member>".\n\u200b\u200bEx: "!transfer <@749563476707377222>"`);
@@ -85,7 +85,7 @@ async function beginDedicate() {
                     permissionOverwrites: [
                         {
                             id: g_roles.get().everyone.id,
-                            deny: ["CONNECT"]
+                            deny: ["CREATE_INSTANT_INVITE", "MANAGE_CHANNELS", "MANAGE_ROLES", "MANAGE_WEBHOOKS", "CONNECT"]
                         },
                         {
                             id: g_roles.get().dedicated.id,
@@ -93,7 +93,8 @@ async function beginDedicate() {
                         },
                         {
                             id: g_roles.get().member.id,
-                            allow: ["CONNECT"]
+                            allow: ["CONNECT", 'SPEAK', "STREAM"],
+                            dent: ['MUTE_MEMBERS', 'DEAFEN_MEMBERS', 'MOVE_MEMBERS', 'PRIORITY_SPEAKER']
                         },
                         {
                             id: g_roles.get().music.id,
@@ -123,7 +124,7 @@ async function beginDedicate() {
                             permissionOverwrites: [
                                 {
                                     id: g_roles.get().everyone.id,
-                                    deny: ["VIEW_CHANNEL"]
+                                    deny: ["CREATE_INSTANT_INVITE", "MANAGE_CHANNELS", "MANAGE_ROLES", "MANAGE_WEBHOOKS", "VIEW_CHANNEL"]
                                 },
                                 {
                                     id: g_roles.get().music.id,
@@ -131,7 +132,8 @@ async function beginDedicate() {
                                 },
                                 {
                                     id: text_role.id,
-                                    allow: ["VIEW_CHANNEL", "SEND_TTS_MESSAGES"]
+                                    allow: ["VIEW_CHANNEL", "SEND_TTS_MESSAGES", "EMBED_LINKS", "ATTACH_FILES"],
+                                    deny: ["MENTION_EVERYONE", "MANAGE_MESSAGES"]
                                 }
                             ]
                         }).then(async text_channel => {
@@ -144,13 +146,26 @@ async function beginDedicate() {
                                 });
                             });
 
+                            // Update voice channel
+                            await voice_channel.updateOverwrite(text_role, {
+                                VIEW_CHANNEL: true
+                            }).catch(error => {
+                                g_interface.on_error({
+                                    name: 'updateGuild -> .updateOverwrite(voice_channel)',
+                                    location: 'channels.js',
+                                    error: error
+                                });
+                            });
+
                             // Set info
                             let embed = new MessageEmbed();
                             embed.setAuthor('Quarantine Gaming: Dedicated Channels');
                             embed.setTitle(`Voice and Text Channels for ${this_name}`);
                             let channel_desc = new Array();
                             channel_desc.push(`• Only members who are in this voice channel can view this text channel.`);
+                            channel_desc.push(`• You can't view other dedicated channels once you're connected to one.`);
                             channel_desc.push(`• ${text_channel} voice and text channels will automatically be deleted once everyone is disconnected from these channels.`);
+                            channel_desc.push(`• You can lock this channel by doing "!dedicate lock", and you can do "!dedicate unlock" to unlock it.`);
                             channel_desc.push(`• You can transfer anyone from another voice channel to this voice channel by doing "!transfer <@member>".\n\u200b\u200bEx: "!transfer <@749563476707377222>"`);
                             channel_desc.push(`• You can also transfer multiple users at once.\n\u200b\u200bEx: "!transfer <@749563476707377222> <@749563476707377222> <@749563476707377222>"`);
                             channel_desc.push('Note: <@&749235255944413234> and <@&700397445506531358> can interact with these channels.');
@@ -196,46 +211,6 @@ async function beginDedicate() {
                                         });
                                     });
                                 }
-                            }
-
-                            // Add Quarantine Gaming Experience if available
-                            switch (this_name.toLowerCase()) {
-                                case 'among us':
-                                    let embed = new MessageEmbed()
-                                        .setColor('#ffff00')
-                                        .setAuthor('Quarantine Gaming: Experience')
-                                        .setThumbnail('https://yt3.ggpht.com/a/AATXAJw5JZ2TM56V4OVFQnVUrOZ5_E2ULtrusmsTdrQatA=s900-c-k-c0xffffffff-no-rj-mo')
-                                        .setTitle('Among Us')
-                                        .setDescription('Voice channel audio control extension.')
-                                        .addFields(
-                                            { name: 'Actions:', value: '🟠 - Mute', inline: true },
-                                            { name: '\u200b', value: '🟢 - Unmute', inline: true }
-                                        )
-                                        .setImage('https://i.pinimg.com/736x/75/69/4f/75694f713b0ab52bf2065ebee0d80f57.jpg')
-                                        .setFooter('Mute or unmute all members on your current voice channel.');
-
-                                    let reactions = new Array();
-                                    reactions.push('🟠');
-                                    reactions.push('🟢');
-                                    await text_channel.send(embed).then(async this_message => {
-                                        await this_message.pin();
-                                        for (let this_reaction of reactions) {
-                                            await this_message.react(this_reaction).catch(error => {
-                                                g_interface.on_error({
-                                                    name: 'beginDedicate -> .react(this_reaction)',
-                                                    location: 'channels.js',
-                                                    error: error
-                                                });
-                                            });
-                                        }
-                                    }).catch(error => {
-                                        g_interface.on_error({
-                                            name: 'beginDedicate -> .send(embed)',
-                                            location: 'channels.js',
-                                            error: error
-                                        });
-                                    });
-                                    break;
                             }
                         }).catch(error => {
                             g_interface.on_error({

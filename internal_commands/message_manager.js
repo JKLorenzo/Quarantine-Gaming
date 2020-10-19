@@ -51,17 +51,16 @@ const reactionAdd = async function (reaction, user) {
         }
         let this_message = reaction.message;
         let this_member;
-        if (this_message.author.id == g_client.user.id) {
+        if (this_message.author.id == g_client.user.id && this_message.embeds.length > 0) {
             switch (this_message.embeds[0].author.name) {
                 case 'Quarantine Gaming: NSFW Content':
                     switch (reaction.emoji.name) {
                         case '🔴':
                             this_member = g_channels.get().guild.members.cache.get(user.id);
-                            let this_role = g_channels.get().guild.roles.cache.find(role => role.id == '700481554132107414');
-                            if (this_role && !this_member.roles.cache.has(this_role.id)) {
-                                await this_member.roles.add(this_role.id).catch(error => {
+                            if (!this_member.roles.cache.has(g_roles.get().nsfw)) {
+                                await this_member.roles.add(g_roles.get().nsfw).catch(error => {
                                     g_interface.on_error({
-                                        name: 'messageReactionAdd -> .add(this_role.id) [case nsfw]',
+                                        name: 'messageReactionAdd -> .add(nsfw)',
                                         location: 'message_manager.js',
                                         error: error
                                     });

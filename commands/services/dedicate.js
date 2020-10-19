@@ -33,7 +33,7 @@ module.exports = class DedicateCommand extends Command {
                     embed.setColor('#ffe500');
                     switch (name) {
                         case 'lock':
-                            message.member.voice.channel.updateOverwrite('722699433225224233', {
+                            message.member.voice.channel.updateOverwrite(g_roles.get().member, {
                                 'CONNECT': false
                             }).then(channel => {
                                 embed.setTitle(channel.name);
@@ -54,7 +54,7 @@ module.exports = class DedicateCommand extends Command {
                             });
                             break;
                         case 'unlock':
-                            message.member.voice.channel.updateOverwrite('722699433225224233', {
+                            message.member.voice.channel.updateOverwrite(g_roles.get().member, {
                                 'CONNECT': true
                             }).then(channel => {
                                 embed.setTitle(channel.name);
@@ -82,6 +82,9 @@ module.exports = class DedicateCommand extends Command {
                 }
             } else {
                 g_channels.dedicate(message.member, name);
+                message.say(`Got it! Please wait.`).then(this_msg => {
+                    this_msg.delete({ timeout: 10000 }).catch(error => { });
+                }).catch(error => { });
             }
         } else {
             message.channel.send(`You must be connected to any voice channels to create a dedicated channel.`).then(this_msg => {
