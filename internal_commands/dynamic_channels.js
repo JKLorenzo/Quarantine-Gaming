@@ -1,42 +1,45 @@
 const { MessageEmbed } = require("discord.js");
 let isUpdating = false, toUpdate = new Array();
 
-async function updateGuild() {
-    // Transfer members from generic voice rooms to dynamic voice rooms
-    for (let this_channel of g_channels.get().guild.channels.cache.array()) {
-        // Disregard Pandora's Box and Couchlockszx
-        if (this_channel.type == 'voice' && this_channel.id != '747005488197009568' && this_channel.id != '663443529170681857') {
-            if (this_channel.members.size > 1) {
-                // Get baseline activity
-                let baseline_role, same_acitivities, diff_acitivities;
-                for (let this_member of this_channel.members.array()) {
-                    for (let this_role of this_member.roles.cache.array()) {
-                        if (!baseline_role && this_role.name.startsWith('Play')) {
-                            // Check how many users have the same roles
-                            same_acitivities = 0;
-                            diff_acitivities = 0;
-                            for (let this_member of this_channel.members.array()) {
-                                if (this_member.roles.cache.find(role => role == this_role)) {
-                                    same_acitivities++;
-                                } else if (this_member.roles.cache.find(role => role.name.startsWith('Play'))) {
-                                    diff_acitivities++;
+function updateGuild() {
+    try {
+        // Transfer members from generic voice rooms to dynamic voice rooms
+        for (let this_channel of g_channels.get().guild.channels.cache.array()) {
+            // Disregard Pandora's Box and Couchlockszx
+            if (this_channel.type == 'voice' && this_channel.id != '747005488197009568' && this_channel.id != '663443529170681857') {
+                if (this_channel.members.size > 1) {
+                    // Get baseline activity
+                    let baseline_role, same_acitivities, diff_acitivities;
+                    for (let this_member of this_channel.members.array()) {
+                        for (let this_role of this_member.roles.cache.array()) {
+                            if (!baseline_role && this_role.name.startsWith('Play')) {
+                                // Check how many users have the same roles
+                                same_acitivities = 0;
+                                diff_acitivities = 0;
+                                for (let the_member of this_channel.members.array()) {
+                                    if (the_member.roles.cache.find(role => role == this_role)) {
+                                        same_acitivities++;
+                                    } else if (the_member.roles.cache.find(role => role.name.startsWith('Play'))) {
+                                        diff_acitivities++;
+                                    }
                                 }
-                            }
-                            if (same_acitivities > 1 && same_acitivities > diff_acitivities && !this_role.name.substring(5).startsWith(this_channel.name)) {
-                                baseline_role = this_role;
-                                g_channels.dedicate(this_member, this_role.name.substring(5));
+                                if (same_acitivities > 1 && same_acitivities > diff_acitivities && !this_role.name.substring(5).startsWith(this_channel.name)) {
+                                    baseline_role = this_role;
+                                    g_channels.dedicate(this_member, this_role.name.substring(5));
+                                }
                             }
                         }
                     }
                 }
             }
         }
+    } catch (error) {
+        g_interface.on_error({
+            name: 'updateGuild',
+            location: 'dynamic_channels.js',
+            error: error
+        });
     }
-
-    setTimeout(async function () {
-        // Repeat
-        updateGuild();
-    }, 30000)
 }
 
 async function updateChannel() {
@@ -152,7 +155,7 @@ async function updateChannel() {
                         });
                     }
                     // Hide all active dedicated channels
-                    if (!newState.member.roles.cache.find(role => role == g_roles.get().dedicated)) {
+                    if (!newState.member.user.bot && !newState.member.roles.cache.find(role => role == g_roles.get().dedicated)) {
                         await newState.member.roles.add(g_roles.get().dedicated).catch(error => {
                             g_interface.on_error({
                                 name: 'updateChannel -> .add(dedicated_role)',
@@ -163,7 +166,7 @@ async function updateChannel() {
                     }
                 } else {
                     // Show all active dedicated channels
-                    if (newState.member.roles.cache.find(role => role == g_roles.get().dedicated)) {
+                    if (!newState.member.user.bot && newState.member.roles.cache.find(role => role == g_roles.get().dedicated)) {
                         await newState.member.roles.remove(g_roles.get().dedicated).catch(error => {
                             g_interface.on_error({
                                 name: 'updateChannel -> .remove(dedicated_role)',
@@ -186,7 +189,7 @@ async function updateChannel() {
                     });
                 }
                 // Show all active dedicated channels
-                if (newState.member.roles.cache.find(role => role == g_roles.get().dedicated)) {
+                if (!newState.member.user.bot && newState.member.roles.cache.find(role => role == g_roles.get().dedicated)) {
                     await newState.member.roles.remove(g_roles.get().dedicated).catch(error => {
                         g_interface.on_error({
                             name: 'updateChannel -> .remove(dedicated_role)',
@@ -265,7 +268,9 @@ const init = async function () {
         }
     }
 
-    updateGuild();
+    setInterval(function () {
+        updateGuild();
+    }, 30000)
 }
 
 const update = function (oldState, newState) {
