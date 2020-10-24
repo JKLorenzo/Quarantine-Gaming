@@ -207,7 +207,7 @@ async function updateChannel() {
 // External Functions Region
 const init = async function () {
     for (let this_channel of g_channels.get().guild.channels.cache.array()) {
-        if (this_channel.parent && this_channel.parent == g_channels.get().dedicated) {
+        if (this_channel && this_channel.parent && this_channel.parent == g_channels.get().dedicated) {
             if (this_channel.type == 'text') {
                 let data = this_channel.topic.split(' ');
                 let this_voice = g_channels.get().guild.channels.cache.get(data[0]);
@@ -253,7 +253,7 @@ const init = async function () {
 
                     // Show all active dedicated channels
                     if (this_member.roles.cache.find(role => role == g_roles.get().dedicated)) {
-                        if (!this_member.voice || this_member.voice.channel.parent != g_channels.get().dedicated) {
+                        if (!this_member.voice || !this_member.voice.channel || this_member.voice.channel.parent != g_channels.get().dedicated) {
                             await this_member.roles.remove(g_roles.get().dedicated).catch(error => {
                                 g_interface.on_error({
                                     name: 'init -> .remove(dedicated_role)',
