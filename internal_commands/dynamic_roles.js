@@ -7,6 +7,32 @@ async function updateMember() {
         const newData = this_data.new;
         let this_member = newData.member ? newData.member : oldData.member;
         if (!this_member.user.bot) {
+            // Clear Dedicated Roles
+            if (this_member.presence.status == 'offline'){
+                let dedicated_channel_role = this_member.roles.cache.find(role => role == g_roles.get().dedicated);
+                if (dedicated_channel_role){
+                    await this_member.roles.remove(dedicated_channel_role).catch(error => {
+                        g_interface.on_error({
+                            name: 'updateMember -> .remove(dedicated_channel_role)',
+                            location: 'dynamic_roles.js',
+                            error: error
+                        });
+                    });
+                }
+                
+                let text_channel_role = this_member.roles.cache.find(role => role.name.startsWith('Text'));
+                if (text_channel_role){
+                    await this_member.roles.remove(text_channel_role).catch(error => {
+                        g_interface.on_error({
+                            name: 'updateMember -> .remove(text_channel_role)',
+                            location: 'dynamic_roles.js',
+                            error: error
+                        });
+                    });
+                }
+            }
+
+            // Play Roles
             let oldA = new Array(), newA = new Array();
             if (oldData) oldA = oldData.activities.map(activity => activity.name.trim());
             if (newData) newA = newData.activities.map(activity => activity.name.trim());
