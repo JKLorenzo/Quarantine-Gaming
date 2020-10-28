@@ -29,7 +29,7 @@ async function get() {
             let this_notif = g_db.hasRecords(item_details);
             if (this_notif) {
                 // Update
-                await g_channels.get().subscription.messages.fetch(this_notif.id).then(async this_message => {
+                await g_channels.get().updates.messages.fetch(this_notif.id).then(async this_message => {
                     if (item_details.description) {
                         this_message.embeds[0].spliceFields(1, 3)
                             .addFields([

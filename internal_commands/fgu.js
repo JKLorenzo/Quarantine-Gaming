@@ -256,7 +256,7 @@ async function process_push() {
 
             // Status
             if (!(no_title || filtered_content.length > 0 || no_url || mentionables.length == 0)) {
-                let sent_message = await g_interface.subscription({ content: mentionables.join(', '), embed: output });
+                let sent_message = await g_interface.updates({ content: mentionables.join(', '), embed: output });
                 await g_db.pushNotification({
                     id: sent_message.id,
                     title: no_title ? '' : safe_title ? safe_title : title,

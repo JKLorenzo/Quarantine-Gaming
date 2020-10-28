@@ -33,9 +33,9 @@ const on_error = async function (details) {
     console.log(details.error);
 }
 
-const subscription = async function (message) {
+const updates = async function (message) {
     return new Promise(async (resolve, reject) => {
-        await g_channels.get().subscription.send(message).then(message => {
+        await g_channels.get().updates.send(message).then(message => {
             resolve(message);
         }).catch(error => {
             reject(error);
@@ -90,6 +90,6 @@ module.exports = {
     log,
     dm,
     announce,
-    subscription,
+    updates,
     clear_dms
 }

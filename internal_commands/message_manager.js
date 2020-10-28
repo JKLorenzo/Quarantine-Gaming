@@ -1,3 +1,5 @@
+const { MessageEmbed } = require('discord.js');
+
 const manage = async function (message) {
     // Announcements
     if (message.channel && message.channel.id == g_channels.get().announcement.id && message.author != g_client.user) {
@@ -11,7 +13,32 @@ const manage = async function (message) {
         message.delete({ timeout: 250 }).catch(error => { });
     }
 
-    
+    // Following
+    if (message.channel && message.channel.id == g_channels.get().following.id) {
+        let sender = message.author.username.split('#');
+        let server = sender[0].trim();
+        let channel = sender[1];
+
+        let game_role = g_channels.get().guild.roles.cache.find(role => role.hexColor == '#00ffff' && role.name.toLowerCase() == server.toLowerCase());
+        if (game_role) {
+            let embed = new MessageEmbed()
+                .setAuthor('Quarantine Gaming: Official Game Updates')
+                .setTitle(server)
+                .setThumbnail(message.author.displayAvatarURL())
+                .setDescription(message.content)
+                .setFooter(channel)
+                .setTimestamp()
+                .setColor(`#00B2FF`);
+
+            g_interface.updates({ content: game_role, embed: embed }).catch(error => {
+                g_interface.on_error({
+                    name: 'manage -> .updates()',
+                    location: 'message_manager.js',
+                    error: error
+                });
+            });
+        }
+    }
 }
 
 const clear_channels = function () {
