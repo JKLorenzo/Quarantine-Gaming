@@ -275,19 +275,6 @@ const init = async function () {
                     }
                 }
             }
-
-
-            // Remove text role
-            let text_channel_role = this_member.roles.cache.find(role => role.name.startsWith('Text'));
-            if (text_channel_role && !g_channels.get().guild.channels.cache.find(channel => channel.id == text_channel_role.name.split(' ')[1])) {
-                await this_member.roles.remove(text_channel_role).catch(error => {
-                    g_interface.on_error({
-                        name: 'updateMember -> .remove(text_channel_role)',
-                        location: 'dynamic_roles.js',
-                        error: error
-                    });
-                });
-            }
         }
     }
 
