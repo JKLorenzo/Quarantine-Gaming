@@ -169,9 +169,10 @@ async function updateMember() {
 }
 
 const init = async function () {
-    // Add play roles
+
     for (let this_member of g_channels.get().guild.members.cache.array()) {
         if (!this_member.user.bot) {
+            // Add play roles
             for (let this_activity of this_member.presence.activities) {
                 if (this_activity.type == 'PLAYING' && !g_db.titles().blacklisted.includes(this_activity.name.trim().toLowerCase()) && (this_activity.applicationID || g_db.titles().whitelisted.includes(this_activity.name.trim().toLowerCase()))) {
                     let this_game_name = this_activity.name.trim();
@@ -244,6 +245,48 @@ const init = async function () {
                         });
                     }
                 }
+            }
+
+            for (let this_role of this_member.roles.cache.array()) {
+                // Remove dedicated role
+                if (this_role == g_roles.get().dedicated) {
+                    if ((this_member.voice && this_member.voice.channel && this_member.voice.channel.parent != g_channels.get().dedicated) || !(this_member.voice && this_member.voice.channel)) {
+                        await this_member.roles.remove(this_role).catch(error => {
+                            g_interface.on_error({
+                                name: 'updateMember -> .remove(dedicated_channel_role)',
+                                location: 'dynamic_roles.js',
+                                error: error
+                            });
+                        });
+                    }
+                }
+
+                // Remove text role
+                if (this_role.name.startsWith('Text')) {
+                    let the_text_channel = g_channels.get().guild.channels.cache.find(channel => channel.id == this_role.name.split(' ')[1]);
+                    if (!the_text_channel || (the_text_channel && !the_text_channel.members.find(member => member.user.id == this_member.user.id))) {
+                        await this_member.roles.remove(this_role).catch(error => {
+                            g_interface.on_error({
+                                name: 'updateMember -> .remove(text_channel_role)',
+                                location: 'dynamic_roles.js',
+                                error: error
+                            });
+                        });
+                    }
+                }
+            }
+
+
+            // Remove text role
+            let text_channel_role = this_member.roles.cache.find(role => role.name.startsWith('Text'));
+            if (text_channel_role && !g_channels.get().guild.channels.cache.find(channel => channel.id == text_channel_role.name.split(' ')[1])) {
+                await this_member.roles.remove(text_channel_role).catch(error => {
+                    g_interface.on_error({
+                        name: 'updateMember -> .remove(text_channel_role)',
+                        location: 'dynamic_roles.js',
+                        error: error
+                    });
+                });
             }
         }
     }
