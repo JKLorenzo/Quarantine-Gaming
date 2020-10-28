@@ -43,7 +43,6 @@ async function beginDedicate() {
                 // Rename channel
                 let text_channel = g_channels.get().guild.channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == this_channel.id);
                 text_channel.setName(this_name).catch(error => { });
-                this_channel.setName(this_name).catch(error => { });
 
                 // Set info
                 let embed = new MessageEmbed();
@@ -87,7 +86,7 @@ async function beginDedicate() {
                     permissionOverwrites: [
                         {
                             id: g_roles.get().everyone.id,
-                            deny: ["CREATE_INSTANT_INVITE", "MANAGE_CHANNELS", "MANAGE_ROLES", "MANAGE_WEBHOOKS", "CONNECT"]
+                            deny: ["CREATE_INSTANT_INVITE", "MANAGE_CHANNELS", "MANAGE_ROLES", "MANAGE_WEBHOOKS", "CONNECT", 'MUTE_MEMBERS', 'DEAFEN_MEMBERS', 'MOVE_MEMBERS', 'PRIORITY_SPEAKER']
                         },
                         {
                             id: g_roles.get().dedicated.id,
@@ -96,7 +95,6 @@ async function beginDedicate() {
                         {
                             id: g_roles.get().member.id,
                             allow: ["CONNECT", 'SPEAK', "STREAM"],
-                            dent: ['MUTE_MEMBERS', 'DEAFEN_MEMBERS', 'MOVE_MEMBERS', 'PRIORITY_SPEAKER']
                         },
                         {
                             id: g_roles.get().music.id,
@@ -126,7 +124,7 @@ async function beginDedicate() {
                             permissionOverwrites: [
                                 {
                                     id: g_roles.get().everyone.id,
-                                    deny: ["CREATE_INSTANT_INVITE", "MANAGE_CHANNELS", "MANAGE_ROLES", "MANAGE_WEBHOOKS", "VIEW_CHANNEL"]
+                                    deny: ["CREATE_INSTANT_INVITE", "MANAGE_CHANNELS", "MANAGE_ROLES", "MANAGE_WEBHOOKS", "VIEW_CHANNEL", "MENTION_EVERYONE", "MANAGE_MESSAGES", 'MUTE_MEMBERS', 'DEAFEN_MEMBERS', 'MOVE_MEMBERS', 'PRIORITY_SPEAKER']
                                 },
                                 {
                                     id: g_roles.get().music.id,
@@ -134,8 +132,7 @@ async function beginDedicate() {
                                 },
                                 {
                                     id: text_role.id,
-                                    allow: ["VIEW_CHANNEL", "SEND_TTS_MESSAGES", "EMBED_LINKS", "ATTACH_FILES"],
-                                    deny: ["MENTION_EVERYONE", "MANAGE_MESSAGES"]
+                                    allow: ["VIEW_CHANNEL", "SEND_TTS_MESSAGES", "EMBED_LINKS", "ATTACH_FILES"]
                                 }
                             ]
                         }).then(async text_channel => {
