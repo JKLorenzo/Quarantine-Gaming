@@ -67,7 +67,7 @@ async function process_push() {
             output.setAuthor('Quarantine Gaming: Free Game/DLC Notification');
             if (flair) {
                 if (flair.toLowerCase().indexOf('comment') !== -1 || flair.toLowerCase().indexOf('issue') !== -1) {
-                    output.setDescription(`(${flair})[${permalink}]`);
+                    output.setDescription(`[${flair}](${permalink})`);
                 } else {
                     output.setDescription(flair);
                 }
