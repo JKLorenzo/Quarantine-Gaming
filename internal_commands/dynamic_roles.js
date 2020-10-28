@@ -8,9 +8,9 @@ async function updateMember() {
         let this_member = newData.member ? newData.member : oldData.member;
         if (!this_member.user.bot) {
             // Clear Dedicated Roles
-            if (this_member.presence.status == 'offline'){
+            if (this_member.presence.status == 'offline') {
                 let dedicated_channel_role = this_member.roles.cache.find(role => role == g_roles.get().dedicated);
-                if (dedicated_channel_role){
+                if (dedicated_channel_role) {
                     await this_member.roles.remove(dedicated_channel_role).catch(error => {
                         g_interface.on_error({
                             name: 'updateMember -> .remove(dedicated_channel_role)',
@@ -19,9 +19,9 @@ async function updateMember() {
                         });
                     });
                 }
-                
+
                 let text_channel_role = this_member.roles.cache.find(role => role.name.startsWith('Text'));
-                if (text_channel_role){
+                if (text_channel_role) {
                     await this_member.roles.remove(text_channel_role).catch(error => {
                         g_interface.on_error({
                             name: 'updateMember -> .remove(text_channel_role)',
@@ -68,8 +68,7 @@ async function updateMember() {
                                         name: this_game_name,
                                         color: '0x00ffff',
                                         mentionable: true
-                                    },
-                                    reason: `A new game is played by (${this_member.user.tag}).`
+                                    }
                                 }).then(function (this_created_role) {
                                     this_game_role = this_created_role;
                                 }).catch(error => {
@@ -101,8 +100,7 @@ async function updateMember() {
                                     color: '0x7b00ff',
                                     position: play_role.position,
                                     hoist: true
-                                },
-                                reason: `A new game is played by (${this_member.user.tag}).`
+                                }
                             }).then(function (play_role) {
                                 this_play_role = play_role;
                             }).catch(error => {
@@ -126,14 +124,16 @@ async function updateMember() {
                             });
                         }
                     } else if (this_play_role) {
-                        // Remove role
-                        await this_member.roles.remove(this_play_role, 'This role is no longer valid.').catch(error => {
-                            g_interface.on_error({
-                                name: 'updateMember -> .remove(this_play_role) [user]',
-                                location: 'dynamic_roles.js',
-                                error: error
+                        // Remove role from member
+                        if (this_member.roles.cache.find(role => role == this_play_role)) {
+                            await this_member.roles.remove(this_play_role).catch(error => {
+                                g_interface.on_error({
+                                    name: 'updateMember -> .remove(this_play_role) [user]',
+                                    location: 'dynamic_roles.js',
+                                    error: error
+                                });
                             });
-                        });
+                        }
                         // Check if the role is still in use
                         let role_in_use = false;
                         for (let this_guild_member of g_channels.get().guild.members.cache.array()) {
@@ -141,7 +141,7 @@ async function updateMember() {
                                 if (this_guild_member.presence.activities.map(activity => activity.name.trim()).includes(this_play_role.name.substring(5))) {
                                     role_in_use = true;
                                 } else {
-                                    await this_guild_member.roles.remove(this_play_role, 'This role is no longer valid.').catch(error => {
+                                    await this_guild_member.roles.remove(this_play_role).catch(error => {
                                         g_interface.on_error({
                                             name: 'updateMember -> .remove(this_play_role) [member]',
                                             location: 'dynamic_roles.js',
@@ -152,7 +152,7 @@ async function updateMember() {
                             }
                         }
                         if (!role_in_use) {
-                            await this_play_role.delete('This role is no longer in use.').catch(error => {
+                            await this_play_role.delete().catch(error => {
                                 g_interface.on_error({
                                     name: 'updateMember -> .delete(this_play_role)',
                                     location: 'dynamic_roles.js',
