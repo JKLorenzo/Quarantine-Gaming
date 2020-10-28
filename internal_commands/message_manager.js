@@ -14,7 +14,7 @@ const manage = async function (message) {
     }
 
     // Following
-    if (message.channel && message.channel.id == g_channels.get().following.id && message.author.user.bot) {
+    if (message.channel && message.channel.id == g_channels.get().following.id) {
         let sender = message.author.username.split('#');
         let server = sender[0].trim();
         let channel = sender[1];
