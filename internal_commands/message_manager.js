@@ -11,17 +11,7 @@ const manage = async function (message) {
         message.delete({ timeout: 250 }).catch(error => { });
     }
 
-    // Coordinator
-    let this_message = message.content.split(' ').join('');
-    if (this_message && this_message.startsWith('<@&') && this_message.endsWith('>') && message.author != g_client.user) {
-        let role_id = this_message.slice(3, this_message.length - 1);
-        let this_role = g_channels.get().guild.roles.cache.find(role => role.id == role_id);
-        if (this_role && this_role.hexColor == '#00ffff') {
-            message.delete({ timeout: 60000 }).catch(error => { });
-            let this_member = g_channels.get().guild.member(message.author);
-            g_coordinator.invite(this_role, this_member, 0, '');
-        }
-    }
+    
 }
 
 const clear_channels = function () {
