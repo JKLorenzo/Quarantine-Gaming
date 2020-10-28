@@ -216,7 +216,7 @@ const init = async function () {
 
                 for (let this_member of this_voice.members.array()) {
                     // Give all channel members text roles
-                    if (!this_member.roles.cache.find(role => role == this_text)) {
+                    if (!this_member.user.bot && !this_member.roles.cache.find(role => role == this_text)) {
                         await this_member.roles.add(this_text).catch(error => {
                             g_interface.on_error({
                                 name: 'init -> .add(text_role)',
@@ -226,7 +226,7 @@ const init = async function () {
                         });
                     }
                     // Hide all active dedicated channels
-                    if (!this_member.roles.cache.find(role => role == g_roles.get().dedicated)) {
+                    if (!this_member.user.bot && !this_member.roles.cache.find(role => role == g_roles.get().dedicated)) {
                         await this_member.roles.add(g_roles.get().dedicated).catch(error => {
                             g_interface.on_error({
                                 name: 'init -> .add(dedicated_role)',
@@ -239,7 +239,7 @@ const init = async function () {
 
                 // Remove role from all members not in the voice room
                 for (let this_member of g_channels.get().guild.members.cache.array()) {
-                    if (this_member.roles.cache.find(role => role == this_text)) {
+                    if (!this_member.user.bot && this_member.roles.cache.find(role => role == this_text)) {
                         if (!this_member.voice || this_member.voice.channelID != this_voice.id) {
                             await this_member.roles.remove(this_text).catch(error => {
                                 g_interface.on_error({
@@ -252,7 +252,7 @@ const init = async function () {
                     }
 
                     // Show all active dedicated channels
-                    if (this_member.roles.cache.find(role => role == g_roles.get().dedicated)) {
+                    if (!this_member.user.bot && this_member.roles.cache.find(role => role == g_roles.get().dedicated)) {
                         if (!this_member.voice || !this_member.voice.channel || this_member.voice.channel.parent != g_channels.get().dedicated) {
                             await this_member.roles.remove(g_roles.get().dedicated).catch(error => {
                                 g_interface.on_error({
