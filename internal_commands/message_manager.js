@@ -23,9 +23,17 @@ const manage = async function (message) {
             .setAuthor('Quarantine Gaming: Official Game Updates')
             .setTitle(server)
             .setThumbnail(message.author.displayAvatarURL())
-            .setDescription(message.content)
-            .setFooter(channel)
-            .setTimestamp()
+            .setDescription(message.content.split(' ').map(word => {
+                if (word.startsWith('<#')) {
+                    return '*External Channel*';
+                } else if (word.startsWith('<@&')) {
+                    return '*External Role*';
+                } else if (word.startsWith('<@')) {
+                    return '*External User*';
+                }
+                return word;
+            }).join(' '))
+            .setFooter(`On ${channel}`)
             .setColor(`#00ffff`);
 
         let game_role = g_channels.get().guild.roles.cache.find(role => role.hexColor == '#00ffff' && role.name.toLowerCase() == server.toLowerCase());
