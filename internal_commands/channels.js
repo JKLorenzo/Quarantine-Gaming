@@ -43,6 +43,7 @@ async function beginDedicate() {
                 // Rename channel
                 let text_channel = g_channels.get().guild.channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == this_channel.id);
                 text_channel.setName(this_name).catch(error => { });
+                this_channel.setName(this_name).catch(error => { });
 
                 // Set info
                 let embed = new MessageEmbed();
