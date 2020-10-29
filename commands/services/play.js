@@ -53,6 +53,7 @@ module.exports = class PlayCommand extends Command {
                 return '';
             }
         }).join('');
+        if (count < 2) count = 0;
         g_coordinator.invite(this_role, this_member, count, reserved);
         return message.say(`Got it! Your bracket will be available in the ${g_channels.get().gaming} channel.`).then(message => message.delete({ timeout: 300000 }).catch(error => { })).catch(error => { });
     }
