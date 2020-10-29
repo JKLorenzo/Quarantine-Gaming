@@ -20,7 +20,7 @@ module.exports = class DedicateCommand extends Command {
     }
 
     run(message, { name }) {
-        message.delete({ timeout: 10000 }).catch(error => { });
+        message.delete({ timeout: 60000 }).catch(error => { });
         if (message.member.voice.channel) {
             if (name.toLowerCase() == 'lock' || name.toLowerCase() == 'unlock') {
                 if (message.member.voice.channel.parent == g_channels.get().dedicated) {
@@ -77,18 +77,18 @@ module.exports = class DedicateCommand extends Command {
                     }
                 } else {
                     message.say(`You must be on a dedicated channel to lock or unlock a voice channel.`).then(this_msg => {
-                        this_msg.delete({ timeout: 10000 }).catch(error => { });
+                        this_msg.delete({ timeout: 60000 }).catch(error => { });
                     }).catch(error => { });
                 }
             } else {
                 g_channels.dedicate(message.member, name);
                 message.say(`Got it! Please wait.`).then(this_msg => {
-                    this_msg.delete({ timeout: 10000 }).catch(error => { });
+                    this_msg.delete({ timeout: 60000 }).catch(error => { });
                 }).catch(error => { });
             }
         } else {
             message.channel.send(`You must be connected to any voice channels to create a dedicated channel.`).then(this_msg => {
-                this_msg.delete({ timeout: 10000 }).catch(error => { });
+                this_msg.delete({ timeout: 60000 }).catch(error => { });
             }).catch(error => { });
         }
     }

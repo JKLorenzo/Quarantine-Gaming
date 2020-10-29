@@ -11,7 +11,7 @@ module.exports = class StreamingCommand extends Command {
     }
 
     async run(message) {
-        message.delete({ timeout: 5000 }).catch(error => { });
+        message.delete({ timeout: 60000 }).catch(error => { });
         let this_member = message.member;
         let this_channel = this_member.voice.channel;
         if (this_channel) {

@@ -32,18 +32,18 @@ module.exports = class TransferCommand extends Command {
                         }).catch(error => { });
                     } else {
                         message.channel.send(`${this_member} must be active to any voice channels.`).then(this_message => {
-                            this_message.delete({ timeout: 5000 }).catch(error => { });
+                            this_message.delete({ timeout: 60000 }).catch(error => { });
                         });
                     }
                 } else {
                     message.channel.send(`I can't find user ${user}, please try again.`).then(this_message => {
-                        this_message.delete({ timeout: 5000 }).catch(error => { });
+                        this_message.delete({ timeout: 60000 }).catch(error => { });
                     });
                 }
             }
         } else {
             message.channel.send('You must be active to any voice channels before you can trasfer other members.').then(this_message => {
-                this_message.delete({ timeout: 5000 }).catch(error => { });
+                this_message.delete({ timeout: 60000 }).catch(error => { });
             });
         }
         return;

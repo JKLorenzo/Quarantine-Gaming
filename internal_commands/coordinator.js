@@ -46,7 +46,7 @@ const invite = async function (role, member, count, reserved) {
         embed.setThumbnail(qg_emoji.url);
     }
     await g_channels.get().gaming.send({ content: `Inviting all ${role} players!`, embed: embed }).then(async message => {
-        message.delete({ timeout: 1800000, reason: 'Timed Out' }).catch(error => { });
+        message.delete({ timeout: 3600000, reason: 'Timed Out' }).catch(error => { });
         if (!is_full) {
             await message.react(emoji ? emoji : qg_emoji).catch(error => {
                 g_interface.on_error({

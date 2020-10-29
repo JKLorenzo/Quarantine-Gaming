@@ -47,7 +47,7 @@ const dm = async function (member, content) {
     if (member.user.bot) return;
     await member.createDM().then(async dm_channel => {
         await dm_channel.send(content).then(message => {
-            message.delete({ timeout: 600000 }).catch(error => { });
+            message.delete({ timeout: 3600000 }).catch(error => { });
         }).catch(error => {
             on_error({
                 name: `dm -> [${member}].send(${content})`,
