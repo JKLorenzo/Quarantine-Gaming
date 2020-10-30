@@ -36,24 +36,13 @@ const manage = async function (message) {
             .setFooter(`On ${channel}`)
             .setColor(`#00ffff`);
 
-        let game_role = g_channels.get().guild.roles.cache.find(role => role.hexColor == '#00ffff' && role.name.toLowerCase() == server.toLowerCase());
-        if (game_role) {
-            g_interface.updates({ content: game_role, embed: embed }).catch(error => {
-                g_interface.on_error({
-                    name: 'manage -> .updates()',
-                    location: 'message_manager.js',
-                    error: error
-                });
+        g_interface.updates({ embed: embed }).catch(error => {
+            g_interface.on_error({
+                name: 'manage -> .updates()',
+                location: 'message_manager.js',
+                error: error
             });
-        } else {
-            g_interface.updates({ embed: embed }).catch(error => {
-                g_interface.on_error({
-                    name: 'manage -> .updates()',
-                    location: 'message_manager.js',
-                    error: error
-                });
-            });
-        }
+        });
     }
 }
 
