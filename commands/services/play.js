@@ -45,7 +45,7 @@ module.exports = class PlayCommand extends Command {
             return parsed;
         }
         const args = input.split(' ');
-        const count = parse(args[0]);
+        let count = parse(args[0]);
         const reserved = args.map(arg => {
             if (arg.startsWith('<@') && arg.endsWith('>')) {
                 return arg + ' ';
