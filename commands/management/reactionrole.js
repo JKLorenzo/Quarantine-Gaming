@@ -129,7 +129,7 @@ function NSFW() {
 
 function FreeGameUpdates() {
     let description = new Array();
-    description.push('All notifications will be made available in the <#699763763859161108> channel.');
+    description.push('All notifications will be made available on the <#699763763859161108> channel.');
     description.push(' ');
     description.push('1️⃣ - <@&722645979248984084>');
     description.push('Notifies you with Steam games and DLCs that are currently free.');
@@ -163,10 +163,25 @@ function FreeGameUpdates() {
 
 function CommunityGameInvites() {
     let description = new Array();
-    description.push('All notifications will be made available in the <#759755324264808489> channel.');
+    description.push('All notifications will be made available on the <#759755324264808489> channel.');
     description.push(' ');
     description.push('⭐ - <@&772934524555493387>');
     description.push('See all the game invites from other members and get a notification when applicable.');
+    description.push(' ');
+    description.push('**Invite members and form a team by doing:**');
+    description.push('!play *<role> [count] {user}*');
+    description.push(' ');
+    description.push('**Example 1 : Open Bracket**');
+    description.push('!play <@&772956970088792085>');
+    description.push(' ');
+    description.push('**Example 2 : Open Bracket w/ Reserved Players**');
+    description.push('!play <@&772956970088792085> <@393013053488103435> <@!339387696785129473> ');
+    description.push(' ');
+    description.push('**Example 3 : Limited Bracket**');
+    description.push('!play <@&772956970088792085> 5');
+    description.push(' ');
+    description.push('**Example 4 : Limited Bracket w/ Reserved Players**');
+    description.push('!play <@&772956970088792085> 5 <@!351179371014258698> <@!347769907678806019> <@166108211643023360> ');
     let embed = new MessageEmbed()
         .setColor('#ffff00')
         .setAuthor('Quarantine Gaming: Community Game Invites')
