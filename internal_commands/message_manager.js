@@ -79,7 +79,7 @@ const reactionAdd = async function (reaction, user) {
                     switch (reaction.emoji.name) {
                         case '🔴':
                             this_member = g_channels.get().guild.members.cache.get(user.id);
-                            if (!this_member.roles.cache.has(g_roles.get().nsfw)) {
+                            if (!this_member.roles.cache.has(g_roles.get().nsfw.id)) {
                                 await this_member.roles.add(g_roles.get().nsfw).catch(error => {
                                     g_interface.on_error({
                                         name: 'messageReactionAdd -> .add(nsfw)',
@@ -112,7 +112,7 @@ const reactionAdd = async function (reaction, user) {
                             break;
                     }
                     if (this_role && !this_member.roles.cache.has(this_role.id)) {
-                        await this_member.roles.add(this_role.id).catch(error => {
+                        await this_member.roles.add(this_role).catch(error => {
                             g_interface.on_error({
                                 name: 'messageReactionAdd -> .add(this_role.id) [case subscribe]',
                                 location: 'message_manager.js',
@@ -338,6 +338,22 @@ const reactionAdd = async function (reaction, user) {
                         });
                     }
                     break;
+                case 'Quarantine Gaming: Community Game Invites':
+                    switch (reaction.emoji.name) {
+                        case '⭐':
+                            this_member = g_channels.get().guild.members.cache.get(user.id);
+                            if (!this_member.roles.cache.has(g_roles.get().community.id)) {
+                                await this_member.roles.add(g_roles.get().community).catch(error => {
+                                    g_interface.on_error({
+                                        name: 'messageReactionAdd -> .add(community)',
+                                        location: 'message_manager.js',
+                                        error: error
+                                    });
+                                });
+                            }
+                            break;
+                    }
+                    break;
             }
         }
     } catch (error) {
@@ -372,7 +388,7 @@ const reactionRemove = async function (reaction, user) {
                             this_member = g_channels.get().guild.members.cache.get(user.id);
                             let this_role = g_channels.get().guild.roles.cache.find(role => role.id == '700481554132107414');
                             if (this_role && this_member.roles.cache.has(this_role.id)) {
-                                await this_member.roles.remove(this_role.id).catch(error => {
+                                await this_member.roles.remove(this_role).catch(error => {
                                     g_interface.on_error({
                                         name: 'messageReactionRemove -> .remove(this_role.id) [case nsfw]',
                                         location: 'message_manager.js',
@@ -404,7 +420,7 @@ const reactionRemove = async function (reaction, user) {
                             break;
                     }
                     if (this_role && this_member.roles.cache.has(this_role.id)) {
-                        await this_member.roles.remove(this_role.id).catch(error => {
+                        await this_member.roles.remove(this_role).catch(error => {
                             g_interface.on_error({
                                 name: 'messageReactionRemove -> .remove(this_role.id) [case subscribe]',
                                 location: 'message_manager.js',
@@ -421,6 +437,22 @@ const reactionRemove = async function (reaction, user) {
                             message: this_message,
                             member: g_channels.get().guild.members.cache.get(user.id)
                         });
+                    }
+                    break;
+                case 'Quarantine Gaming: Community Game Invites':
+                    switch (reaction.emoji.name) {
+                        case '⭐':
+                            this_member = g_channels.get().guild.members.cache.get(user.id);
+                            if (this_member.roles.cache.has(g_roles.get().community.id)) {
+                                await this_member.roles.remove(g_roles.get().community).catch(error => {
+                                    g_interface.on_error({
+                                        name: 'messageReactionRemove -> .remove(community)',
+                                        location: 'message_manager.js',
+                                        error: error
+                                    });
+                                });
+                            }
+                            break;
                     }
                     break;
             }

@@ -24,17 +24,16 @@ module.exports = class ReactionRole extends Command {
                 },
                 {
                     key: 'type',
-                    prompt: 'nsfw or fgu?',
+                    prompt: 'nsfw, fgu, or cgi?',
                     type: 'string',
-                    oneOf: ['nsfw', 'fgu']
+                    oneOf: ['nsfw', 'fgu', 'cgi']
                 },
                 {
                     key: 'msgID',
                     prompt: 'Message ID',
                     type: 'string',
                     validate: msgID => {
-                        if (mode == 'create' || (msgID && msgID.length > 0)) return true;
-                        return false;
+                        return mode == 'create' || (msgID && msgID.length > 0);
                     }
                 }
             ]
@@ -51,10 +50,13 @@ module.exports = class ReactionRole extends Command {
             case 'fgu':
                 output = FreeGameUpdates();
                 break;
+            case 'cgi':
+                output = CommunityGameInvites();
+                break;
         }
         switch (mode) {
             case 'create':
-                await message.say(output.message).then(async this_message => {
+                await g_channels.get().roles.send(output.message).then(async this_message => {
                     for (let this_reaction of output.reactions) {
                         await this_message.react(this_reaction).catch(error => {
                             g_interface.on_error({
@@ -73,7 +75,7 @@ module.exports = class ReactionRole extends Command {
                 });
                 break;
             case 'update':
-                await message.channel.messages.fetch({ limit: 25 }).then(async messages => {
+                await g_channels.get().roles.messages.fetch({ limit: 25 }).then(async messages => {
                     let this_messages = new Array();
                     messages.map(msg => {
                         if (msg.embeds.length == 0 || !msg.author.bot) return msg;
@@ -118,8 +120,7 @@ function NSFW() {
         .setImage('https://s3.amazonaws.com/sofontsy-files-us/wp-content/uploads/2019/02/07163845/NSFW-Bundle_banner.jpg')
         .setFooter('Update your role by reacting below.');
 
-    let reactions = new Array();
-    reactions.push('🔴');
+    let reactions = ['🔴'];
     return {
         message: embed,
         reactions: reactions
@@ -154,6 +155,28 @@ function FreeGameUpdates() {
         .setFooter('Update your role by reacting below.');
 
     let reactions = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'];
+    return {
+        message: embed,
+        reactions: reactions
+    };
+}
+
+function CommunityGameInvites() {
+    let description = new Array();
+    description.push('All notifications will be made available in the <#759755324264808489> channel.');
+    description.push(' ');
+    description.push('⭐ - <@&772934524555493387>');
+    description.push('See all the game invites from other members and get a notification when applicable.');
+    let embed = new MessageEmbed()
+        .setColor('#ffff00')
+        .setAuthor('Quarantine Gaming: Community Game Invites')
+        .setTitle('Receive Game Invites from other Members')
+        .setThumbnail(g_client.user.displayAvatarURL())
+        .setDescription(description.join('\n'))
+        .setImage('http://www.playfaeria.com/wp-content/uploads/2016/08/FAERIA-Banner_News_InviteYourFriends.jpg')
+        .setFooter('Update your role by reacting below.');
+
+    let reactions = ['⭐'];
     return {
         message: embed,
         reactions: reactions
