@@ -66,14 +66,31 @@ async function updateMember() {
                                 await g_channels.get().guild.roles.create({
                                     data: {
                                         name: this_game_name,
-                                        color: '0x00ffff',
-                                        mentionable: true
+                                        color: '0x00ffff'
                                     }
                                 }).then(function (this_created_role) {
                                     this_game_role = this_created_role;
                                 }).catch(error => {
                                     g_interface.on_error({
-                                        name: 'updateMember -> .create(data, reason)',
+                                        name: 'updateMember -> .create(game_role)',
+                                        location: 'dynamic_roles.js',
+                                        error: error
+                                    });
+                                });
+                            }
+                            // Check if mentionable role exists
+                            let this_game_role_mentionable = g_channels.get().guild.roles.cache.find(role => role.name == this_game_name + ' ⭐');
+                            if (!this_game_role_mentionable) {
+                                // Create mentionable role on this guild
+                                await g_channels.get().guild.roles.create({
+                                    data: {
+                                        name: this_game_name + ' ⭐',
+                                        color: '0x00fffe',
+                                        mentionable: true
+                                    }
+                                }).catch(error => {
+                                    g_interface.on_error({
+                                        name: 'updateMember -> .create(game_role_mentionable)',
                                         location: 'dynamic_roles.js',
                                         error: error
                                     });
@@ -179,7 +196,7 @@ const init = async function () {
                     let this_play_name = 'Play ' + this_game_name;
                     let this_play_role = g_channels.get().guild.roles.cache.find(role => role.name == this_play_name);
 
-                    // Check if user doesn't have this mentionable role
+                    // Check if user doesn't have this game role
                     if (!this_member.roles.cache.find(role => role.name == this_game_name)) {
                         // Get the equivalent role of this game
                         let this_game_role = g_channels.get().guild.roles.cache.find(role => role.name == this_game_name);
@@ -189,15 +206,30 @@ const init = async function () {
                                 data: {
                                     name: this_game_name,
                                     color: '0x00ffff',
-                                    mentionable: true,
-                                    hoist: true
-                                },
-                                reason: `A new game is played by (${this_member.user.tag}).`
+                                }
                             }).then(async function (this_created_role) {
                                 this_game_role = this_created_role;
                             }).catch(error => {
                                 g_interface.on_error({
                                     name: 'init -> .create(this_game_name)',
+                                    location: 'dynamic_roles.js',
+                                    error: error
+                                });
+                            });
+                        }
+                        // Check if mentionable role exists
+                        let this_game_role_mentionable = g_channels.get().guild.roles.cache.find(role => role.name == this_game_name + ' ⭐');
+                        if (!this_game_role_mentionable) {
+                            // Create mentionable role on this guild
+                            await g_channels.get().guild.roles.create({
+                                data: {
+                                    name: this_game_name + ' ⭐',
+                                    color: '0x00fffe',
+                                    mentionable: true
+                                }
+                            }).catch(error => {
+                                g_interface.on_error({
+                                    name: 'updateMember -> .create(game_role_mentionable)',
                                     location: 'dynamic_roles.js',
                                     error: error
                                 });
@@ -222,8 +254,7 @@ const init = async function () {
                                 color: '0x7b00ff',
                                 position: play_role.position,
                                 hoist: true
-                            },
-                            reason: `A new game is played by (${this_member.user.tag}).`
+                            }
                         }).then(async function (play_role) {
                             this_play_role = play_role;
                         }).catch(error => {
@@ -290,7 +321,7 @@ const init = async function () {
                         role_in_use = true;
                     } else {
                         // Remove play role from this member
-                        await this_member.roles.remove(this_role, 'This role is no longer valid.').catch(error => {
+                        await this_member.roles.remove(this_role).catch(error => {
                             g_interface.on_error({
                                 name: 'init -> .remove(this_role)',
                                 location: 'dynamic_roles.js',
@@ -303,7 +334,7 @@ const init = async function () {
             // Delete blacklisted or unused play roles
             if (!role_in_use || g_db.titles().blacklisted.includes(this_role.name.substring(5).toLowerCase())) {
                 // Delete Play Role
-                await this_role.delete('This role is no longer in use or is blacklisted.').catch(error => {
+                await this_role.delete().catch(error => {
                     g_interface.on_error({
                         name: 'init -> .delete(this_role) [play role]',
                         location: 'dynamic_roles.js',
@@ -313,7 +344,7 @@ const init = async function () {
             }
         } else if (this_role.hexColor == '#00ffff' && g_db.titles().blacklisted.includes(this_role.name.toLowerCase())) {
             // Delete Game Role
-            await this_role.delete('This role is no longer in use or is blacklisted.').catch(error => {
+            await this_role.delete().catch(error => {
                 g_interface.on_error({
                     name: 'init -> .delete(this_role) [game role]',
                     location: 'dynamic_roles.js',

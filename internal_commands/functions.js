@@ -55,8 +55,15 @@ const array_difference = function (a1, a2) {
     return diff;
 }
 
+const string_to_int = function (string) {
+    const parsed = parseInt(string, 10);
+    if (isNaN(parsed)) return 0;
+    return parsed;
+}
+
 module.exports = {
     sleep,
     string_similarity,
-    array_difference
+    array_difference,
+    string_to_int
 }

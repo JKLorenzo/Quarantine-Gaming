@@ -17,11 +17,10 @@ module.exports = class PlayCommand extends Command {
                         let role_id = `${role}`.substring(3, `${role}`.length - 1);
                         let this_role = g_channels.get().guild.roles.cache.find(role => role.id == role_id);
                         if (this_role) {
-                            return this_role.hexColor == '#00ffff'
+                            return this_role.hexColor == '#00fffe' && this_role.name.split(' ⭐').length == 2;
                         } else {
                             return false;
                         }
-
                     }
                 },
                 {
@@ -39,13 +38,9 @@ module.exports = class PlayCommand extends Command {
         const role_id = `${role}`.substring(3, `${role}`.length - 1);
         const this_role = g_channels.get().guild.roles.cache.find(role => role.id == role_id);
         const this_member = g_channels.get().guild.member(message.author);
-        function parse(string) {
-            const parsed = parseInt(string, 10);
-            if (isNaN(parsed)) return 0;
-            return parsed;
-        }
+
         const args = input.split(' ');
-        let count = parse(args[0]);
+        let count = g_functions.string_to_int(args[0]);
         const reserved = args.map(arg => {
             if (arg.startsWith('<@') && arg.endsWith('>')) {
                 return arg + ' ';

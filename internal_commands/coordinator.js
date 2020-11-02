@@ -1,68 +1,73 @@
 const { MessageEmbed } = require('discord.js');
 
 const invite = async function (role, member, count, reserved) {
-    let embed = new MessageEmbed();
-    embed.setAuthor('Quarantine Gaming: Game Coordinator');
-    embed.setTitle(role.name);
-    embed.addField(`Player 1:`, member.toString());
-    let reserved_count = 2;
-    let members = [];
-    if (reserved) {
-        for (let user of reserved.split(' ')) {
-            let user_id = user.split('<@').join('').split('>').join('').slice(1);
-            let this_member = g_channels.get().guild.members.cache.get(user_id);
-            if (this_member && !members.includes(this_member)) {
-                members.push(this_member);
+    let mention_role = g_roles.get().guild.roles.cache.find(this_role => this_role.hexColor == '#00ffff' && role.name.startsWith(this_role.name));
+    if (mention_role) {
+        let embed = new MessageEmbed();
+        embed.setAuthor('Quarantine Gaming: Game Coordinator');
+        embed.setTitle(mention_role.name);
+        embed.addField(`Player 1:`, member.toString());
+        let reserved_count = 2;
+        let members = [];
+        if (reserved) {
+            for (let user of reserved.split(' ')) {
+                let user_id = user.split('<@').join('').split('>').join('').slice(1);
+                let this_member = g_channels.get().guild.members.cache.get(user_id);
+                if (this_member && !members.includes(this_member)) {
+                    members.push(this_member);
+                }
+            }
+            for (let this_member of members) {
+                if (this_member.user.id != member.user.id) {
+                    embed.addField(`Player ${reserved_count++}:`, this_member.toString());
+                }
             }
         }
-        for (let this_member of members) {
-            if (this_member.user.id != member.user.id) {
-                embed.addField(`Player ${reserved_count++}:`, this_member.toString());
+        if (count == 0) {
+            embed.setDescription(`${member.displayName} wants to play ${mention_role}.`);
+        } else {
+            embed.setDescription(`${member.displayName} is looking for **${count - 1}** other ${mention_role} player${count == 2 ? '' : 's'}.`);
+            for (let i = reserved_count; i <= count; i++) {
+                embed.addField(`Player ${i}:`, '\u200B');
             }
         }
-    }
-    if (count == 0) {
-        embed.setDescription(`${member.displayName} wants to play ${role}.`);
-    } else {
-        embed.setDescription(`${member.displayName} is looking for **${count - 1}** other ${role} player${count == 2 ? '' : 's'}.`);
-        for (let i = reserved_count; i <= count; i++) {
-            embed.addField(`Player ${i}:`, '\u200B');
+
+        let is_full = count != 0 && members.length + 1 >= count;
+        if (is_full) {
+            embed.setFooter('Closed. This bracket is now full.');
+        } else {
+            embed.setFooter(`Join this bracket by reacting below.`);
         }
-    }
+        embed.setColor('#7b00ff');
 
-    let is_full = count != 0 && members.length + 1 >= count;
-    if (is_full) {
-        embed.setFooter('Closed. This bracket is now full.');
-    } else {
-        embed.setFooter(`Join this bracket by reacting below.`);
-    }
-    embed.setColor('#7b00ff');
+        let emoji = g_channels.get().guild.emojis.cache.find(emoji => emoji.name == mention_role.name.split(' ').join('').split(':').join('').split('-').join(''));
+        let qg_emoji = g_channels.get().guild.emojis.cache.find(emoji => emoji.name == 'quarantinegaming');
+        if (emoji) {
+            embed.setThumbnail(emoji.url);
+        } else {
+            embed.setThumbnail(qg_emoji.url);
+        }
 
-    let emoji = g_channels.get().guild.emojis.cache.find(emoji => emoji.name == role.name.split(' ').join('').split(':').join('').split('-').join(''));
-    let qg_emoji = g_channels.get().guild.emojis.cache.find(emoji => emoji.name == 'quarantinegaming');
-    if (emoji) {
-        embed.setThumbnail(emoji.url);
-    } else {
-        embed.setThumbnail(qg_emoji.url);
-    }
-    await g_channels.get().gaming.send({ content: `Inviting all ${role} players!`, embed: embed }).then(async message => {
-        message.delete({ timeout: 3600000, reason: 'Timed Out' }).catch(error => { });
-        if (!is_full) {
-            await message.react(emoji ? emoji : qg_emoji).catch(error => {
-                g_interface.on_error({
-                    name: 'run -> .react()',
-                    location: 'play.js',
-                    error: error
+
+        await g_channels.get().gaming.send({ content: `Inviting all ${mention_role} players!`, embed: embed }).then(async message => {
+            message.delete({ timeout: 3600000, reason: 'Timed Out' }).catch(error => { });
+            if (!is_full) {
+                await message.react(emoji ? emoji : qg_emoji).catch(error => {
+                    g_interface.on_error({
+                        name: 'run -> .react()',
+                        location: 'play.js',
+                        error: error
+                    });
                 });
+            }
+        }).catch(error => {
+            g_interface.on_error({
+                name: 'run -> .say()',
+                location: 'play.js',
+                error: error
             });
-        }
-    }).catch(error => {
-        g_interface.on_error({
-            name: 'run -> .say()',
-            location: 'play.js',
-            error: error
         });
-    });
+    }
 }
 
 let coordinator_queue = new Array(), is_processing = false;
