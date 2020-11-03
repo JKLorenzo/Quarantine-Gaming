@@ -46,7 +46,6 @@ client.registry
     .registerDefaultGroups()
     .registerDefaultCommands({
         eval: false,
-        ping: false,
         prefix: false,
         commandState: false
     })
