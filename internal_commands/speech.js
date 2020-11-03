@@ -41,6 +41,7 @@ const say = async function (message, channel) {
                 });
             });
         } catch (error) {
+            await channel.leave();
             is_saying = false;
             reject(error);
         };
