@@ -39,7 +39,8 @@ module.exports = class Game extends Command {
                 };
                 break;
         }
-        if (updated){
+
+        if (updated) {
             message.say('Updated!');
         } else {
             message.say('No changes made!');

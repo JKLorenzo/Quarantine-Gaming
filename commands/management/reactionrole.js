@@ -41,7 +41,6 @@ module.exports = class ReactionRole extends Command {
     }
 
     async run(message, { mode, type, msgID }) {
-        message.delete({ timeout: 5000 }).catch(error => { });
         let output;
         switch (type) {
             case 'nsfw':
@@ -54,6 +53,8 @@ module.exports = class ReactionRole extends Command {
                 output = CommunityGameInvites();
                 break;
         }
+
+        let updated = true;
         switch (mode) {
             case 'create':
                 await g_channels.get().roles.send(output.message).then(async this_message => {
@@ -105,6 +106,15 @@ module.exports = class ReactionRole extends Command {
                     }
                 });
                 break;
+            default:
+                updated = false;
+                break;
+        }
+
+        if (updated) {
+            message.say(`Got it! All changes are made.`)
+        } else {
+            message.say(`Uh oh! No changes made.`)
         }
     }
 };

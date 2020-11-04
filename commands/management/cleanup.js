@@ -21,10 +21,12 @@ module.exports = class CleanUp extends Command {
 	}
 
 	async run(message, { count }) {
-		message.delete().catch(error => { });
+		await message.delete().catch(error => { });
+
 		let remaining = count;
 		let deleted = 0;
 		await g_functions.sleep(1000);
+
 		async function removeMessages(number_of_messages) {
 			if (number_of_messages > 0) {
 				await message.channel.bulkDelete(number_of_messages).then(messages => {
@@ -48,6 +50,7 @@ module.exports = class CleanUp extends Command {
 				});
 			}
 		}
+
 		while (remaining > 100) {
 			await removeMessages(100);
 		}
