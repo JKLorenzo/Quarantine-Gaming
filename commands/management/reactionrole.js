@@ -24,9 +24,9 @@ module.exports = class ReactionRole extends Command {
                 },
                 {
                     key: 'type',
-                    prompt: 'nsfw, fgu, or cgi?',
+                    prompt: 'nsfw, fgu',
                     type: 'string',
-                    oneOf: ['nsfw', 'fgu', 'cgi']
+                    oneOf: ['nsfw', 'fgu']
                 },
                 {
                     key: 'msgID',
@@ -48,9 +48,6 @@ module.exports = class ReactionRole extends Command {
                 break;
             case 'fgu':
                 output = FreeGameUpdates();
-                break;
-            case 'cgi':
-                output = CommunityGameInvites();
                 break;
         }
 
@@ -165,43 +162,6 @@ function FreeGameUpdates() {
         .setFooter('Update your role by reacting below.');
 
     let reactions = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'];
-    return {
-        message: embed,
-        reactions: reactions
-    };
-}
-
-function CommunityGameInvites() {
-    let description = new Array();
-    description.push('All notifications will be made available on the <#759755324264808489> channel.');
-    description.push(' ');
-    description.push('⭐ - <@&772934524555493387>');
-    description.push('See all the game invites from other members and get a notification when applicable.');
-    description.push(' ');
-    description.push('**Invite members and form a team by doing:**');
-    description.push('!play *<role> [count] {user}*');
-    description.push(' ');
-    description.push('**Example 1 : Open Bracket**');
-    description.push('!play <@&772956970088792085>');
-    description.push(' ');
-    description.push('**Example 2 : Open Bracket w/ Reserved Players**');
-    description.push('!play <@&772956970088792085> <@393013053488103435> <@!339387696785129473> ');
-    description.push(' ');
-    description.push('**Example 3 : Limited Bracket**');
-    description.push('!play <@&772956970088792085> 5');
-    description.push(' ');
-    description.push('**Example 4 : Limited Bracket w/ Reserved Players**');
-    description.push('!play <@&772956970088792085> 5 <@!351179371014258698> <@!347769907678806019> <@166108211643023360> ');
-    let embed = new MessageEmbed()
-        .setColor('#ffff00')
-        .setAuthor('Quarantine Gaming: Community Game Invites')
-        .setTitle('Receive Game Invites from other Members')
-        .setThumbnail(g_client.user.displayAvatarURL())
-        .setDescription(description.join('\n'))
-        .setImage('http://www.playfaeria.com/wp-content/uploads/2016/08/FAERIA-Banner_News_InviteYourFriends.jpg')
-        .setFooter('Update your role by reacting below.');
-
-    let reactions = ['⭐'];
     return {
         message: embed,
         reactions: reactions

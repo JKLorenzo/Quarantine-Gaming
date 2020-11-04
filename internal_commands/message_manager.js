@@ -407,22 +407,6 @@ const reactionAdd = async function (reaction, user) {
                         });
                     }
                     break;
-                case 'Quarantine Gaming: Community Game Invites':
-                    switch (reaction.emoji.name) {
-                        case '⭐':
-                            this_member = g_channels.get().guild.members.cache.get(user.id);
-                            if (!this_member.roles.cache.has(g_roles.get().community.id)) {
-                                await this_member.roles.add(g_roles.get().community).catch(error => {
-                                    g_interface.on_error({
-                                        name: 'messageReactionAdd -> .add(community)',
-                                        location: 'message_manager.js',
-                                        error: error
-                                    });
-                                });
-                            }
-                            break;
-                    }
-                    break;
             }
         }
     } catch (error) {
@@ -506,22 +490,6 @@ const reactionRemove = async function (reaction, user) {
                             message: this_message,
                             member: g_channels.get().guild.members.cache.get(user.id)
                         });
-                    }
-                    break;
-                case 'Quarantine Gaming: Community Game Invites':
-                    switch (reaction.emoji.name) {
-                        case '⭐':
-                            this_member = g_channels.get().guild.members.cache.get(user.id);
-                            if (this_member.roles.cache.has(g_roles.get().community.id)) {
-                                await this_member.roles.remove(g_roles.get().community).catch(error => {
-                                    g_interface.on_error({
-                                        name: 'messageReactionRemove -> .remove(community)',
-                                        location: 'message_manager.js',
-                                        error: error
-                                    });
-                                });
-                            }
-                            break;
                     }
                     break;
             }
