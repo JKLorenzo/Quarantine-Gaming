@@ -115,12 +115,12 @@ const clear_dms = async function () {
     }
 }
 
-const clear_channels = function () {
+const clear_channels = async function () {
     const channels_To_clear = [g_channels.get().gaming, g_channels.get().testing];
     for (let channel of channels_To_clear) {
-        channel.messages.fetch().then(messages => {
+        await channel.messages.fetch().then(async messages => {
             for (let message of messages) {
-                message[1].delete({ timeout: 900000 }).catch(error => { });
+                await message[1].delete({ timeout: 900000 }).catch(error => { }); // Delete after 15 mins
             }
         });
     }
