@@ -95,13 +95,13 @@ const dm_member = async function (member, content) {
     });
 }
 
-const clear_dms = function () {
+const clear_dms = async function () {
     for (let member of g_channels.get().guild.members.cache.array()) {
         if (!member.user.bot) {
-            member.createDM().then(async dm_channel => {
-                dm_channel.messages.fetch().then(async messages => {
+            await member.createDM().then(async dm_channel => {
+                await dm_channel.messages.fetch().then(async messages => {
                     for (let message of messages) {
-                        message[1].delete().catch(error => { });;
+                        if (message[1].author.bot) await message[1].delete().catch(error => { });;
                     }
                 }).catch(error => { });
             }).catch(error => {
