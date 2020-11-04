@@ -1,7 +1,6 @@
 const { Command } = require('discord.js-commando');
 const { MessageEmbed } = require('discord.js');
 
-let mode;
 function guidelines() {
     let embed = new MessageEmbed();
     embed.setAuthor('Discord', 'http://orig08.deviantart.net/5d90/f/2016/099/d/a/discord_token_icon_light_by_flexo013-d9y9q3w.png');
@@ -48,77 +47,124 @@ function guidelines() {
     return embed;
 }
 
+let this_mode;
+function setMode(val) {
+    this_mode = val;
+}
+function getMode() {
+    return this_mode;
+}
 module.exports = class Message extends Command {
     constructor(client) {
         super(client, {
             name: 'message',
             group: 'management',
             memberName: 'message',
-            description: '[Admin Only] Send or update a message to a channel as Quarantine Gaming.',
+            description: '[Admin Only] Send a message to a channel, update a message on a channel, or send a DM to a member as Quarantine Gaming.',
             userPermissions: ["ADMINISTRATOR"],
             args: [
                 {
                     key: 'mode',
-                    prompt: 'Send or Update?',
+                    prompt: 'Send, Update or DM?',
                     type: 'string',
-                    oneOf: ['send', 'update'],
-                    validate: this_mode => {
-                        mode = this_mode;
-                        return this_mode == 'send' || this_mode == 'update';
+                    oneOf: ['send', 'update', 'dm'],
+                    validate: mode => {
+                        setMode(mode.toLowerCase());
+                        return mode == 'send' || mode == 'update' || mode == 'dm';
                     }
                 },
                 {
-                    key: 'arg1',
-                    prompt: `Mention the channel where  ${mode == 'send' ? 'you want to send the message' : 'the message is located'}.`,
-                    type: 'channel'
-                },
-                {
-                    key: 'arg2',
-                    prompt: mode == 'send' ? 'Enter the message you want to send.' : 'Enter the message ID of the original message. Followed by the message you want to send.',
-                    type: 'string'
+                    key: 'args',
+                    prompt: `**Arguments:**\n` +
+                        `On Send: *<Channel ID> [Message]*\n` +
+                        `On Update: *<Channel ID> [Message ID] {Message}*\n` +
+                        `On DM: *<User ID> [Message]*`,
+                    type: 'string',
+                    validate: async args => {
+                        console.log('validating')
+                        let commands = args.split(' ');
+                        if (commands.length < 2) return false;
+                        let this_channel, the_message, this_member;
+                        switch (getMode()) {
+                            case 'send':
+                                this_channel = g_channels.get().guild.channels.cache.find(channel => channel.id == commands[0]);
+                                the_message = commands.slice(1).join(' ');
+                                return (this_channel && the_message) ? true : false;
+                                break;
+                            case 'update':
+                                this_channel = g_channels.get().guild.channels.cache.find(channel => channel.id == commands[0]);
+                                let this_message;
+                                if (this_channel) {
+                                    await this_channel.messages.fetch(commands[1]).then(message => {
+                                        this_message = message;
+                                    }).catch(error => { });
+                                }
+                                the_message = commands.slice(2).join(' ');
+                                return (this_channel && this_message && the_message) ? true : false;
+                                break;
+                            case 'dm':
+                                this_member = g_channels.get().guild.members.cache.find(member => member.user.id == commands[0]);
+                                the_message = commands.slice(1).join(' ');
+                                return (this_member && the_message) ? true : false;
+                                break;
+                        }
+                    }
                 }
             ]
         });
     }
 
-    run(message, { mode, arg1, arg2 }) {
-        message.delete({ timeout: 250 }).catch(error => { });
-        let channel = g_channels.get().guild.channels.cache.get(arg1.id);
-        if (channel) {
-            switch (mode) {
-                case 'send':
-                    if (arg2 == 'guidelines') {
-                        return channel.send(guidelines()).catch(error => {
-                            g_interface.on_error({
-                                name: 'run -> .send(guidelines)',
-                                location: 'message.js',
-                                error: error
-                            });
-                        });
-                    } else {
-                        return channel.send(`${arg2}`).catch(error => {
-                            g_interface.on_error({
-                                name: 'run -> .send(content)',
-                                location: 'message.js',
-                                error: error
-                            });
-                        });
-                    }
-                case 'update':
-                    let message_id = arg2.split(' ')[0];
-                    let content = arg2.split(' ').slice(1).join(' ');
-                    channel.messages.fetch(message_id).then(this_message => {
-                        return this_message.edit(`${content}`).catch(error => {
-                            message.say(`Uh oh! ${error}`).then(this_message => {
-                                this_message.delete({ timeout: 5000 }).catch(error => { });
-                            });
+    async run(message, { mode, args }) {
+        console.log('running')
+        let this_channel, the_message, this_member;
+        let commands = args.split(' ');
+        switch (mode.toLowerCase()) {
+            case 'send':
+                this_channel = g_channels.get().guild.channels.cache.find(channel => channel.id == commands[0]);
+                the_message = commands.slice(1).join(' ');
+                if (the_message == 'guidelines') {
+                    await this_channel.send(guidelines()).catch(error => {
+                        g_interface.on_error({
+                            name: 'run -> .send(guidelines)',
+                            location: 'message.js',
+                            error: error
                         });
                     });
-            }
-        } else {
-            return message.say(`I can't find the channel you're looking for.`).then(this_message => {
-                this_message.delete({ timeout: 5000 }).catch(error => { });
-            });
+                } else {
+                    await this_channel.send(the_message).catch(error => {
+                        g_interface.on_error({
+                            name: 'run -> .send(the_message)',
+                            location: 'message.js',
+                            error: error
+                        });
+                    });
+                }
+                break;
+            case 'update':
+                this_channel = g_channels.get().guild.channels.cache.find(channel => channel.id == commands[0]);
+                the_message = commands.slice(2).join(' ');
+                if (this_channel) {
+                    await this_channel.messages.fetch(commands[1]).then(async this_message => {
+                        await this_message.edit(the_message).catch(async error => {
+                            await message.say(`Uh oh! ${error}`).then(this_error_message => {
+                                this_error_message.delete({ timeout: 5000 }).catch(error => { });
+                            });
+                        });
+                    }).catch(error => {
+                        g_interface.on_error({
+                            name: 'run -> .fetch(the_message)',
+                            location: 'message.js',
+                            error: error
+                        });
+                    });
+                }
+                break;
+            case 'dm':
+                this_member = g_channels.get().guild.members.cache.find(member => member.user.id == commands[0]);
+                the_message = commands.slice(1).join(' ');
+                await g_message_manager.dm_member(this_member, the_message);
+                break;
         }
+        return message.say('Done!').catch(error => { });
     }
 };

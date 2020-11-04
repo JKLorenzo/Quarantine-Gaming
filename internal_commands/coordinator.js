@@ -169,7 +169,7 @@ async function beginProcess() {
                 await message.edit({ content: message.content, embed: embed }).then(async message => {
                     // Notify join
                     if (inviter) {
-                        await g_interface.dm(inviter, `${member} ${status ? 'joined' : 'left'} your bracket. ${players.length > 1 ? `${players.length} players total.` : ''}`);
+                        await g_message_manager.dm_member(inviter, `${member} ${status ? 'joined' : 'left'} your bracket. ${players.length > 1 ? `${players.length} players total.` : ''}`);
                     }
                     // Notify full
                     if (status && has_caps && players.length >= max) {
@@ -177,7 +177,7 @@ async function beginProcess() {
                         if (inviter) {
                             embed.setDescription('Your team members are listed below.');
                             embed.setFooter('Game On!');
-                            g_interface.dm(inviter, { content: `Your ${embed.title} bracket is now full.`, embed: embed });
+                            g_message_manager.dm_member(inviter, { content: `Your ${embed.title} bracket is now full.`, embed: embed });
                         }
                     }
                 }).catch(error => {

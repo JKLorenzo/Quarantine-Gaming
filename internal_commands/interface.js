@@ -43,45 +43,14 @@ const updates = async function (message) {
     });
 }
 
-const dm = async function (member, content) {
-    if (member.user.bot) return;
-    await member.createDM().then(async dm_channel => {
-        await dm_channel.send(content).then(message => {
-            message.delete({ timeout: 3600000 }).catch(error => { });
+const dm = async function (message) {
+    return new Promise(async (resolve, reject) => {
+        await g_channels.get().dm.send(message).then(message => {
+            resolve(message);
         }).catch(error => {
-            on_error({
-                name: `dm -> [${member}].send(${content})`,
-                location: 'interface.js',
-                error: error
-            });
-        });
-    }).catch(error => {
-        on_error({
-            name: `dm -> .createDM(${member})`,
-            location: 'interface.js',
-            error: error
+            reject(error);
         });
     });
-}
-
-const clear_dms = function () {
-    for (let member of g_channels.get().guild.members.cache.array()) {
-        if (!member.user.bot) {
-            member.createDM().then(async dm_channel => {
-                dm_channel.messages.fetch().then(async messages => {
-                    for (let message of messages) {
-                        message[1].delete().catch(error => { });;
-                    }
-                }).catch(error => { });
-            }).catch(error => {
-                on_error({
-                    name: 'clear_dms -> .createDM()',
-                    location: 'interface.js',
-                    error: error
-                });
-            });
-        }
-    }
 }
 
 // Interface Module Functions
@@ -90,6 +59,5 @@ module.exports = {
     log,
     dm,
     announce,
-    updates,
-    clear_dms
+    updates
 }

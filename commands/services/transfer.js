@@ -28,7 +28,7 @@ module.exports = class TransferCommand extends Command {
                 if (this_member) {
                     if (this_member.voice.channelID) {
                         this_member.voice.setChannel(channel.id).then(member => {
-                            g_interface.dm(member, `You have been transfered by ${message.author} to ${channel.name}.`);
+                            g_message_manager.dm_member(member, `You have been transfered by ${message.author} to ${channel.name}.`);
                         }).catch(error => { });
                     } else {
                         message.channel.send(`${this_member} must be active to any voice channels.`).then(this_message => {

@@ -116,7 +116,7 @@ async function updateChannel() {
                     embed.setDescription('Please observe proper behavior on your current voice channel.')
                     embed.setImage('https://pa1.narvii.com/6771/d33918fa87ad0d84b7dc854dcbf6a8545c73f94d_hq.gif');
                     embed.setColor('#5dff00')
-                    await g_interface.dm(newState.member, embed).catch(error => {
+                    await g_message_manager.dm_member(newState.member, embed).catch(error => {
                         g_interface.on_error({
                             name: 'updateChannel -> .dm(stream)',
                             location: 'dynamic_channels.js',

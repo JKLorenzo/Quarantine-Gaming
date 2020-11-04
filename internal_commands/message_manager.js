@@ -1,15 +1,20 @@
 const { MessageEmbed } = require('discord.js');
 
 const manage = async function (message) {
+    // Help
+    if (message.channel && message.content.toLowerCase() == '!help') {
+        message.channel.send(`Visit <https://quarantinegamingdiscord.wordpress.com/> to learn more.`).catch(error => { });
+    }
+
     // Announcements
     if (message.channel && message.channel.id == g_channels.get().announcement.id && message.author != g_client.user) {
         message.delete({ timeout: 250 }).catch(error => { });
         g_interface.announce(message.content);
     }
 
-    // Game Invites
+    // Game Invites Channel Blocking
     if (message.channel && message.channel.id == g_channels.get().gaming.id && (message.embeds.length == 0 || (message.embeds.length > 0 && message.embeds[0].author.name != 'Quarantine Gaming: Game Coordinator'))) {
-        g_interface.dm(g_channels.get().guild.member(message.author), `Hello there! You can't send any messages in ${message.channel} channel. To invite players, do *!play* command in the ${g_channels.get().general} text channel.`);
+        dm_member(g_channels.get().guild.member(message.author), `Hello there! You can't send any messages in ${message.channel} channel. To invite players, do *!play* command in the ${g_channels.get().general} text channel.`);
         message.delete({ timeout: 250 }).catch(error => { });
     }
 
@@ -43,6 +48,69 @@ const manage = async function (message) {
                 error: error
             });
         });
+    }
+
+    // DM
+    if (message.guild == null) {
+        let this_member = g_channels.get().guild.member(message.author);
+        if (this_member && !this_member.user.bot) {
+            let embed = new MessageEmbed()
+                .setAuthor('Quarantine Gaming: Direct Message Handler')
+                .setTitle(`${this_member.displayName} (${this_member.user.tag})`)
+                .setThumbnail(message.author.displayAvatarURL())
+                .setDescription(message.content)
+                .setFooter(`To reply: !message dm ${this_member.user.id} <message>`)
+                .setColor(`#00ff6f`);
+
+            g_interface.dm({ embed: embed }).catch(error => {
+                g_interface.on_error({
+                    name: 'manage -> .dm(embed)',
+                    location: 'message_manager.js',
+                    error: error
+                });
+            });
+        }
+    }
+}
+
+const dm_member = async function (member, content) {
+    if (member.user.bot) return;
+    await member.createDM().then(async dm_channel => {
+        await dm_channel.send(content).then(message => {
+            message.delete({ timeout: 3600000 }).catch(error => { });
+        }).catch(error => {
+            on_error({
+                name: `dm -> [${member}].send(${content})`,
+                location: 'interface.js',
+                error: error
+            });
+        });
+    }).catch(error => {
+        on_error({
+            name: `dm -> .createDM(${member})`,
+            location: 'interface.js',
+            error: error
+        });
+    });
+}
+
+const clear_dms = function () {
+    for (let member of g_channels.get().guild.members.cache.array()) {
+        if (!member.user.bot) {
+            member.createDM().then(async dm_channel => {
+                dm_channel.messages.fetch().then(async messages => {
+                    for (let message of messages) {
+                        message[1].delete().catch(error => { });;
+                    }
+                }).catch(error => { });
+            }).catch(error => {
+                on_error({
+                    name: 'clear_dms -> .createDM()',
+                    location: 'interface.js',
+                    error: error
+                });
+            });
+        }
     }
 }
 
@@ -147,7 +215,7 @@ const reactionAdd = async function (reaction, user) {
                                                 `Do *!help* on our #general🔗 text channel to know more about these features or you can visit https://quarantinegamingdiscord.wordpress.com/ for more info.`,
                                                 `Thank you for joining **Quarantine Gaming**! Game On!`
                                             ]
-                                            g_interface.dm(this_member, dm_msg.join('\n'));
+                                            dm_member(this_member, dm_msg.join('\n'));
                                         }).catch(error => {
                                             g_interface.on_error({
                                                 name: 'messageReactionAdd -> .removeAll(reactions) [case approve]',
@@ -468,7 +536,9 @@ const reactionRemove = async function (reaction, user) {
 
 module.exports = {
     manage,
+    dm_member,
     reactionAdd,
     reactionRemove,
-    clear_channels
+    clear_channels,
+    clear_dms
 }

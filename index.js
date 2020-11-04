@@ -30,6 +30,7 @@ global.g_interface = interface;
 global.g_speech = speech;
 global.g_functions = functions;
 global.g_channels = channels;
+global.g_message_manager = message_manager;
 global.g_roles = roles;
 global.g_dynamic_channels = dynamic_channels;
 global.g_dynamic_roles = dynamic_roles;
@@ -63,7 +64,7 @@ client.once('ready', async () => {
     dynamic_channels.init();
 
     // Clear Messages
-    interface.clear_dms();
+    message_manager.clear_dms();
     message_manager.clear_channels();
 
     // Set the bot's activity
@@ -200,7 +201,7 @@ client.on('guildMemberAdd', async member => {
             let dm = new Array();
             dm.push(`Hi ${member.user.username}, and welcome to **Quarantine Gaming**!`);
             dm.push('Please wait while our staff is processing your membership approval.');
-            g_interface.dm(member, dm.join('\n'));
+            g_message_manager.dm_member(member, dm.join('\n'));
         }
     }
 });
