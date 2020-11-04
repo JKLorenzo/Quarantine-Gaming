@@ -58,8 +58,9 @@ const manage = async function (message) {
                 .setAuthor('Quarantine Gaming: Direct Message Handler')
                 .setTitle(`${this_member.displayName} (${this_member.user.tag})`)
                 .setThumbnail(message.author.displayAvatarURL())
-                .setDescription(message.content)
-                .setFooter(`To reply: !message dm ${this_member.user.id} <message>`)
+                .addField('Sender:', this_member)
+                .addField('Message:', message.content)
+                .setFooter(`To reply, do: !message dm ${this_member.user.id} <message>`)
                 .setColor(`#00ff6f`);
 
             g_interface.dm({ embed: embed }).catch(error => {

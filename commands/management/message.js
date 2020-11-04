@@ -81,7 +81,6 @@ module.exports = class Message extends Command {
                         `On DM: *<User ID> [Message]*`,
                     type: 'string',
                     validate: async args => {
-                        console.log('validating')
                         let commands = args.split(' ');
                         if (commands.length < 2) return false;
                         let this_channel, the_message, this_member;
@@ -115,7 +114,6 @@ module.exports = class Message extends Command {
     }
 
     async run(message, { mode, args }) {
-        console.log('running')
         let this_channel, the_message, this_member;
         let commands = args.split(' ');
         switch (mode.toLowerCase()) {
