@@ -1,5 +1,6 @@
 const googleTTS = require('google-tts-api');
 const OpusScript = require('opusscript'); // for TTS
+const { MessageEmbed } = require('discord.js');
 
 let is_saying = false;
 
@@ -21,13 +22,15 @@ const say = async function (message, channel) {
     is_saying = true;
 
     return new Promise(async (resolve, reject) => {
-        try {
-            // Format words
-            for (let word of format_words) {
-                message = message.split(word.original).join(word.formatted);
-            }
-            // Begin TTS
-            await channel.join().then(async connection => {
+        // Format words
+        for (let word of format_words) {
+            message = message.split(word.original).join(word.formatted);
+        }
+        // Begin TTS
+        await channel.join().then(async connection => {
+            let retries = 3, failed;
+            do {
+                failed = false;
                 await googleTTS(message).then(async (url) => {
                     const dispatcher = await connection.play(url);
                     dispatcher.on('speaking', async speaking => {
@@ -38,13 +41,22 @@ const say = async function (message, channel) {
                             resolve();
                         }
                     });
+                }).catch(async error => {
+                    failed = error;
+                    retries--;
+                    await g_functions.sleep(1000);
                 });
-            });
-        } catch (error) {
-            await channel.leave();
+            } while (retries > 0 && failed);
+
+            if (failed) {
+                await channel.leave();
+                is_saying = false;
+                reject(failed);
+            }
+        }).catch(error => {
             is_saying = false;
             reject(error);
-        };
+        });
     });
 }
 
