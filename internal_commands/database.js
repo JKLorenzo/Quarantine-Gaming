@@ -26,7 +26,7 @@ let notifications = new Array(), index = 0, blacklisted = new Array(), whitelist
 async function trimNotif() {
     while (notifications.length > 5) {
         let expired_notif = notifications.shift();
-        DB.notifications.doc(expired_notif.id).delete();
+        await DB.notifications.doc(expired_notif.id).delete();
     }
 }
 
@@ -103,7 +103,7 @@ const pushBlacklisted = async function (name) {
     }
 
     let index = whitelisted.indexOf(name);
-    if (index + 1){
+    if (index + 1) {
         whitelisted.splice(index, 1);
         await DB.titles_whitelisted.doc(name).delete();
         updated = true;
@@ -118,10 +118,10 @@ const pushWhitelisted = async function (name) {
         whitelisted.push(name);
         await DB.titles_whitelisted.doc(name).set({});
         updated = true;
-    } 
+    }
 
     let index = blacklisted.indexOf(name);
-    if (index + 1){
+    if (index + 1) {
         blacklisted.splice(index, 1);
         await DB.titles_blacklisted.doc(name).delete();
         updated = true;

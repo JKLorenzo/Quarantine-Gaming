@@ -32,7 +32,7 @@ async function updateMember() {
                 }
             }
 
-            // Play Roles
+            // Sort Changed Activities
             let oldA = new Array(), newA = new Array();
             if (oldData) oldA = oldData.activities.map(activity => activity.name.trim());
             if (newData) newA = newData.activities.map(activity => activity.name.trim());
@@ -49,6 +49,7 @@ async function updateMember() {
                     }
                 }
             });
+            // Process changed activities
             for (let this_data of diff) {
                 let this_activity = this_data.activity;
                 if (this_activity.type == 'PLAYING' && !g_db.titles().blacklisted.includes(this_activity.name.trim().toLowerCase()) && (this_activity.applicationID || g_db.titles().whitelisted.includes(this_activity.name.trim().toLowerCase()))) {
@@ -68,7 +69,7 @@ async function updateMember() {
                                         name: this_game_name,
                                         color: '0x00ffff'
                                     }
-                                }).then(function (this_created_role) {
+                                }).then(this_created_role => {
                                     this_game_role = this_created_role;
                                 }).catch(error => {
                                     g_interface.on_error({
@@ -118,7 +119,7 @@ async function updateMember() {
                                     position: play_role.position,
                                     hoist: true
                                 }
-                            }).then(function (play_role) {
+                            }).then(play_role => {
                                 this_play_role = play_role;
                             }).catch(error => {
                                 g_interface.on_error({
@@ -186,10 +187,9 @@ async function updateMember() {
 }
 
 const init = async function () {
-
     for (let this_member of g_channels.get().guild.members.cache.array()) {
         if (!this_member.user.bot) {
-            // Add play roles
+            // Add roles
             for (let this_activity of this_member.presence.activities) {
                 if (this_activity.type == 'PLAYING' && !g_db.titles().blacklisted.includes(this_activity.name.trim().toLowerCase()) && (this_activity.applicationID || g_db.titles().whitelisted.includes(this_activity.name.trim().toLowerCase()))) {
                     let this_game_name = this_activity.name.trim();
@@ -207,7 +207,7 @@ const init = async function () {
                                     name: this_game_name,
                                     color: '0x00ffff',
                                 }
-                            }).then(async function (this_created_role) {
+                            }).then(this_created_role => {
                                 this_game_role = this_created_role;
                             }).catch(error => {
                                 g_interface.on_error({
@@ -247,15 +247,15 @@ const init = async function () {
 
                     // Check if this role doesn't exists
                     if (!this_play_role) {
-                        let play_role = g_channels.get().guild.roles.cache.find(role => role.name == '<PLAYROLES>');
+                        let play_roles = g_channels.get().guild.roles.cache.find(role => role.name == '<PLAYROLES>');
                         await g_channels.get().guild.roles.create({
                             data: {
                                 name: this_play_name,
                                 color: '0x7b00ff',
-                                position: play_role.position,
+                                position: play_roles.position,
                                 hoist: true
                             }
-                        }).then(async function (play_role) {
+                        }).then(play_role => {
                             this_play_role = play_role;
                         }).catch(error => {
                             g_interface.on_error({
@@ -346,7 +346,16 @@ const init = async function () {
             // Delete Game Role
             await this_role.delete().catch(error => {
                 g_interface.on_error({
-                    name: 'init -> .delete(this_role) [game role]',
+                    name: 'init -> .delete(game_role)',
+                    location: 'dynamic_roles.js',
+                    error: error
+                });
+            });
+        } else if (this_role.hexColor == '#00fffe' && g_db.titles().blacklisted.includes(this_role.name.toLowerCase())) {
+            // Delete Game Role Mentionable
+            await this_role.delete().catch(error => {
+                g_interface.on_error({
+                    name: 'init -> .delete(game_role_mentionable)',
                     location: 'dynamic_roles.js',
                     error: error
                 });
