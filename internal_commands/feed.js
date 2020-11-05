@@ -33,16 +33,16 @@ async function get() {
                     if (item_details.description) {
                         this_message.embeds[0].spliceFields(1, 3)
                             .addFields([
-                                { name: 'Validity', value: `${item_details.validity} %`, inline: true },
-                                { name: 'Score', value: `${item_details.score}`, inline: true },
+                                { name: 'Trust Factor', value: `${item_details.validity} %`, inline: true },
+                                { name: 'Margin', value: `${item_details.score}`, inline: true },
                                 { name: 'Details', value: `${item_details.description}` }
                             ])
                             .setTimestamp();
                     } else {
                         this_message.embeds[0].spliceFields(1, 2)
                             .addFields([
-                                { name: 'Validity', value: `${item_details.validity} %`, inline: true },
-                                { name: 'Score', value: `${item_details.score}`, inline: true }
+                                { name: 'Trust Factor', value: `${item_details.validity} %`, inline: true },
+                                { name: 'Margin', value: `${item_details.score}`, inline: true }
                             ])
                             .setTimestamp();
                     }

@@ -74,8 +74,8 @@ async function process_push() {
             }
             output.addFields([
                 { name: 'Author', value: author, inline: true },
-                { name: 'Validity', value: `${validity} %`, inline: true },
-                { name: 'Score', value: `${score}`, inline: true }
+                { name: 'Trust Factor', value: `${validity} %`, inline: true },
+                { name: 'Margin', value: `${score}`, inline: true }
             ]);
             if (description) {
                 output.addField('Details', description);
