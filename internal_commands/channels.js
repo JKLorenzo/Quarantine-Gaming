@@ -108,7 +108,7 @@ async function beginDedicate() {
                     ]
                 }).then(async voice_channel => {
                     // Set bitrate
-                    voice_channel.setBitrate(128000).catch(error => {
+                    voice_channel.setBitrate(64000).catch(error => {
                         g_interface.on_error({
                             name: 'beginDedicate -> .setBitrate()',
                             location: 'channels.js',
