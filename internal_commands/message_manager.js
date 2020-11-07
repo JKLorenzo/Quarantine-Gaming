@@ -199,11 +199,8 @@ const reactionAdd = async function (reaction, user) {
                                     await this_member.roles.add('722699433225224233').then(async () => {
                                         await this_message.reactions.removeAll().then(async message => {
                                             let final = message.embeds[0]
-                                                .spliceFields(4, 1)
-                                                .addFields(
-                                                    { name: 'Action Taken:', value: 'Approved ✅' },
-                                                    { name: 'Moderator:', value: user },
-                                                ).setTimestamp();
+                                                .spliceFields(4, 1, [{ name: 'Action Taken:', value: `Approved by ${user}` }])
+                                                .setTimestamp();
                                             await message.edit(final).catch(error => {
                                                 g_interface.on_error({
                                                     name: 'messageReactionAdd -> .edit(final) [case approve]',
@@ -236,11 +233,8 @@ const reactionAdd = async function (reaction, user) {
                                 await this_member.kick().then(async () => {
                                     await this_message.reactions.removeAll().then(async message => {
                                         let final = message.embeds[0]
-                                            .spliceFields(4, 1)
-                                            .addFields(
-                                                { name: 'Action Taken:', value: 'Kicked ❌' },
-                                                { name: 'Moderator:', value: user },
-                                            ).setTimestamp();
+                                            .spliceFields(4, 1, [{ name: 'Action Taken:', value: `Kicked by ${user}` }])
+                                            .setTimestamp();
                                         await message.edit(final).catch(error => {
                                             g_interface.on_error({
                                                 name: 'messageReactionAdd -> .edit(final) [case kick]',
@@ -267,11 +261,8 @@ const reactionAdd = async function (reaction, user) {
                                 await this_member.ban().then(async () => {
                                     await this_message.reactions.removeAll().then(async message => {
                                         let final = message.embeds[0]
-                                            .spliceFields(4, 1)
-                                            .addFields(
-                                                { name: 'Action Taken:', value: 'Banned ⛔' },
-                                                { name: 'Moderator:', value: user },
-                                            ).setTimestamp();
+                                            .spliceFields(4, 1, [{ name: 'Action Taken:', value: `Banned by ${user}` }])
+                                            .setTimestamp();
                                         await message.edit(final).catch(error => {
                                             g_interface.on_error({
                                                 name: 'messageReactionAdd -> .edit(final) [case ban]',
@@ -298,11 +289,8 @@ const reactionAdd = async function (reaction, user) {
                     } else {
                         await this_message.reactions.removeAll().then(async message => {
                             let final = message.embeds[0]
-                                .spliceFields(4, 1)
-                                .addFields(
-                                    { name: 'Action Taken:', value: 'None. User not found ⚠' },
-                                    { name: 'Moderator:', value: user },
-                                ).setTimestamp();
+                                .spliceFields(4, 1, [{ name: 'Action Taken:', value: `None. User not found ⚠. Attempted by ${user}` }])
+                                .setTimestamp();
                             await message.edit(final).catch(error => {
                                 g_interface.on_error({
                                     name: 'messageReactionAdd -> .edit(final) [case none]',

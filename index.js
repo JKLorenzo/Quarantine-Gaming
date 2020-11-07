@@ -197,7 +197,7 @@ client.on('guildMemberAdd', async member => {
                 { name: 'User:', value: this_member },
                 { name: 'ID:', value: this_member.id },
                 { name: 'Account Created:', value: created_on },
-                { name: 'Possible Inviter:', value: inviters.length > 0 ? inviters.map(this_invite => this_invite.inviter).join(' or ') : 'Not Traced.' },
+                { name: 'Inviter:', value: inviters.length > 0 ? inviters.map(this_invite => this_invite.inviter).join(' or ') : 'Not Traced.' },
                 { name: 'Moderation:', value: '✅ - Approve     ❌ - Kick     ⛔ - Ban' }
             ]);
             embed.setColor('#25c059');
