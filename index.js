@@ -62,6 +62,7 @@ client.once('ready', async () => {
     feed.init()
     dynamic_roles.init();
     dynamic_channels.init();
+    await functions.getInviter();
 
     // Clear Messages
     message_manager.clear_dms();
@@ -175,12 +176,18 @@ client.on('guildMemberAdd', async member => {
 
     if (this_member && !this_member.user.bot) {
         if (!this_member.roles.cache.find(role => role.id == '722699433225224233')) {
+            let dm = new Array();
+            dm.push(`Hi ${member.user.username}, and welcome to **Quarantine Gaming**!`);
+            dm.push('Please wait while our staff is processing your membership approval.');
+            await g_message_manager.dm_member(member, dm.join('\n'));
+
             let today = new Date();
             let diffMs = (today - this_member.user.createdAt);
             let diffDays = Math.floor(diffMs / 86400000)
             let diffHrs = Math.floor((diffMs % 86400000) / 3600000)
             let diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000);
             let created_on = diffDays + " days " + diffHrs + " hours " + diffMins + " minutes";
+            let inviters = await g_functions.getInviter();
 
             let embed = new MessageEmbed
             embed.setAuthor('Quarantine Gaming: Member Approval');
@@ -190,6 +197,7 @@ client.on('guildMemberAdd', async member => {
                 { name: 'User:', value: this_member },
                 { name: 'ID:', value: this_member.id },
                 { name: 'Account Created:', value: created_on },
+                { name: 'Possible Inviter:', value: inviters.length > 0 ? inviters.map(this_invite => this_invite.inviter).join(' or ') : 'Not Traced.' },
                 { name: 'Moderation:', value: '✅ - Approve     ❌ - Kick     ⛔ - Ban' }
             ]);
             embed.setColor('#25c059');
@@ -198,10 +206,6 @@ client.on('guildMemberAdd', async member => {
                 await this_message.react('❌');
                 await this_message.react('⛔');
             });
-            let dm = new Array();
-            dm.push(`Hi ${member.user.username}, and welcome to **Quarantine Gaming**!`);
-            dm.push('Please wait while our staff is processing your membership approval.');
-            g_message_manager.dm_member(member, dm.join('\n'));
         }
     }
 });

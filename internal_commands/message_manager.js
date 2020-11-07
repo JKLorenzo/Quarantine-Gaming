@@ -199,7 +199,7 @@ const reactionAdd = async function (reaction, user) {
                                     await this_member.roles.add('722699433225224233').then(async () => {
                                         await this_message.reactions.removeAll().then(async message => {
                                             let final = message.embeds[0]
-                                                .spliceFields(3, 1)
+                                                .spliceFields(4, 1)
                                                 .addFields(
                                                     { name: 'Action Taken:', value: 'Approved ✅' },
                                                     { name: 'Moderator:', value: user },
@@ -213,8 +213,7 @@ const reactionAdd = async function (reaction, user) {
                                             });
                                             let dm_msg = [
                                                 `Hooraaay! 🥳 Your membership request has been approved! You will now have access to all the features of this server!`,
-                                                `Do *!help* on our #general🔗 text channel to know more about these features or you can visit https://quarantinegamingdiscord.wordpress.com/ for more info.`,
-                                                `Thank you for joining **Quarantine Gaming**! Game On!`
+                                                `Do !help on our *#general🔗* text channel to know more about these features or you can visit <https://quarantinegamingdiscord.wordpress.com/> for more info.`
                                             ]
                                             dm_member(this_member, dm_msg.join('\n'));
                                         }).catch(error => {
@@ -237,7 +236,7 @@ const reactionAdd = async function (reaction, user) {
                                 await this_member.kick().then(async () => {
                                     await this_message.reactions.removeAll().then(async message => {
                                         let final = message.embeds[0]
-                                            .spliceFields(3, 1)
+                                            .spliceFields(4, 1)
                                             .addFields(
                                                 { name: 'Action Taken:', value: 'Kicked ❌' },
                                                 { name: 'Moderator:', value: user },
@@ -268,7 +267,7 @@ const reactionAdd = async function (reaction, user) {
                                 await this_member.ban().then(async () => {
                                     await this_message.reactions.removeAll().then(async message => {
                                         let final = message.embeds[0]
-                                            .spliceFields(3, 1)
+                                            .spliceFields(4, 1)
                                             .addFields(
                                                 { name: 'Action Taken:', value: 'Banned ⛔' },
                                                 { name: 'Moderator:', value: user },
@@ -299,7 +298,7 @@ const reactionAdd = async function (reaction, user) {
                     } else {
                         await this_message.reactions.removeAll().then(async message => {
                             let final = message.embeds[0]
-                                .spliceFields(3, 1)
+                                .spliceFields(4, 1)
                                 .addFields(
                                     { name: 'Action Taken:', value: 'None. User not found ⚠' },
                                     { name: 'Moderator:', value: user },

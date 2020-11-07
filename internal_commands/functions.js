@@ -61,9 +61,40 @@ const string_to_int = function (string) {
     return parsed;
 }
 
+let invites_list = new Array();
+const getInviter = async function () {
+    let invite_changes = new Array();
+    await g_channels.get().guild.fetchInvites().then(invites => {
+        for (let invite of invites) {
+            let the_invite = invites_list.find(this_invite => this_invite.code == invite[1].code);
+            if (!the_invite) {
+                // Add to list
+                invites_list.push(invite[1]);
+                // Add to changes
+                if (invite[1].uses > 0) {
+                    invite_changes.push(invite[1]);
+                }
+            } else if (the_invite.uses != invite[1].uses) {
+                // Add to changes
+                invite_changes.push(invite[1]);
+                // Replace
+                invites_list.splice(invites_list.indexOf(the_invite), 1, invite[1]);
+            }
+        }
+    }).catch(error => {
+        g_interface.on_error({
+            name: 'getInviter -> .fetchInvites()',
+            location: 'functions.js',
+            error: error
+        });
+    });
+    return invite_changes;
+}
+
 module.exports = {
     sleep,
     string_similarity,
     array_difference,
-    string_to_int
+    string_to_int,
+    getInviter
 }
