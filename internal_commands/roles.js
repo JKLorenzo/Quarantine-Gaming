@@ -1,3 +1,4 @@
+const { MessageEmbed } = require('discord.js');
 
 let guild, r_everyone, r_member, r_nsfw, r_dedicated, r_streaming, r_music;
 
@@ -23,7 +24,35 @@ const get = function () {
     }
 }
 
+const checkUnlisted = async function () {
+    // Check if any member doesnt have member role
+    for (let this_member of guild.members.cache.array()) {
+        if (!this_member.user.bot && !this_member.roles.cache.find(this_role => this_role == r_member)) {
+            // This member doesnt have member role
+            let today = new Date();
+            let diffMs = (today - this_member.user.createdAt);
+            let diffDays = Math.floor(diffMs / 86400000)
+            let diffHrs = Math.floor((diffMs % 86400000) / 3600000)
+            let diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000);
+            let created_on = diffDays + " days " + diffHrs + " hours " + diffMins + " minutes";
+
+            let embed = new MessageEmbed
+            embed.setAuthor('Quarantine Gaming: Unlisted Member');
+            embed.setTitle('Member Details');
+            embed.setThumbnail(this_member.user.displayAvatarURL());
+            embed.addFields([
+                { name: 'User:', value: this_member },
+                { name: 'ID:', value: this_member.id },
+                { name: 'Account Created:', value: created_on }
+            ]);
+            embed.setColor('#ff5f5f');
+            await g_channels.get().staff.send({ content: `This user doesn't have a member role. Manual action is required.`, embed: embed });
+        }
+    }
+}
+
 module.exports = {
     init,
-    get
+    get,
+    checkUnlisted
 }

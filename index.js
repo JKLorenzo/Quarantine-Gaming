@@ -63,6 +63,7 @@ client.once('ready', async () => {
     dynamic_roles.init();
     dynamic_channels.init();
     await functions.getInviter();
+    await roles.checkUnlisted();
 
     // Clear Messages
     message_manager.clear_dms();
