@@ -41,7 +41,7 @@ const manage = async function (message) {
             .setFooter(`On ${channel}`)
             .setColor(`#00ffff`);
 
-        g_interface.updates({ embed: embed }).catch(error => {
+        if (!message.content.startsWith('RT @')) g_interface.updates({ embed: embed }).catch(error => {
             g_interface.on_error({
                 name: 'manage -> .updates()',
                 location: 'message_manager.js',
