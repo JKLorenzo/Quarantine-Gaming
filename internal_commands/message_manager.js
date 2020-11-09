@@ -6,12 +6,6 @@ const manage = async function (message) {
         message.channel.send(`Visit <https://quarantinegamingdiscord.wordpress.com/> to learn more.`).catch(error => { });
     }
 
-    // Announcements
-    if (message.channel && message.channel.id == g_channels.get().announcement.id && message.author != g_client.user) {
-        message.delete({ timeout: 250 }).catch(error => { });
-        g_interface.announce(message.content);
-    }
-
     // Game Invites Channel Blocking
     if (message.channel && message.channel.id == g_channels.get().gaming.id && (message.embeds.length == 0 || (message.embeds.length > 0 && message.embeds[0].author.name != 'Quarantine Gaming: Game Coordinator'))) {
         dm_member(g_channels.get().guild.member(message.author), `Hello there! You can't send any messages in ${message.channel} channel. To invite players, do *!play* command in the ${g_channels.get().general} text channel.`);
@@ -83,14 +77,14 @@ const dm_member = async function (member, content) {
         await dm_channel.send(content).then(message => {
             message.delete({ timeout: 3600000 }).catch(error => { });
         }).catch(error => {
-            on_error({
+            g_interface.on_error({
                 name: `dm -> [${member}].send(${content})`,
                 location: 'interface.js',
                 error: error
             });
         });
     }).catch(error => {
-        on_error({
+        g_interface.on_error({
             name: `dm -> .createDM(${member})`,
             location: 'interface.js',
             error: error
@@ -108,7 +102,7 @@ const clear_dms = async function () {
                     }
                 }).catch(error => { });
             }).catch(error => {
-                on_error({
+                g_interface.on_error({
                     name: 'clear_dms -> .createDM()',
                     location: 'interface.js',
                     error: error
