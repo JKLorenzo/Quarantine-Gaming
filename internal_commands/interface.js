@@ -20,17 +20,23 @@ const log = async function (message) {
     });
 }
 
+let unavailable_count = 0;
 const on_error = async function (details) {
-    let embed = new MessageEmbed()
-        .setAuthor(details.name)
-        .setTitle(`${details.location} Error`)
-        .setDescription(`An error occured while performing ${details.name} function on ${details.location}.`)
-        .addField('Error Message', details.error)
-        .setThumbnail('https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Antu_dialog-error.svg/1024px-Antu_dialog-error.svg.png')
-        .setColor('#FF0000');
-    await log({ content: '<@393013053488103435>', embed: embed });
-    console.log(`An error occured while performing ${details.name} function on ${details.location}.`);
-    console.log(details.error);
+    if (details.error.code == 503) {
+        if (unavailable_count == 0) {
+            await announce(`**Discord Status Updates**\nDiscord is currently having some issues and may impact users on this server. Visit <https://discordstatus.com/> for more info.`);
+        }
+        unavailable_count++;
+    } else {
+        let embed = new MessageEmbed()
+        embed.setAuthor(details.name)
+        embed.setTitle(`${details.location} Error`)
+        embed.setDescription(`An error occured while performing ${details.name} function on ${details.location}.`)
+        embed.addField('Error Message', details.error)
+        embed.setThumbnail('https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Antu_dialog-error.svg/1024px-Antu_dialog-error.svg.png')
+        embed.setColor('#FF0000');
+        await log({ content: '<@393013053488103435>', embed: embed });
+    }
 }
 
 const updates = async function (message) {
