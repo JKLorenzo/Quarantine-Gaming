@@ -55,13 +55,12 @@ async function updateMember() {
                 if (this_activity.type == 'PLAYING' && !g_db.titles().blacklisted.includes(this_activity.name.trim().toLowerCase()) && (this_activity.applicationID || g_db.titles().whitelisted.includes(this_activity.name.trim().toLowerCase()))) {
                     let this_game_name = this_activity.name.trim();
                     let this_play_name = 'Play ' + this_game_name;
-                    let this_play_role = g_channels.get().guild.roles.cache.find(role => role.name == this_play_name);
+
                     if (this_data.new) {
                         // Check if user doesn't have this game role
                         if (!this_member.roles.cache.find(role => role.name == this_game_name)) {
-                            // Get the equivalent role of this game
+                            // Check if this game role exists
                             let this_game_role = g_channels.get().guild.roles.cache.find(role => role.name == this_game_name);
-                            // Check if this role exists
                             if (!this_game_role) {
                                 // Create role on this guild
                                 await g_channels.get().guild.roles.create({
@@ -79,7 +78,7 @@ async function updateMember() {
                                     });
                                 });
                             }
-                            // Check if mentionable role exists
+                            // Check if this game role mentionable doesnt exists
                             let this_game_role_mentionable = g_channels.get().guild.roles.cache.find(role => role.name == this_game_name + ' ⭐');
                             if (!this_game_role_mentionable) {
                                 // Create mentionable role on this guild
@@ -107,31 +106,32 @@ async function updateMember() {
                             });
                         }
 
-                        // Check if this role doesn't exists
-                        if (!this_play_role) {
-                            // Get reference role
-                            let play_role = g_channels.get().guild.roles.cache.find(role => role.name == '<PLAYROLES>');
-                            // Create role on this guild
-                            await g_channels.get().guild.roles.create({
-                                data: {
-                                    name: this_play_name,
-                                    color: '0x7b00ff',
-                                    position: play_role.position,
-                                    hoist: true
-                                }
-                            }).then(play_role => {
-                                this_play_role = play_role;
-                            }).catch(error => {
-                                g_interface.on_error({
-                                    name: 'updateMember -> .create(this_play_name)',
-                                    location: 'dynamic_roles.js',
-                                    error: error
-                                });
-                            });
-                        }
-
                         // Check if user doesn't have this play role
-                        if (!this_member.roles.cache.find(role => role == this_play_role)) {
+                        if (!this_member.roles.cache.find(role => role.name == this_play_name)) {
+                            // Check if this play role doesn't exists
+                            let this_play_role = g_channels.get().guild.roles.cache.find(role => role.name == this_play_name);
+                            if (!this_play_role) {
+                                // Get reference role
+                                let play_roles = g_channels.get().guild.roles.cache.find(role => role.name == '<PLAYROLES>');
+                                // Create role on this guild
+                                await g_channels.get().guild.roles.create({
+                                    data: {
+                                        name: this_play_name,
+                                        color: '0x7b00ff',
+                                        position: play_roles.position,
+                                        hoist: true
+                                    }
+                                }).then(play_role => {
+                                    this_play_role = play_role;
+                                }).catch(error => {
+                                    g_interface.on_error({
+                                        name: 'updateMember -> .create(this_play_name)',
+                                        location: 'dynamic_roles.js',
+                                        error: error
+                                    });
+                                });
+                            }
+
                             // Assign role to this member
                             await this_member.roles.add(this_play_role).catch(error => {
                                 g_interface.on_error({
@@ -187,128 +187,6 @@ async function updateMember() {
 }
 
 const init = async function () {
-    for (let this_member of g_channels.get().guild.members.cache.array()) {
-        if (!this_member.user.bot) {
-            // Add roles
-            for (let this_activity of this_member.presence.activities) {
-                if (this_activity.type == 'PLAYING' && !g_db.titles().blacklisted.includes(this_activity.name.trim().toLowerCase()) && (this_activity.applicationID || g_db.titles().whitelisted.includes(this_activity.name.trim().toLowerCase()))) {
-                    let this_game_name = this_activity.name.trim();
-                    let this_play_name = 'Play ' + this_game_name;
-                    let this_play_role = g_channels.get().guild.roles.cache.find(role => role.name == this_play_name);
-
-                    // Check if user doesn't have this game role
-                    if (!this_member.roles.cache.find(role => role.name == this_game_name)) {
-                        // Get the equivalent role of this game
-                        let this_game_role = g_channels.get().guild.roles.cache.find(role => role.name == this_game_name);
-                        // Check if this role exists
-                        if (!this_game_role) {
-                            await g_channels.get().guild.roles.create({
-                                data: {
-                                    name: this_game_name,
-                                    color: '0x00ffff',
-                                }
-                            }).then(this_created_role => {
-                                this_game_role = this_created_role;
-                            }).catch(error => {
-                                g_interface.on_error({
-                                    name: 'init -> .create(this_game_name)',
-                                    location: 'dynamic_roles.js',
-                                    error: error
-                                });
-                            });
-                        }
-                        // Check if mentionable role exists
-                        let this_game_role_mentionable = g_channels.get().guild.roles.cache.find(role => role.name == this_game_name + ' ⭐');
-                        if (!this_game_role_mentionable) {
-                            // Create mentionable role on this guild
-                            await g_channels.get().guild.roles.create({
-                                data: {
-                                    name: this_game_name + ' ⭐',
-                                    color: '0x00fffe',
-                                    mentionable: true
-                                }
-                            }).catch(error => {
-                                g_interface.on_error({
-                                    name: 'updateMember -> .create(game_role_mentionable)',
-                                    location: 'dynamic_roles.js',
-                                    error: error
-                                });
-                            });
-                        }
-                        // Assign role to this member
-                        await this_member.roles.add(this_game_role).catch(error => {
-                            g_interface.on_error({
-                                name: 'init -> .add(this_game_role)',
-                                location: 'dynamic_roles.js',
-                                error: error
-                            });
-                        });
-                    }
-
-                    // Check if this role doesn't exists
-                    if (!this_play_role) {
-                        let play_roles = g_channels.get().guild.roles.cache.find(role => role.name == '<PLAYROLES>');
-                        await g_channels.get().guild.roles.create({
-                            data: {
-                                name: this_play_name,
-                                color: '0x7b00ff',
-                                position: play_roles.position,
-                                hoist: true
-                            }
-                        }).then(play_role => {
-                            this_play_role = play_role;
-                        }).catch(error => {
-                            g_interface.on_error({
-                                name: 'init -> .create(this_play_name)',
-                                location: 'dynamic_roles.js',
-                                error: error
-                            });
-                        });
-                    }
-
-                    if (!this_member.roles.cache.find(role => role == this_play_role)) {
-                        await this_member.roles.add(this_play_role).catch(error => {
-                            g_interface.on_error({
-                                name: 'init -> .add(this_play_role)',
-                                location: 'dynamic_roles.js',
-                                error: error
-                            });
-                        });
-                    }
-                }
-            }
-
-            for (let this_role of this_member.roles.cache.array()) {
-                // Remove dedicated role
-                if (this_role == g_roles.get().dedicated) {
-                    if ((this_member.voice && this_member.voice.channel && this_member.voice.channel.parent != g_channels.get().dedicated) || !(this_member.voice && this_member.voice.channel)) {
-                        await this_member.roles.remove(this_role).catch(error => {
-                            g_interface.on_error({
-                                name: 'updateMember -> .remove(dedicated_channel_role)',
-                                location: 'dynamic_roles.js',
-                                error: error
-                            });
-                        });
-                    }
-                }
-
-                // Remove text role
-                if (this_role.name.startsWith('Text')) {
-                    let the_text_channel = g_channels.get().guild.channels.cache.find(channel => channel.id == this_role.name.split(' ')[1]);
-                    if (!the_text_channel || (the_text_channel && !the_text_channel.members.find(member => member.user.id == this_member.user.id))) {
-                        await this_member.roles.remove(this_role).catch(error => {
-                            g_interface.on_error({
-                                name: 'updateMember -> .remove(text_channel_role)',
-                                location: 'dynamic_roles.js',
-                                error: error
-                            });
-                        });
-                    }
-                }
-            }
-        }
-    }
-
     // Remove unused play roles
     for (let this_role of g_channels.get().guild.roles.cache.array()) {
         if (this_role.hexColor == '#7b00ff' && this_role.name.startsWith('Play')) {
@@ -360,6 +238,128 @@ const init = async function () {
                     error: error
                 });
             });
+        }
+    }
+
+    // Assign Game Roles and Play Roles
+    for (let this_member of g_channels.get().guild.members.cache.array()) {
+        if (!this_member.user.bot) {
+            for (let this_activity of this_member.presence.activities) {
+                if (this_activity.type == 'PLAYING' && !g_db.titles().blacklisted.includes(this_activity.name.trim().toLowerCase()) && (this_activity.applicationID || g_db.titles().whitelisted.includes(this_activity.name.trim().toLowerCase()))) {
+                    let this_game_name = this_activity.name.trim();
+                    let this_play_name = 'Play ' + this_game_name;
+
+                    // Check if user doesn't have this game role
+                    if (!this_member.roles.cache.find(role => role.name == this_game_name)) {
+                        // Check if game role doesnt exists
+                        let this_game_role = g_channels.get().guild.roles.cache.find(role => role.name == this_game_name);
+                        if (!this_game_role) {
+                            await g_channels.get().guild.roles.create({
+                                data: {
+                                    name: this_game_name,
+                                    color: '0x00ffff',
+                                }
+                            }).then(this_created_role => {
+                                this_game_role = this_created_role;
+                            }).catch(error => {
+                                g_interface.on_error({
+                                    name: 'init -> .create(this_game_name)',
+                                    location: 'dynamic_roles.js',
+                                    error: error
+                                });
+                            });
+                        }
+
+                        // Check if game role mentionable doesnt exists
+                        let this_game_role_mentionable = g_channels.get().guild.roles.cache.find(role => role.name == this_game_name + ' ⭐');
+                        if (!this_game_role_mentionable) {
+                            // Create mentionable role on this guild
+                            await g_channels.get().guild.roles.create({
+                                data: {
+                                    name: this_game_name + ' ⭐',
+                                    color: '0x00fffe',
+                                    mentionable: true
+                                }
+                            }).catch(error => {
+                                g_interface.on_error({
+                                    name: 'updateMember -> .create(game_role_mentionable)',
+                                    location: 'dynamic_roles.js',
+                                    error: error
+                                });
+                            });
+                        }
+                        // Assign game role to this member
+                        await this_member.roles.add(this_game_role).catch(error => {
+                            g_interface.on_error({
+                                name: 'init -> .add(this_game_role)',
+                                location: 'dynamic_roles.js',
+                                error: error
+                            });
+                        });
+                    }
+
+                    // Check if this play role doesn't exists
+                    if (!this_member.roles.cache.find(role => role.name == this_play_name)) {
+                        let this_play_role = g_channels.get().guild.roles.cache.find(role => role.name == this_play_name);
+                        if (!this_play_role) {
+                            let play_roles = g_channels.get().guild.roles.cache.find(role => role.name == '<PLAYROLES>');
+                            await g_channels.get().guild.roles.create({
+                                data: {
+                                    name: this_play_name,
+                                    color: '0x7b00ff',
+                                    position: play_roles.position,
+                                    hoist: true
+                                }
+                            }).then(play_role => {
+                                this_play_role = play_role;
+                            }).catch(error => {
+                                g_interface.on_error({
+                                    name: 'init -> .create(this_play_name)',
+                                    location: 'dynamic_roles.js',
+                                    error: error
+                                });
+                            });
+                        }
+
+                        await this_member.roles.add(this_play_role).catch(error => {
+                            g_interface.on_error({
+                                name: 'init -> .add(this_play_role)',
+                                location: 'dynamic_roles.js',
+                                error: error
+                            });
+                        });
+                    }
+                }
+            }
+
+            for (let this_role of this_member.roles.cache.array()) {
+                // Remove dedicated role
+                if (this_role == g_roles.get().dedicated) {
+                    if ((this_member.voice && this_member.voice.channel && this_member.voice.channel.parent != g_channels.get().dedicated) || !(this_member.voice && this_member.voice.channel)) {
+                        await this_member.roles.remove(this_role).catch(error => {
+                            g_interface.on_error({
+                                name: 'updateMember -> .remove(dedicated_channel_role)',
+                                location: 'dynamic_roles.js',
+                                error: error
+                            });
+                        });
+                    }
+                }
+
+                // Remove text role
+                if (this_role.name.startsWith('Text')) {
+                    let the_text_channel = g_channels.get().guild.channels.cache.find(channel => channel.id == this_role.name.split(' ')[1]);
+                    if (!the_text_channel || (the_text_channel && !the_text_channel.members.find(member => member.user.id == this_member.user.id))) {
+                        await this_member.roles.remove(this_role).catch(error => {
+                            g_interface.on_error({
+                                name: 'updateMember -> .remove(text_channel_role)',
+                                location: 'dynamic_roles.js',
+                                error: error
+                            });
+                        });
+                    }
+                }
+            }
         }
     }
     return true;
