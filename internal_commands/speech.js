@@ -44,7 +44,7 @@ const say = async function (message, channel) {
                 }).catch(async error => {
                     failed = error;
                     retries--;
-                    await g_functions.sleep(1000);
+                    await g_functions.sleep(2500);
                 });
             } while (retries > 0 && failed);
 
