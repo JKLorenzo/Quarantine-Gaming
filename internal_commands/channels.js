@@ -93,7 +93,7 @@ async function beginDedicate() {
                 await text_channel.setName(this_name).catch(error => { });
                 await this_channel.setName(this_name).catch(error => { });
                 // Rename role
-                let hoisted_role = g_channels.get().guild.roles.cache.find(role => channel.topic && channel.topic.split(' ')[2] == role.id);
+                let hoisted_role = g_channels.get().guild.roles.cache.find(role => text_channel.topic && text_channel.topic.split(' ')[2] == role.id);
                 await hoisted_role.setName(`Team ${this_name}`).catch(error => { });
 
                 // Set info
