@@ -28,7 +28,7 @@ const say = async function (message, channel) {
         }
         // Begin TTS
         await channel.join().then(async connection => {
-            let retries = 3, failed;
+            let retries = 5, failed;
             do {
                 failed = false;
                 await googleTTS(message).then(async (url) => {
