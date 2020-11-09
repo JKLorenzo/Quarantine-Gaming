@@ -3,7 +3,7 @@ let is_dedicating = false, dedicate_queue = new Array();
 
 let guild, c_log, c_roles, c_updates, c_following, c_staff, c_gaming, c_announcement, c_testing, c_general, c_dedicated, c_dm;
 
-const init = function () {
+const init = async function () {
     guild = g_client.guilds.cache.get('351178660725915649');
     c_general = guild.channels.cache.get('749661539908190258');
     c_log = guild.channels.cache.get('722760285622108210');
@@ -16,6 +16,50 @@ const init = function () {
     c_testing = guild.channels.cache.get('749579412139278399');
     c_dedicated = guild.channels.cache.get('749231470396309535');
     c_dm = guild.channels.cache.get('773425152750125106');
+
+    // Delete empty dedicate channels
+    for (let this_channel of guild.channels.cache.array()) {
+        if (this_channel.type == 'voice' && this_channel.parent && this_channel.parent == c_dedicated) {
+            let empty = true;
+            for (let member of this_channel.members.array()) {
+                if (!member.user.bot) empty = false;
+            }
+            if (empty) {
+                let text_channel = guild.channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == this_channel.id);
+                let text_role = guild.roles.cache.get(text_channel.topic.split(' ')[1]);
+                let hoisted_role = guild.roles.cache.get(text_channel.topic.split(' ')[2]);
+
+                await this_channel.delete().catch(error => {
+                    g_interface.on_error({
+                        name: 'init -> .delete(this_channel)',
+                        location: 'channels.js',
+                        error: error
+                    });
+                });
+                await text_channel.delete().catch(error => {
+                    g_interface.on_error({
+                        name: 'init -> .delete(text_channel)',
+                        location: 'channels.js',
+                        error: error
+                    });
+                });
+                await text_role.delete().catch(error => {
+                    g_interface.on_error({
+                        name: 'init -> .delete(text_role)',
+                        location: 'channels.js',
+                        error: error
+                    });
+                });
+                await hoisted_role.delete().catch(error => {
+                    g_interface.on_error({
+                        name: 'init -> .delete(hoisted_role)',
+                        location: 'channels.js',
+                        error: error
+                    });
+                });
+            }
+        }
+    }
 }
 
 const get = function () {
@@ -44,10 +88,13 @@ async function beginDedicate() {
 
         if (this_channel) {
             if (this_channel.parent == g_channels.get().dedicated) {
-                // Rename channel
+                // Rename channels
                 let text_channel = g_channels.get().guild.channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == this_channel.id);
-                text_channel.setName(this_name).catch(error => { });
-                this_channel.setName(this_name).catch(error => { });
+                await text_channel.setName(this_name).catch(error => { });
+                await this_channel.setName(this_name).catch(error => { });
+                // Rename role
+                let hoisted_role = g_channels.get().guild.channels.cache.find(role => channel.topic && channel.topic.split(' ')[2] == role.id);
+                await hoisted_role.setName(`Team ${this_name}`).catch(error => { });
 
                 // Set info
                 let embed = new MessageEmbed();
@@ -63,8 +110,8 @@ async function beginDedicate() {
                 channel_desc.push('Note: <@&749235255944413234> and <@&700397445506531358> can interact with these channels.');
                 embed.setDescription(channel_desc.join('\n\n'));
                 embed.setColor('#7b00ff');
-                await text_channel.send(embed).then(message => {
-                    message.pin();
+                await text_channel.send(embed).then(async message => {
+                    await message.pin();
                 }).catch(error => {
                     g_interface.on_error({
                         name: 'beginDedicate -> .send(embed)',
@@ -72,7 +119,6 @@ async function beginDedicate() {
                         error: error
                     });
                 });
-
             } else {
                 // Notify voice channel
                 await g_speech.say(`Transferring to ${this_name} dedicated channel. Please wait.`, this_channel).catch(error => {
@@ -141,10 +187,26 @@ async function beginDedicate() {
                                 }
                             ]
                         }).then(async text_channel => {
-                            // Set link
-                            await text_channel.setTopic(`${voice_channel.id} ${text_role.id}`).catch(error => {
+                            // Create hoisted dedicated role
+                            await guild.roles.create({
+                                data: {
+                                    name: `Team ${this_name}`,
+                                    color: '0x00a5ff',
+                                    position: g_roles.get().dedicated.position,
+                                    hoist: true
+                                }
+                            }).then(async hoisted_role => {
+                                // Set link
+                                await text_channel.setTopic(`${voice_channel.id} ${text_role.id} ${hoisted_role.id}`).catch(error => {
+                                    g_interface.on_error({
+                                        name: 'updateGuild -> .setTopic(text_channel)',
+                                        location: 'channels.js',
+                                        error: error
+                                    });
+                                });
+                            }).catch(error => {
                                 g_interface.on_error({
-                                    name: 'updateGuild -> .setTopic(text_channel)',
+                                    name: 'updateGuild -> .updateOverwrite(voice_channel)',
                                     location: 'channels.js',
                                     error: error
                                 });

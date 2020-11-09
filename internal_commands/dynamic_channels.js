@@ -52,7 +52,17 @@ async function updateChannel() {
             if (oldState.channel && oldState.channel.parent == g_channels.get().dedicated) {
                 let text_channel = g_channels.get().guild.channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == oldState.channelID);
                 let text_role = g_channels.get().guild.roles.cache.get(text_channel.topic.split(' ')[1]);
+                let hoisted_role = g_channels.get().guild.roles.cache.get(text_channel.topic.split(' ')[2]);
                 if (oldState.channel.members.size > 0 && !(oldState.channel.members.size == 1 && oldState.channel.members.first().user.bot)) {
+                    // Remove hoisted role
+                    await newState.member.roles.remove(hoisted_role).catch(error => {
+                        g_interface.on_error({
+                            name: 'updateChannel -> .remove(hoisted_role)',
+                            location: 'dynamic_channels.js',
+                            error: error
+                        });
+                    });
+                    // Remove text role
                     await newState.member.roles.remove(text_role).catch(error => {
                         g_interface.on_error({
                             name: 'updateChannel -> .remove(text_role)',
@@ -76,23 +86,30 @@ async function updateChannel() {
                         });
                     });
                 } else {
-                    await oldState.channel.delete('This channel is no longer in use.').catch(error => {
+                    await oldState.channel.delete().catch(error => {
                         g_interface.on_error({
                             name: 'updateChannel -> .delete(voice_channel)',
                             location: 'dynamic_channels.js',
                             error: error
                         });
                     });
-                    await text_channel.delete('This channel is no longer in use.').catch(error => {
+                    await text_channel.delete().catch(error => {
                         g_interface.on_error({
                             name: 'updateChannel -> .delete(text_channel)',
                             location: 'dynamic_channels.js',
                             error: error
                         });
                     });
-                    await text_role.delete('This role is no longer in use.').catch(error => {
+                    await text_role.delete().catch(error => {
                         g_interface.on_error({
                             name: 'updateChannel -> .delete(text_role)',
+                            location: 'dynamic_channels.js',
+                            error: error
+                        });
+                    });
+                    await hoisted_role.delete().catch(error => {
+                        g_interface.on_error({
+                            name: 'updateChannel -> .delete(hoisted_role)',
                             location: 'dynamic_channels.js',
                             error: error
                         });
@@ -130,7 +147,17 @@ async function updateChannel() {
                     // Add member to a text channel when joining a dedicated channel
                     let text_channel = g_channels.get().guild.channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == newState.channelID);
                     let text_role = g_channels.get().guild.roles.cache.get(text_channel.topic.split(' ')[1]);
+                    let hoisted_role = g_channels.get().guild.roles.cache.get(text_channel.topic.split(' ')[2]);
                     if (!newState.member.roles.cache.find(role => role == text_role)) {
+                        // Add hoisted role
+                        await newState.member.roles.add(hoisted_role).catch(error => {
+                            g_interface.on_error({
+                                name: 'updateChannel -> .add(hoisted_role)',
+                                location: 'dynamic_channels.js',
+                                error: error
+                            });
+                        });
+                        // Add text role
                         await newState.member.roles.add(text_role).catch(error => {
                             g_interface.on_error({
                                 name: 'updateChannel -> .add(text_role)',
@@ -212,6 +239,7 @@ const init = async function () {
                 let data = this_channel.topic.split(' ');
                 let this_voice = g_channels.get().guild.channels.cache.get(data[0]);
                 let this_text = g_channels.get().guild.roles.cache.get(data[1]);
+                let this_hoisted = g_channels.get().guild.roles.cache.get(data[2]);
 
 
                 for (let this_member of this_voice.members.array()) {
@@ -220,6 +248,16 @@ const init = async function () {
                         await this_member.roles.add(this_text).catch(error => {
                             g_interface.on_error({
                                 name: 'init -> .add(text_role)',
+                                location: 'dynamic_channels.js',
+                                error: error
+                            });
+                        });
+                    }
+                    // Give all channel members hoisted roles
+                    if (!this_member.user.bot && !this_member.roles.cache.find(role => role == this_hoisted)) {
+                        await this_member.roles.add(this_hoisted).catch(error => {
+                            g_interface.on_error({
+                                name: 'init -> .add(this_hoisted)',
                                 location: 'dynamic_channels.js',
                                 error: error
                             });
@@ -244,6 +282,14 @@ const init = async function () {
                             await this_member.roles.remove(this_text).catch(error => {
                                 g_interface.on_error({
                                     name: 'init -> .remove(text_role) [A]',
+                                    location: 'dynamic_channels.js',
+                                    error: error
+                                });
+                            });
+
+                            await this_member.roles.remove(this_hoisted).catch(error => {
+                                g_interface.on_error({
+                                    name: 'init -> .remove(this_hoisted) [A]',
                                     location: 'dynamic_channels.js',
                                     error: error
                                 });

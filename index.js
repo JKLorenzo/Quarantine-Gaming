@@ -57,7 +57,7 @@ client.once('ready', async () => {
 
     // Initialize modules
     roles.init();
-    channels.init();
+    await channels.init();
     await db.init();
     feed.init()
     dynamic_roles.init();
@@ -142,7 +142,7 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
         if (newMember.roles.cache.size != oldMember.roles.cache.size) {
             let added = new Array(), removed = new Array();
             for (let this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
-                if (!this_role.name.startsWith('Play ') && !this_role.name.startsWith('Text') && this_role != g_roles.get().dedicated) {
+                if (!this_role.name.startsWith('Play') && !this_role.name.startsWith('Text') && !this_role.name.startsWith('Team') && this_role != g_roles.get().dedicated) {
                     if (newMember.roles.cache.has(this_role.id)) {
                         added.push(this_role);
                     } else {

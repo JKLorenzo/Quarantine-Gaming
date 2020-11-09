@@ -30,6 +30,17 @@ async function updateMember() {
                         });
                     });
                 }
+
+                let team_role = this_member.roles.cache.find(role => role.name.startsWith('Team'));
+                if (team_role) {
+                    await this_member.roles.remove(team_role).catch(error => {
+                        g_interface.on_error({
+                            name: 'updateMember -> .remove(team_role)',
+                            location: 'dynamic_roles.js',
+                            error: error
+                        });
+                    });
+                }
             }
 
             // Sort Changed Activities
@@ -228,7 +239,7 @@ const init = async function () {
                                 }
                             }).catch(error => {
                                 g_interface.on_error({
-                                    name: 'updateMember -> .create(game_role_mentionable)',
+                                    name: 'init -> .create(game_role_mentionable)',
                                     location: 'dynamic_roles.js',
                                     error: error
                                 });
@@ -284,7 +295,7 @@ const init = async function () {
                     if ((this_member.voice && this_member.voice.channel && this_member.voice.channel.parent != g_channels.get().dedicated) || !(this_member.voice && this_member.voice.channel)) {
                         await this_member.roles.remove(this_role).catch(error => {
                             g_interface.on_error({
-                                name: 'updateMember -> .remove(dedicated_channel_role)',
+                                name: 'init -> .remove(dedicated_channel_role)',
                                 location: 'dynamic_roles.js',
                                 error: error
                             });
@@ -298,7 +309,7 @@ const init = async function () {
                     if (!the_text_channel || (the_text_channel && !the_text_channel.members.find(member => member.user.id == this_member.user.id))) {
                         await this_member.roles.remove(this_role).catch(error => {
                             g_interface.on_error({
-                                name: 'updateMember -> .remove(text_channel_role)',
+                                name: 'init -> .remove(text_channel_role)',
                                 location: 'dynamic_roles.js',
                                 error: error
                             });
