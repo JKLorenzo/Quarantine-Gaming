@@ -41,13 +41,16 @@ const manage = async function (message) {
             .setFooter(`On ${channel}`)
             .setColor(`#00ffff`);
 
-        if (!message.content.startsWith('RT @')) g_interface.updates({ embed: embed }).catch(error => {
-            g_interface.on_error({
-                name: 'manage -> .updates()',
-                location: 'message_manager.js',
-                error: error
+        // Filter out retweets and replies
+        if (!message.content.startsWith('RT @') && !message.content.startsWith('@')) {
+            g_interface.updates({ embed: embed }).catch(error => {
+                g_interface.on_error({
+                    name: 'manage -> .updates()',
+                    location: 'message_manager.js',
+                    error: error
+                });
             });
-        });
+        }
     }
 
     // DM
