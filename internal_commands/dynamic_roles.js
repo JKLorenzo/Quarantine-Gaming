@@ -55,6 +55,7 @@ async function updateMember() {
                 if (this_activity.type == 'PLAYING' && !g_db.titles().blacklisted.includes(this_activity.name.trim().toLowerCase()) && (this_activity.applicationID || g_db.titles().whitelisted.includes(this_activity.name.trim().toLowerCase()))) {
                     let this_game_name = this_activity.name.trim();
                     let this_play_name = 'Play ' + this_game_name;
+                    let this_play_role = g_channels.get().guild.roles.cache.find(role => role.name == this_play_name);
 
                     if (this_data.new) {
                         // Check if user doesn't have this game role
@@ -109,7 +110,6 @@ async function updateMember() {
                         // Check if user doesn't have this play role
                         if (!this_member.roles.cache.find(role => role.name == this_play_name)) {
                             // Check if this play role doesn't exists
-                            let this_play_role = g_channels.get().guild.roles.cache.find(role => role.name == this_play_name);
                             if (!this_play_role) {
                                 // Get reference role
                                 let play_roles = g_channels.get().guild.roles.cache.find(role => role.name == '<PLAYROLES>');
@@ -187,60 +187,6 @@ async function updateMember() {
 }
 
 const init = async function () {
-    // Remove unused play roles
-    for (let this_role of g_channels.get().guild.roles.cache.array()) {
-        if (this_role.hexColor == '#7b00ff' && this_role.name.startsWith('Play')) {
-            // Check if the role is still in use
-            let role_in_use = false;
-            for (let this_member of g_channels.get().guild.members.cache.array()) {
-                if (this_member.roles.cache.find(role => role == this_role)) {
-                    // Check if this member is still playing
-                    if (this_member.presence.activities.map(activity => activity.name.trim()).includes(this_role.name.substring(5))) {
-                        role_in_use = true;
-                    } else {
-                        // Remove play role from this member
-                        await this_member.roles.remove(this_role).catch(error => {
-                            g_interface.on_error({
-                                name: 'init -> .remove(this_role)',
-                                location: 'dynamic_roles.js',
-                                error: error
-                            });
-                        });
-                    }
-                }
-            }
-            // Delete blacklisted or unused play roles
-            if (!role_in_use || g_db.titles().blacklisted.includes(this_role.name.substring(5).toLowerCase())) {
-                // Delete Play Role
-                await this_role.delete().catch(error => {
-                    g_interface.on_error({
-                        name: 'init -> .delete(this_role) [play role]',
-                        location: 'dynamic_roles.js',
-                        error: error
-                    });
-                });
-            }
-        } else if (this_role.hexColor == '#00ffff' && g_db.titles().blacklisted.includes(this_role.name.toLowerCase())) {
-            // Delete Game Role
-            await this_role.delete().catch(error => {
-                g_interface.on_error({
-                    name: 'init -> .delete(game_role)',
-                    location: 'dynamic_roles.js',
-                    error: error
-                });
-            });
-        } else if (this_role.hexColor == '#00fffe' && g_db.titles().blacklisted.includes(this_role.name.toLowerCase())) {
-            // Delete Game Role Mentionable
-            await this_role.delete().catch(error => {
-                g_interface.on_error({
-                    name: 'init -> .delete(game_role_mentionable)',
-                    location: 'dynamic_roles.js',
-                    error: error
-                });
-            });
-        }
-    }
-
     // Assign Game Roles and Play Roles
     for (let this_member of g_channels.get().guild.members.cache.array()) {
         if (!this_member.user.bot) {
@@ -360,6 +306,60 @@ const init = async function () {
                     }
                 }
             }
+        }
+    }
+
+    // Remove unused play roles
+    for (let this_role of g_channels.get().guild.roles.cache.array()) {
+        if (this_role.hexColor == '#7b00ff' && this_role.name.startsWith('Play')) {
+            // Check if the role is still in use
+            let role_in_use = false;
+            for (let this_member of g_channels.get().guild.members.cache.array()) {
+                if (this_member.roles.cache.find(role => role == this_role)) {
+                    // Check if this member is still playing
+                    if (this_member.presence.activities.map(activity => activity.name.trim()).includes(this_role.name.substring(5))) {
+                        role_in_use = true;
+                    } else {
+                        // Remove play role from this member
+                        await this_member.roles.remove(this_role).catch(error => {
+                            g_interface.on_error({
+                                name: 'init -> .remove(this_role)',
+                                location: 'dynamic_roles.js',
+                                error: error
+                            });
+                        });
+                    }
+                }
+            }
+            // Delete blacklisted or unused play roles
+            if (!role_in_use || g_db.titles().blacklisted.includes(this_role.name.substring(5).toLowerCase())) {
+                // Delete Play Role
+                await this_role.delete().catch(error => {
+                    g_interface.on_error({
+                        name: 'init -> .delete(this_role) [play role]',
+                        location: 'dynamic_roles.js',
+                        error: error
+                    });
+                });
+            }
+        } else if (this_role.hexColor == '#00ffff' && g_db.titles().blacklisted.includes(this_role.name.toLowerCase())) {
+            // Delete Game Role
+            await this_role.delete().catch(error => {
+                g_interface.on_error({
+                    name: 'init -> .delete(game_role)',
+                    location: 'dynamic_roles.js',
+                    error: error
+                });
+            });
+        } else if (this_role.hexColor == '#00fffe' && g_db.titles().blacklisted.includes(this_role.name.toLowerCase())) {
+            // Delete Game Role Mentionable
+            await this_role.delete().catch(error => {
+                g_interface.on_error({
+                    name: 'init -> .delete(game_role_mentionable)',
+                    location: 'dynamic_roles.js',
+                    error: error
+                });
+            });
         }
     }
     return true;
