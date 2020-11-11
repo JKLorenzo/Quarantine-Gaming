@@ -24,10 +24,20 @@ let unavailable_count = 0;
 const on_error = async function (details) {
     if (details.error.code == 503) {
         if (unavailable_count == 0) {
+            // Announce members
             await announce(`**Discord Status Updates**\nDiscord is currently having some issues and may impact users on this server. Visit <https://discordstatus.com/> for more info.`);
+
+            // Change bot presence
+            g_functions.setActivity(`SERVER RESTART`);
+
+            // Notify staffs
+            g_channels.get().staff.send(`I'm currently detecting issues with Discord; some functionalities are disabled. A bot restart is recommended once the issues are resolved. Notify <@393013053488103435> when offline.`).catch(error => { });
+        } else if (unavailable_count % 5 == 0) {
+            // Change bot presence
+            g_functions.setActivity(`SERVER RESTART (${unavailable_count})`);
         }
         unavailable_count++;
-    } else {
+    } else if (unavailable_count == 0) {
         let embed = new MessageEmbed()
         embed.setAuthor(details.name)
         embed.setTitle(`${details.location} Error`)

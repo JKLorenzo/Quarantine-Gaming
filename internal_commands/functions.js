@@ -2,6 +2,19 @@ const sleep = function (ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+const setActivity = function (text) {
+    // Set the bot's activity
+    g_client.user.setActivity(text, {
+        type: 'LISTENING'
+    }).catch(error => {
+        g_interface.on_error({
+            name: 'setActivity -> .setActivity(text)',
+            location: 'functions.js',
+            error: error
+        });
+    });
+}
+
 const string_similarity = function (s1, s2) {
     let longer = s1;
     let shorter = s2;
@@ -93,6 +106,7 @@ const getInviter = async function () {
 
 module.exports = {
     sleep,
+    setActivity,
     string_similarity,
     array_difference,
     string_to_int,

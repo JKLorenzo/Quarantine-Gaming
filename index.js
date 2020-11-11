@@ -69,10 +69,7 @@ client.once('ready', async () => {
     message_manager.clear_dms();
     message_manager.clear_channels();
 
-    // Set the bot's activity
-    client.user.setActivity('!help', {
-        type: 'LISTENING'
-    });
+    functions.setActivity('!help');
 
     if (process.env.STARTUP_REASON) {
         let embed = new MessageEmbed();
