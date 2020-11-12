@@ -40,7 +40,7 @@ module.exports = class SteamSale extends Command {
             });
 
             if (response) {
-                await this_message.edit(`${response.Name} will start on ${response.RemainingTime.days} days ${response.RemainingTime.hours} hours ${response.RemainingTime.minutes} minutes ${response.RemainingTime.days} seconds and it will be available for ${response.Length} days! ${response.confirmed ? '' : '*Unconfirmed'}`).catch(error => {
+                await this_message.edit(`Steam ${response.Name} will start on ${response.RemainingTime.days} days ${response.RemainingTime.hours} hours ${response.RemainingTime.minutes} minutes ${response.RemainingTime.seconds} seconds and it will be available for ${response.Length} days! ${response.confirmed ? '' : '*Unconfirmed'}`).catch(error => {
                     g_interface.on_error({
                         name: 'run => .edit(else)',
                         location: 'steamsale.js',
