@@ -16,7 +16,7 @@ module.exports = class AmongUs extends Command {
         message.delete({ timeout: 60000 }).catch(error => { });
         let embed = new MessageEmbed()
             .setColor('#ffff00')
-            .setAuthor('Quarantine Gaming: Experience')
+            .setAuthor('Quarantine Gaming Experience: Among Us')
             .setThumbnail('https://yt3.ggpht.com/a/AATXAJw5JZ2TM56V4OVFQnVUrOZ5_E2ULtrusmsTdrQatA=s900-c-k-c0xffffffff-no-rj-mo')
             .setTitle('Among Us')
             .setDescription('Voice channel audio control extension.')
