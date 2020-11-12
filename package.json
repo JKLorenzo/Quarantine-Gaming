@@ -17,11 +17,13 @@
   },
   "homepage": "https://github.com/JKLorenzo/Quarantine-Gaming#readme",
   "dependencies": {
+    "axios": "^0.21.0",
     "discord.js": "^12.4.1",
     "discord.js-commando": "github:discordjs/Commando",
     "firebase-admin": "^9.3.0",
     "g-i-s": "^2.1.6",
     "google-tts-api": "0.0.4",
+    "jsdom": "^16.4.0",
     "node-fetch": "^2.6.1",
     "opusscript": "0.0.7",
     "probe-image-size": "^6.0.0"
