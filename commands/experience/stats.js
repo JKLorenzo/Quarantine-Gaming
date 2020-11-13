@@ -205,9 +205,9 @@ module.exports = class Stats extends Command {
                             the_message.delete({ timeout: 300000 }).catch(error => { });
                         }).catch(error => { });
                     } else {
-                        message.delete({ timeout: 5000 }).catch(error => { });
-                        this_message.edit('Failed to get information.').then(the_message => {
-                            the_message.delete({ timeout: 5000 }).catch(error => { });
+                        message.delete({ timeout: 10000 }).catch(error => { });
+                        this_message.edit("Failed to get information from this account. The account may have been set to private or the account does not exist.").then(the_message => {
+                            the_message.delete({ timeout: 10000 }).catch(error => { });
                         }).catch(error => { });
                     }
                 }).catch(error => { });
