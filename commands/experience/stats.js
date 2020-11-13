@@ -87,36 +87,36 @@ module.exports = class Stats extends Command {
             name: 'stats',
             group: 'experience',
             memberName: 'stats',
-            description: 'Get your game stats.',
+            description: 'A stats tracker that shows your performace over time.',
             args: [
                 {
                     key: 'game',
-                    prompt: 'Enter the name of the game',
+                    prompt: 'Enter the name of the game.',
                     type: 'string',
                     oneOf: ['valorant']
                 },
                 {
-                    key: 'id',
-                    prompt: 'Enter your riot id.',
+                    key: 'riot',
+                    prompt: 'Enter your riot username and id.',
                     type: 'string'
                 }
             ]
         });
     }
 
-    async run(message, { game, id }) {
-        message.delete({ timeout: 300000 }).catch(error => { });
+    async run(message, { game, riot }) {
         switch (game) {
             case 'valorant':
                 message.say(`Getting information...`).then(async this_message => {
-                    let stats = await valorant(id.split('#')[0], id.split('#')[1]);
+                    let stats = await valorant(riot.split('#')[0], riot.split('#')[1]);
                     if (stats) {
-                        this_message.delete().catch(console.error)
+                        message.delete({ timeout: 300000 }).catch(error => { });
+                        this_message.delete().catch(error => { })
 
                         let embed1 = new MessageEmbed()
                             .setAuthor(`Quarantine Gaming Experience: Stats Tracker`)
                             .setColor('#25ff00')
-                            .setFooter(`${id}'s Competitive Stats | Realtime information is not guaranteed.`)
+                            .setFooter(`${riot}'s Competitive Stats | Realtime information is not guaranteed.`)
                             .setThumbnail('https://preview.redd.it/pq2si1uks8t41.png?width=512&format=png&auto=webp&s=a86b0d7a2620b6f0d404e191d37d75f895996c23')
                             .setTitle(`Overview`)
                             .addFields([
@@ -131,7 +131,7 @@ module.exports = class Stats extends Command {
                         let embed2 = new MessageEmbed()
                             .setAuthor(`Quarantine Gaming Experience: Stats Tracker`)
                             .setColor('#25ff00')
-                            .setFooter(`${id}'s Competitive Stats | Realtime information is not guaranteed.`)
+                            .setFooter(`${riot}'s Competitive Stats | Realtime information is not guaranteed.`)
                             .setThumbnail('https://preview.redd.it/pq2si1uks8t41.png?width=512&format=png&auto=webp&s=a86b0d7a2620b6f0d404e191d37d75f895996c23')
                             .setTitle(`Top Weapons`)
                             .addFields([
@@ -151,7 +151,7 @@ module.exports = class Stats extends Command {
                         let embed3 = new MessageEmbed()
                             .setAuthor(`Quarantine Gaming Experience: Stats Tracker`)
                             .setColor('#25ff00')
-                            .setFooter(`${id}'s Competitive Stats | Realtime information is not guaranteed.`)
+                            .setFooter(`${riot}'s Competitive Stats | Realtime information is not guaranteed.`)
                             .setThumbnail('https://preview.redd.it/pq2si1uks8t41.png?width=512&format=png&auto=webp&s=a86b0d7a2620b6f0d404e191d37d75f895996c23')
                             .setTitle(`Top Agents`)
                             .addFields([
@@ -171,7 +171,7 @@ module.exports = class Stats extends Command {
                         let embed4 = new MessageEmbed()
                             .setAuthor(`Quarantine Gaming Experience: Stats Tracker`)
                             .setColor('#25ff00')
-                            .setFooter(`${id}'s Competitive Stats | Realtime information is not guaranteed.`)
+                            .setFooter(`${riot}'s Competitive Stats | Realtime information is not guaranteed.`)
                             .setThumbnail('https://preview.redd.it/pq2si1uks8t41.png?width=512&format=png&auto=webp&s=a86b0d7a2620b6f0d404e191d37d75f895996c23')
                             .setTitle(`General`)
                             .addFields([
@@ -205,6 +205,7 @@ module.exports = class Stats extends Command {
                             the_message.delete({ timeout: 300000 }).catch(error => { });
                         }).catch(error => { });
                     } else {
+                        message.delete({ timeout: 5000 }).catch(error => { });
                         this_message.edit('Failed to get information.').then(the_message => {
                             the_message.delete({ timeout: 5000 }).catch(error => { });
                         }).catch(error => { });
