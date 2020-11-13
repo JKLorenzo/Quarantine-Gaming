@@ -105,7 +105,7 @@ module.exports = class Stats extends Command {
     }
 
     async run(message, { game, id }) {
-        message.delete({ timeout: 60000 }).catch(error => { });
+        message.delete({ timeout: 300000 }).catch(error => { });
         switch (game) {
             case 'valorant':
                 message.say(`Getting information...`).then(async this_message => {
@@ -114,12 +114,11 @@ module.exports = class Stats extends Command {
                         this_message.delete().catch(console.error)
 
                         let embed1 = new MessageEmbed()
-                            .setAuthor(`Quarantine Gaming Experience: Stat Tracker`)
+                            .setAuthor(`Quarantine Gaming Experience: Stats Tracker`)
                             .setColor('#25ff00')
-                            .setFooter('Note: Realtime information is not guaranteed.')
+                            .setFooter(`${id}'s Competitive Stats | Realtime information is not guaranteed.`)
                             .setThumbnail('https://preview.redd.it/pq2si1uks8t41.png?width=512&format=png&auto=webp&s=a86b0d7a2620b6f0d404e191d37d75f895996c23')
-                            .setTitle(`${id}'s Competitive Stats`)
-                            .setDescription('**Overview**')
+                            .setTitle(`Overview`)
                             .addFields([
                                 { name: 'Rating', value: stats.rating, inline: true },
                                 { name: 'Matches', value: stats.matches, inline: true },
@@ -130,12 +129,11 @@ module.exports = class Stats extends Command {
                             ]);
 
                         let embed2 = new MessageEmbed()
-                            .setAuthor(`Quarantine Gaming Experience: Stat Tracker`)
+                            .setAuthor(`Quarantine Gaming Experience: Stats Tracker`)
                             .setColor('#25ff00')
-                            .setFooter('Note: Realtime information is not guaranteed.')
+                            .setFooter(`${id}'s Competitive Stats | Realtime information is not guaranteed.`)
                             .setThumbnail('https://preview.redd.it/pq2si1uks8t41.png?width=512&format=png&auto=webp&s=a86b0d7a2620b6f0d404e191d37d75f895996c23')
-                            .setTitle(`${id}'s Competitive Stats`)
-                            .setDescription('**Top Weapons**')
+                            .setTitle(`Top Weapons`)
                             .addFields([
                                 { name: `Name`, value: stats.top_weapons[0].name, inline: true },
                                 { name: `Type`, value: stats.top_weapons[0].type, inline: true },
@@ -151,12 +149,11 @@ module.exports = class Stats extends Command {
                             ]);
 
                         let embed3 = new MessageEmbed()
-                            .setAuthor(`Quarantine Gaming Experience: Stat Tracker`)
+                            .setAuthor(`Quarantine Gaming Experience: Stats Tracker`)
                             .setColor('#25ff00')
-                            .setFooter('Note: Realtime information is not guaranteed.')
+                            .setFooter(`${id}'s Competitive Stats | Realtime information is not guaranteed.`)
                             .setThumbnail('https://preview.redd.it/pq2si1uks8t41.png?width=512&format=png&auto=webp&s=a86b0d7a2620b6f0d404e191d37d75f895996c23')
-                            .setTitle(`${id}'s Competitive Stats`)
-                            .setDescription('**Top Agents**')
+                            .setTitle(`Top Agents`)
                             .addFields([
                                 { name: `Agent`, value: stats.top_agents[0].name, inline: true },
                                 { name: `Time Played`, value: stats.top_agents[0].time_played, inline: true },
@@ -172,12 +169,11 @@ module.exports = class Stats extends Command {
                             ]);
 
                         let embed4 = new MessageEmbed()
-                            .setAuthor(`Quarantine Gaming Experience: Stat Tracker`)
+                            .setAuthor(`Quarantine Gaming Experience: Stats Tracker`)
                             .setColor('#25ff00')
-                            .setFooter('Note: Realtime information is not guaranteed.')
+                            .setFooter(`${id}'s Competitive Stats | Realtime information is not guaranteed.`)
                             .setThumbnail('https://preview.redd.it/pq2si1uks8t41.png?width=512&format=png&auto=webp&s=a86b0d7a2620b6f0d404e191d37d75f895996c23')
-                            .setTitle(`${id}'s Competitive Stats`)
-                            .setDescription('**General**')
+                            .setTitle(`General`)
                             .addFields([
                                 { name: 'Damage/Round', value: stats.damage_per_round, inline: true },
                                 { name: 'K/D Ratio', value: stats.kd_ratio, inline: true },
