@@ -61,7 +61,7 @@ async function get() {
                         });
                     });
                 });
-            } else if (elapsedMinutes >= 30 && elapsedMinutes <= 90) {
+            } else if (elapsedMinutes >= 30 && elapsedMinutes <= 120) {
                 // Push
                 g_fgu.push(item_details);
             }
