@@ -7,9 +7,9 @@ module.exports = class SteamSale extends Command {
     constructor(client) {
         super(client, {
             name: 'steamsale',
-            group: 'services',
+            group: 'experience',
             memberName: 'steamsale',
-            description: "Gets the next Steam Sale Day."
+            description: "Gets the next Steam Sale schedule."
         });
     }
 
