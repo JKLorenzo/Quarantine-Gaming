@@ -238,11 +238,8 @@ async function process_push() {
 
             let Console_URLs = ['playstation.com', 'wii.com', 'xbox.com'];
             for (let Console_URL of Console_URLs) {
-                if (_url.indexOf(Console_URL) !== -1) {
-                    if (!mentionables.includes('<@&722691724572491776>')) {
-                        mentionables.push(`<@&722691724572491776>`);
-                    }
-                    mentionables[mentionables.length] = 'console';
+                if (_url.indexOf(Console_URL) !== -1 && !mentionables.includes('<@&722691724572491776>')) {
+                    mentionables.push(`<@&722691724572491776>`);
                     color.add(200, 80, 200)
                 }
             }
