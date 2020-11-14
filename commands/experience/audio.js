@@ -1,13 +1,13 @@
 const { Command } = require('discord.js-commando');
 const { MessageEmbed } = require('discord.js');
 
-module.exports = class AmongUs extends Command {
+module.exports = class Audio extends Command {
     constructor(client) {
         super(client, {
-            name: 'amongus',
+            name: 'audio',
             group: 'experience',
-            memberName: 'amongus',
-            description: 'Manually summon the audio control extension feature for Among Us on you current text channel.',
+            memberName: 'audio',
+            description: 'Summon the audio control extension for voice channels.',
             guildOnly: true
         });
     }
@@ -16,16 +16,15 @@ module.exports = class AmongUs extends Command {
         message.delete({ timeout: 60000 }).catch(error => { });
         let embed = new MessageEmbed()
             .setColor('#ffff00')
-            .setAuthor('Quarantine Gaming Experience: Among Us')
-            .setThumbnail('https://yt3.ggpht.com/a/AATXAJw5JZ2TM56V4OVFQnVUrOZ5_E2ULtrusmsTdrQatA=s900-c-k-c0xffffffff-no-rj-mo')
-            .setTitle('Among Us')
-            .setDescription('Voice channel audio control extension.')
+            .setAuthor('Quarantine Gaming: Experience')
+            .setThumbnail('http://www.extensions.in.th/amitiae/2013/prefs/images/sound_icon.png')
+            .setTitle('Audio Control Extension for Voice Channels')
+            .setDescription('Mute or unmute all members on your current voice channel.')
             .addFields(
                 { name: 'Actions:', value: '🟠 - Mute', inline: true },
                 { name: '\u200b', value: '🟢 - Unmute', inline: true }
             )
-            .setImage('https://i.pinimg.com/736x/75/69/4f/75694f713b0ab52bf2065ebee0d80f57.jpg')
-            .setFooter('Mute or unmute all members on your current voice channel.');
+            .setFooter('Apply selected actions by reacting below.');
 
         let reactions = new Array();
         reactions.push('🟠');
@@ -35,7 +34,7 @@ module.exports = class AmongUs extends Command {
                 await this_message.react(this_reaction).catch(error => {
                     g_interface.on_error({
                         name: 'run -> .react(this_reaction)',
-                        location: 'amongus.js',
+                        location: 'audio.js',
                         error: error
                     });
                 });
@@ -43,7 +42,7 @@ module.exports = class AmongUs extends Command {
         }).catch(error => {
             g_interface.on_error({
                 name: 'run -> .say(message)',
-                location: 'amongus.js',
+                location: 'audio.js',
                 error: error
             });
         });

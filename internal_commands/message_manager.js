@@ -308,11 +308,12 @@ const reactionAdd = async function (reaction, user) {
                     if (!updating) {
                         updating = true;
                         switch (this_message.embeds[0].title) {
-                            case 'Among Us':
+                            case 'Audio Control Extension for Voice Channels':
                                 // Delete reactions
                                 await this_message.reactions.removeAll().then(async message => {
                                     let this_channel = g_channels.get().guild.members.cache.get(user.id).voice.channel;
                                     if (this_channel) {
+
                                         // Get members
                                         let channel_members = new Array();
                                         for (let this_entry of this_channel.members) {
@@ -320,7 +321,7 @@ const reactionAdd = async function (reaction, user) {
                                         }
 
                                         // Get reaction effect
-                                        let effect = false;
+                                        let effect;
                                         switch (reaction.emoji.name) {
                                             case '🟠':
                                                 effect = true;
@@ -330,28 +331,18 @@ const reactionAdd = async function (reaction, user) {
                                                 break;
                                         }
 
-                                        // Notify voice channel
-                                        await g_speech.say(effect ? 'Muting in 5 seconds' : 'Unmuting', this_channel).catch(error => {
-                                            g_interface.on_error({
-                                                name: 'messageReactionAdd -> .say() [among us]',
-                                                location: 'message_manager.js',
-                                                error: error
-                                            });
-                                        });
-
-                                        // Sleep
-                                        if (effect) await g_functions.sleep(5000);
-
-                                        // Apply reaction effect
-                                        for (let this_channel_member of channel_members) {
-                                            if (!this_channel_member.user.bot) {
-                                                await this_channel_member.voice.setMute(effect).catch(error => {
-                                                    g_interface.on_error({
-                                                        name: `messageReactionAdd -> .setMute(${this_channel_member}) [among us]`,
-                                                        location: 'message_manager.js',
-                                                        error: error
+                                        if (typeof (effect) == 'boolean') {
+                                            // Apply reaction effect
+                                            for (let this_channel_member of channel_members) {
+                                                if (!this_channel_member.user.bot) {
+                                                    await this_channel_member.voice.setMute(effect).catch(error => {
+                                                        g_interface.on_error({
+                                                            name: `messageReactionAdd -> .setMute(${this_channel_member}) [Audio Control Extension for Voice Channels]`,
+                                                            location: 'message_manager.js',
+                                                            error: error
+                                                        });
                                                     });
-                                                });
+                                                }
                                             }
                                         }
 
@@ -362,7 +353,7 @@ const reactionAdd = async function (reaction, user) {
                                         for (let this_reaction of reactions) {
                                             await message.react(this_reaction).catch(error => {
                                                 g_interface.on_error({
-                                                    name: 'messageReactionAdd -> .react(this_reaction) [among us]',
+                                                    name: 'messageReactionAdd -> .react(this_reaction) [Audio Control Extension for Voice Channels]',
                                                     location: 'message_manager.js',
                                                     error: error
                                                 });
@@ -371,7 +362,7 @@ const reactionAdd = async function (reaction, user) {
                                     }
                                 }).catch(error => {
                                     g_interface.on_error({
-                                        name: 'messageReactionAdd -> .removeAll(reaction) [among us]',
+                                        name: 'messageReactionAdd -> .removeAll(reaction) [Audio Control Extension for Voice Channels]',
                                         location: 'message_manager.js',
                                         error: error
                                     });
