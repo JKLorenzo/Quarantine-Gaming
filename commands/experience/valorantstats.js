@@ -93,16 +93,22 @@ module.exports = class StatsVALORANT extends Command {
                     key: 'player',
                     prompt: "Enter the player's riot username and id. Example: username#1234",
                     type: 'string'
+                },
+                {
+                    key: 'target',
+                    prompt: "Where would you like to receive the information? DM or Here?",
+                    type: 'string',
+                    oneOf: ['dm', 'here'],
+                    default: 'dm'
                 }
             ]
         });
     }
 
-    async run(message, { player }) {
+    async run(message, { player, target }) {
         message.say(`Getting information...`).then(async this_message => {
             let stats = await valorant(player.split('#')[0], player.split('#')[1]);
             if (stats) {
-                message.delete({ timeout: 300000 }).catch(error => { });
                 this_message.delete().catch(error => { })
 
                 let embed1 = new MessageEmbed()
@@ -188,22 +194,34 @@ module.exports = class StatsVALORANT extends Command {
                         { name: 'Most Kills (Match)', value: stats.most_kills_match, inline: true }
                     ]);
 
-                await message.say(embed1).then(the_message => {
-                    the_message.delete({ timeout: 300000 }).catch(error => { });
-                }).catch(error => { });
-                await message.say(embed2).then(the_message => {
-                    the_message.delete({ timeout: 300000 }).catch(error => { });
-                }).catch(error => { });
-                await message.say(embed3).then(the_message => {
-                    the_message.delete({ timeout: 300000 }).catch(error => { });
-                }).catch(error => { });
-                await message.say(embed4).then(the_message => {
-                    the_message.delete({ timeout: 300000 }).catch(error => { });
-                }).catch(error => { });
+                if (target == 'here') {
+                    message.delete({ timeout: 300000 }).catch(error => { });
+                    await message.say(embed1).then(the_message => {
+                        the_message.delete({ timeout: 300000 }).catch(error => { });
+                    }).catch(error => { });
+                    await message.say(embed2).then(the_message => {
+                        the_message.delete({ timeout: 300000 }).catch(error => { });
+                    }).catch(error => { });
+                    await message.say(embed3).then(the_message => {
+                        the_message.delete({ timeout: 300000 }).catch(error => { });
+                    }).catch(error => { });
+                    await message.say(embed4).then(the_message => {
+                        the_message.delete({ timeout: 300000 }).catch(error => { });
+                    }).catch(error => { });
+                } else {
+                    await g_message_manager.dm_member(g_channels.get().guild.member(message.author), embed1);
+                    await g_message_manager.dm_member(g_channels.get().guild.member(message.author), embed2);
+                    await g_message_manager.dm_member(g_channels.get().guild.member(message.author), embed3);
+                    await g_message_manager.dm_member(g_channels.get().guild.member(message.author), embed4);
+                    message.say(`${message.author}, Sent you a DM with information.`).then(the_message => {
+                        message.delete({ timeout: 60000 }).catch(error => { });
+                        the_message.delete({ timeout: 60000 }).catch(error => { });
+                    }).catch(error => { });
+                }
             } else {
-                message.delete({ timeout: 10000 }).catch(error => { });
+                message.delete({ timeout: 60000 }).catch(error => { });
                 this_message.edit("Failed to get information from this account. The account may have been set to private or the account does not exist.").then(the_message => {
-                    the_message.delete({ timeout: 10000 }).catch(error => { });
+                    the_message.delete({ timeout: 60000 }).catch(error => { });
                 }).catch(error => { });
             }
         }).catch(error => { });
