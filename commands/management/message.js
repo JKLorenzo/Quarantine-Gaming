@@ -163,6 +163,6 @@ module.exports = class Message extends Command {
                 await g_message_manager.dm_member(this_member, the_message);
                 break;
         }
-        return message.say('Done!').catch(error => { });
+        return message.say('Done!').catch(() => { });;
     }
 };

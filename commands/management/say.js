@@ -25,7 +25,7 @@ module.exports = class Say extends Command {
     }
 
     run(message, { channelID, content }) {
-        message.delete({ timeout: 250 }).catch(error => { });
+        message.delete({ timeout: 250 }).catch(() => { });
         g_speech.say(`${content}`, g_channels.get().guild.channels.cache.find(channel => channel.id == channelID));
     }
 };

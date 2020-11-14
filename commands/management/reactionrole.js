@@ -51,7 +51,7 @@ module.exports = class ReactionRole extends Command {
                 break;
         }
 
-        let updated = true;
+        let updated = false;
         switch (mode) {
             case 'create':
                 await g_channels.get().roles.send(output.message).then(async this_message => {
@@ -64,6 +64,7 @@ module.exports = class ReactionRole extends Command {
                             });
                         });
                     }
+                    updated = true;
                 }).catch(error => {
                     g_interface.on_error({
                         name: 'run -> .say(output.message) [case create]',
@@ -93,6 +94,7 @@ module.exports = class ReactionRole extends Command {
                                     });
                                 });
                             }
+                            updated = true;
                         }).catch(error => {
                             g_interface.on_error({
                                 name: 'run -> .edit(output.message) [case update]',
@@ -103,15 +105,12 @@ module.exports = class ReactionRole extends Command {
                     }
                 });
                 break;
-            default:
-                updated = false;
-                break;
         }
 
         if (updated) {
-            message.say(`Got it! All changes are made.`)
+            message.say(`Got it! All changes are made.`).catch(() => { });
         } else {
-            message.say(`Uh oh! No changes made.`)
+            message.say(`Uh oh! No changes made.`).catch(() => { });
         }
     }
 };

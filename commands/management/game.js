@@ -41,9 +41,9 @@ module.exports = class Game extends Command {
         }
 
         if (updated) {
-            message.say('Updated!');
+            message.say('Updated!').catch(() => { });;
         } else {
-            message.say('No changes made!');
+            message.say('No changes made!').catch(() => { });;
         }
     }
 };

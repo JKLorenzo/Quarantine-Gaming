@@ -56,7 +56,7 @@ module.exports = class CleanUp extends Command {
 		}
 		await removeMessages(remaining);
 
-		return message.channel.send(`Cleanup complete. ${deleted} messages removed.`).then(this_message => {
+		return message.say(`Cleanup complete. ${deleted} messages removed.`).then(this_message => {
 			this_message.delete({ timeout: 5000 }).catch(() => { });
 		});
 	}

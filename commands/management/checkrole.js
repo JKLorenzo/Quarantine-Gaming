@@ -69,6 +69,6 @@ module.exports = class CheckRole extends Command {
         embed.setAuthor('Quarantine Gaming: Role Information', g_client.user.displayAvatarURL());
         embed.setFooter(`On ${channel.name} channel`);
         embed.setTimestamp(new Date());
-        return message.say(embed);
+        return message.say(embed).catch(() => { });;
     }
 };
