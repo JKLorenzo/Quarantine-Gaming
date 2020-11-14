@@ -1,3 +1,5 @@
+const gis = require('g-i-s');
+
 const sleep = function (ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -104,11 +106,58 @@ const getInviter = async function () {
     return invite_changes;
 }
 
+const htmlEntities = function (str) {
+    return String(str).replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"');
+}
+
+const getIcon = function (hostname) {
+    function contains(word) {
+        return hostname.toLowerCase().indexOf(word) !== -1;
+    }
+    let icon_url = '';
+    if (contains('reddit')) {
+        icon_url = 'https://image.flaticon.com/icons/png/512/355/355990.png';
+    } else if (contains('steam')) {
+        icon_url = 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Steam_icon_logo.svg/1024px-Steam_icon_logo.svg.png';
+    } else if (contains('epicgames')) {
+        icon_url = 'https://cdn2.unrealengine.com/EpicGames%2Fno-exist-576x576-5c7c5c6c4edc402cbd0d369cf7dd2662206b4657.png';
+    } else if (contains('gog')) {
+        icon_url = 'https://static.techspot.com/images2/downloads/topdownload/2016/12/gog.png';
+    } else if (contains('playstation')) {
+        icon_url = 'https://lh3.ggpht.com/pYDuCWSs7TIopjHX_i89et1C6zyk82iRZKAiWe8yJt5KNXp-B2ZuK7KHydkpaQmAnV0=w300';
+    } else if (contains('xbox')) {
+        icon_url = 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/i/0428cd5e-b1ca-4c7c-8d6a-0b263465bfe0/d4hcb91-d614c470-8051-43ef-ab75-18100a527bd1.png';
+    } else if (contains('ubisoft')) {
+        icon_url = 'https://vignette.wikia.nocookie.net/ichc-channel/images/e/e2/Ubisoft_round_icon_by_slamiticon-d66j9vs.png/revision/latest/scale-to-width-down/220?cb=20160328232011';
+    } else if (contains('microsoft')) {
+        icon_url = 'https://cdn0.iconfinder.com/data/icons/shift-free/32/Microsoft-512.png';
+    } else if (contains('discord')) {
+        icon_url = 'https://i1.pngguru.com/preview/373/977/320/discord-for-macos-white-and-blue-logo-art.jpg';
+    } else {
+        icon_url = `http://www.google.com/s2/favicons?domain=${hostname}`;
+    }
+    return icon_url;
+}
+const image_search = function (name) {
+    return new Promise(function (resolve, reject) {
+        gis(name, (error, results) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(results);
+            }
+        })
+    })
+}
+
 module.exports = {
     sleep,
     setActivity,
     string_similarity,
     array_difference,
     string_to_int,
-    getInviter
+    getInviter,
+    htmlEntities,
+    getIcon,
+    image_search
 }

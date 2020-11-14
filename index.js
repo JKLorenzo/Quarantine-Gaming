@@ -3,7 +3,6 @@ const { MessageEmbed } = require('discord.js');
 const path = require('path');
 const db = require(path.join(__dirname, 'internal_commands', 'database.js'));
 const interface = require(path.join(__dirname, 'internal_commands', 'interface.js'));
-const feed = require(path.join(__dirname, 'internal_commands', 'feed.js'));
 const fgu = require(path.join(__dirname, 'internal_commands', 'fgu.js'));
 const coordinator = require(path.join(__dirname, 'internal_commands', 'coordinator.js'));
 const dynamic_roles = require(path.join(__dirname, 'internal_commands', 'dynamic_roles.js'));
@@ -59,11 +58,11 @@ client.once('ready', async () => {
     roles.init();
     await channels.init();
     await db.init();
-    feed.init()
     dynamic_roles.init();
     dynamic_channels.init();
     await functions.getInviter();
     await roles.checkUnlisted();
+    fgu.begin()
 
     // Clear Messages
     message_manager.clear_dms();

@@ -1,50 +1,82 @@
 const { MessageEmbed } = require('discord.js');
 const fetch = require('node-fetch');
 const probe = require('probe-image-size');
-const gis = require('g-i-s');
 
 let is_pushing = false, to_push = new Array();
 
 // Internal Functions Region
-function getIcon(hostname) {
-    function contains(word) {
-        return hostname.toLowerCase().indexOf(word) !== -1;
-    }
-    let icon_url = '';
-    if (contains('reddit')) {
-        icon_url = 'https://image.flaticon.com/icons/png/512/355/355990.png';
-    } else if (contains('steam')) {
-        icon_url = 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Steam_icon_logo.svg/1024px-Steam_icon_logo.svg.png';
-    } else if (contains('epicgames')) {
-        icon_url = 'https://cdn2.unrealengine.com/EpicGames%2Fno-exist-576x576-5c7c5c6c4edc402cbd0d369cf7dd2662206b4657.png';
-    } else if (contains('gog')) {
-        icon_url = 'https://static.techspot.com/images2/downloads/topdownload/2016/12/gog.png';
-    } else if (contains('playstation')) {
-        icon_url = 'https://lh3.ggpht.com/pYDuCWSs7TIopjHX_i89et1C6zyk82iRZKAiWe8yJt5KNXp-B2ZuK7KHydkpaQmAnV0=w300';
-    } else if (contains('xbox')) {
-        icon_url = 'https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/i/0428cd5e-b1ca-4c7c-8d6a-0b263465bfe0/d4hcb91-d614c470-8051-43ef-ab75-18100a527bd1.png';
-    } else if (contains('ubisoft')) {
-        icon_url = 'https://vignette.wikia.nocookie.net/ichc-channel/images/e/e2/Ubisoft_round_icon_by_slamiticon-d66j9vs.png/revision/latest/scale-to-width-down/220?cb=20160328232011';
-    } else if (contains('microsoft')) {
-        icon_url = 'https://cdn0.iconfinder.com/data/icons/shift-free/32/Microsoft-512.png';
-    } else if (contains('discord')) {
-        icon_url = 'https://i1.pngguru.com/preview/373/977/320/discord-for-macos-white-and-blue-logo-art.jpg';
-    } else {
-        icon_url = `http://www.google.com/s2/favicons?domain=${hostname}`;
-    }
-    return icon_url;
-}
-function image_search(name) {
-    return new Promise(function (resolve, reject) {
-        gis(name, (error, results) => {
-            if (error) {
-                reject(error);
-            } else {
-                resolve(results);
+async function get() {
+    await fetch('https://www.reddit.com/r/FreeGameFindings/new/.json?limit=25&sort=new').then(data => data.json()).then(async data => {
+        for (let child of data.data.children) {
+            let item = child.data;
+
+            let item_details = {
+                title: g_functions.htmlEntities(item.title),
+                url: item.url,
+                author: item.author,
+                description: g_functions.htmlEntities(item.selftext),
+                validity: item.upvote_ratio * 100,
+                score: item.score,
+                flair: item.link_flair_text,
+                permalink: `https://www.reddit.com${item.permalink}`,
+                createdAt: item.created_utc
+            };
+
+            let today = new Date();
+            let published = new Date(item_details.createdAt * 1000);
+            let elapsedMinutes = Math.floor((today - published) / 60000);
+
+            let this_notif = g_db.hasRecords(item_details);
+            if (this_notif) {
+                // Update
+                await g_channels.get().updates.messages.fetch(this_notif.id).then(async this_message => {
+                    if (item_details.description) {
+                        this_message.embeds[0].spliceFields(1, 3)
+                            .addFields([
+                                { name: 'Trust Factor', value: `${item_details.validity} %`, inline: true },
+                                { name: 'Margin', value: `${item_details.score}`, inline: true },
+                                { name: 'Details', value: `${item_details.description}` }
+                            ])
+                            .setTimestamp();
+                    } else {
+                        this_message.embeds[0].spliceFields(1, 2)
+                            .addFields([
+                                { name: 'Trust Factor', value: `${item_details.validity} %`, inline: true },
+                                { name: 'Margin', value: `${item_details.score}`, inline: true }
+                            ])
+                            .setTimestamp();
+                    }
+                    if (item_details.flair) {
+                        if (item_details.flair.toLowerCase().indexOf('comment') != -1 || item_details.flair.toLowerCase().indexOf('issue') != -1) {
+                            this_message.embeds[0].setDescription(`[${item_details.flair}](${item_details.permalink})`);
+                        } else {
+                            this_message.embeds[0].setDescription(item_details.flair);
+                        }
+                    }
+                    await this_message.edit({ content: this_message.content, embed: this_message.embeds[0] }).catch(error => {
+                        g_interface.on_error({
+                            name: 'get -> edit(this_message)',
+                            location: 'fgu.js',
+                            error: error
+                        });
+                    });
+                });
+            } else if (elapsedMinutes >= 30 && elapsedMinutes <= 120) {
+                // Push
+                g_fgu.push(item_details);
             }
-        })
-    })
+        }
+    }).catch(error => {
+        if (!error.indexOf('getaddrinfo EAI_AGAIN') !== -1) {
+            g_interface.on_error({
+                name: 'get -> fetch()',
+                location: 'fgu.js',
+                error: error
+            });
+        }
+    });
 }
+
 async function process_push() {
     try {
         // Set the pushing status to true
@@ -118,7 +150,7 @@ async function process_push() {
                     if (response.ok) {
                         output.setURL(url);
                         let hostname = new URL(url).hostname;
-                        output.setFooter(`${hostname} | Updated as of `, getIcon(hostname));
+                        output.setFooter(`${hostname} | Updated as of `, g_functions.getIcon(hostname));
                     } else {
                         no_url = true;
                     }
@@ -136,7 +168,7 @@ async function process_push() {
             let gis_results;
             let has_error = false;
             // Search for images
-            await image_search(title).then(results => gis_results = results).catch(() => {
+            await g_functions.image_search(title).then(results => gis_results = results).catch(() => {
                 has_error = true;
             });
             // Check if there's no error
@@ -284,7 +316,17 @@ const push = function (notification) {
     }
 }
 
+const begin = function () {
+    // First fetch
+    get();
+    // Fetchs every 30 mins
+    setInterval(() => {
+        get();
+    }, 1800000);
+}
+
 // Interface Module Functions
 module.exports = {
-    push
+    push,
+    begin
 }
