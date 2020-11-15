@@ -48,9 +48,8 @@ const invite = async function (role, member, count, reserved) {
             embed.setThumbnail(qg_emoji.url);
         }
 
-
-        await g_channels.get().gaming.send({ content: `Inviting all ${mention_role} players!`, embed: embed }).then(async message => {
-            message.delete({ timeout: 3600000, reason: 'Timed Out' }).catch(error => { });
+        await g_channels.get().gaming.send({ content: `${member.displayName} is inviting you to play ${mention_role.name}! (${mention_role})`, embed: embed }).then(async message => {
+            message.delete({ timeout: 3600000 }).catch(error => { });
             if (!is_full) {
                 await message.react(emoji ? emoji : qg_emoji).catch(error => {
                     g_interface.on_error({
@@ -89,8 +88,6 @@ async function beginProcess() {
         await g_channels.get().gaming.messages.fetch(this_data.message.id).then(async message => {
             let embed = message.embeds[0];
             let inviter_id = embed.fields[0].value.substring(2, embed.fields[0].value.length - 1);
-            let inviter = g_channels.get().guild.members.cache.find(member => member.id == inviter_id);
-
             if (inviter_id != member.id && embed.footer.text != 'Closed. This bracket is now full.') {
                 let players = [];
                 let max = embed.fields.length;
@@ -168,16 +165,28 @@ async function beginProcess() {
 
                 await message.edit({ content: message.content, embed: embed }).then(async message => {
                     // Notify join
-                    if (inviter) {
-                        await g_message_manager.dm_member(inviter, `${member} ${status ? 'joined' : 'left'} your bracket. ${players.length > 1 ? `${players.length} players total.` : ''}`);
+                    for (let this_field of embed.fields) {
+                        if (this_field.value && this_field.value.length > 0) {
+                            let player_id = this_field.value.substring(2, this_field.value.length - 1);
+                            let player_member = g_channels.get().guild.members.cache.find(member => member.id == player_id);
+                            if (player_member && player_member.id != member.id) {
+                                await g_message_manager.dm_member(player_member, `${member} ${status ? 'joined' : 'left'} your bracket. ${players.length > 1 ? `${players.length} players total.` : ''}`);
+                            }
+                        }
                     }
                     // Notify full
                     if (status && has_caps && players.length >= max) {
                         await message.reactions.removeAll().catch(error => { });
-                        if (inviter) {
-                            embed.setDescription('Your team members are listed below.');
-                            embed.setFooter('Game On!');
-                            g_message_manager.dm_member(inviter, { content: `Your ${embed.title} bracket is now full.`, embed: embed });
+                        embed.setDescription('Your team members are listed below.');
+                        embed.setFooter('Game On!');
+                        for (let this_field of embed.fields) {
+                            if (this_field.value && this_field.value.length > 0) {
+                                let player_id = this_field.value.substring(2, this_field.value.length - 1);
+                                let player_member = g_channels.get().guild.members.cache.find(member => member.id == player_id);
+                                if (player_member && player_member.id != member.id) {
+                                    await g_message_manager.dm_member(player_member, { content: `Your ${embed.title} bracket is now full.`, embed: embed });
+                                }
+                            }
                         }
                     }
                 }).catch(error => {
