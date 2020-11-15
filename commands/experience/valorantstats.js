@@ -87,7 +87,7 @@ module.exports = class StatsVALORANT extends Command {
             name: 'valorantstats',
             group: 'experience',
             memberName: 'valorantstats',
-            description: 'A stats tracker that shows your VALORANT Competitive performaces over time.',
+            description: 'A stats tracker that shows your VALORANT Competitive performances over time.',
             args: [
                 {
                     key: 'player',
@@ -220,7 +220,7 @@ module.exports = class StatsVALORANT extends Command {
                 }
             } else {
                 message.delete({ timeout: 60000 }).catch(error => { });
-                this_message.edit("Failed to get information from this account. The account may have been set to private or the account does not exist.").then(the_message => {
+                this_message.edit("Failed to get information from this account. The account may have been set to private or the account does not exist.\nTo make your account public, you must sign up your riot account here: <https://tracker.gg/valorant>.").then(the_message => {
                     the_message.delete({ timeout: 60000 }).catch(error => { });
                 }).catch(error => { });
             }
