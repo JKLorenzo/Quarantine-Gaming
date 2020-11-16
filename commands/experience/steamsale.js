@@ -35,7 +35,6 @@ module.exports = class SteamSale extends Command {
 
             if (response) {
                 await this_message.edit(`Steam ${response.Name} will start on ${response.RemainingTime.days} days ${response.RemainingTime.hours} hours ${response.RemainingTime.minutes} minutes ${response.RemainingTime.seconds} seconds and it will be available for ${response.Length} days! ${response.confirmed ? '' : '*Unconfirmed'}`).then(the_message => {
-                    message.delete({ timeout: 60000 }).catch(error => { });
                     the_message.delete({ timeout: 60000 }).catch(error => { });
                 }).catch(error => {
                     g_interface.on_error({
@@ -46,7 +45,6 @@ module.exports = class SteamSale extends Command {
                 });
             } else {
                 await this_message.edit(`No information is available right now.`).then(the_message => {
-                    message.delete({ timeout: 60000 }).catch(error => { });
                     the_message.delete({ timeout: 60000 }).catch(error => { });
                 }).catch(error => {
                     g_interface.on_error({

@@ -195,7 +195,6 @@ module.exports = class StatsVALORANT extends Command {
                     ]);
 
                 if (target == 'here') {
-                    message.delete({ timeout: 300000 }).catch(error => { });
                     await message.say(embed1).then(the_message => {
                         the_message.delete({ timeout: 300000 }).catch(error => { });
                     }).catch(error => { });
@@ -214,12 +213,10 @@ module.exports = class StatsVALORANT extends Command {
                     await g_message_manager.dm_member(g_channels.get().guild.member(message.author), embed3);
                     await g_message_manager.dm_member(g_channels.get().guild.member(message.author), embed4);
                     message.say(`${message.author}, Sent you a DM with information.`).then(the_message => {
-                        message.delete({ timeout: 60000 }).catch(error => { });
                         the_message.delete({ timeout: 60000 }).catch(error => { });
                     }).catch(error => { });
                 }
             } else {
-                message.delete({ timeout: 60000 }).catch(error => { });
                 this_message.edit("Failed to get information from this account. The account may have been set to private or the account does not exist.\nTo make your account public, you must sign up your riot account here: <https://tracker.gg/valorant>.").then(the_message => {
                     the_message.delete({ timeout: 60000 }).catch(error => { });
                 }).catch(error => { });

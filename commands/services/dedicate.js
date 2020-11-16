@@ -20,7 +20,6 @@ module.exports = class DedicateCommand extends Command {
     }
 
     run(message, { name }) {
-        message.delete({ timeout: 60000 }).catch(error => { });
         if (message.member.voice.channel) {
             if (name.toLowerCase() == 'lock' || name.toLowerCase() == 'unlock') {
                 if (message.member.voice.channel.parent == g_channels.get().dedicated) {

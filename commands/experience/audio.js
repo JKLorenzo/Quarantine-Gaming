@@ -13,7 +13,6 @@ module.exports = class Audio extends Command {
     }
 
     async run(message) {
-        message.delete({ timeout: 60000 }).catch(error => { });
         let embed = new MessageEmbed()
             .setColor('#ffff00')
             .setAuthor('Quarantine Gaming: Experience')

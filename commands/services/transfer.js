@@ -19,7 +19,6 @@ module.exports = class TransferCommand extends Command {
     }
 
     run(message, { users }) {
-        message.delete({ timeout: 60000 }).catch(error => { });
         let channel = g_channels.get().guild.member(message.author).voice.channel;
         if (channel) {
             for (let user of users.split(' ')) {
