@@ -76,6 +76,10 @@ const string_to_int = function (string) {
     return parsed;
 }
 
+const string_alphanumeric = function (string) {
+    return string.replace(/[^a-z0-9]/gi, '');
+}
+
 let invites_list = new Array();
 const getInviter = async function () {
     let invite_changes = new Array();
@@ -156,6 +160,7 @@ module.exports = {
     string_similarity,
     array_difference,
     string_to_int,
+    string_alphanumeric,
     getInviter,
     htmlEntities,
     getIcon,
