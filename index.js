@@ -17,7 +17,7 @@ const client = new CommandoClient({
     commandPrefix: '!',
     owner: '393013053488103435',
     partials: [
-        'MESSAGE', 'REACTION'
+        'MESSAGE', 'CHANNEL', 'REACTION'
     ]
 });
 
