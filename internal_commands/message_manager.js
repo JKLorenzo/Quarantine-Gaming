@@ -117,7 +117,7 @@ const clear_dms = async function () {
             await member.createDM().then(async dm_channel => {
                 await dm_channel.messages.fetch().then(async messages => {
                     for (let message of messages) {
-                        if (message[1].author.bot) await message[1].delete().catch(error => { });;
+                        if (message[1].author.bot) await message[1].delete({ timeout: 900000 }).catch(error => { });; // Delete after 15 mins
                     }
                 }).catch(error => { });
             }).catch(error => {
