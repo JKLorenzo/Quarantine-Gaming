@@ -50,7 +50,7 @@ const manage = async function (message) {
     // GitHub
     if (message.channel && message.channel.id == g_channels.get().log.id) {
         if (message.embeds.length > 0 && message.embeds[0].title && message.embeds[0].title.split('commit').length > 1) {
-            const changes = msg.embeds[0].description.split('\n').map(commit => {
+            const changes = message.embeds[0].description.split('\n').map(commit => {
                 let description = commit.split(' ').slice(1);
                 description.splice(description.length - 2, 2)
                 return `  • ${description.join(' ')}`;
