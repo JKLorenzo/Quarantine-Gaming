@@ -56,7 +56,7 @@ const manage = async function (message) {
                 return `  • ${description.join(' ')}`;
             }).join('\n');
 
-            g_channels.get().staff.send(`**Quarantine Gaming Codebase Updated:**\n${changes}\n\nView Changes: <${message.embeds[0].url}>`).catch(error => {
+            g_channels.get().staff.send(`**Codebase Updated:**\n${changes}\n\nView Changes: <${message.embeds[0].url}>`).catch(error => {
                 g_interface.on_error({
                     name: 'manage -> staff.send()',
                     location: 'message_manager.js',
