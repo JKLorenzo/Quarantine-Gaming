@@ -47,6 +47,25 @@ const manage = async function (message) {
         }
     }
 
+    // GitHub
+    if (message.channel && message.channel.id == g_channels.get().log.id) {
+        if (message.embeds.length > 0 && message.embeds[0].title && message.embeds[0].title.split('commit').length > 1) {
+            const changes = msg.embeds[0].description.split('\n').map(commit => {
+                let description = commit.split(' ').slice(1);
+                description.splice(description.length - 2, 2)
+                return `  • ${description.join(' ')}`;
+            }).join('\n');
+
+            g_channels.get().staff.send(`**Quarantine Gaming Codebase Updated:**\n${changes}\n\nView Changes: <${message.embeds[0].url}>`).catch(error => {
+                g_interface.on_error({
+                    name: 'manage -> staff.send()',
+                    location: 'message_manager.js',
+                    error: error
+                });
+            });
+        }
+    }
+
     // DM
     if (message.guild == null) {
         let this_member = g_channels.get().guild.member(message.author);
