@@ -1,11 +1,16 @@
 const { MessageEmbed } = require('discord.js');
 
-const announce = async function (message) {
-    await g_channels.get().announcement.send(message).catch(error => {
-        on_error({
-            name: 'announce',
-            location: 'interface.js',
-            error: error
+const announce = function (message) {
+    return new Promise(async (resolve, reject) => {
+        await g_channels.get().announcement.send(message).then(msg => {
+            resolve(msg);
+        }).catch(error => {
+            on_error({
+                name: 'announce',
+                location: 'interface.js',
+                error: error
+            });
+            reject(error);
         });
     });
 }
@@ -20,32 +25,50 @@ const log = async function (message) {
     });
 }
 
-let unavailable_count = 0;
+let error_count = 0;
 const on_error = async function (details) {
-    if (details.error.code == 503) {
-        if (unavailable_count == 0) {
-            // Announce members
-            await announce(`**Discord Status Updates**\nDiscord is currently having some issues and may impact users on this server. Visit <https://discordstatus.com/> for more info.`);
+    // Service Unavailable, User aborted request
+    if (error_count == 5) {
 
-            // Change bot presence
-            g_functions.setActivity(`SERVER RESTART`);
+        // Change bot presence
+        g_functions.setActivity(`SERVER RESTART`);
 
-            // Notify staffs
-            g_channels.get().staff.send(`I'm currently detecting issues with Discord; some functionalities are disabled. A bot restart is recommended once the issues are resolved. Notify <@393013053488103435> when offline.`).catch(error => { });
-        } else if (unavailable_count % 5 == 0) {
-            // Change bot presence
-            g_functions.setActivity(`SERVER RESTART (${unavailable_count})`);
-        }
-        unavailable_count++;
-    } else if (unavailable_count == 0) {
+        // Announce
+        await announce(`**Discord Status Updates**\nDiscord is currently having some issues and may impact users on this server. Visit <https://discordstatus.com/> for more info.`).catch(() => {
+            let embed = new MessageEmbed();
+            embed.setAuthor('Limited Functionality');
+            embed.setTitle('Discord Status Updates');
+            embed.setDescription(`Discord is currently having some issues and may impact users on this server. Visit <https://discordstatus.com/> for more info.`);
+            embed.setColor('ffe300');
+            await announce(embed).catch(() => { });
+        });
+
+        // Notify staffs
+        await g_channels.get().staff.send(`I'm currently detecting issues with Discord; some functionalities are disabled. A bot restart is recommended once the issues are resolved.`).catch(() => {
+            let embed = new MessageEmbed();
+            embed.setAuthor('Limited Functionality');
+            embed.setTitle('Issues with Discord');
+            embed.setDescription(`I'm currently detecting issues with Discord; some functionalities are disabled. A bot restart is recommended once the issues are resolved.`);
+            embed.setColor('ffe300');
+            await g_channels.get().staff.send(embed).catch(() => { });
+        });
+
+        error_count++;
+
+    } else {
+
+        error_count++;
+
         let embed = new MessageEmbed()
-        embed.setAuthor(details.name)
-        embed.setTitle(`${details.location} Error`)
-        embed.setDescription(`An error occured while performing ${details.name} function on ${details.location}.`)
-        embed.addField('Error Message', details.error)
-        embed.setThumbnail('https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Antu_dialog-error.svg/1024px-Antu_dialog-error.svg.png')
+        embed.setAuthor('Quarantine Gaming: Telemetry');
+        embed.setTitle('Exception Details');
+        embed.addField('Function', details.name);
+        embed.addField('Message', details.error);
+        embed.addField('Location', details.location);
+        embed.addField('Code', details.error.code);
+        embed.setThumbnail('https://mir-s3-cdn-cf.behance.net/project_modules/disp/c9955d46715833.589222657aded.png');
         embed.setColor('#FF0000');
-        await log({ content: '<@393013053488103435>', embed: embed });
+        await log(embed);
     }
 }
 
