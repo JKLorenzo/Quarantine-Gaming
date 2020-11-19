@@ -30,20 +30,14 @@ module.exports = class TransferCommand extends Command {
                             g_message_manager.dm_member(member, `You have been transfered by ${message.author} to ${channel.name}.`);
                         }).catch(() => { });
                     } else {
-                        message.channel.send(`${this_member} must be active to any voice channels.`).then(this_message => {
-                            this_message.delete({ timeout: 60000 }).catch(() => { });
-                        });
+                        message.channel.send(`${this_member} must be active to any voice channels.`).catch(() => { });
                     }
                 } else {
-                    message.channel.send(`I can't find user ${user}, please try again.`).then(this_message => {
-                        this_message.delete({ timeout: 60000 }).catch(() => { });
-                    });
+                    message.channel.send(`I can't find user ${user}, please try again.`).catch(() => { });
                 }
             }
         } else {
-            message.channel.send('You must be active to any voice channels before you can trasfer other members.').then(this_message => {
-                this_message.delete({ timeout: 60000 }).catch(() => { });
-            });
+            message.channel.send('You must be active to any voice channels before you can trasfer other members.').catch(() => { });
         }
         return;
     }
