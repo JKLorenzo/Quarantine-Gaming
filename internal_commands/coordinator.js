@@ -49,7 +49,7 @@ const invite = async function (role, member, count, reserved) {
         }
 
         await g_channels.get().gaming.send({ content: `${member.displayName} is inviting you to play ${mention_role.name}! (${mention_role})`, embed: embed }).then(async message => {
-            message.delete({ timeout: 3600000 }).catch(error => { });
+            message.delete({ timeout: 3600000 }).catch(() => { });
             if (!is_full) {
                 await message.react(emoji ? emoji : qg_emoji).catch(error => {
                     g_interface.on_error({
@@ -176,7 +176,7 @@ async function beginProcess() {
                     }
                     // Notify full
                     if (status && has_caps && players.length >= max) {
-                        await message.reactions.removeAll().catch(error => { });
+                        await message.reactions.removeAll().catch(() => { });
                         embed.setDescription('Your team members are listed below.');
                         embed.setFooter('Game On!');
                         for (let this_field of embed.fields) {

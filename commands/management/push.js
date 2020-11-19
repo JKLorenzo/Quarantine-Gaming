@@ -20,7 +20,7 @@ module.exports = class PushCommand extends Command {
     }
 
     async run(message, { link }) {
-        message.say('Got it! Inserting to processing queue.').catch(error => { });
+        message.say('Got it! Inserting to processing queue.').catch(() => { });
         try {
             await fetch('https://www.reddit.com/r/FreeGameFindings/new/.json?limit=25&sort=new').then(data => data.json()).then(data => {
                 for (let child of data.data.children) {

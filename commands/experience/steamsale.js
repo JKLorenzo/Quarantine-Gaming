@@ -31,7 +31,7 @@ module.exports = class SteamSale extends Command {
                     confirmed: data.IsConfirmed
                 }
                 response = info;
-            }).catch(error => { });
+            }).catch(() => { });
 
             if (response) {
                 await this_message.edit(`Steam ${response.Name} will start on ${response.RemainingTime.days} days ${response.RemainingTime.hours} hours ${response.RemainingTime.minutes} minutes ${response.RemainingTime.seconds} seconds and it will be available for ${response.Length} days! ${response.confirmed ? '' : '*Unconfirmed'}`).catch(error => {

@@ -145,7 +145,7 @@ module.exports = class Message extends Command {
                     await this_channel.messages.fetch(commands[1]).then(async this_message => {
                         await this_message.edit(the_message).catch(async error => {
                             await message.say(`Uh oh! ${error}`).then(this_error_message => {
-                                this_error_message.delete({ timeout: 5000 }).catch(error => { });
+                                this_error_message.delete({ timeout: 5000 }).catch(() => { });
                             });
                         });
                     }).catch(error => {

@@ -25,7 +25,7 @@ module.exports = class CheckRole extends Command {
     }
 
     async run(message, { role, channel }) {
-        message.delete({ timeout: 60000 }).catch(error => { });
+        message.delete({ timeout: 60000 }).catch(() => { });
 
         let permissions = g_channels.get().guild.channels.cache.get(channel.id).permissionsFor(role);
         const generalPermissions = [

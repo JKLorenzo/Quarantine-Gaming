@@ -21,7 +21,7 @@ module.exports = class CleanUp extends Command {
 	}
 
 	async run(message, { count }) {
-		await message.delete().catch(error => { });
+		await message.delete().catch(() => { });
 
 		let remaining = count;
 		let deleted = 0;

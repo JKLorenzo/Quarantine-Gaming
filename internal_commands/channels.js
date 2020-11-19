@@ -90,11 +90,11 @@ async function beginDedicate() {
             if (this_channel.parent == g_channels.get().dedicated) {
                 // Rename channels
                 let text_channel = g_channels.get().guild.channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == this_channel.id);
-                await text_channel.setName(this_name).catch(error => { });
-                await this_channel.setName(this_name).catch(error => { });
+                await text_channel.setName(this_name).catch(() => { });
+                await this_channel.setName(this_name).catch(() => { });
                 // Rename role
                 let hoisted_role = g_channels.get().guild.roles.cache.find(role => text_channel.topic && text_channel.topic.split(' ')[2] == role.id);
-                await hoisted_role.setName(`Team ${this_name}`).catch(error => { });
+                await hoisted_role.setName(`Team ${this_name}`).catch(() => { });
 
                 // Set info
                 let embed = new MessageEmbed();

@@ -3,13 +3,13 @@ const { MessageEmbed } = require('discord.js');
 const manage = async function (message) {
     // Help
     if (message.channel && message.content.toLowerCase() == '!help') {
-        message.channel.send(`Visit <https://quarantinegamingdiscord.wordpress.com/> to learn more.`).catch(error => { });
+        message.channel.send(`Visit <https://quarantinegamingdiscord.wordpress.com/> to learn more.`).catch(() => { });
     }
 
     // Game Invites Channel Blocking
     if (message.channel && message.channel.id == g_channels.get().gaming.id && (message.embeds.length == 0 || (message.embeds.length > 0 && message.embeds[0].author.name != 'Quarantine Gaming: Game Coordinator'))) {
         dm_member(g_channels.get().guild.member(message.author), `Hello there! You can't send any messages in ${message.channel} channel. To invite players, do *!play* command in the ${g_channels.get().general} text channel.`);
-        message.delete({ timeout: 250 }).catch(error => { });
+        message.delete({ timeout: 250 }).catch(() => { });
     }
 
     // Following
@@ -94,7 +94,7 @@ const dm_member = async function (member, content) {
     if (member.user.bot) return;
     await member.createDM().then(async dm_channel => {
         await dm_channel.send(content).then(message => {
-            message.delete({ timeout: 3600000 }).catch(error => { });
+            message.delete({ timeout: 3600000 }).catch(() => { });
         }).catch(error => {
             g_interface.on_error({
                 name: `dm -> [${member}].send(${content})`,
@@ -117,9 +117,9 @@ const clear_dms = async function () {
             await member.createDM().then(async dm_channel => {
                 await dm_channel.messages.fetch().then(async messages => {
                     for (let message of messages) {
-                        if (message[1].author.bot) await message[1].delete({ timeout: 900000 }).catch(error => { });; // Delete after 15 mins
+                        if (message[1].author.bot) await message[1].delete({ timeout: 900000 }).catch(() => { });; // Delete after 15 mins
                     }
-                }).catch(error => { });
+                }).catch(() => { });
             }).catch(error => {
                 g_interface.on_error({
                     name: 'clear_dms -> .createDM()',
@@ -136,7 +136,7 @@ const clear_channels = async function () {
     for (let channel of channels_To_clear) {
         await channel.messages.fetch().then(async messages => {
             for (let message of messages) {
-                await message[1].delete({ timeout: 900000 }).catch(error => { }); // Delete after 15 mins
+                await message[1].delete({ timeout: 900000 }).catch(() => { }); // Delete after 15 mins
             }
         });
     }

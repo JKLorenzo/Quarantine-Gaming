@@ -76,19 +76,19 @@ module.exports = class DedicateCommand extends Command {
                     }
                 } else {
                     message.say(`You must be on a dedicated channel to lock or unlock a voice channel.`).then(this_msg => {
-                        this_msg.delete({ timeout: 60000 }).catch(error => { });
-                    }).catch(error => { });
+                        this_msg.delete({ timeout: 60000 }).catch(() => { });
+                    }).catch(() => { });
                 }
             } else {
                 g_channels.dedicate(message.member, name);
                 message.say(`Got it! Please wait.`).then(this_msg => {
-                    this_msg.delete({ timeout: 60000 }).catch(error => { });
-                }).catch(error => { });
+                    this_msg.delete({ timeout: 60000 }).catch(() => { });
+                }).catch(() => { });
             }
         } else {
             message.channel.send(`You must be connected to any voice channels to create a dedicated channel.`).then(this_msg => {
-                this_msg.delete({ timeout: 60000 }).catch(error => { });
-            }).catch(error => { });
+                this_msg.delete({ timeout: 60000 }).catch(() => { });
+            }).catch(() => { });
         }
     }
 };
