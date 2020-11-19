@@ -34,7 +34,7 @@ const on_error = async function (details) {
         g_functions.setActivity(`SERVER RESTART`);
 
         // Announce
-        await announce(`**Discord Status Updates**\nDiscord is currently having some issues and may impact users on this server. Visit <https://discordstatus.com/> for more info.`).catch(() => {
+        await announce(`**Discord Status Updates**\nDiscord is currently having some issues and may impact users on this server. Visit <https://discordstatus.com/> for more info.`).catch(async () => {
             let embed = new MessageEmbed();
             embed.setAuthor('Limited Functionality');
             embed.setTitle('Discord Status Updates');
@@ -44,7 +44,7 @@ const on_error = async function (details) {
         });
 
         // Notify staffs
-        await g_channels.get().staff.send(`I'm currently detecting issues with Discord; some functionalities are disabled. A bot restart is recommended once the issues are resolved.`).catch(() => {
+        await g_channels.get().staff.send(`I'm currently detecting issues with Discord; some functionalities are disabled. A bot restart is recommended once the issues are resolved.`).catch(async () => {
             let embed = new MessageEmbed();
             embed.setAuthor('Limited Functionality');
             embed.setTitle('Issues with Discord');
