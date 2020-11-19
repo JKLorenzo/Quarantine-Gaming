@@ -65,6 +65,7 @@ async function updateMember() {
                 let this_activity = this_data.activity;
                 if (this_activity.type == 'PLAYING' && !g_db.titles().blacklisted.includes(this_activity.name.trim().toLowerCase()) && (this_activity.applicationID || g_db.titles().whitelisted.includes(this_activity.name.trim().toLowerCase()))) {
                     let this_game_name = this_activity.name.trim();
+                    let this_game_role = g_channels.get().guild.roles.cache.find(role => role.name == this_game_name);
                     let this_play_name = 'Play ' + this_game_name;
                     let this_play_role = g_channels.get().guild.roles.cache.find(role => role.name == this_play_name);
 
@@ -72,7 +73,6 @@ async function updateMember() {
                         // Check if user doesn't have this game role
                         if (!this_member.roles.cache.find(role => role.name == this_game_name)) {
                             // Check if this game role exists
-                            let this_game_role = g_channels.get().guild.roles.cache.find(role => role.name == this_game_name);
                             if (!this_game_role) {
                                 // Create role on this guild
                                 await g_channels.get().guild.roles.create({
@@ -120,16 +120,15 @@ async function updateMember() {
 
                         // Check if user doesn't have this play role
                         if (!this_member.roles.cache.find(role => role.name == this_play_name)) {
+                            const ref_play_roles = g_channels.get().guild.roles.cache.find(role => role.name == '<PLAYROLES>');
                             // Check if this play role doesn't exists
                             if (!this_play_role) {
-                                // Get reference role
-                                let play_roles = g_channels.get().guild.roles.cache.find(role => role.name == '<PLAYROLES>');
                                 // Create role on this guild
                                 await g_channels.get().guild.roles.create({
                                     data: {
                                         name: this_play_name,
                                         color: '0x7b00ff',
-                                        position: play_roles.position,
+                                        position: ref_play_roles.position,
                                         hoist: true
                                     }
                                 }).then(play_role => {
@@ -141,9 +140,12 @@ async function updateMember() {
                                         error: error
                                     });
                                 });
+                            } else {
+                                // Bring to Top
+                                await this_play_role.setPosition(ref_play_roles.position - 1).catch(() => { });
                             }
 
-                            // Assign role to this member
+                            // Assign member this play role
                             await this_member.roles.add(this_play_role).catch(error => {
                                 g_interface.on_error({
                                     name: 'updateMember -> .add(this_play_role)',
@@ -204,12 +206,13 @@ const init = async function () {
             for (let this_activity of this_member.presence.activities) {
                 if (this_activity.type == 'PLAYING' && !g_db.titles().blacklisted.includes(this_activity.name.trim().toLowerCase()) && (this_activity.applicationID || g_db.titles().whitelisted.includes(this_activity.name.trim().toLowerCase()))) {
                     let this_game_name = this_activity.name.trim();
+                    let this_game_role = g_channels.get().guild.roles.cache.find(role => role.name == this_game_name);
                     let this_play_name = 'Play ' + this_game_name;
+                    let this_play_role = g_channels.get().guild.roles.cache.find(role => role.name == this_play_name);
 
                     // Check if user doesn't have this game role
                     if (!this_member.roles.cache.find(role => role.name == this_game_name)) {
                         // Check if game role doesnt exists
-                        let this_game_role = g_channels.get().guild.roles.cache.find(role => role.name == this_game_name);
                         if (!this_game_role) {
                             await g_channels.get().guild.roles.create({
                                 data: {
@@ -257,14 +260,13 @@ const init = async function () {
 
                     // Check if this play role doesn't exists
                     if (!this_member.roles.cache.find(role => role.name == this_play_name)) {
-                        let this_play_role = g_channels.get().guild.roles.cache.find(role => role.name == this_play_name);
+                        const ref_play_roles = g_channels.get().guild.roles.cache.find(role => role.name == '<PLAYROLES>');
                         if (!this_play_role) {
-                            let play_roles = g_channels.get().guild.roles.cache.find(role => role.name == '<PLAYROLES>');
                             await g_channels.get().guild.roles.create({
                                 data: {
                                     name: this_play_name,
                                     color: '0x7b00ff',
-                                    position: play_roles.position,
+                                    position: ref_play_roles.position,
                                     hoist: true
                                 }
                             }).then(play_role => {
@@ -276,8 +278,12 @@ const init = async function () {
                                     error: error
                                 });
                             });
+                        } else {
+                            // Bring to Top
+                            await this_play_role.setPosition(ref_play_roles.position - 1).catch(() => { });
                         }
 
+                        // Assign member this play role
                         await this_member.roles.add(this_play_role).catch(error => {
                             g_interface.on_error({
                                 name: 'init -> .add(this_play_role)',
