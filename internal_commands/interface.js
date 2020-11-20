@@ -37,6 +37,7 @@ const on_error = function (details) {
 
 let threshold_reached = false;
 let errors_per_minute = new Array();
+let threshold_hit_count = 0;
 async function process_errors() {
     is_processing_errors = true;
 
@@ -53,48 +54,46 @@ async function process_errors() {
 
         const epm = errors_per_minute.length;
 
-        if (epm > 5) {
-            if (!threshold_reached) {
-                // Change bot presence
-                g_functions.setActivity(`SERVER RESTART`);
+        if (epm > 5 && !threshold_reached) {
+            // Change bot presence
+            g_functions.setActivity(`SERVER RESTART (${++threshold_hit_count})`);
 
-                // Announce
-                await announce(`**Discord Status Updates**\nDiscord is currently having some issues and may impact users on this server. Visit <https://discordstatus.com/> for more info.`).catch(async () => {
-                    let embed = new MessageEmbed();
-                    embed.setAuthor('Limited Functionality');
-                    embed.setTitle('Discord Status Updates');
-                    embed.setDescription(`Discord is currently having some issues and may impact users on this server. Visit <https://discordstatus.com/> for more info.`);
-                    embed.setColor('ffe300');
-                    await announce(embed).catch(() => { });
-                });
+            // Announce
+            await announce(`**Discord Status Updates**\nDiscord is currently having some issues and may impact users on this server. Visit <https://discordstatus.com/> for more info.`).catch(async () => {
+                let embed = new MessageEmbed();
+                embed.setAuthor('Limited Functionality');
+                embed.setTitle('Discord Status Updates');
+                embed.setDescription(`Discord is currently having some issues and may impact users on this server. Visit <https://discordstatus.com/> for more info.`);
+                embed.setColor('ffe300');
+                await announce(embed).catch(() => { });
+            });
 
-                // Notify staffs
-                await g_channels.get().staff.send(`I'm currently detecting issues with Discord; some functionalities are disabled. A bot restart is recommended once the issues are resolved.`).catch(async () => {
-                    let embed = new MessageEmbed();
-                    embed.setAuthor('Limited Functionality');
-                    embed.setTitle('Issues with Discord');
-                    embed.setDescription(`I'm currently detecting issues with Discord; some functionalities are disabled. A bot restart is recommended once the issues are resolved.`);
-                    embed.setColor('ffe300');
-                    await g_channels.get().staff.send(embed).catch(() => { });
-                });
+            // Notify staffs
+            await g_channels.get().staff.send(`I'm currently detecting issues with Discord; some functionalities are disabled. A bot restart is recommended once the issues are resolved.`).catch(async () => {
+                let embed = new MessageEmbed();
+                embed.setAuthor('Limited Functionality');
+                embed.setTitle('Issues with Discord');
+                embed.setDescription(`I'm currently detecting issues with Discord; some functionalities are disabled. A bot restart is recommended once the issues are resolved.`);
+                embed.setColor('ffe300');
+                await g_channels.get().staff.send(embed).catch(() => { });
+            });
 
-                threshold_reached = true;
-            } else {
-                // Suppressed Errors
-            }
-        } else {
-            let embed = new MessageEmbed();
-            embed.setAuthor('Quarantine Gaming: Telemetry');
-            embed.setTitle('Exception Details');
-            embed.addField('Function', details.name);
-            embed.addField('Message', details.error);
-            embed.addField('Location', details.location);
-            embed.addField('Code', details.error.code);
-            embed.addField('Errors per Minute', epm);
-            embed.setThumbnail('https://mir-s3-cdn-cf.behance.net/project_modules/disp/c9955d46715833.589222657aded.png');
-            embed.setColor('#FF0000');
-            await log(embed);
+            threshold_reached = true;
         }
+
+        let embed = new MessageEmbed();
+        embed.setAuthor('Quarantine Gaming: Telemetry');
+        embed.setTitle('Exception Details');
+        embed.addField('Function', details.name);
+        embed.addField('Message', details.error);
+        embed.addField('Location', details.location);
+        embed.addField('Code', details.error.code);
+        embed.addField('Errors per Minute', epm);
+        embed.addField('Threshold Hit', threshold_reached ? 'True' : 'False');
+        embed.addField('Threshold Hit Count', threshold_hit_count);
+        embed.setThumbnail('https://mir-s3-cdn-cf.behance.net/project_modules/disp/c9955d46715833.589222657aded.png');
+        embed.setColor('#FF0000');
+        await log(embed);
     }
 
     is_processing_errors = false;
