@@ -21,6 +21,9 @@ const client = new CommandoClient({
     ]
 });
 
+const puppeteer = require('puppeteer');
+const CloudflareBypasser = require('cloudflare-bypasser');
+
 // Global Variables
 global.rootDir = path.resolve(__dirname);
 global.g_db = db;
@@ -78,6 +81,47 @@ client.once('ready', async () => {
         embed.addField('Reason', process.env.STARTUP_REASON);
         g_interface.log(embed);
     }
+
+    // ------------------------------
+    function makeCookie(cf) {
+        const data = JSON.parse(JSON.stringify(cf.jar))._jar.cookies[0];
+        return {
+            name: data.key,
+            value: data.value,
+            // url: 'steamdb.info',
+            domain: data.domain,
+            path: data.path,
+            expires: Math.floor((new Date(data.expires)) / 1000),
+            httpOnly: data.httpOnly,
+            secure: data.secure,
+            sameSite: "Lax",
+            session: false,
+            size: 51
+        }
+    }
+    const url = 'https://steamdb.info/sales/history/';
+    const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4298.0 Safari/537.36'
+    let cf = new CloudflareBypasser({
+        userAgent: userAgent
+    });
+    cf.request(url).then(async () => {
+        await functions.sleep(10000);
+        const browser = await puppeteer.launch({ headless: true });
+        const page = await browser.newPage();
+        page.on("load", async () => {
+            let x = await page.$("#js-sale-countdown");
+            if (x) {
+                console.log(await x.evaluate(node => node.innerText));
+            } else {
+                console.log('Blocked');
+            }
+            browser.close();
+        })
+
+        await page.setUserAgent(userAgent);
+        await page.setCookie(makeCookie(cf));
+        await page.goto(url);
+    });
 });
 
 client.on('message', message => message_manager.manage(message));
