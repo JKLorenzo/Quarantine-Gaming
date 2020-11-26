@@ -26,7 +26,6 @@
     "jsdom": "^16.4.0",
     "node-fetch": "^2.6.1",
     "opusscript": "0.0.7",
-    "probe-image-size": "^6.0.0",
-    "puppeteer": "^5.5.0"
+    "probe-image-size": "^6.0.0"
   }
 }
