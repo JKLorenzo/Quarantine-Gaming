@@ -105,6 +105,7 @@ client.once('ready', async () => {
     let cf = new CloudflareBypasser({
         userAgent: userAgent
     });
+
     cf.request(url).then(async () => {
         const browser = await puppeteer.launch({
             args: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -112,7 +113,6 @@ client.once('ready', async () => {
         const page = await browser.newPage();
         await page.setRequestInterception(true);
         page.on('request', r => {
-            console.log(r.url())
             r.continue();
         });
         page.on("load", async () => {
@@ -121,12 +121,17 @@ client.once('ready', async () => {
                     console.log(await element.evaluate(node => node.innerText));
                 }
             });
-            // await browser.close();
+            console.log('***********************')
         })
         await page.setUserAgent(userAgent);
         await page.setCookie(makeCookie(cf));
         await page.goto(url);
     });
+
+    setTimeout(() => {
+        await browser.close();
+        console.log('========================');
+    }, 20000);
 });
 
 client.on('message', message => message_manager.manage(message));
