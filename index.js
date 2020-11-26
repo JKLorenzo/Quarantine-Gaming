@@ -106,14 +106,19 @@ client.once('ready', async () => {
         userAgent: userAgent
     });
 
+    const browser = await puppeteer.launch({
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+
     cf.request(url).then(async () => {
-        const browser = await puppeteer.launch({
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
         const page = await browser.newPage();
         await page.setRequestInterception(true);
-        page.on('request', r => {
-            r.continue();
+        page.on('request', interceptedRequest => {
+            if (interceptedRequest.resourceType() === 'media') {
+                interceptedRequest.abort();
+            } else {
+                interceptedRequest.continue();
+            }
         });
         page.on("load", async () => {
             await page.$$("#js-sale-countdown").then(async elements => {
