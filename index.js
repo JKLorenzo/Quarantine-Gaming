@@ -129,7 +129,7 @@ client.once('ready', async () => {
     });
 
     setTimeout(() => {
-        await browser.close();
+        browser.close();
         console.log('========================');
     }, 20000);
 });
