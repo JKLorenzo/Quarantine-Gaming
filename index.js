@@ -13,6 +13,8 @@ const functions = require(path.join(__dirname, 'internal_commands', 'functions.j
 const channels = require(path.join(__dirname, 'internal_commands', 'channels.js'));
 const roles = require(path.join(__dirname, 'internal_commands', 'roles.js'));
 
+const puppeteer = require('puppeteer');
+
 const client = new CommandoClient({
     commandPrefix: '!',
     owner: '393013053488103435',
@@ -78,6 +80,18 @@ client.once('ready', async () => {
         embed.addField('Reason', process.env.STARTUP_REASON);
         g_interface.log(embed);
     }
+
+    // -------------------------------------------
+
+    puppeteer.launch({ headless: false }).then(async browser => {
+        const page = await browser.newPage();
+        page.on("load", async () => {
+            let x = await page.$("#js-sale-countdown");
+            console.log(await x.evaluate(node => node.innerText));
+            browser.close();
+        })
+        await page.goto('https://steamdb.info/sales/history/');
+    });
 });
 
 client.on('message', message => message_manager.manage(message));
