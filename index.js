@@ -106,7 +106,10 @@ client.once('ready', async () => {
     });
     cf.request(url).then(async () => {
         await functions.sleep(10000);
-        const browser = await puppeteer.launch({ headless: true });
+        const browser = await puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox']
+        });
         const page = await browser.newPage();
         page.on("load", async () => {
             let x = await page.$("#js-sale-countdown");
