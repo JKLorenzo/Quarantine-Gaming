@@ -105,20 +105,18 @@ client.once('ready', async () => {
         userAgent: userAgent
     });
     cf.request(url).then(async () => {
-        await functions.sleep(10000);
         const browser = await puppeteer.launch({
-            headless: true,
-            args: ['--no-sandbox']
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
         const page = await browser.newPage();
         page.on("load", async () => {
-            let x = await page.$("#js-sale-countdown");
-            if (x) {
-                console.log(await x.evaluate(node => node.innerText));
-            } else {
-                console.log('Blocked');
-            }
-            browser.close();
+            await page.$$("#js-sale-countdown").then(async elements => {
+                for (let element of elements) {
+                    console.log(await element.evaluate(node => node.innerText));
+                }
+            });
+            console.log('--------------------------------------');
+            await browser.close();
         })
 
         await page.setUserAgent(userAgent);
