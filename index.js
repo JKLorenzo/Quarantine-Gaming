@@ -101,6 +101,7 @@ client.once('ready', async () => {
     }
     const url = 'https://steamdb.info/sales/history/';
     const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4298.0 Safari/537.36'
+
     let cf = new CloudflareBypasser({
         userAgent: userAgent
     });
@@ -109,16 +110,19 @@ client.once('ready', async () => {
             args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
         const page = await browser.newPage();
+        await page.setRequestInterception(true);
+        page.on('request', r => {
+            console.log(r.url())
+            r.continue();
+        });
         page.on("load", async () => {
             await page.$$("#js-sale-countdown").then(async elements => {
                 for (let element of elements) {
                     console.log(await element.evaluate(node => node.innerText));
                 }
             });
-            console.log('--------------------------------------');
-            await browser.close();
+            // await browser.close();
         })
-
         await page.setUserAgent(userAgent);
         await page.setCookie(makeCookie(cf));
         await page.goto(url);
