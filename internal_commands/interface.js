@@ -81,19 +81,21 @@ async function process_errors() {
             threshold_reached = true;
         }
 
-        let embed = new MessageEmbed();
-        embed.setAuthor('Quarantine Gaming: Telemetry');
-        embed.setTitle('Exception Details');
-        embed.addField('Function', details.name);
-        embed.addField('Message', details.error);
-        embed.addField('Location', details.location);
-        embed.addField('Code', details.error.code);
-        embed.addField('Errors per Minute', epm);
-        embed.addField('Threshold Hit', threshold_reached ? 'True' : 'False');
-        embed.addField('Threshold Hit Count', threshold_hit_count);
-        embed.setThumbnail('https://mir-s3-cdn-cf.behance.net/project_modules/disp/c9955d46715833.589222657aded.png');
-        embed.setColor('#FF0000');
-        await log(embed);
+        if (!threshold_reached) {
+            let embed = new MessageEmbed();
+            embed.setAuthor('Quarantine Gaming: Telemetry');
+            embed.setTitle('Exception Details');
+            embed.addField('Function', details.name);
+            embed.addField('Message', details.error);
+            embed.addField('Location', details.location);
+            embed.addField('Code', details.error.code);
+            embed.addField('Errors per Minute', epm);
+            embed.addField('Threshold Hit', threshold_reached ? 'True' : 'False');
+            embed.addField('Threshold Hit Count', threshold_hit_count);
+            embed.setThumbnail('https://mir-s3-cdn-cf.behance.net/project_modules/disp/c9955d46715833.589222657aded.png');
+            embed.setColor('#FF0000');
+            await log(embed);
+        }
     }
 
     is_processing_errors = false;
