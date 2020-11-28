@@ -5,8 +5,8 @@ function updateGuild() {
     try {
         // Transfer members from generic voice rooms to dynamic voice rooms
         for (let this_channel of g_channels.get().guild.channels.cache.array()) {
-            // Disregard Pandora's Box and Couchlockszx
-            if (this_channel.type == 'voice' && this_channel.id != '747005488197009568' && this_channel.id != '663443529170681857') {
+            // Disregard Pandora's Box, Couchlockszx and Create Dedicated Channel VRs
+            if (this_channel.type == 'voice' && this_channel.id != '747005488197009568' && this_channel.id != '663443529170681857' && this_channel.id != '782122602134896641') {
                 if (this_channel.members.size > 1) {
                     // Get baseline activity
                     let baseline_role, same_acitivities, diff_acitivities;
@@ -25,7 +25,7 @@ function updateGuild() {
                                 }
                                 if (same_acitivities > 1 && same_acitivities > diff_acitivities && !this_role.name.substring(5).startsWith(this_channel.name)) {
                                     baseline_role = this_role;
-                                    g_channels.dedicate(this_member, this_role.name.substring(5), false);
+                                    g_channels.dedicate(this_member, this_role.name.substring(5));
                                 }
                             }
                         }
@@ -49,8 +49,7 @@ async function updateChannel() {
         let oldState = this_data.old;
 
         if (newState.channel && newState.channel.id == '782122602134896641' && !newState.member.user.bot) {
-            // instant create dedicated channel
-            g_channels.dedicate(newState.member, newState.member.displayName, true);
+            g_channels.dedicate(newState.member, newState.member.displayName);
         } else {
             if (oldState.channel != newState.channel) {
                 if (oldState.channel && oldState.channel.parent == g_channels.get().dedicated) {
@@ -146,7 +145,6 @@ async function updateChannel() {
                         });
                     }
 
-
                     if (newState.channel.parent == g_channels.get().dedicated) {
                         // Add member to a text channel when joining a dedicated channel
                         let text_channel = g_channels.get().guild.channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == newState.channelID);
@@ -240,12 +238,11 @@ async function updateChannel() {
 const init = async function () {
     for (let this_channel of g_channels.get().guild.channels.cache.array()) {
         if (this_channel && this_channel.parent && this_channel.parent == g_channels.get().dedicated) {
-            if (this_channel.type == 'text') {
+            if (this_channel.type == 'text' && this_channel.topic) {
                 let data = this_channel.topic.split(' ');
                 let this_voice = g_channels.get().guild.channels.cache.get(data[0]);
                 let this_text = g_channels.get().guild.roles.cache.get(data[1]);
                 let this_hoisted = g_channels.get().guild.roles.cache.get(data[2]);
-
 
                 for (let this_member of this_voice.members.array()) {
                     // Give all channel members text roles
