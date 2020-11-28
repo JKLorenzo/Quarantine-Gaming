@@ -70,7 +70,7 @@ async function get() {
                 }
             }
         }).catch(error => {
-            if (!error.indexOf('getaddrinfo EAI_AGAIN') !== -1) {
+            if (!error.message.indexOf('getaddrinfo EAI_AGAIN') !== -1) {
                 g_interface.on_error({
                     name: 'get -> fetch()',
                     location: 'fgu.js',
