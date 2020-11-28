@@ -31,36 +31,38 @@ async function get() {
                 if (this_notif) {
                     // Update
                     await g_channels.get().updates.messages.fetch(this_notif.id).then(async this_message => {
-                        if (item_details.description) {
-                            this_message.embeds[0].spliceFields(1, 3)
-                                .addFields([
-                                    { name: 'Trust Factor', value: `${item_details.validity} %`, inline: true },
-                                    { name: 'Margin', value: `${item_details.score}`, inline: true },
-                                    { name: 'Details', value: `${item_details.description}` }
-                                ])
-                                .setTimestamp();
-                        } else {
-                            this_message.embeds[0].spliceFields(1, 2)
-                                .addFields([
-                                    { name: 'Trust Factor', value: `${item_details.validity} %`, inline: true },
-                                    { name: 'Margin', value: `${item_details.score}`, inline: true }
-                                ])
-                                .setTimestamp();
-                        }
-                        if (item_details.flair) {
-                            if (item_details.flair.toLowerCase().indexOf('comment') != -1 || item_details.flair.toLowerCase().indexOf('issue') != -1) {
-                                this_message.embeds[0].setDescription(`[${item_details.flair}](${item_details.permalink})`);
+                        if (this_message) {
+                            if (item_details.description) {
+                                this_message.embeds[0].spliceFields(1, 3)
+                                    .addFields([
+                                        { name: 'Trust Factor', value: `${item_details.validity} %`, inline: true },
+                                        { name: 'Margin', value: `${item_details.score}`, inline: true },
+                                        { name: 'Details', value: `${item_details.description}` }
+                                    ])
+                                    .setTimestamp();
                             } else {
-                                this_message.embeds[0].setDescription(item_details.flair);
+                                this_message.embeds[0].spliceFields(1, 2)
+                                    .addFields([
+                                        { name: 'Trust Factor', value: `${item_details.validity} %`, inline: true },
+                                        { name: 'Margin', value: `${item_details.score}`, inline: true }
+                                    ])
+                                    .setTimestamp();
                             }
-                        }
-                        await this_message.edit({ content: this_message.content, embed: this_message.embeds[0] }).catch(error => {
-                            g_interface.on_error({
-                                name: 'get -> edit(this_message)',
-                                location: 'fgu.js',
-                                error: error
+                            if (item_details.flair) {
+                                if (item_details.flair.toLowerCase().indexOf('comment') != -1 || item_details.flair.toLowerCase().indexOf('issue') != -1) {
+                                    this_message.embeds[0].setDescription(`[${item_details.flair}](${item_details.permalink})`);
+                                } else {
+                                    this_message.embeds[0].setDescription(item_details.flair);
+                                }
+                            }
+                            await this_message.edit({ content: this_message.content, embed: this_message.embeds[0] }).catch(error => {
+                                g_interface.on_error({
+                                    name: 'get -> edit(this_message)',
+                                    location: 'fgu.js',
+                                    error: error
+                                });
                             });
-                        });
+                        }
                     });
                 } else if (elapsedMinutes >= 30 && elapsedMinutes <= 120) {
                     // Push
