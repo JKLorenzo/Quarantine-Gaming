@@ -1,4 +1,5 @@
 const { MessageEmbed } = require("discord.js");
+let is_dedicating = false, dedicate_queue = new Array();
 
 let guild, c_log, c_roles, c_updates, c_following, c_staff, c_gaming, c_announcement, c_testing, c_general, c_dedicated, c_dm;
 
@@ -113,7 +114,9 @@ const dedicate = async function (member, name) {
             channel_desc.push('Note: <@&749235255944413234> and <@&700397445506531358> can interact with these channels.');
             embed.setDescription(channel_desc.join('\n\n'));
             embed.setColor('#7b00ff');
-            await text_channel.send(embed).catch(error => {
+            await text_channel.send(embed).then(async message => {
+                await message.pin();
+            }).catch(error => {
                 g_interface.on_error({
                     name: 'beginDedicate -> .send(embed)',
                     location: 'channels.js',
@@ -229,7 +232,9 @@ const dedicate = async function (member, name) {
                         channel_desc.push('Note: <@&749235255944413234> and <@&700397445506531358> can interact with these channels.');
                         embed.setDescription(channel_desc.join('\n\n'));
                         embed.setColor('#7b00ff');
-                        await text_channel.send(embed).catch(error => {
+                        await text_channel.send(embed).then(message => {
+                            message.pin();
+                        }).catch(error => {
                             g_interface.on_error({
                                 name: 'beginDedicate -> .send(embed)',
                                 location: 'channels.js',

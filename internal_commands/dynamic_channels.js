@@ -5,8 +5,8 @@ function updateGuild() {
     try {
         // Transfer members from generic voice rooms to dynamic voice rooms
         for (let this_channel of g_channels.get().guild.channels.cache.array()) {
-            // Update dedicated channel names and roles
-            if (this_channel.type == 'voice' && this_channel.parent == g_channels.get().dedicated) {
+            // Disregard Pandora's Box, Couchlockszx and Create Dedicated Channel VRs
+            if (this_channel.type == 'voice' && this_channel.id != '747005488197009568' && this_channel.id != '663443529170681857' && this_channel.id != '782122602134896641') {
                 if (this_channel.members.size > 1) {
                     // Get baseline activity
                     let baseline_role, same_acitivities, diff_acitivities;
