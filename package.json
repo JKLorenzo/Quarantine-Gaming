@@ -18,7 +18,6 @@
   "homepage": "https://github.com/JKLorenzo/Quarantine-Gaming#readme",
   "dependencies": {
     "axios": "^0.21.0",
-    "cloudflare-bypasser": "0.0.3",
     "discord.js": "^12.4.1",
     "discord.js-commando": "github:discordjs/Commando",
     "firebase-admin": "^9.3.0",
@@ -27,7 +26,6 @@
     "jsdom": "^16.4.0",
     "node-fetch": "^2.6.1",
     "opusscript": "0.0.7",
-    "probe-image-size": "^6.0.0",
-    "puppeteer": "^5.5.0"
+    "probe-image-size": "^6.0.0"
   }
 }
