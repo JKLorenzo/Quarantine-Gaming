@@ -6,75 +6,83 @@ let is_pushing = false, to_push = new Array();
 
 // Internal Functions Region
 async function get() {
-    await fetch('https://www.reddit.com/r/FreeGameFindings/new/.json?limit=25&sort=new').then(data => data.json()).then(async data => {
-        for (let child of data.data.children) {
-            let item = child.data;
+    try {
+        await fetch('https://www.reddit.com/r/FreeGameFindings/new/.json?limit=25&sort=new').then(data => data.json()).then(async data => {
+            for (let child of data.data.children) {
+                let item = child.data;
 
-            let item_details = {
-                title: g_functions.htmlEntities(item.title),
-                url: item.url,
-                author: item.author,
-                description: g_functions.htmlEntities(item.selftext),
-                validity: item.upvote_ratio * 100,
-                score: item.score,
-                flair: item.link_flair_text,
-                permalink: `https://www.reddit.com${item.permalink}`,
-                createdAt: item.created_utc
-            };
+                let item_details = {
+                    title: g_functions.htmlEntities(item.title),
+                    url: item.url,
+                    author: item.author,
+                    description: g_functions.htmlEntities(item.selftext),
+                    validity: item.upvote_ratio * 100,
+                    score: item.score,
+                    flair: item.link_flair_text,
+                    permalink: `https://www.reddit.com${item.permalink}`,
+                    createdAt: item.created_utc
+                };
 
-            let today = new Date();
-            let published = new Date(item_details.createdAt * 1000);
-            let elapsedMinutes = Math.floor((today - published) / 60000);
+                let today = new Date();
+                let published = new Date(item_details.createdAt * 1000);
+                let elapsedMinutes = Math.floor((today - published) / 60000);
 
-            let this_notif = g_db.hasRecords(item_details);
-            if (this_notif) {
-                // Update
-                await g_channels.get().updates.messages.fetch(this_notif.id).then(async this_message => {
-                    if (item_details.description) {
-                        this_message.embeds[0].spliceFields(1, 3)
-                            .addFields([
-                                { name: 'Trust Factor', value: `${item_details.validity} %`, inline: true },
-                                { name: 'Margin', value: `${item_details.score}`, inline: true },
-                                { name: 'Details', value: `${item_details.description}` }
-                            ])
-                            .setTimestamp();
-                    } else {
-                        this_message.embeds[0].spliceFields(1, 2)
-                            .addFields([
-                                { name: 'Trust Factor', value: `${item_details.validity} %`, inline: true },
-                                { name: 'Margin', value: `${item_details.score}`, inline: true }
-                            ])
-                            .setTimestamp();
-                    }
-                    if (item_details.flair) {
-                        if (item_details.flair.toLowerCase().indexOf('comment') != -1 || item_details.flair.toLowerCase().indexOf('issue') != -1) {
-                            this_message.embeds[0].setDescription(`[${item_details.flair}](${item_details.permalink})`);
+                let this_notif = g_db.hasRecords(item_details);
+                if (this_notif) {
+                    // Update
+                    await g_channels.get().updates.messages.fetch(this_notif.id).then(async this_message => {
+                        if (item_details.description) {
+                            this_message.embeds[0].spliceFields(1, 3)
+                                .addFields([
+                                    { name: 'Trust Factor', value: `${item_details.validity} %`, inline: true },
+                                    { name: 'Margin', value: `${item_details.score}`, inline: true },
+                                    { name: 'Details', value: `${item_details.description}` }
+                                ])
+                                .setTimestamp();
                         } else {
-                            this_message.embeds[0].setDescription(item_details.flair);
+                            this_message.embeds[0].spliceFields(1, 2)
+                                .addFields([
+                                    { name: 'Trust Factor', value: `${item_details.validity} %`, inline: true },
+                                    { name: 'Margin', value: `${item_details.score}`, inline: true }
+                                ])
+                                .setTimestamp();
                         }
-                    }
-                    await this_message.edit({ content: this_message.content, embed: this_message.embeds[0] }).catch(error => {
-                        g_interface.on_error({
-                            name: 'get -> edit(this_message)',
-                            location: 'fgu.js',
-                            error: error
+                        if (item_details.flair) {
+                            if (item_details.flair.toLowerCase().indexOf('comment') != -1 || item_details.flair.toLowerCase().indexOf('issue') != -1) {
+                                this_message.embeds[0].setDescription(`[${item_details.flair}](${item_details.permalink})`);
+                            } else {
+                                this_message.embeds[0].setDescription(item_details.flair);
+                            }
+                        }
+                        await this_message.edit({ content: this_message.content, embed: this_message.embeds[0] }).catch(error => {
+                            g_interface.on_error({
+                                name: 'get -> edit(this_message)',
+                                location: 'fgu.js',
+                                error: error
+                            });
                         });
                     });
-                });
-            } else if (elapsedMinutes >= 30 && elapsedMinutes <= 120) {
-                // Push
-                g_fgu.push(item_details);
+                } else if (elapsedMinutes >= 30 && elapsedMinutes <= 120) {
+                    // Push
+                    g_fgu.push(item_details);
+                }
             }
-        }
-    }).catch(error => {
-        if (!error.indexOf('getaddrinfo EAI_AGAIN') !== -1) {
-            g_interface.on_error({
-                name: 'get -> fetch()',
-                location: 'fgu.js',
-                error: error
-            });
-        }
-    });
+        }).catch(error => {
+            if (!error.indexOf('getaddrinfo EAI_AGAIN') !== -1) {
+                g_interface.on_error({
+                    name: 'get -> fetch()',
+                    location: 'fgu.js',
+                    error: error
+                });
+            }
+        });
+    } catch (error) {
+        g_interface.on_error({
+            name: 'get',
+            location: 'fgu.js',
+            error: error
+        });
+    }
 }
 
 async function process_push() {
@@ -307,22 +315,39 @@ async function process_push() {
 }
 
 const push = function (notification) {
-    // Push this notification to the push array
-    to_push.push(notification);
-    // Check if there's no ongoing push process
-    if (!is_pushing) {
-        // Start the push process
-        process_push();
+    try {
+        // Push this notification to the push array
+        to_push.push(notification);
+        // Check if there's no ongoing push process
+        if (!is_pushing) {
+            // Start the push process
+            process_push();
+        }
+    } catch (error) {
+        g_interface.on_error({
+            name: 'push',
+            location: 'fgu.js',
+            error: error
+        });
     }
+
 }
 
 const begin = function () {
-    // First fetch
-    get();
-    // Fetchs every 30 mins
-    setInterval(() => {
+    try {
+        // First fetch
         get();
-    }, 1800000);
+        // Fetchs every 30 mins
+        setInterval(() => {
+            get();
+        }, 1800000);
+    } catch (error) {
+        g_interface.on_error({
+            name: 'begin',
+            location: 'fgu.js',
+            error: error
+        });
+    }
 }
 
 // Interface Module Functions

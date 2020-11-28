@@ -25,64 +25,98 @@ let notifications = new Array(), index = 0, blacklisted = new Array(), whitelist
 
 async function trimNotif() {
     while (notifications.length > 5) {
-        let expired_notif = notifications.shift();
-        await DB.notifications.doc(expired_notif.id).delete();
+        try {
+            let expired_notif = notifications.shift();
+            await DB.notifications.doc(expired_notif.id).delete();
+        } catch (error) {
+            g_interface.on_error({
+                name: 'trimNotif',
+                location: 'database.js',
+                error: error
+            });
+        }
+
     }
 }
 
 const init = async function () {
-    const o_notifs = await DB.notifications.orderBy('index').get();
-    for (let o_notif of o_notifs.docs) {
-        const data = o_notif.data();
-        const this_notif = {
-            id: o_notif.id,
-            title: data.title,
-            url: data.url,
-            author: data.author,
-            permalink: data.permalink
-        };
+    try {
+        const o_notifs = await DB.notifications.orderBy('index').get();
+        for (let o_notif of o_notifs.docs) {
+            const data = o_notif.data();
+            const this_notif = {
+                id: o_notif.id,
+                title: data.title,
+                url: data.url,
+                author: data.author,
+                permalink: data.permalink
+            };
 
-        if (data.index > index) index = data.index;
-        notifications.push(this_notif);
-    }
+            if (data.index > index) index = data.index;
+            notifications.push(this_notif);
+        }
 
-    await trimNotif();
+        await trimNotif();
 
-    const t_blacklisted = await DB.titles_blacklisted.get();
-    for (let title of t_blacklisted.docs) {
-        blacklisted.push(title.id);
-    }
+        const t_blacklisted = await DB.titles_blacklisted.get();
+        for (let title of t_blacklisted.docs) {
+            blacklisted.push(title.id);
+        }
 
-    const t_whitelisted = await DB.titles_whitelisted.get();
-    for (let title of t_whitelisted.docs) {
-        whitelisted.push(title.id);
+        const t_whitelisted = await DB.titles_whitelisted.get();
+        for (let title of t_whitelisted.docs) {
+            whitelisted.push(title.id);
+        }
+    } catch (error) {
+        g_interface.on_error({
+            name: 'init',
+            location: 'database.js',
+            error: error
+        });
     }
 }
 
 // Notification Region
 const pushNotification = async function (notification) {
-    notifications.push(notification);
+    try {
+        notifications.push(notification);
 
-    await DB.notifications.doc(notification.id).set({
-        title: notification.title,
-        url: notification.url,
-        author: notification.author,
-        permalink: notification.permalink,
-        index: ++index
-    });
+        await DB.notifications.doc(notification.id).set({
+            title: notification.title,
+            url: notification.url,
+            author: notification.author,
+            permalink: notification.permalink,
+            index: ++index
+        });
 
-    await trimNotif();
+        await trimNotif();
+    } catch (error) {
+        g_interface.on_error({
+            name: 'pushNotification',
+            location: 'database.js',
+            error: error
+        });
+    }
 }
 
 const hasRecords = function (notification) {
-    let similarity_threshold = 70;
-    for (let this_notification of notifications) {
-        let this_similarity = g_functions.string_similarity(this_notification.url, notification.url);
-        if (this_similarity >= similarity_threshold) {
-            return this_notification;
+    try {
+        let similarity_threshold = 70;
+        for (let this_notification of notifications) {
+            let this_similarity = g_functions.string_similarity(this_notification.url, notification.url);
+            if (this_similarity >= similarity_threshold) {
+                return this_notification;
+            }
         }
+        return false;
+    } catch (error) {
+        g_interface.on_error({
+            name: 'hasRecords',
+            location: 'database.js',
+            error: error
+        });
     }
-    return false;
+
 }
 
 // Titles Region
@@ -94,40 +128,56 @@ const titles = function () {
 }
 
 const pushBlacklisted = async function (name) {
-    name = name.toLowerCase();
-    let updated = false;
-    if (!blacklisted.includes(name)) {
-        blacklisted.push(name);
-        await DB.titles_blacklisted.doc(name).set({});
-        updated = true;
-    }
+    try {
+        name = name.toLowerCase();
+        let updated = false;
+        if (!blacklisted.includes(name)) {
+            blacklisted.push(name);
+            await DB.titles_blacklisted.doc(name).set({});
+            updated = true;
+        }
 
-    let index = whitelisted.indexOf(name);
-    if (index + 1) {
-        whitelisted.splice(index, 1);
-        await DB.titles_whitelisted.doc(name).delete();
-        updated = true;
+        let index = whitelisted.indexOf(name);
+        if (index + 1) {
+            whitelisted.splice(index, 1);
+            await DB.titles_whitelisted.doc(name).delete();
+            updated = true;
+        }
+        return updated;
+    } catch (error) {
+        g_interface.on_error({
+            name: 'pushBlacklisted',
+            location: 'database.js',
+            error: error
+        });
     }
-    return updated;
 }
 
 const pushWhitelisted = async function (name) {
-    name = name.toLowerCase();
-    let updated = false;
-    if (!whitelisted.includes(name)) {
-        whitelisted.push(name);
-        await DB.titles_whitelisted.doc(name).set({});
-        updated = true;
-    }
+    try {
+        name = name.toLowerCase();
+        let updated = false;
+        if (!whitelisted.includes(name)) {
+            whitelisted.push(name);
+            await DB.titles_whitelisted.doc(name).set({});
+            updated = true;
+        }
 
-    let index = blacklisted.indexOf(name);
-    if (index + 1) {
-        blacklisted.splice(index, 1);
-        await DB.titles_blacklisted.doc(name).delete();
-        updated = true;
-    }
+        let index = blacklisted.indexOf(name);
+        if (index + 1) {
+            blacklisted.splice(index, 1);
+            await DB.titles_blacklisted.doc(name).delete();
+            updated = true;
+        }
 
-    return updated;
+        return updated;
+    } catch (error) {
+        g_interface.on_error({
+            name: 'pushWhitelisted',
+            location: 'database.js',
+            error: error
+        });
+    }
 }
 
 // Database Module Functions

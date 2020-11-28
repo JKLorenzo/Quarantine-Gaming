@@ -52,32 +52,41 @@ client.registry
     .registerCommandsIn(path.join(__dirname, 'commands'));
 
 client.once('ready', async () => {
-    console.log('-------------{  Startup  }-------------');
+    try {
+        console.log('-------------{  Startup  }-------------');
 
-    // Initialize modules
-    roles.init();
-    await channels.init();
-    await db.init();
-    dynamic_roles.init();
-    dynamic_channels.init();
-    await functions.getInviter();
-    await roles.checkUnlisted();
-    fgu.begin()
+        // Initialize modules
+        roles.init();
+        await channels.init();
+        await db.init();
+        dynamic_roles.init();
+        dynamic_channels.init();
+        await functions.getInviter();
+        await roles.checkUnlisted();
+        fgu.begin()
 
-    // Clear Messages
-    message_manager.clear_dms();
-    message_manager.clear_channels();
+        // Clear Messages
+        message_manager.clear_dms();
+        message_manager.clear_channels();
 
-    functions.setActivity('!help');
+        functions.setActivity('!help');
 
-    if (process.env.STARTUP_REASON) {
-        let embed = new MessageEmbed();
-        embed.setColor('#ffff00');
-        embed.setAuthor('Quarantine Gaming', client.user.displayAvatarURL());
-        embed.setTitle('Startup Initiated');
-        embed.addField('Reason', process.env.STARTUP_REASON);
-        g_interface.log(embed);
+        if (process.env.STARTUP_REASON) {
+            let embed = new MessageEmbed();
+            embed.setColor('#ffff00');
+            embed.setAuthor('Quarantine Gaming', client.user.displayAvatarURL());
+            embed.setTitle('Startup Initiated');
+            embed.addField('Reason', process.env.STARTUP_REASON);
+            g_interface.log(embed);
+        }
+    } catch (error) {
+        g_interface.on_error({
+            name: 'ready',
+            location: 'index.js',
+            error: error
+        });
     }
+
 });
 
 client.on('message', message => message_manager.manage(message));
@@ -169,41 +178,49 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
 });
 
 client.on('guildMemberAdd', async member => {
-    let this_member = g_channels.get().guild.members.cache.get(member.id);
+    try {
+        let this_member = g_channels.get().guild.members.cache.get(member.id);
 
-    if (this_member && !this_member.user.bot) {
-        if (!this_member.roles.cache.find(role => role.id == '722699433225224233')) {
-            let dm = new Array();
-            dm.push(`Hi ${member.user.username}, and welcome to **Quarantine Gaming**!`);
-            dm.push('Please wait while our staff is processing your membership approval.');
-            await g_message_manager.dm_member(member, dm.join('\n'));
+        if (this_member && !this_member.user.bot) {
+            if (!this_member.roles.cache.find(role => role.id == '722699433225224233')) {
+                let dm = new Array();
+                dm.push(`Hi ${member.user.username}, and welcome to **Quarantine Gaming**!`);
+                dm.push('Please wait while our staff is processing your membership approval.');
+                await g_message_manager.dm_member(member, dm.join('\n'));
 
-            let today = new Date();
-            let diffMs = (today - this_member.user.createdAt);
-            let diffDays = Math.floor(diffMs / 86400000)
-            let diffHrs = Math.floor((diffMs % 86400000) / 3600000)
-            let diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000);
-            let created_on = diffDays + " days " + diffHrs + " hours " + diffMins + " minutes";
-            let inviters = await g_functions.getInviter();
+                let today = new Date();
+                let diffMs = (today - this_member.user.createdAt);
+                let diffDays = Math.floor(diffMs / 86400000)
+                let diffHrs = Math.floor((diffMs % 86400000) / 3600000)
+                let diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000);
+                let created_on = diffDays + " days " + diffHrs + " hours " + diffMins + " minutes";
+                let inviters = await g_functions.getInviter();
 
-            let embed = new MessageEmbed
-            embed.setAuthor('Quarantine Gaming: Member Approval');
-            embed.setTitle('Member Details');
-            embed.setThumbnail(this_member.user.displayAvatarURL());
-            embed.addFields([
-                { name: 'User:', value: this_member },
-                { name: 'ID:', value: this_member.id },
-                { name: 'Account Created:', value: created_on },
-                { name: 'Inviter:', value: inviters.length > 0 ? inviters.map(this_invite => this_invite.inviter).join(' or ') : 'Not Traced.' },
-                { name: 'Moderation:', value: '✅ - Approve     ❌ - Kick     ⛔ - Ban' }
-            ]);
-            embed.setColor('#25c059');
-            await g_channels.get().staff.send({ content: '<@&749235255944413234> action is required.', embed: embed }).then(async this_message => {
-                await this_message.react('✅');
-                await this_message.react('❌');
-                await this_message.react('⛔');
-            });
+                let embed = new MessageEmbed
+                embed.setAuthor('Quarantine Gaming: Member Approval');
+                embed.setTitle('Member Details');
+                embed.setThumbnail(this_member.user.displayAvatarURL());
+                embed.addFields([
+                    { name: 'User:', value: this_member },
+                    { name: 'ID:', value: this_member.id },
+                    { name: 'Account Created:', value: created_on },
+                    { name: 'Inviter:', value: inviters.length > 0 ? inviters.map(this_invite => this_invite.inviter).join(' or ') : 'Not Traced.' },
+                    { name: 'Moderation:', value: '✅ - Approve     ❌ - Kick     ⛔ - Ban' }
+                ]);
+                embed.setColor('#25c059');
+                await g_channels.get().staff.send({ content: '<@&749235255944413234> action is required.', embed: embed }).then(async this_message => {
+                    await this_message.react('✅');
+                    await this_message.react('❌');
+                    await this_message.react('⛔');
+                });
+            }
         }
+    } catch (error) {
+        g_interface.on_error({
+            name: 'guildMemberAdd',
+            location: 'index.js',
+            error: error
+        });
     }
 });
 

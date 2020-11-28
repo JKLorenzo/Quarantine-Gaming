@@ -1,143 +1,175 @@
 const { MessageEmbed } = require('discord.js');
 
 const manage = async function (message) {
-    // Help
-    if (message.channel && message.content.toLowerCase() == '!help') {
-        message.channel.send(`Visit <https://quarantinegamingdiscord.wordpress.com/> to learn more.`).catch(() => { });
-    }
-
-    // Game Invites Channel Blocking
-    if (message.channel && message.channel.id == g_channels.get().gaming.id && (message.embeds.length == 0 || (message.embeds.length > 0 && message.embeds[0].author.name != 'Quarantine Gaming: Game Coordinator'))) {
-        dm_member(g_channels.get().guild.member(message.author), `Hello there! You can't send any messages in ${message.channel} channel. To invite players, do *!play* command in the ${g_channels.get().general} text channel.`);
-        message.delete({ timeout: 250 }).catch(() => { });
-    }
-
-    // Following
-    if (message.channel && message.channel.id == g_channels.get().following.id) {
-        let sender = message.author.username.split('#');
-        let server = sender[0].trim();
-        let channel = sender[1];
-
-        let embed = new MessageEmbed()
-            .setAuthor('Quarantine Gaming: Official Game Updates')
-            .setTitle(server)
-            .setThumbnail(message.author.displayAvatarURL())
-            .setDescription(message.content.split(' ').map(word => {
-                if (word.startsWith('<#')) {
-                    return '*External Channel*';
-                } else if (word.startsWith('<@&')) {
-                    return '*External Role*';
-                } else if (word.startsWith('<@')) {
-                    return '*External User*';
-                }
-                return word;
-            }).join(' '))
-            .setFooter(`On ${channel}`)
-            .setColor(`#00ffff`);
-
-        // Filter out retweets and replies
-        if (!message.content.startsWith('RT @') && !message.content.startsWith('@')) {
-            g_interface.updates({ embed: embed }).catch(error => {
-                g_interface.on_error({
-                    name: 'manage -> .updates()',
-                    location: 'message_manager.js',
-                    error: error
-                });
-            });
+    try {
+        // Help
+        if (message.channel && message.content.toLowerCase() == '!help') {
+            message.channel.send(`Visit <https://quarantinegamingdiscord.wordpress.com/> to learn more.`).catch(() => { });
         }
-    }
 
-    // GitHub
-    if (message.channel && message.channel.id == g_channels.get().log.id) {
-        if (message.embeds.length > 0 && message.embeds[0].title && message.embeds[0].title.split('commit').length > 1) {
-            const changes = message.embeds[0].description.split('\n').map(commit => {
-                let description = commit.split(' ').slice(1);
-                description.splice(description.length - 2, 2)
-                return `  • ${description.join(' ')}`;
-            }).join('\n');
-
-            g_channels.get().staff.send(`**Codebase Updated:**\n${changes}\n\nView Changes: <${message.embeds[0].url}>`).catch(error => {
-                g_interface.on_error({
-                    name: 'manage -> staff.send()',
-                    location: 'message_manager.js',
-                    error: error
-                });
-            });
+        // Game Invites Channel Blocking
+        if (message.channel && message.channel.id == g_channels.get().gaming.id && (message.embeds.length == 0 || (message.embeds.length > 0 && message.embeds[0].author.name != 'Quarantine Gaming: Game Coordinator'))) {
+            dm_member(g_channels.get().guild.member(message.author), `Hello there! You can't send any messages in ${message.channel} channel. To invite players, do *!play* command in the ${g_channels.get().general} text channel.`);
+            message.delete({ timeout: 250 }).catch(() => { });
         }
-    }
 
-    // DM
-    if (message.guild == null) {
-        let this_member = g_channels.get().guild.member(message.author);
-        if (this_member && !this_member.user.bot) {
+        // Following
+        if (message.channel && message.channel.id == g_channels.get().following.id) {
+            let sender = message.author.username.split('#');
+            let server = sender[0].trim();
+            let channel = sender[1];
+
             let embed = new MessageEmbed()
-                .setAuthor('Quarantine Gaming: Direct Message Handler')
-                .setTitle(`${this_member.displayName} (${this_member.user.tag})`)
+                .setAuthor('Quarantine Gaming: Official Game Updates')
+                .setTitle(server)
                 .setThumbnail(message.author.displayAvatarURL())
-                .addField('Sender:', this_member)
-                .addField('Message:', message.content)
-                .setFooter(`To reply, do: !message dm ${this_member.user.id} <message>`)
-                .setColor(`#00ff6f`);
+                .setDescription(message.content.split(' ').map(word => {
+                    if (word.startsWith('<#')) {
+                        return '*External Channel*';
+                    } else if (word.startsWith('<@&')) {
+                        return '*External Role*';
+                    } else if (word.startsWith('<@')) {
+                        return '*External User*';
+                    }
+                    return word;
+                }).join(' '))
+                .setFooter(`On ${channel}`)
+                .setColor(`#00ffff`);
 
-            g_interface.dm({ embed: embed }).catch(error => {
-                g_interface.on_error({
-                    name: 'manage -> .dm(embed)',
-                    location: 'message_manager.js',
-                    error: error
+            // Filter out retweets and replies
+            if (!message.content.startsWith('RT @') && !message.content.startsWith('@')) {
+                g_interface.updates({ embed: embed }).catch(error => {
+                    g_interface.on_error({
+                        name: 'manage -> .updates()',
+                        location: 'message_manager.js',
+                        error: error
+                    });
                 });
-            });
+            }
         }
+
+        // GitHub
+        if (message.channel && message.channel.id == g_channels.get().log.id) {
+            if (message.embeds.length > 0 && message.embeds[0].title && message.embeds[0].title.split('commit').length > 1) {
+                const changes = message.embeds[0].description.split('\n').map(commit => {
+                    let description = commit.split(' ').slice(1);
+                    description.splice(description.length - 2, 2)
+                    return `  • ${description.join(' ')}`;
+                }).join('\n');
+
+                g_channels.get().staff.send(`**Codebase Updated:**\n${changes}\n\nView Changes: <${message.embeds[0].url}>`).catch(error => {
+                    g_interface.on_error({
+                        name: 'manage -> staff.send()',
+                        location: 'message_manager.js',
+                        error: error
+                    });
+                });
+            }
+        }
+
+        // DM
+        if (message.guild == null) {
+            let this_member = g_channels.get().guild.member(message.author);
+            if (this_member && !this_member.user.bot) {
+                let embed = new MessageEmbed()
+                    .setAuthor('Quarantine Gaming: Direct Message Handler')
+                    .setTitle(`${this_member.displayName} (${this_member.user.tag})`)
+                    .setThumbnail(message.author.displayAvatarURL())
+                    .addField('Sender:', this_member)
+                    .addField('Message:', message.content)
+                    .setFooter(`To reply, do: !message dm ${this_member.user.id} <message>`)
+                    .setColor(`#00ff6f`);
+
+                g_interface.dm({ embed: embed }).catch(error => {
+                    g_interface.on_error({
+                        name: 'manage -> .dm(embed)',
+                        location: 'message_manager.js',
+                        error: error
+                    });
+                });
+            }
+        }
+    } catch (error) {
+        g_interface.on_error({
+            name: 'manage',
+            location: 'message_manager.js',
+            error: error
+        });
     }
 }
 
 const dm_member = async function (member, content) {
-    if (member.user.bot) return;
-    await member.createDM().then(async dm_channel => {
-        await dm_channel.send(content).then(message => {
-            message.delete({ timeout: 3600000 }).catch(() => { });
-        }).catch(error => {
-            g_interface.on_error({
-                name: `dm -> [${member}].send(${content})`,
-                location: 'interface.js',
-                error: error
-            });
-        });
-    }).catch(error => {
-        g_interface.on_error({
-            name: `dm -> .createDM(${member})`,
-            location: 'interface.js',
-            error: error
-        });
-    });
-}
-
-const clear_dms = async function () {
-    for (let member of g_channels.get().guild.members.cache.array()) {
-        if (!member.user.bot) {
-            await member.createDM().then(async dm_channel => {
-                await dm_channel.messages.fetch().then(async messages => {
-                    for (let message of messages) {
-                        if (message[1].author.bot) await message[1].delete({ timeout: 900000 }).catch(() => { });; // Delete after 15 mins
-                    }
-                }).catch(() => { });
+    try {
+        if (member.user.bot) return;
+        await member.createDM().then(async dm_channel => {
+            await dm_channel.send(content).then(message => {
+                message.delete({ timeout: 3600000 }).catch(() => { });
             }).catch(error => {
                 g_interface.on_error({
-                    name: 'clear_dms -> .createDM()',
+                    name: `dm -> [${member}].send(${content})`,
                     location: 'interface.js',
                     error: error
                 });
             });
+        }).catch(error => {
+            g_interface.on_error({
+                name: `dm -> .createDM(${member})`,
+                location: 'interface.js',
+                error: error
+            });
+        });
+    } catch (error) {
+        g_interface.on_error({
+            name: 'dm_member',
+            location: 'message_manager.js',
+            error: error
+        });
+    }
+}
+
+const clear_dms = async function () {
+    try {
+        for (let member of g_channels.get().guild.members.cache.array()) {
+            if (!member.user.bot) {
+                await member.createDM().then(async dm_channel => {
+                    await dm_channel.messages.fetch().then(async messages => {
+                        for (let message of messages) {
+                            if (message[1].author.bot) await message[1].delete({ timeout: 900000 }).catch(() => { });; // Delete after 15 mins
+                        }
+                    }).catch(() => { });
+                }).catch(error => {
+                    g_interface.on_error({
+                        name: 'clear_dms -> .createDM()',
+                        location: 'interface.js',
+                        error: error
+                    });
+                });
+            }
         }
+    } catch (error) {
+        g_interface.on_error({
+            name: 'clear_dms',
+            location: 'message_manager.js',
+            error: error
+        });
     }
 }
 
 const clear_channels = async function () {
-    const channels_To_clear = [g_channels.get().gaming, g_channels.get().testing];
-    for (let channel of channels_To_clear) {
-        await channel.messages.fetch().then(async messages => {
-            for (let message of messages) {
-                await message[1].delete({ timeout: 900000 }).catch(() => { }); // Delete after 15 mins
-            }
+    try {
+        const channels_To_clear = [g_channels.get().gaming, g_channels.get().testing];
+        for (let channel of channels_To_clear) {
+            await channel.messages.fetch().then(async messages => {
+                for (let message of messages) {
+                    await message[1].delete({ timeout: 900000 }).catch(() => { }); // Delete after 15 mins
+                }
+            });
+        }
+    } catch (error) {
+        g_interface.on_error({
+            name: 'clear_channels',
+            location: 'message_manager.js',
+            error: error
         });
     }
 }
