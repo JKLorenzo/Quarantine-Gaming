@@ -85,7 +85,6 @@ async function beginDedicate() {
         let this_data = dedicate_queue.shift();
         let this_name = this_data.name;
         let this_channel = this_data.member.voice.channel;
-        let instant = this_data.instant;
 
         if (this_channel) {
             if (this_channel.parent == g_channels.get().dedicated) {
@@ -100,7 +99,7 @@ async function beginDedicate() {
                 // Set info
                 let embed = new MessageEmbed();
                 embed.setAuthor('Quarantine Gaming: Dedicated Channels');
-                embed.setTitle(`Voice and Text Channels ${instant ? 'by' : 'for'} ${this_name}`);
+                embed.setTitle(`Voice and Text Channels for ${this_name}`);
                 let channel_desc = new Array();
                 channel_desc.push(`• Only members who are in this voice channel can view this text channel.`);
                 channel_desc.push(`• You can't view other dedicated channels once you're connected to one.`);
@@ -121,16 +120,14 @@ async function beginDedicate() {
                     });
                 });
             } else {
-                if (!instant) {
-                    // Notify voice channel
-                    await g_speech.say(`Transferring to ${this_name} dedicated channel. Please wait.`, this_channel).catch(error => {
-                        g_interface.on_error({
-                            name: 'beginDedicate -> .say()',
-                            location: 'channels.js',
-                            error: error
-                        });
+                // Notify voice channel
+                await g_speech.say(`Transferring to ${this_name} dedicated channel. Please wait.`, this_channel).catch(error => {
+                    g_interface.on_error({
+                        name: 'beginDedicate -> .say()',
+                        location: 'channels.js',
+                        error: error
                     });
-                }
+                });
 
                 // Create voice channel
                 await guild.channels.create(this_name, {
@@ -229,7 +226,7 @@ async function beginDedicate() {
                             // Set info
                             let embed = new MessageEmbed();
                             embed.setAuthor('Quarantine Gaming: Dedicated Channels');
-                            embed.setTitle(`Voice and Text Channels ${instant ? 'by' : 'for'} ${this_name}`);
+                            embed.setTitle(`Voice and Text Channels for ${this_name}`);
                             let channel_desc = new Array();
                             channel_desc.push(`• Only members who are in this voice channel can view this text channel.`);
                             channel_desc.push(`• You can't view other dedicated channels once you're connected to one.`);
@@ -250,18 +247,28 @@ async function beginDedicate() {
                                 });
                             });
 
-                            if (!instant) {
-                                // Sort members
-                                let streamers = [], members = [];
-                                for (let this_member of this_channel.members.array()) {
-                                    if (this_member.roles.cache.find(role => role == g_roles.get().streaming)) {
-                                        streamers.push(this_member);
-                                    } else {
-                                        members.push(this_member);
-                                    }
+                            // Sort members
+                            let streamers = [], members = [];
+                            for (let this_member of this_channel.members.array()) {
+                                if (this_member.roles.cache.find(role => role == g_roles.get().streaming)) {
+                                    streamers.push(this_member);
+                                } else {
+                                    members.push(this_member);
                                 }
-                                // Transfer streamers
-                                for (let this_member of streamers) {
+                            }
+                            // Transfer streamers
+                            for (let this_member of streamers) {
+                                await this_member.voice.setChannel(voice_channel).catch(error => {
+                                    g_interface.on_error({
+                                        name: 'beginDedicate -> .setChannel(voice_channel)',
+                                        location: 'channels.js',
+                                        error: error
+                                    });
+                                });
+                            }
+                            // Transfer members
+                            for (let this_member of members) {
+                                if (this_member.user.id != g_client.user.id) {
                                     await this_member.voice.setChannel(voice_channel).catch(error => {
                                         g_interface.on_error({
                                             name: 'beginDedicate -> .setChannel(voice_channel)',
@@ -270,27 +277,6 @@ async function beginDedicate() {
                                         });
                                     });
                                 }
-                                // Transfer members
-                                for (let this_member of members) {
-                                    if (this_member.user.id != g_client.user.id) {
-                                        await this_member.voice.setChannel(voice_channel).catch(error => {
-                                            g_interface.on_error({
-                                                name: 'beginDedicate -> .setChannel(voice_channel)',
-                                                location: 'channels.js',
-                                                error: error
-                                            });
-                                        });
-                                    }
-                                }
-                            } else {
-                                // Transfer user
-                                await this_data.member.voice.setChannel(voice_channel).catch(error => {
-                                    g_interface.on_error({
-                                        name: 'beginDedicate -> .setChannel(voice_channel)',
-                                        location: 'channels.js',
-                                        error: error
-                                    });
-                                });
                             }
                         }).catch(error => {
                             g_interface.on_error({
@@ -319,11 +305,10 @@ async function beginDedicate() {
     is_dedicating = false;
 }
 
-const dedicate = function (member, name, instant) {
+const dedicate = function (member, name) {
     dedicate_queue.push({
         member: member,
-        name: name,
-        instant: instant
+        name: name
     });
     if (!is_dedicating) beginDedicate();
 }
