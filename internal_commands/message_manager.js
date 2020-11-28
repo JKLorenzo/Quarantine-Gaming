@@ -127,34 +127,6 @@ const dm_member = async function (member, content) {
     }
 }
 
-const clear_dms = async function () {
-    try {
-        for (let member of g_channels.get().guild.members.cache.array()) {
-            if (!member.user.bot) {
-                await member.createDM().then(async dm_channel => {
-                    await dm_channel.messages.fetch().then(async messages => {
-                        for (let message of messages) {
-                            if (message[1].author.bot) await message[1].delete({ timeout: 900000 }).catch(() => { });; // Delete after 15 mins
-                        }
-                    }).catch(() => { });
-                }).catch(error => {
-                    g_interface.on_error({
-                        name: 'clear_dms -> .createDM()',
-                        location: 'interface.js',
-                        error: error
-                    });
-                });
-            }
-        }
-    } catch (error) {
-        g_interface.on_error({
-            name: 'clear_dms',
-            location: 'message_manager.js',
-            error: error
-        });
-    }
-}
-
 const clear_channels = async function () {
     try {
         const channels_To_clear = [g_channels.get().gaming, g_channels.get().testing];
@@ -553,6 +525,5 @@ module.exports = {
     dm_member,
     reactionAdd,
     reactionRemove,
-    clear_channels,
-    clear_dms
+    clear_channels
 }

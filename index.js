@@ -66,7 +66,6 @@ client.once('ready', async () => {
         fgu.begin()
 
         // Clear Messages
-        message_manager.clear_dms();
         message_manager.clear_channels();
 
         functions.setActivity('!help');
@@ -86,7 +85,6 @@ client.once('ready', async () => {
             error: error
         });
     }
-
 });
 
 client.on('message', message => message_manager.manage(message));

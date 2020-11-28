@@ -143,7 +143,13 @@ async function updateMember() {
                                     });
                                 } else {
                                     // Bring to Top
-                                    await this_play_role.setPosition(ref_play_roles.position - 1).catch(() => { });
+                                    await this_play_role.setPosition(ref_play_roles.position - 1).catch(error => {
+                                        g_interface.on_error({
+                                            name: 'updateMember -> .setPosition(this_play_role)',
+                                            location: 'dynamic_roles.js',
+                                            error: error
+                                        });
+                                    });
                                 }
 
                                 // Assign member this play role
@@ -289,7 +295,13 @@ const init = async function () {
                                 });
                             } else {
                                 // Bring to Top
-                                await this_play_role.setPosition(ref_play_roles.position - 1).catch(() => { });
+                                await this_play_role.setPosition(ref_play_roles.position - 1).catch(error => {
+                                    g_interface.on_error({
+                                        name: 'init -> .setPosition(this_play_role)',
+                                        location: 'dynamic_roles.js',
+                                        error: error
+                                    });
+                                });
                             }
 
                             // Assign member this play role
