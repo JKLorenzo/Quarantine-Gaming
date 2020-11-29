@@ -129,9 +129,7 @@ async function beginDedicate() {
                     channel_desc.push('Note: <@&749235255944413234> and <@&700397445506531358> can interact with these channels.');
                     embed.setDescription(channel_desc.join('\n\n'));
                     embed.setColor('#7b00ff');
-                    await text_channel.send(embed).then(async message => {
-                        await message.pin();
-                    }).catch(error => {
+                    await text_channel.send(embed).catch(error => {
                         g_interface.on_error({
                             name: 'beginDedicate -> .send(embed)',
                             location: 'channels.js',
@@ -256,9 +254,7 @@ async function beginDedicate() {
                                 channel_desc.push('Note: <@&749235255944413234> and <@&700397445506531358> can interact with these channels.');
                                 embed.setDescription(channel_desc.join('\n\n'));
                                 embed.setColor('#7b00ff');
-                                await text_channel.send(embed).then(message => {
-                                    message.pin();
-                                }).catch(error => {
+                                await text_channel.send(embed).catch(error => {
                                     g_interface.on_error({
                                         name: 'beginDedicate -> .send(embed)',
                                         location: 'channels.js',
