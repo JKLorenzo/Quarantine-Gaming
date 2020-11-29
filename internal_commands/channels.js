@@ -102,7 +102,7 @@ async function beginDedicate() {
     while (dedicate_queue.length > 0) {
         try {
             let this_data = dedicate_queue.shift();
-            let this_name = this_data.name;
+            let this_name = '🔰' + this_data.name;
             let this_channel = this_data.member.voice.channel;
 
             if (this_channel) {
@@ -140,7 +140,7 @@ async function beginDedicate() {
                     });
                 } else {
                     // Notify voice channel
-                    await g_speech.say(`Transferring to ${this_name} dedicated channel. Please wait.`, this_channel).catch(error => {
+                    await g_speech.say(`Transferring to ${this_name.substr(2)} dedicated channel. Please wait.`, this_channel).catch(error => {
                         g_interface.on_error({
                             name: 'beginDedicate -> .say()',
                             location: 'channels.js',

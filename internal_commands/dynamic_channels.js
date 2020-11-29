@@ -23,7 +23,7 @@ function updateGuild() {
                                         diff_acitivities++;
                                     }
                                 }
-                                if (same_acitivities > 1 && same_acitivities > diff_acitivities && !this_role.name.substring(5).startsWith(this_channel.name)) {
+                                if (same_acitivities > 1 && same_acitivities > diff_acitivities && !this_role.name.substring(5).startsWith(this_channel.name.substring(2))) {
                                     baseline_role = this_role;
                                     g_channels.dedicate(this_member, this_role.name.substring(5));
                                 }
