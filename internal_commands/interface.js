@@ -21,7 +21,6 @@ const announce = function (message) {
             error: error
         });
     }
-
 }
 
 const log = async function (message) {

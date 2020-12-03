@@ -1,6 +1,5 @@
 const googleTTS = require('google-tts-api');
 const OpusScript = require('opusscript'); // for TTS
-const { MessageEmbed } = require('discord.js');
 
 let is_saying = false;
 
