@@ -114,7 +114,6 @@ const string_to_int = function (string) {
             error: error
         });
     }
-
 }
 
 const string_alphanumeric = function (string) {

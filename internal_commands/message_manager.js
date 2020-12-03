@@ -13,41 +13,6 @@ const manage = async function (message) {
             message.delete({ timeout: 250 }).catch(() => { });
         }
 
-        // Following
-        if (message.channel && message.channel.id == g_channels.get().following.id) {
-            let sender = message.author.username.split('#');
-            let server = sender[0].trim();
-            let channel = sender[1];
-
-            let embed = new MessageEmbed()
-                .setAuthor('Quarantine Gaming: Official Game Updates')
-                .setTitle(server)
-                .setThumbnail(message.author.displayAvatarURL())
-                .setDescription(message.content.split(' ').map(word => {
-                    if (word.startsWith('<#')) {
-                        return '*External Channel*';
-                    } else if (word.startsWith('<@&')) {
-                        return '*External Role*';
-                    } else if (word.startsWith('<@')) {
-                        return '*External User*';
-                    }
-                    return word;
-                }).join(' '))
-                .setFooter(`On ${channel}`)
-                .setColor(`#00ffff`);
-
-            // Filter out retweets and replies
-            if (!message.content.startsWith('RT @') && !message.content.startsWith('@')) {
-                g_interface.updates({ embed: embed }).catch(error => {
-                    g_interface.on_error({
-                        name: 'manage -> .updates()',
-                        location: 'message_manager.js',
-                        error: error
-                    });
-                });
-            }
-        }
-
         // DM
         if (message.guild == null) {
             let this_member = g_channels.get().guild.member(message.author);
