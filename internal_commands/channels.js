@@ -68,7 +68,6 @@ const init = async function () {
             error: error
         });
     }
-
 }
 
 const get = function () {
@@ -147,7 +146,7 @@ async function beginDedicate() {
                     });
 
                     // Create voice channel
-                    await guild.channels.create(this_name, {
+                    const voice_channel = await guild.channels.create(this_name, {
                         type: 'voice',
                         parent: g_channels.get().dedicated.id,
                         position: 1,
@@ -169,144 +168,6 @@ async function beginDedicate() {
                                 allow: ["CONNECT"]
                             }
                         ]
-                    }).then(async voice_channel => {
-                        // Set bitrate
-                        voice_channel.setBitrate(128000).catch(error => {
-                            g_interface.on_error({
-                                name: 'beginDedicate -> .setBitrate()',
-                                location: 'channels.js',
-                                error: error
-                            });
-                        });
-                        // Create text role
-                        await guild.roles.create({
-                            data: {
-                                name: `Text ${voice_channel.id}`
-                            }
-                        }).then(async function (text_role) {
-                            // Create text channel
-                            await guild.channels.create(this_name, {
-                                type: 'text',
-                                parent: g_channels.get().dedicated.id,
-                                position: 1,
-                                permissionOverwrites: [
-                                    {
-                                        id: g_roles.get().everyone.id,
-                                        deny: ["CREATE_INSTANT_INVITE", "MANAGE_CHANNELS", "MANAGE_ROLES", "MANAGE_WEBHOOKS", "VIEW_CHANNEL", "MENTION_EVERYONE", "MANAGE_MESSAGES", 'MUTE_MEMBERS', 'DEAFEN_MEMBERS', 'MOVE_MEMBERS', 'PRIORITY_SPEAKER']
-                                    },
-                                    {
-                                        id: g_roles.get().music.id,
-                                        allow: ["VIEW_CHANNEL"]
-                                    },
-                                    {
-                                        id: text_role.id,
-                                        allow: ["VIEW_CHANNEL", "SEND_TTS_MESSAGES", "EMBED_LINKS", "ATTACH_FILES"]
-                                    }
-                                ]
-                            }).then(async text_channel => {
-                                // Create hoisted dedicated role
-                                await guild.roles.create({
-                                    data: {
-                                        name: `Team ${this_name}`,
-                                        color: '0x00a5ff',
-                                        position: g_roles.get().dedicated.position,
-                                        hoist: true
-                                    }
-                                }).then(async hoisted_role => {
-                                    // Set link
-                                    await text_channel.setTopic(`${voice_channel.id} ${text_role.id} ${hoisted_role.id}`).catch(error => {
-                                        g_interface.on_error({
-                                            name: 'updateGuild -> .setTopic(text_channel)',
-                                            location: 'channels.js',
-                                            error: error
-                                        });
-                                    });
-                                }).catch(error => {
-                                    g_interface.on_error({
-                                        name: 'updateGuild -> .updateOverwrite(voice_channel)',
-                                        location: 'channels.js',
-                                        error: error
-                                    });
-                                });
-
-                                // Update voice channel
-                                await voice_channel.updateOverwrite(text_role, {
-                                    VIEW_CHANNEL: true
-                                }).catch(error => {
-                                    g_interface.on_error({
-                                        name: 'updateGuild -> .updateOverwrite(voice_channel)',
-                                        location: 'channels.js',
-                                        error: error
-                                    });
-                                });
-
-                                // Set info
-                                let embed = new MessageEmbed();
-                                embed.setAuthor('Quarantine Gaming: Dedicated Channels');
-                                embed.setTitle(`Voice and Text Channels for ${this_name}`);
-                                let channel_desc = new Array();
-                                channel_desc.push(`• Only members who are in this voice channel can view this text channel.`);
-                                channel_desc.push(`• You can't view other dedicated channels once you're connected to one.`);
-                                channel_desc.push(`• ${text_channel} voice and text channels will automatically be deleted once everyone is disconnected from these channels.`);
-                                channel_desc.push(`• You can lock this channel by doing "!dedicate lock", and you can do "!dedicate unlock" to unlock it.`);
-                                channel_desc.push(`• You can transfer anyone from another voice channel to this voice channel by doing "!transfer <@member>".\n\u200b\u200bEx: "!transfer <@749563476707377222>"`);
-                                channel_desc.push(`• You can also transfer multiple users at once.\n\u200b\u200bEx: "!transfer <@749563476707377222> <@749563476707377222> <@749563476707377222>"`);
-                                channel_desc.push('Note: <@&749235255944413234> and <@&700397445506531358> can interact with these channels.');
-                                embed.setDescription(channel_desc.join('\n\n'));
-                                embed.setColor('#7b00ff');
-                                await text_channel.send(embed).catch(error => {
-                                    g_interface.on_error({
-                                        name: 'beginDedicate -> .send(embed)',
-                                        location: 'channels.js',
-                                        error: error
-                                    });
-                                });
-
-                                // Sort members
-                                let streamers = [], members = [];
-                                for (let this_member of this_channel.members.array()) {
-                                    if (this_member.roles.cache.find(role => role == g_roles.get().streaming)) {
-                                        streamers.push(this_member);
-                                    } else {
-                                        members.push(this_member);
-                                    }
-                                }
-                                // Transfer streamers
-                                for (let this_member of streamers) {
-                                    await this_member.voice.setChannel(voice_channel).catch(error => {
-                                        g_interface.on_error({
-                                            name: 'beginDedicate -> .setChannel(voice_channel)',
-                                            location: 'channels.js',
-                                            error: error
-                                        });
-                                    });
-                                }
-                                // Transfer members
-                                for (let this_member of members) {
-                                    if (this_member.user.id != g_client.user.id) {
-                                        await this_member.voice.setChannel(voice_channel).catch(error => {
-                                            g_interface.on_error({
-                                                name: 'beginDedicate -> .setChannel(voice_channel)',
-                                                location: 'channels.js',
-                                                error: error
-                                            });
-                                        });
-                                    }
-                                }
-                            }).catch(error => {
-                                g_interface.on_error({
-                                    name: 'beginDedicate -> .create(text_channel)',
-                                    location: 'channels.js',
-                                    error: error
-                                });
-                            });
-                        }).catch(error => {
-                            g_interface.on_error({
-                                name: 'beginDedicate -> .create(text_role)',
-                                location: 'channels.js',
-                                error: error
-                            });
-                        });
                     }).catch(error => {
                         g_interface.on_error({
                             name: 'beginDedicate -> .create(voice_channel)',
@@ -314,6 +175,145 @@ async function beginDedicate() {
                             error: error
                         });
                     });
+
+                    // Set bitrate
+                    voice_channel.setBitrate(128000).catch(error => {
+                        g_interface.on_error({
+                            name: 'beginDedicate -> .setBitrate()',
+                            location: 'channels.js',
+                            error: error
+                        });
+                    });
+
+                    // Create text role
+                    const text_role = await guild.roles.create({
+                        data: {
+                            name: `Text ${voice_channel.id}`
+                        }
+                    }).catch(error => {
+                        g_interface.on_error({
+                            name: 'beginDedicate -> .create(text_role)',
+                            location: 'channels.js',
+                            error: error
+                        });
+                    });
+
+                    // Create text channel
+                    const text_channel = await guild.channels.create(this_name, {
+                        type: 'text',
+                        parent: g_channels.get().dedicated.id,
+                        position: 1,
+                        permissionOverwrites: [
+                            {
+                                id: g_roles.get().everyone.id,
+                                deny: ["CREATE_INSTANT_INVITE", "MANAGE_CHANNELS", "MANAGE_ROLES", "MANAGE_WEBHOOKS", "VIEW_CHANNEL", "MENTION_EVERYONE", "MANAGE_MESSAGES", 'MUTE_MEMBERS', 'DEAFEN_MEMBERS', 'MOVE_MEMBERS', 'PRIORITY_SPEAKER']
+                            },
+                            {
+                                id: g_roles.get().music.id,
+                                allow: ["VIEW_CHANNEL"]
+                            },
+                            {
+                                id: text_role.id,
+                                allow: ["VIEW_CHANNEL", "SEND_TTS_MESSAGES", "EMBED_LINKS", "ATTACH_FILES"]
+                            }
+                        ]
+                    }).catch(error => {
+                        g_interface.on_error({
+                            name: 'beginDedicate -> .create(text_channel)',
+                            location: 'channels.js',
+                            error: error
+                        });
+                    });
+
+                    // Create hoisted dedicated role
+                    const hoisted_role = await guild.roles.create({
+                        data: {
+                            name: `Team ${this_name}`,
+                            color: '0x00a5ff',
+                            position: g_roles.get().dedicated.position,
+                            hoist: true
+                        }
+                    }).catch(error => {
+                        g_interface.on_error({
+                            name: 'updateGuild -> .updateOverwrite(voice_channel)',
+                            location: 'channels.js',
+                            error: error
+                        });
+                    });
+
+                    // Set link
+                    await text_channel.setTopic(`${voice_channel.id} ${text_role.id} ${hoisted_role.id}`).catch(error => {
+                        g_interface.on_error({
+                            name: 'updateGuild -> .setTopic(text_channel)',
+                            location: 'channels.js',
+                            error: error
+                        });
+                    });
+
+                    // Update voice channel
+                    await voice_channel.updateOverwrite(text_role, {
+                        VIEW_CHANNEL: true
+                    }).catch(error => {
+                        g_interface.on_error({
+                            name: 'updateGuild -> .updateOverwrite(voice_channel)',
+                            location: 'channels.js',
+                            error: error
+                        });
+                    });
+
+                    // Set info
+                    let embed = new MessageEmbed();
+                    embed.setAuthor('Quarantine Gaming: Dedicated Channels');
+                    embed.setTitle(`Voice and Text Channels for ${this_name}`);
+                    let channel_desc = new Array();
+                    channel_desc.push(`• Only members who are in this voice channel can view this text channel.`);
+                    channel_desc.push(`• You can't view other dedicated channels once you're connected to one.`);
+                    channel_desc.push(`• ${text_channel} voice and text channels will automatically be deleted once everyone is disconnected from these channels.`);
+                    channel_desc.push(`• You can lock this channel by doing "!dedicate lock", and you can do "!dedicate unlock" to unlock it.`);
+                    channel_desc.push(`• You can transfer anyone from another voice channel to this voice channel by doing "!transfer <@member>".\n\u200b\u200bEx: "!transfer <@749563476707377222>"`);
+                    channel_desc.push(`• You can also transfer multiple users at once.\n\u200b\u200bEx: "!transfer <@749563476707377222> <@749563476707377222> <@749563476707377222>"`);
+                    channel_desc.push('Note: <@&749235255944413234> and <@&700397445506531358> can interact with these channels.');
+                    embed.setDescription(channel_desc.join('\n\n'));
+                    embed.setColor('#7b00ff');
+                    await text_channel.send(embed).catch(error => {
+                        g_interface.on_error({
+                            name: 'beginDedicate -> .send(embed)',
+                            location: 'channels.js',
+                            error: error
+                        });
+                    });
+
+                    // Sort members
+                    let streamers = [], members = [];
+                    for (let this_member of this_channel.members.array()) {
+                        if (this_member.roles.cache.find(role => role == g_roles.get().streaming)) {
+                            streamers.push(this_member);
+                        } else {
+                            members.push(this_member);
+                        }
+                    }
+                    // Transfer streamers
+                    for (let this_member of streamers) {
+                        await this_member.voice.setChannel(voice_channel).catch(error => {
+                            g_interface.on_error({
+                                name: 'beginDedicate -> .setChannel(voice_channel)',
+                                location: 'channels.js',
+                                error: error
+                            });
+                        });
+                    }
+                    // Transfer members
+                    for (let this_member of members) {
+                        if (this_member.user.id != g_client.user.id) {
+                            await this_member.voice.setChannel(voice_channel).catch(error => {
+                                g_interface.on_error({
+                                    name: 'beginDedicate -> .setChannel(voice_channel)',
+                                    location: 'channels.js',
+                                    error: error
+                                });
+                            });
+                        }
+                    }
                 }
             }
         } catch (error) {

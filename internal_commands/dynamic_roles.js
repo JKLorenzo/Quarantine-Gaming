@@ -1,4 +1,7 @@
 let isUpdating = false, toUpdate = new Array();
+let role_create_per_period = 0;
+let role_create_per_period_max = 3;
+let role_create_period = 15;
 
 async function updateMember() {
     while (toUpdate.length > 0) {
@@ -67,22 +70,36 @@ async function updateMember() {
                     if (this_activity.type == 'PLAYING' && !g_db.titles().blacklisted.includes(this_activity.name.trim().toLowerCase()) && (this_activity.applicationID || g_db.titles().whitelisted.includes(this_activity.name.trim().toLowerCase()))) {
                         let this_game_name = this_activity.name.trim();
                         let this_game_role = g_channels.get().guild.roles.cache.find(role => role.name == this_game_name);
+                        let this_game_role_mentionable_name = this_game_name + ' ⭐';
+                        let this_game_role_mentionable_role = g_channels.get().guild.roles.cache.find(role => role.name == this_game_role_mentionable_name);
                         let this_play_name = 'Play ' + this_game_name;
                         let this_play_role = g_channels.get().guild.roles.cache.find(role => role.name == this_play_name);
 
                         if (this_data.new) {
+                            let rate_limited = false;
+                            // Check if roles are required to be created
+                            if (!this_game_role || !this_game_role_mentionable_role || !this_play_role) {
+                                if (role_create_per_period >= role_create_per_period_max) {
+                                    rate_limited = true;
+                                    update(oldData, newData);
+                                } else {
+                                    role_create_per_period++;
+                                    setTimeout(() => {
+                                        role_create_per_period--;
+                                    }, role_create_period)
+                                }
+                            }
+
                             // Check if user doesn't have this game role
-                            if (!this_member.roles.cache.find(role => role.name == this_game_name)) {
+                            if (!this_member.roles.cache.find(role => role.name == this_game_name) && !rate_limited) {
                                 // Check if this game role exists
                                 if (!this_game_role) {
                                     // Create role on this guild
-                                    await g_channels.get().guild.roles.create({
+                                    this_game_role = await g_channels.get().guild.roles.create({
                                         data: {
                                             name: this_game_name,
                                             color: '0x00ffff'
                                         }
-                                    }).then(this_created_role => {
-                                        this_game_role = this_created_role;
                                     }).catch(error => {
                                         g_interface.on_error({
                                             name: 'updateMember -> .create(game_role)',
@@ -92,10 +109,9 @@ async function updateMember() {
                                     });
                                 }
                                 // Check if this game role mentionable doesnt exists
-                                let this_game_role_mentionable = g_channels.get().guild.roles.cache.find(role => role.name == this_game_name + ' ⭐');
-                                if (!this_game_role_mentionable) {
+                                if (!this_game_role_mentionable_role) {
                                     // Create mentionable role on this guild
-                                    await g_channels.get().guild.roles.create({
+                                    this_game_role_mentionable_role = await g_channels.get().guild.roles.create({
                                         data: {
                                             name: this_game_name + ' ⭐',
                                             color: '0x00fffe',
@@ -120,20 +136,18 @@ async function updateMember() {
                             }
 
                             // Check if user doesn't have this play role
-                            if (!this_member.roles.cache.find(role => role.name == this_play_name)) {
+                            if (!this_member.roles.cache.find(role => role.name == this_play_name) && !rate_limited) {
                                 const ref_play_roles = g_channels.get().guild.roles.cache.find(role => role.name == '<PLAYROLES>');
                                 // Check if this play role doesn't exists
                                 if (!this_play_role) {
                                     // Create role on this guild
-                                    await g_channels.get().guild.roles.create({
+                                    this_play_role = await g_channels.get().guild.roles.create({
                                         data: {
                                             name: this_play_name,
                                             color: '0x7b00ff',
                                             position: ref_play_roles.position,
                                             hoist: true
                                         }
-                                    }).then(play_role => {
-                                        this_play_role = play_role;
                                     }).catch(error => {
                                         g_interface.on_error({
                                             name: 'updateMember -> .create(this_play_name)',
@@ -209,6 +223,8 @@ async function updateMember() {
                 error: error
             });
         }
+        // Process every 2.5s
+        await g_functions.sleep(2500);
     }
     isUpdating = false;
 }
@@ -410,11 +426,11 @@ const init = async function () {
     }
 }
 
-const update = function (oldData, newMember) {
+const update = function (oldData, newData) {
     try {
         let this_data = {
             old: oldData,
-            new: newMember
+            new: newData
         }
 
         toUpdate.push(this_data);

@@ -66,7 +66,6 @@ let errors_per_minute = new Array();
 let threshold_hit_count = 0;
 async function process_errors() {
     is_processing_errors = true;
-
     while (errors.length > 0) {
         try {
             const details = errors.shift();
@@ -80,7 +79,6 @@ async function process_errors() {
             }, 60000);
 
             const epm = errors_per_minute.length;
-
             if (epm > 5 && !threshold_reached) {
                 // Change bot presence
                 g_functions.setActivity(`SERVER RESTART (${++threshold_hit_count})`);
@@ -112,10 +110,18 @@ async function process_errors() {
                 let embed = new MessageEmbed();
                 embed.setAuthor('Quarantine Gaming: Telemetry');
                 embed.setTitle('Exception Details');
-                embed.addField('Function', details.name);
-                embed.addField('Message', details.error);
-                embed.addField('Location', details.location);
-                embed.addField('Code', details.error.code);
+                if (details.name) {
+                    embed.addField('Function', details.name);
+                }
+                if (details.error) {
+                    embed.addField('Message', details.error);
+                }
+                if (details.location) {
+                    embed.addField('Location', details.location);
+                }
+                if (details.error.code) {
+                    embed.addField('Code', details.error.code);
+                }
                 embed.addField('Errors per Minute', epm);
                 embed.addField('Threshold Hit', threshold_reached ? 'True' : 'False');
                 embed.addField('Threshold Hit Count', threshold_hit_count);

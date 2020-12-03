@@ -230,6 +230,20 @@ client.on('messageReactionAdd', (reaction, user) => message_manager.reactionAdd(
 
 client.on('messageReactionRemove', (reaction, user) => message_manager.reactionRemove(reaction, user));
 
+client.on('rateLimit', (rateLimitInfo) => {
+    console.log(rateLimitInfo)
+    let embed = new MessageEmbed();
+    embed.setColor('#ffff00');
+    embed.setAuthor('Quarantine Gaming: Telemetry');
+    embed.setTitle('The client hits a rate limit while making a request.');
+    embed.addField('Timeout', rateLimitInfo.timeout);
+    embed.addField('Limit', rateLimitInfo.limit);
+    embed.addField('Method', rateLimitInfo.method);
+    embed.addField('Path', rateLimitInfo.path);
+    embed.addField('Route', rateLimitInfo.route);
+    g_interface.log(embed);
+});
+
 client.on('error', error => {
     console.log(error);
     g_interface.on_error({
