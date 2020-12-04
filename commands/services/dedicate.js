@@ -75,45 +75,51 @@ module.exports = class DedicateCommand extends Command {
                             break
                     }
                 } else {
-                    message.say(`You must be on a dedicated channel to lock or unlock a voice channel.`).catch(() => { });
+                    message.reply(`You must be on a dedicated channel to lock or unlock a voice channel.`).catch(() => { });
                 }
             } else {
-                // check if it is mentionable
-                name = name.trim();
-                if (name.startsWith('<') && name.endsWith('>')) {
-                    const chars = name.split('')
-                    const id = chars.map(char => {
-                        const parsed = parseInt(char, 10);
-                        if (isNaN(parsed)) {
-                            return '';
+                // Only allow on voice channels and dedicated channels category
+                if (message.member.voice.channel.parentID == '782163385910951936' || message.member.voice.channel.parentID == '749231470396309535') {
+                    // check if it is mentionable
+                    name = name.trim();
+                    if (name.startsWith('<') && name.endsWith('>')) {
+                        const chars = name.split('')
+                        const id = chars.map(char => {
+                            const parsed = parseInt(char, 10);
+                            if (isNaN(parsed)) {
+                                return '';
+                            } else {
+                                return parsed;
+                            }
+                        }).join('');
+                        if (chars.includes('&')) {
+                            // Role
+                            const role = g_channels.get().guild.roles.cache.get(id);
+                            if (role) name = g_functions.string_alphanumeric(role.name);
+                        } else if (chars.includes('#')) {
+                            // Channel
+                            const channel = g_channels.get().guild.channels.cache.get(id);
+                            if (channel) name = g_functions.string_alphanumeric(channel.name);
                         } else {
-                            return parsed;
+                            // Member
+                            const member = g_channels.get().guild.members.cache.get(id);
+                            if (member) name = member.displayName;
                         }
-                    }).join('');
-                    if (chars.includes('&')) {
-                        // Role
-                        const role = g_channels.get().guild.roles.cache.get(id);
-                        if (role) name = g_functions.string_alphanumeric(role.name);
-                    } else if (chars.includes('#')) {
-                        // Channel
-                        const channel = g_channels.get().guild.channels.cache.get(id);
-                        if (channel) name = g_functions.string_alphanumeric(channel.name);
+                        g_channels.dedicate(message.member, name);
                     } else {
-                        // Member
-                        const member = g_channels.get().guild.members.cache.get(id);
-                        if (member) name = member.displayName;
+                        // Filter
+                        name = name.split(' ').map(word => {
+                            return g_functions.string_alphanumeric(word);
+                        }).join(' ')
+                        g_channels.dedicate(message.member, name);
                     }
-                    g_channels.dedicate(message.member, name);
+                    message.reply(`Got it! Please wait while I'm preparing ${name} voice and text channels.`).catch(() => { });
                 } else {
-                    // Filter
-                    g_channels.dedicate(message.member, name.split(' ').map(word => {
-                        return g_functions.string_alphanumeric(word);
-                    }).join(' '));
+                    message.reply(`Sorry, you can't create a dedicated channel from your current voice channel.`).catch(() => { });
                 }
-                message.say(`Got it! Please wait.`).catch(() => { });
             }
         } else {
-            message.channel.send(`You must be connected to any voice channels to create a dedicated channel.`).catch(() => { });
+            message.reply(`You must be connected to any voice channels to create a dedicated channel.`).catch(() => { });
         }
     }
 };
