@@ -65,9 +65,9 @@ async function get() {
                         }
                     });
 
-                    // Process every 60s
-                    await g_functions.sleep(60000);
-                } else if (elapsedMinutes >= 30 && elapsedMinutes <= 120) {
+                    // Process every 5 minutes
+                    await g_functions.sleep(300000);
+                } else if (elapsedMinutes >= 30 && elapsedMinutes <= 150) {
                     // Push
                     g_fgu.push(item_details);
                 }
@@ -335,17 +335,16 @@ const push = function (notification) {
             error: error
         });
     }
-
 }
 
 const begin = function () {
     try {
         // First fetch
         get();
-        // Fetchs every 30 mins
+        // Fetchs every 1 hour
         setInterval(() => {
             get();
-        }, 1800000);
+        }, 3600000);
     } catch (error) {
         g_interface.on_error({
             name: 'begin',
