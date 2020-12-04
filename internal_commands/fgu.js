@@ -339,12 +339,14 @@ const push = function (notification) {
 
 const begin = function () {
     try {
-        // First fetch
-        get();
-        // Fetchs every 1 hour
-        setInterval(() => {
+        // First fetch in 5 mins
+        setTimeout(() => {
             get();
-        }, 3600000);
+            // Fetch every 1 hour after first fetch
+            setInterval(() => {
+                get();
+            }, 3600000);
+        }, 300000);
     } catch (error) {
         g_interface.on_error({
             name: 'begin',
