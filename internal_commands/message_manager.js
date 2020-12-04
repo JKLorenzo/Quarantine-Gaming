@@ -355,7 +355,7 @@ const reactionAdd = async function (reaction, user) {
                 }
                 break;
             case 'Quarantine Gaming: Game Coordinator':
-                if (reaction.me && !(this_message.embeds[0].fields[0].value.indexOf(user.id) !== -1)) {
+                if (this_message.embeds[0].thumbnail.url == reaction.emoji.url && !(this_message.embeds[0].fields[0].value.indexOf(user.id) !== -1)) {
                     g_coordinator.queue({
                         status: 1,
                         message: this_message,
@@ -448,7 +448,7 @@ const reactionRemove = async function (reaction, user) {
                 }
                 break;
             case 'Quarantine Gaming: Game Coordinator':
-                if (reaction.me && !(this_message.embeds[0].fields[0].value.indexOf(this_member.user.id) !== -1)) {
+                if (this_message.embeds[0].thumbnail.url == reaction.emoji.url && !(this_message.embeds[0].fields[0].value.indexOf(this_member.user.id) !== -1)) {
                     g_coordinator.queue({
                         status: 0,
                         message: this_message,
