@@ -78,7 +78,38 @@ module.exports = class DedicateCommand extends Command {
                     message.say(`You must be on a dedicated channel to lock or unlock a voice channel.`).catch(() => { });
                 }
             } else {
-                g_channels.dedicate(message.member, name);
+                // check if it is mentionable
+                name = name.trim();
+                if (name.startsWith('<') && name.endsWith('>')) {
+                    const chars = name.split('')
+                    const id = chars.map(char => {
+                        const parsed = parseInt(char, 10);
+                        if (isNaN(parsed)) {
+                            return '';
+                        } else {
+                            return parsed;
+                        }
+                    }).join('');
+                    if (chars.includes('&')) {
+                        // Role
+                        const role = g_channels.get().guild.roles.cache.get(id);
+                        if (role) name = g_functions.string_alphanumeric(role.name);
+                    } else if (chars.includes('#')) {
+                        // Channel
+                        const channel = g_channels.get().guild.channels.cache.get(id);
+                        if (channel) name = g_functions.string_alphanumeric(channel.name);
+                    } else {
+                        // Member
+                        const member = g_channels.get().guild.members.cache.get(id);
+                        if (member) name = member.displayName;
+                    }
+                    g_channels.dedicate(message.member, name);
+                } else {
+                    // Filter
+                    g_channels.dedicate(message.member, name.split(' ').map(word => {
+                        return g_functions.string_alphanumeric(word);
+                    }).join(' '));
+                }
                 message.say(`Got it! Please wait.`).catch(() => { });
             }
         } else {
