@@ -231,7 +231,6 @@ client.on('messageReactionAdd', (reaction, user) => message_manager.reactionAdd(
 client.on('messageReactionRemove', (reaction, user) => message_manager.reactionRemove(reaction, user));
 
 client.on('rateLimit', (rateLimitInfo) => {
-    console.log(rateLimitInfo)
     let embed = new MessageEmbed();
     embed.setColor('#ffff00');
     embed.setAuthor('Quarantine Gaming: Telemetry');

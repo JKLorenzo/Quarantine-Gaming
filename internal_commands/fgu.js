@@ -298,7 +298,7 @@ async function process_push() {
 
             // Status
             if (!(no_title || filtered_content.length > 0 || no_url || mentionables.length == 0)) {
-                let sent_message = await g_interface.updates({ content: mentionables.join(', '), embed: output });
+                const sent_message = await g_interface.updates({ content: mentionables.join(', '), embed: output });
                 await g_db.pushNotification({
                     id: sent_message.id,
                     title: no_title ? '' : safe_title ? safe_title : title,
@@ -306,6 +306,24 @@ async function process_push() {
                     author: author,
                     permalink: permalink
                 });
+
+                // Crosspost a message
+                if (sent_message.channel.type === 'news') {
+                    sent_message.crosspost().then(() => {
+                        let embed = new MessageEmbed();
+                        embed.setColor('#da00ff');
+                        embed.setAuthor('Quarantine Gaming: Free Game/DLC Crossposting');
+                        embed.setTitle(sent_message.embeds[0].title);
+                        embed.setDescription('This notification is now published and is visible to all external(following) servers.')
+                        g_interface.log(embed);
+                    }).catch(error => {
+                        g_interface.on_error({
+                            name: 'process_push -> .crosspost()',
+                            location: 'fgu.js',
+                            error: error
+                        });
+                    });
+                }
             }
         } while (to_push.length > 0);
         // Reset the status to false
