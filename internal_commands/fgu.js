@@ -64,6 +64,9 @@ async function get() {
                             });
                         }
                     });
+
+                    // Process every 60s
+                    await g_functions.sleep(60000);
                 } else if (elapsedMinutes >= 30 && elapsedMinutes <= 120) {
                     // Push
                     g_fgu.push(item_details);

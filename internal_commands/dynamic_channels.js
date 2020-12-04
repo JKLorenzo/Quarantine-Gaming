@@ -227,6 +227,9 @@ async function updateChannel() {
                         });
                     }
                 }
+
+                // Process every 5s
+                await g_functions.sleep(5000);
             }
         } catch (error) {
             g_interface.on_error({

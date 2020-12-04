@@ -313,6 +313,9 @@ async function beginDedicate() {
                         }
                     }
                 }
+
+                // Process every 10s
+                await g_functions.sleep(10000);
             }
         } catch (error) {
             g_interface.on_error({

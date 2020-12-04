@@ -213,6 +213,9 @@ async function updateMember() {
                                 });
                             }
                         }
+
+                        // Process every 5s
+                        await g_functions.sleep(5000);
                     }
                 }
             }
@@ -223,8 +226,6 @@ async function updateMember() {
                 error: error
             });
         }
-        // Process every 2.5s
-        await g_functions.sleep(2500);
     }
     isUpdating = false;
 }
