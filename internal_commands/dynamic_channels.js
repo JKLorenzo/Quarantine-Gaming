@@ -228,7 +228,7 @@ async function updateChannel() {
                     }
                 }
 
-                // Process every 5s
+                // Process every 5 seconds
                 await g_functions.sleep(5000);
             }
         } catch (error) {
@@ -326,9 +326,10 @@ const init = async function () {
             }
         }
 
+        // Update every 2 minutes
         setInterval(function () {
             updateGuild();
-        }, 30000)
+        }, 120000)
     } catch (error) {
         g_interface.on_error({
             name: 'init',
