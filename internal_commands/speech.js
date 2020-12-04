@@ -1,5 +1,6 @@
-const googleTTS = require('google-tts-api');
 const OpusScript = require('opusscript'); // for TTS
+const fs = require('fs');
+const tts = require('google-translate-tts');
 
 let is_saying = false;
 
@@ -31,8 +32,12 @@ const say = async function (message, channel) {
                 let retries = 5, failed;
                 do {
                     failed = false;
-                    await googleTTS(message).then(async (url) => {
-                        const dispatcher = await connection.play(url);
+                    await tts.synthesize({
+                        text: message,
+                        voice: 'en-US'
+                    }).then(async buffer => {
+                        fs.writeFileSync('tts.mp3', buffer);
+                        const dispatcher = await connection.play('tts.mp3');
                         dispatcher.on('speaking', async speaking => {
                             if (!speaking) {
                                 await g_functions.sleep(1000);
