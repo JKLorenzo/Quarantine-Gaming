@@ -120,9 +120,9 @@ async function beginDedicate() {
                     channel_desc.push(`• Only members who are in this voice channel can view this text channel.`);
                     channel_desc.push(`• You can't view other dedicated channels once you're connected to one.`);
                     channel_desc.push(`• ${text_channel} voice and text channels will automatically be deleted once everyone is disconnected from these channels.`);
-                    channel_desc.push(`• You can lock this channel by doing "!dedicate lock", and you can do "!dedicate unlock" to unlock it.`);
-                    channel_desc.push(`• You can transfer anyone from another voice channel to this voice channel by doing "!transfer <@member>".\n\u200b\u200bEx: "!transfer <@749563476707377222>"`);
-                    channel_desc.push(`• You can also transfer multiple users at once.\n\u200b\u200bEx: "!transfer <@749563476707377222> <@749563476707377222> <@749563476707377222>"`);
+                    channel_desc.push(`• You can lock this channel by doing **!dedicate lock**, and you can do **!dedicate unlock** to unlock it.`);
+                    channel_desc.push(`• You can transfer anyone from another voice channel to this voice channel by doing **!transfer <@member>**.\n\u200b\u200bEx: "!transfer ${g_client.user}"`);
+                    channel_desc.push(`• You can also transfer multiple users at once.\n\u200b\u200bEx: "!transfer ${g_client.user} ${g_client.user} ${g_client.user}"`);
                     channel_desc.push('Note: <@&749235255944413234> and <@&700397445506531358> can interact with these channels.');
                     embed.setDescription(channel_desc.join('\n\n'));
                     embed.setColor('#7b00ff');
@@ -267,9 +267,9 @@ async function beginDedicate() {
                     channel_desc.push(`• Only members who are in this voice channel can view this text channel.`);
                     channel_desc.push(`• You can't view other dedicated channels once you're connected to one.`);
                     channel_desc.push(`• ${text_channel} voice and text channels will automatically be deleted once everyone is disconnected from these channels.`);
-                    channel_desc.push(`• You can lock this channel by doing "!dedicate lock", and you can do "!dedicate unlock" to unlock it.`);
-                    channel_desc.push(`• You can transfer anyone from another voice channel to this voice channel by doing "!transfer <@member>".\n\u200b\u200bEx: "!transfer <@749563476707377222>"`);
-                    channel_desc.push(`• You can also transfer multiple users at once.\n\u200b\u200bEx: "!transfer <@749563476707377222> <@749563476707377222> <@749563476707377222>"`);
+                    channel_desc.push(`• You can lock this channel by doing **!dedicate lock**, and you can do **!dedicate unlock** to unlock it.`);
+                    channel_desc.push(`• You can transfer anyone from another voice channel to this voice channel by doing **!transfer <@member>**.\n\u200b\u200bEx: "!transfer ${g_client.user}"`);
+                    channel_desc.push(`• You can also transfer multiple users at once.\n\u200b\u200bEx: "!transfer ${g_client.user} ${g_client.user} ${g_client.user}"`);
                     channel_desc.push('Note: <@&749235255944413234> and <@&700397445506531358> can interact with these channels.');
                     embed.setDescription(channel_desc.join('\n\n'));
                     embed.setColor('#7b00ff');
