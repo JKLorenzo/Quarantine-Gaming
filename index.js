@@ -68,7 +68,13 @@ client.once('ready', async () => {
         // Clear Messages
         message_manager.clear_channels();
 
-        functions.setActivity('!help');
+        functions.setActivity('!help').catch(error => {
+            g_interface.on_error({
+                name: `ready -> .setActivity() [default]`,
+                location: 'index.js',
+                error: error
+            });
+        });
 
         if (process.env.STARTUP_REASON) {
             let embed = new MessageEmbed();

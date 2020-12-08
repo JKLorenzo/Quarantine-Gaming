@@ -1,36 +1,14 @@
 const gis = require('g-i-s');
 
 const sleep = function (ms) {
-    try {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    } catch (error) {
-        g_interface.on_error({
-            name: 'sleep',
-            location: 'function.js',
-            error: error
-        });
-    }
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-const setActivity = function (text) {
-    try {
-        // Set the bot's activity
-        g_client.user.setActivity(text, {
-            type: 'LISTENING'
-        }).catch(error => {
-            g_interface.on_error({
-                name: 'setActivity -> .setActivity(text)',
-                location: 'functions.js',
-                error: error
-            });
-        });
-    } catch (error) {
-        g_interface.on_error({
-            name: 'setActivity',
-            location: 'function.js',
-            error: error
-        });
-    }
+const setActivity = function (value, type = 'LISTENING') {
+    // Set the bot's activity
+    return g_client.user.setActivity(value.trim(), {
+        type: type.trim().toUpperCase()
+    });
 }
 
 const string_similarity = function (s1, s2) {
