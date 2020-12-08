@@ -356,22 +356,10 @@ const push = function (notification) {
 }
 
 const begin = function () {
-    try {
-        // First fetch in 5 mins
-        setTimeout(() => {
-            get();
-            // Fetch every 1 hour after first fetch
-            setInterval(() => {
-                get();
-            }, 3600000);
-        }, 300000);
-    } catch (error) {
-        g_interface.on_error({
-            name: 'begin',
-            location: 'fgu.js',
-            error: error
-        });
-    }
+    // Fetch after every 1 hour
+    setInterval(() => {
+        get();
+    }, 3600000);
 }
 
 // Interface Module Functions
