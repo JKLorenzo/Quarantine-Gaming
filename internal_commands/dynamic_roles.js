@@ -76,22 +76,21 @@ async function updateMember() {
                         let this_play_role = g_channels.get().guild.roles.cache.find(role => role.name == this_play_name);
 
                         if (this_data.new) {
-                            let rate_limited = false;
                             // Check if roles are required to be created
                             if (!this_game_role || !this_game_role_mentionable_role || !this_play_role) {
-                                if (role_create_per_period >= role_create_per_period_max) {
-                                    rate_limited = true;
-                                    update(oldData, newData);
-                                } else {
-                                    role_create_per_period++;
-                                    setTimeout(() => {
-                                        role_create_per_period--;
-                                    }, role_create_period)
+                                while (role_create_per_period >= role_create_per_period_max) {
+                                    // break
+                                    await g_functions.sleep(role_create_period / 2);
                                 }
+                                // Update rate limiter
+                                role_create_per_period++;
+                                setTimeout(() => {
+                                    role_create_per_period--;
+                                }, role_create_period)
                             }
 
                             // Check if user doesn't have this game role
-                            if (!this_member.roles.cache.find(role => role.name == this_game_name) && !rate_limited) {
+                            if (!this_member.roles.cache.find(role => role.name == this_game_name)) {
                                 // Check if this game role exists
                                 if (!this_game_role) {
                                     // Create role on this guild
@@ -136,7 +135,7 @@ async function updateMember() {
                             }
 
                             // Check if user doesn't have this play role
-                            if (!this_member.roles.cache.find(role => role.name == this_play_name) && !rate_limited) {
+                            if (!this_member.roles.cache.find(role => role.name == this_play_name)) {
                                 const ref_play_roles = g_channels.get().guild.roles.cache.find(role => role.name == '<PLAYROLES>');
                                 // Check if this play role doesn't exists
                                 if (!this_play_role) {
@@ -214,7 +213,7 @@ async function updateMember() {
                             }
                         }
 
-                        // Process every 5s
+                        // Break for 5s
                         await g_functions.sleep(5000);
                     }
                 }
