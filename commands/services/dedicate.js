@@ -113,13 +113,13 @@ module.exports = class DedicateCommand extends Command {
                         }).join(' ')
                         g_channels.dedicate(message.member, name);
                     }
-                    message.reply(`Got it! Please wait while I'm preparing ${name} voice and text channels.`).catch(() => { });
+                    message.reply(`Got it! Please wait while I'm preparing **${name}** voice and text channels.`).catch(() => { });
                 } else {
-                    message.reply(`Sorry, you can't create a dedicated channel from your current voice channel.`).catch(() => { });
+                    message.reply(`You can't create a dedicated channel from your current voice channel. Join one of the Voice Room channels to create a dedicated channel.`).catch(() => { });
                 }
             }
         } else {
-            message.reply(`You must be connected to any voice channels to create a dedicated channel.`).catch(() => { });
+            message.reply(`You must be connected to any Voice Room channels to create a dedicated channel.`).catch(() => { });
         }
     }
 };
