@@ -122,10 +122,22 @@ async function beginDedicate() {
                     channel_desc.push(`• ${text_channel} voice and text channels will automatically be deleted once everyone is disconnected from these channels.`);
                     channel_desc.push(`• You can lock this channel by doing **!dedicate lock**, and you can do **!dedicate unlock** to unlock it.`);
                     channel_desc.push(`• You can transfer anyone from another voice channel to this voice channel by doing **!transfer <@member>**.\n\u200b\u200bEx: "!transfer ${g_client.user}"`);
-                    channel_desc.push(`• You can also transfer multiple users at once.\n\u200b\u200bEx: "!transfer ${g_client.user} ${g_client.user} ${g_client.user}"`);
+                    channel_desc.push(`• You can also transfer multiple users at once.\n\u200b\u200bEx: "!transfer ${g_client.user} ${g_client.user}"`);
                     channel_desc.push('Note: <@&749235255944413234> and <@&700397445506531358> can interact with these channels.');
                     embed.setDescription(channel_desc.join('\n\n'));
                     embed.setColor('#7b00ff');
+
+                    let profile = g_channels.get().guild.members.cache.find(member => member.displayName == this_name.substr(2));
+                    let emoji = g_channels.get().guild.emojis.cache.find(emoji => emoji.name == this_name.substr(2).split(' ').join('').split(':').join('').split('-').join(''));
+                    let qg_emoji = g_channels.get().guild.emojis.cache.find(emoji => emoji.name == 'quarantinegaming');
+                    if (profile) {
+                        embed.setThumbnail(profile.user.displayAvatarURL());
+                    } else if (emoji) {
+                        embed.setThumbnail(emoji.url);
+                    } else {
+                        embed.setThumbnail(qg_emoji.url);
+                    }
+
                     await text_channel.send(embed).catch(error => {
                         g_interface.on_error({
                             name: 'beginDedicate -> .send(embed)',
@@ -269,10 +281,22 @@ async function beginDedicate() {
                     channel_desc.push(`• ${text_channel} voice and text channels will automatically be deleted once everyone is disconnected from these channels.`);
                     channel_desc.push(`• You can lock this channel by doing **!dedicate lock**, and you can do **!dedicate unlock** to unlock it.`);
                     channel_desc.push(`• You can transfer anyone from another voice channel to this voice channel by doing **!transfer <@member>**.\n\u200b\u200bEx: "!transfer ${g_client.user}"`);
-                    channel_desc.push(`• You can also transfer multiple users at once.\n\u200b\u200bEx: "!transfer ${g_client.user} ${g_client.user} ${g_client.user}"`);
+                    channel_desc.push(`• You can also transfer multiple users at once.\n\u200b\u200bEx: "!transfer ${g_client.user} ${g_client.user}"`);
                     channel_desc.push('Note: <@&749235255944413234> and <@&700397445506531358> can interact with these channels.');
                     embed.setDescription(channel_desc.join('\n\n'));
                     embed.setColor('#7b00ff');
+
+                    let profile = g_channels.get().guild.members.cache.find(member => member.displayName == this_name.substr(2));
+                    let emoji = g_channels.get().guild.emojis.cache.find(emoji => emoji.name == this_name.substr(2).split(' ').join('').split(':').join('').split('-').join(''));
+                    let qg_emoji = g_channels.get().guild.emojis.cache.find(emoji => emoji.name == 'quarantinegaming');
+                    if (profile) {
+                        embed.setThumbnail(profile.user.displayAvatarURL());
+                    } else if (emoji) {
+                        embed.setThumbnail(emoji.url);
+                    } else {
+                        embed.setThumbnail(qg_emoji.url);
+                    }
+
                     await text_channel.send(embed).catch(error => {
                         g_interface.on_error({
                             name: 'beginDedicate -> .send(embed)',
