@@ -27,29 +27,43 @@ module.exports = class Game extends Command {
 
     async run(message, { mode, name }) {
         let updated = false;
-        let reply = await message.reply('Updating database...').catch(() => { });;
-        switch (mode) {
-            case 'whitelist':
-                if (await g_db.pushWhitelisted(name.trim())) {
-                    await g_functions.sleep(2500);
-                    reply.edit('Applying changes...').catch(() => { });;
-                    updated = await g_dynamic_roles.init();
+        // Check if anyone is playing this game name
+        let reply = await message.reply('Checking for players...').catch(() => { });;
+        let has_players = false
+        // Check roles
+        for (let this_role of g_channels.get().guild.roles.cache.array()) {
+            if (this_role.name == name.trim()) {
+                has_players = true;
+            }
+        }
+        if (has_players) {
+            // Check presence
+            for (let this_member of g_channels.get().guild.members.cache.array()) {
+                if (this_member.presence.activities.map(activity => activity.name.trim().toLowerCase()).includes(name.trim().toLowerCase())) {
+                    has_players = true;
                 }
-                break;
-            case 'blacklist':
-                if (await g_db.pushBlacklisted(name.trim())) {
-                    await g_functions.sleep(2500);
-                    reply.edit('Applying changes...').catch(() => { });;
-                    updated = await g_dynamic_roles.init();
-                };
-                break;
+            }
         }
 
         await g_functions.sleep(2500);
-        if (updated) {
-            reply.edit(`Updated! ${name} is now ${mode}ed.`).catch(() => { });;
+
+        if (has_players) {
+            reply.edit('Updating databases...').catch(() => { });;
+            if ((mode == 'whitelist' && await g_db.pushWhitelisted(name.trim())) || (mode == 'blacklist' && await g_db.pushBlacklisted(name.trim()))) {
+                await g_functions.sleep(2500);
+                reply.edit('Applying changes...').catch(() => { });;
+                updated = await g_dynamic_roles.init();
+            }
+
+            await g_functions.sleep(2500);
+
+            if (updated) {
+                reply.edit(`Updated! ${name} is now ${mode}ed.`).catch(() => { });;
+            } else {
+                reply.edit(`No changes made. Failed to ${mode} ${name} while updating.`).catch(() => { });;
+            }
         } else {
-            reply.edit(`No changes made. Failed to ${mode} ${name}.`).catch(() => { });;
+            reply.edit(`No changes made. Failed to ${mode} ${name}. No active players found.`).catch(() => { });;
         }
     }
 };
