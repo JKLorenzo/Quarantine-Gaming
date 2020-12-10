@@ -363,6 +363,9 @@ const init = async function () {
             }
         }
 
+        // Timeout for 5s
+        await g_functions.sleep(5000);
+
         // Remove unused play roles
         for (let this_role of g_channels.get().guild.roles.cache.array()) {
             if (this_role.hexColor == '#7b00ff' && this_role.name.startsWith('Play')) {
