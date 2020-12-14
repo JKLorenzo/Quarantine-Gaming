@@ -77,8 +77,32 @@ async function process_errors() {
                 if (errors_per_minute.length == 0) threshold_reached = false;
             }, 60000);
 
+            if (!threshold_reached) {
+                let embed = new MessageEmbed();
+                embed.setAuthor('Quarantine Gaming: Telemetry');
+                embed.setTitle('Exception Details');
+                if (details.name) {
+                    embed.addField('Function', details.name);
+                }
+                if (details.error) {
+                    embed.addField('Message', details.error);
+                }
+                if (details.location) {
+                    embed.addField('Location', details.location);
+                }
+                if (details.error.code) {
+                    embed.addField('Code', details.error.code);
+                }
+                embed.addField('Errors per Minute', epm);
+                embed.addField('Threshold Hit', threshold_reached ? 'True' : 'False');
+                embed.addField('Threshold Hit Count', threshold_hit_count);
+                embed.setThumbnail('https://mir-s3-cdn-cf.behance.net/project_modules/disp/c9955d46715833.589222657aded.png');
+                embed.setColor('#FF0000');
+                await log(embed);
+            }
+
             const epm = errors_per_minute.length;
-            if (epm > 5 && !threshold_reached) {
+            if ((epm > 5 || details.error.code == '500') && !threshold_reached) {
                 // Change bot presence
                 g_functions.setActivity(`SERVER RESTART (${++threshold_hit_count})`);
 
@@ -103,30 +127,6 @@ async function process_errors() {
                 });
 
                 threshold_reached = true;
-            }
-
-            if (!threshold_reached) {
-                let embed = new MessageEmbed();
-                embed.setAuthor('Quarantine Gaming: Telemetry');
-                embed.setTitle('Exception Details');
-                if (details.name) {
-                    embed.addField('Function', details.name);
-                }
-                if (details.error) {
-                    embed.addField('Message', details.error);
-                }
-                if (details.location) {
-                    embed.addField('Location', details.location);
-                }
-                if (details.error.code) {
-                    embed.addField('Code', details.error.code);
-                }
-                embed.addField('Errors per Minute', epm);
-                embed.addField('Threshold Hit', threshold_reached ? 'True' : 'False');
-                embed.addField('Threshold Hit Count', threshold_hit_count);
-                embed.setThumbnail('https://mir-s3-cdn-cf.behance.net/project_modules/disp/c9955d46715833.589222657aded.png');
-                embed.setColor('#FF0000');
-                await log(embed);
             }
         } catch (error) {
             g_interface.on_error({
