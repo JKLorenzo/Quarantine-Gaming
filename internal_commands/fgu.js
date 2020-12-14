@@ -67,7 +67,7 @@ async function get() {
 
                     // Process every 5 minutes
                     await g_functions.sleep(300000);
-                } else if (elapsedMinutes >= 30 && elapsedMinutes <= 150) {
+                } else if (elapsedMinutes >= 30 && elapsedMinutes <= 300) {
                     // Push
                     g_fgu.push(item_details);
                 }
@@ -356,10 +356,15 @@ const push = function (notification) {
 }
 
 const begin = function () {
-    // Fetch after every 1 hour
-    setInterval(() => {
+    // Delay for 10 mins
+    setTimeout(() => {
+        // Inital fetch
         get();
-    }, 3600000);
+        // Fetch after every 1 hour
+        setInterval(() => {
+            get();
+        }, 3600000);
+    }, 600000);
 }
 
 // Interface Module Functions
