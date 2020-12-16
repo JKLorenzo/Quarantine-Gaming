@@ -130,7 +130,7 @@ async function process_push() {
             }
 
             // Title
-            let no_title = false, safe_title = '', exclude_title = [], filtered_content = [];
+            let safe_title = '', exclude_title = [], filtered_content = [];
             if (title) {
                 let title_parts = title.split(' ');
                 let filters = ['other', 'alpha', 'beta', 'psa'];
@@ -149,32 +149,21 @@ async function process_push() {
                     }
                 });
                 output.setTitle(`**${safe_title ? safe_title : title}**`);
-            } else {
-                no_title = true;
             }
 
             // URL
-            let no_url = false;
-            if (url && url.length > 4) {
+            if (url) {
                 // Initialize a has error boolean identifier, stores the response of the url
                 let has_error = false, response;
                 response = await fetch(url).catch(() => {
                     has_error = true
                 });
                 // Check if there's no error and there's a response
-                if (!has_error && response) {
-                    if (response.ok) {
-                        output.setURL(url);
+                if (!has_error && response && response.ok) {
+                    output.setURL(url);
                         let hostname = new URL(url).hostname;
                         output.setFooter(`${hostname} | Updated as of `, g_functions.getIcon(hostname));
-                    } else {
-                        no_url = true;
-                    }
-                } else {
-                    no_url = true;
                 }
-            } else {
-                no_url = true;
             }
 
             // Image
@@ -267,32 +256,32 @@ async function process_push() {
 
             // Stores all the mentionables in this array
             let mentionables = [];
-            let _url = no_url ? ' ' : url.toLowerCase();
+            let searchables = (description ? description.toLowerCase() : '') + ' ' + (url ?  url.toLowerCase() : '');
 
-            if (_url.indexOf('steampowered.com') !== -1) {
+            if (searchables.indexOf('steampowered.com') !== -1) {
                 mentionables.push(`<@&722645979248984084>`);
                 color.add(0, 157, 255);
             }
 
-            if (_url.indexOf('epicgames.com') !== -1) {
+            if (searchables.indexOf('epicgames.com') !== -1) {
                 mentionables.push(`<@&722691589813829672>`);
                 color.add(157, 255, 0);
             }
 
-            if (_url.indexOf('gog.com') !== -1) {
+            if (searchables.indexOf('gog.com') !== -1) {
                 mentionables.push(`<@&722691679542312970>`);
                 color.add(157, 0, 255)
             }
 
-            let Console_URLs = ['playstation.com', 'wii.com', 'xbox.com'];
+            let Console_URLs = ['playstation.com', 'wii.com', 'xbox.com', 'microsoft.com'];
             for (let Console_URL of Console_URLs) {
-                if (_url.indexOf(Console_URL) !== -1 && !mentionables.includes('<@&722691724572491776>')) {
+                if (searchables.indexOf(Console_URL) !== -1 && !mentionables.includes('<@&722691724572491776>')) {
                     mentionables.push(`<@&722691724572491776>`);
                     color.add(200, 80, 200)
                 }
             }
 
-            if (_url.indexOf('ubisoft.com') !== -1) {
+            if (searchables.indexOf('ubisoft.com') !== -1) {
                 mentionables.push(`<@&750517524738605087>`);
                 color.add(200, 120, 255)
             }
@@ -300,11 +289,11 @@ async function process_push() {
             output.setColor(color.toHex());
 
             // Status
-            if (!(no_title || filtered_content.length > 0 || no_url || mentionables.length == 0)) {
+            if (filtered_content.length == 0 && mentionables.length > 0) {
                 const sent_message = await g_interface.updates({ content: mentionables.join(', '), embed: output });
                 await g_db.pushNotification({
                     id: sent_message.id,
-                    title: no_title ? '' : safe_title ? safe_title : title,
+                    title: safe_title ? safe_title : title,
                     url: url,
                     author: author,
                     permalink: permalink
