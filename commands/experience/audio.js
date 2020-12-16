@@ -37,6 +37,7 @@ module.exports = class Audio extends Command {
                         error: error
                     });
                 });
+                await g_functions.sleep(1500);
             }
         }).catch(error => {
             g_interface.on_error({

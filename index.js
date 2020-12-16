@@ -214,7 +214,9 @@ client.on('guildMemberAdd', async member => {
                 embed.setColor('#25c059');
                 await g_channels.get().staff.send({ content: '<@&749235255944413234> action is required.', embed: embed }).then(async this_message => {
                     await this_message.react('✅');
+                    await g_functions.sleep(1500);
                     await this_message.react('❌');
+                    await g_functions.sleep(1500);
                     await this_message.react('⛔');
                 });
             }

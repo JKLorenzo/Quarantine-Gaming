@@ -65,11 +65,14 @@ async function get() {
                         }
                     });
 
-                    // Process every 5 minutes
-                    await g_functions.sleep(300000);
+                    // Process every 10 minutes
+                    await g_functions.sleep(600000);
                 } else if (elapsedMinutes >= 30 && elapsedMinutes <= 300) {
                     // Push
                     g_fgu.push(item_details);
+
+                    // Process every 10 minutes
+                    await g_functions.sleep(600000);
                 }
             }
         }).catch(error => {

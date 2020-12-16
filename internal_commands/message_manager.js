@@ -10,7 +10,7 @@ const manage = async function (message) {
         // Game Invites Channel Blocking
         if (message.channel && message.channel.id == g_channels.get().gaming.id && (message.embeds.length == 0 || (message.embeds.length > 0 && message.embeds[0].author.name != 'Quarantine Gaming: Game Coordinator'))) {
             dm_member(g_channels.get().guild.member(message.author), `Hello there! You can't send any messages in ${message.channel} channel. To invite players, do *!play* command in the ${g_channels.get().general} text channel.`);
-            message.delete({ timeout: 250 }).catch(() => { });
+            message.delete({ timeout: 2500 }).catch(() => { });
         }
 
         // DM

@@ -63,6 +63,7 @@ module.exports = class ReactionRole extends Command {
                                 error: error
                             });
                         });
+                        await g_functions.sleep(1500);
                     }
                     updated = true;
                 }).catch(error => {
@@ -93,6 +94,7 @@ module.exports = class ReactionRole extends Command {
                                         error: error
                                     });
                                 });
+                                await g_functions.sleep(1500);
                             }
                             updated = true;
                         }).catch(error => {
