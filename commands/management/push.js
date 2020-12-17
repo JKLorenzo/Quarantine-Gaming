@@ -12,7 +12,7 @@ module.exports = class PushCommand extends Command {
             args: [
                 {
                     key: 'link',
-                    prompt: 'Enter the link to the giveaway.',
+                    prompt: 'Enter the link to the giveaway or the permalink of the source.',
                     type: 'string',
                 }
             ]
@@ -25,7 +25,7 @@ module.exports = class PushCommand extends Command {
             await fetch('https://www.reddit.com/r/FreeGameFindings/new/.json?limit=25&sort=new').then(data => data.json()).then(data => {
                 for (let child of data.data.children) {
                     let item = child.data;
-                    if (item.url == link) {
+                    if (item.url == link || link.toLowerCase().indexOf(item.permalink) !== -1) {
                         function htmlEntities(str) {
                             return String(str).replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"');
                         }
