@@ -20,27 +20,9 @@ module.exports = class PushCommand extends Command {
     }
 
     async run(message, { link }) {
-        message.say('Got it! Inserting to processing queue.').catch(() => { });
         try {
-            await fetch('https://www.reddit.com/r/FreeGameFindings/new/.json?limit=25&sort=new').then(data => data.json()).then(data => {
-                for (let child of data.data.children) {
-                    let item = child.data;
-                    if (item.url == link || link.toLowerCase().indexOf(item.permalink) !== -1) {
-                        function htmlEntities(str) {
-                            return String(str).replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"');
-                        }
-                        g_fgu.push({
-                            title: htmlEntities(item.title),
-                            url: item.url,
-                            author: item.author,
-                            description: htmlEntities(item.selftext),
-                            validity: item.upvote_ratio * 100,
-                            score: item.score,
-                            flair: item.link_flair_text,
-                            permalink: `https://www.reddit.com${item.permalink}`
-                        });
-                    }
-                }
+            message.reply('Checking...').then(this_message => {
+                this_message.edit(await g_fgu.get(link));
             });
         } catch (error) {
             g_interface.on_error({
@@ -49,6 +31,5 @@ module.exports = class PushCommand extends Command {
                 error: error
             });
         }
-        return;
     }
 };
