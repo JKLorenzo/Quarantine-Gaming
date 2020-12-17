@@ -161,8 +161,8 @@ async function process_push() {
                 // Check if there's no error and there's a response
                 if (!has_error && response && response.ok) {
                     output.setURL(url);
-                        let hostname = new URL(url).hostname;
-                        output.setFooter(`${hostname} | Updated as of `, g_functions.getIcon(hostname));
+                    let hostname = new URL(url).hostname;
+                    output.setFooter(`${hostname} | Updated as of `, g_functions.getIcon(hostname));
                 }
             }
 
@@ -256,7 +256,7 @@ async function process_push() {
 
             // Stores all the mentionables in this array
             let mentionables = [];
-            let searchables = (description ? description.toLowerCase() : '') + ' ' + (url ?  url.toLowerCase() : '');
+            let searchables = (description ? description.toLowerCase() : '*') + ' ' + (url ? url.toLowerCase() : '*');
 
             if (searchables.indexOf('steampowered.com') !== -1) {
                 mentionables.push(`<@&722645979248984084>`);
