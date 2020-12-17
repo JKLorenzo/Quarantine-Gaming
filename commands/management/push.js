@@ -21,7 +21,7 @@ module.exports = class PushCommand extends Command {
 
     async run(message, { link }) {
         try {
-            message.reply('Checking...').then(this_message => {
+            message.reply('Checking...').then(async this_message => {
                 this_message.edit(await g_fgu.get(link));
             });
         } catch (error) {
