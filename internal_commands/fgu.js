@@ -8,7 +8,6 @@ let is_pushing = false, to_push = new Array(), raw_data_collection = new Array()
 const get = async function (link) {
     try {
         raw_data_collection = await fetch('https://www.reddit.com/r/FreeGameFindings/new/.json?limit=25&sort=new').then(data => data.json()).then(entry => entry.data.children.map(child => child.data));
-
         if (raw_data_collection) {
             for (let raw_data of raw_data_collection) {
                 const information = {
@@ -29,18 +28,18 @@ const get = async function (link) {
 
                 const this_notification = g_db.hasRecords(information);
                 if (link) {
-                    if (link.toLowerCase() == information.url || link.toLowerCase().indexOf(information.permalink) !== -1) {
+                    if (link.trim().toLowerCase() == information.url.trim().toLowerCase() || link.trim().toLowerCase() == information.permalink.trim().toLowerCase()) {
                         if (!this_notification) {
                             // Push
                             g_fgu.push(information);
 
-                            return 'Got it! Inserting this entry to processing queue.';
+                            return 'Got it! Inserting this entry to processing queue for validation.';
                         } else {
                             return 'Uh-oh! This entry is already posted on the free games channel.';
                         }
                     }
                 } else {
-                    if (!this_notification && elapsedMinutes >= 30 && elapsedMinutes <= 300 && information.score >= 25) {
+                    if (!this_notification && elapsedMinutes >= 30 && elapsedMinutes <= 300 && information.score >= 50 && information.validity >= 75) {
                         // Push
                         g_fgu.push(information);
 
@@ -49,6 +48,7 @@ const get = async function (link) {
                     }
                 }
             }
+            if (link) return 'Uh-oh! The link you provided is no longer valid.';
         }
     } catch (error) {
         g_interface.on_error({
@@ -113,8 +113,8 @@ async function update() {
                         }
                     });
 
-                    // Process every 20 minutes
-                    await g_functions.sleep(1200000);
+                    // Process every 25 minutes
+                    await g_functions.sleep(1500000);
                 }
             }
         }
@@ -385,18 +385,18 @@ const begin = function () {
     // Inital fetch
     get();
 
-    // Fetch after every 1 hour
+    // Fetch after every 30 mins
     setInterval(() => {
         get();
-    }, 3600000);
+    }, 1800000);
 
     // Offset 5 minutes
     setTimeout(() => {
-        // Update after every 2 hours
+        // Update after every 3 hours
         setInterval(() => {
             update();
-        }, 7200000);
-    }, 12000)
+        }, 10800000);
+    }, 300000)
 }
 
 // Interface Module Functions
