@@ -103,8 +103,8 @@ const hasRecords = function (notification) {
     try {
         let similarity_threshold = 70;
         for (let this_notification of notifications) {
-            let this_similarity = g_functions.string_similarity(this_notification.url, notification.url);
-            if (this_similarity >= similarity_threshold) {
+            let this_similarity = g_functions.string_similarity(this_notification.title, notification.title);
+            if (this_similarity >= similarity_threshold || this_notification.url.trim().toLowerCase() == notification.url.trim().toLowerCase()) {
                 return this_notification;
             }
         }
@@ -116,7 +116,6 @@ const hasRecords = function (notification) {
             error: error
         });
     }
-
 }
 
 // Titles Region
