@@ -2,62 +2,110 @@ const { MessageEmbed } = require('discord.js');
 const fetch = require('node-fetch');
 const probe = require('probe-image-size');
 
-let is_pushing = false, to_push = new Array();
+let is_pushing = false, to_push = new Array(), raw_data_collection = new Array();;
 
 // Internal Functions Region
-async function get() {
+const get = async function (link) {
     try {
-        await fetch('https://www.reddit.com/r/FreeGameFindings/new/.json?limit=25&sort=new').then(data => data.json()).then(async data => {
-            for (let child of data.data.children) {
-                let item = child.data;
+        raw_data_collection = await fetch('https://www.reddit.com/r/FreeGameFindings/new/.json?limit=25&sort=new').then(data => data.json()).then(entry => entry.data.children.map(child => child.data));
 
-                let item_details = {
-                    title: g_functions.htmlEntities(item.title),
-                    url: item.url,
-                    author: item.author,
-                    description: g_functions.htmlEntities(item.selftext),
-                    validity: item.upvote_ratio * 100,
-                    score: item.score,
-                    flair: item.link_flair_text,
-                    permalink: `https://www.reddit.com${item.permalink}`,
-                    createdAt: item.created_utc
+        if (raw_data_collection) {
+            for (let raw_data of raw_data_collection) {
+                const information = {
+                    title: g_functions.htmlEntities(raw_data.title),
+                    url: raw_data.url,
+                    author: raw_data.author,
+                    description: g_functions.htmlEntities(raw_data.selftext),
+                    validity: raw_data.upvote_ratio * 100,
+                    score: raw_data.score,
+                    flair: raw_data.link_flair_text,
+                    permalink: `https://www.reddit.com${raw_data.permalink}`,
+                    createdAt: raw_data.created_utc
                 };
 
-                let today = new Date();
-                let published = new Date(item_details.createdAt * 1000);
-                let elapsedMinutes = Math.floor((today - published) / 60000);
+                const today = new Date();
+                const published = new Date(information.createdAt * 1000);
+                const elapsedMinutes = Math.floor((today - published) / 60000);
 
-                let this_notif = g_db.hasRecords(item_details);
-                if (this_notif) {
+                const this_notification = g_db.hasRecords(information);
+                if (link) {
+                    if (link.toLowerCase() == information.url || link.toLowerCase().indexOf(information.permalink) !== -1) {
+                        if (!this_notification) {
+                            // Push
+                            g_fgu.push(information);
+
+                            return 'Got it! Inserting this entry to processing queue.';
+                        } else {
+                            return 'Uh-oh! This entry is already posted on the free games channel.';
+                        }
+                    }
+                } else {
+                    if (!this_notification && elapsedMinutes >= 30 && elapsedMinutes <= 300 && information.score >= 25) {
+                        // Push
+                        g_fgu.push(information);
+
+                        // Process every 10 minutes
+                        await g_functions.sleep(600000);
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        g_interface.on_error({
+            name: 'get',
+            location: 'fgu.js',
+            error: error
+        });
+    }
+}
+
+async function update() {
+    try {
+        if (raw_data_collection) {
+            for (let raw_data of raw_data_collection) {
+                const information = {
+                    title: g_functions.htmlEntities(raw_data.title),
+                    url: raw_data.url,
+                    author: raw_data.author,
+                    description: g_functions.htmlEntities(raw_data.selftext),
+                    validity: raw_data.upvote_ratio * 100,
+                    score: raw_data.score,
+                    flair: raw_data.link_flair_text,
+                    permalink: `https://www.reddit.com${raw_data.permalink}`,
+                    createdAt: raw_data.created_utc
+                };
+
+                const this_notification = g_db.hasRecords(information);
+                if (this_notification) {
                     // Update
-                    await g_channels.get().updates.messages.fetch(this_notif.id).then(async this_message => {
+                    await g_channels.get().updates.messages.fetch(this_notification.id).then(async this_message => {
                         if (this_message) {
-                            if (item_details.description) {
+                            if (information.description) {
                                 this_message.embeds[0].spliceFields(1, 3)
                                     .addFields([
-                                        { name: 'Trust Factor', value: `${item_details.validity} %`, inline: true },
-                                        { name: 'Margin', value: `${item_details.score}`, inline: true },
-                                        { name: 'Details', value: `${item_details.description}` }
+                                        { name: 'Trust Factor', value: `${information.validity} %`, inline: true },
+                                        { name: 'Margin', value: `${information.score}`, inline: true },
+                                        { name: 'Details', value: `${information.description}` }
                                     ])
                                     .setTimestamp();
                             } else {
                                 this_message.embeds[0].spliceFields(1, 2)
                                     .addFields([
-                                        { name: 'Trust Factor', value: `${item_details.validity} %`, inline: true },
-                                        { name: 'Margin', value: `${item_details.score}`, inline: true }
+                                        { name: 'Trust Factor', value: `${information.validity} %`, inline: true },
+                                        { name: 'Margin', value: `${information.score}`, inline: true }
                                     ])
                                     .setTimestamp();
                             }
-                            if (item_details.flair) {
-                                if (item_details.flair.toLowerCase().indexOf('comment') != -1 || item_details.flair.toLowerCase().indexOf('issue') != -1) {
-                                    this_message.embeds[0].setDescription(`[${item_details.flair}](${item_details.permalink})`);
+                            if (information.flair) {
+                                if (information.flair.toLowerCase().indexOf('comment') != -1 || information.flair.toLowerCase().indexOf('issue') != -1) {
+                                    this_message.embeds[0].setDescription(`[${information.flair}](${information.permalink})`);
                                 } else {
-                                    this_message.embeds[0].setDescription(item_details.flair);
+                                    this_message.embeds[0].setDescription(information.flair);
                                 }
                             }
                             await this_message.edit({ content: this_message.content, embed: this_message.embeds[0] }).catch(error => {
                                 g_interface.on_error({
-                                    name: 'get -> edit(this_message)',
+                                    name: 'update -> edit(this_message)',
                                     location: 'fgu.js',
                                     error: error
                                 });
@@ -65,28 +113,14 @@ async function get() {
                         }
                     });
 
-                    // Process every 10 minutes
-                    await g_functions.sleep(600000);
-                } else if (elapsedMinutes >= 30 && elapsedMinutes <= 300) {
-                    // Push
-                    g_fgu.push(item_details);
-
-                    // Process every 10 minutes
-                    await g_functions.sleep(600000);
+                    // Process every 20 minutes
+                    await g_functions.sleep(1200000);
                 }
             }
-        }).catch(error => {
-            if (!error.message.indexOf('getaddrinfo EAI_AGAIN') !== -1) {
-                g_interface.on_error({
-                    name: 'get -> fetch()',
-                    location: 'fgu.js',
-                    error: error
-                });
-            }
-        });
+        }
     } catch (error) {
         g_interface.on_error({
-            name: 'get',
+            name: 'update',
             location: 'fgu.js',
             error: error
         });
@@ -348,19 +382,26 @@ const push = function (notification) {
 }
 
 const begin = function () {
-    // Delay for 10 mins
-    setTimeout(() => {
-        // Inital fetch
+    // Inital fetch
+    get();
+
+    // Fetch after every 1 hour
+    setInterval(() => {
         get();
-        // Fetch after every 1 hour
+    }, 3600000);
+
+    // Offset 5 minutes
+    setTimeout(() => {
+        // Update after every 2 hours
         setInterval(() => {
-            get();
-        }, 3600000);
-    }, 600000);
+            update();
+        }, 7200000);
+    }, 12000)
 }
 
 // Interface Module Functions
 module.exports = {
     push,
-    begin
+    begin,
+    get
 }
