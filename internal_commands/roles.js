@@ -19,7 +19,6 @@ const init = async function () {
             error: error
         });
     }
-
 }
 
 const get = function () {
