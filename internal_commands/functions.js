@@ -5,7 +5,6 @@ const sleep = function (ms) {
 }
 
 const setActivity = function (value, type = 'LISTENING') {
-    // Set the bot's activity
     return g_client.user.setActivity(value.trim(), {
         type: type.trim().toUpperCase()
     });

@@ -1,17 +1,6 @@
 const { CommandoClient } = require('discord.js-commando');
 const { MessageEmbed } = require('discord.js');
-const path = require('path');
-const db = require(path.join(__dirname, 'internal_commands', 'database.js'));
-const interface = require(path.join(__dirname, 'internal_commands', 'interface.js'));
-const fgu = require(path.join(__dirname, 'internal_commands', 'fgu.js'));
-const coordinator = require(path.join(__dirname, 'internal_commands', 'coordinator.js'));
-const dynamic_roles = require(path.join(__dirname, 'internal_commands', 'dynamic_roles.js'));
-const dynamic_channels = require(path.join(__dirname, 'internal_commands', 'dynamic_channels.js'));
-const message_manager = require(path.join(__dirname, 'internal_commands', 'message_manager.js'));
-const speech = require(path.join(__dirname, 'internal_commands', 'speech.js'));
-const functions = require(path.join(__dirname, 'internal_commands', 'functions.js'));
-const channels = require(path.join(__dirname, 'internal_commands', 'channels.js'));
-const roles = require(path.join(__dirname, 'internal_commands', 'roles.js'));
+const app = require('./modules/app.js');
 
 const client = new CommandoClient({
     commandPrefix: '!',
@@ -20,21 +9,6 @@ const client = new CommandoClient({
         'MESSAGE', 'CHANNEL', 'REACTION'
     ]
 });
-
-// Global Variables
-global.rootDir = path.resolve(__dirname);
-global.g_db = db;
-global.g_fgu = fgu;
-global.g_interface = interface;
-global.g_speech = speech;
-global.g_functions = functions;
-global.g_channels = channels;
-global.g_message_manager = message_manager;
-global.g_roles = roles;
-global.g_dynamic_channels = dynamic_channels;
-global.g_dynamic_roles = dynamic_roles;
-global.g_coordinator = coordinator;
-global.g_client = client;
 
 client.registry
     .registerDefaultTypes()
@@ -51,46 +25,11 @@ client.registry
     })
     .registerCommandsIn(path.join(__dirname, 'commands'));
 
+let initialized = false;
+
 client.once('ready', async () => {
-    try {
-        console.log('-------------{  Startup  }-------------');
-
-        // Initialize modules
-        roles.init();
-        await channels.init();
-        await db.init();
-        dynamic_roles.init();
-        dynamic_channels.init();
-        await functions.getInviter();
-        await roles.checkUnlisted();
-        fgu.begin()
-
-        // Clear Messages
-        message_manager.clear_channels();
-
-        functions.setActivity('!help').catch(error => {
-            g_interface.on_error({
-                name: `ready -> .setActivity() [default]`,
-                location: 'index.js',
-                error: error
-            });
-        });
-
-        if (process.env.STARTUP_REASON) {
-            let embed = new MessageEmbed();
-            embed.setColor('#ffff00');
-            embed.setAuthor('Quarantine Gaming', client.user.displayAvatarURL());
-            embed.setTitle('Startup Initiated');
-            embed.addField('Reason', process.env.STARTUP_REASON);
-            g_interface.log(embed);
-        }
-    } catch (error) {
-        g_interface.on_error({
-            name: 'ready',
-            location: 'index.js',
-            error: error
-        });
-    }
+    console.log('-------------{  Startup  }-------------');
+    initialized = await app.initialize(client);
 });
 
 client.on('message', message => message_manager.manage(message));
