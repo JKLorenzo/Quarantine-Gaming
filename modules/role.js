@@ -3,6 +3,8 @@ const functions = require('./functions.js');
 
 const RoleCreateManager = functions.createManager(1000);
 const RoleDeleteManager = functions.createManager(5000);
+const RoleAddManager = functions.createManager(1000);
+const RoleRemoveManager = functions.createManager(1000);
 
 module.exports = {
     create: function (options = {
@@ -50,5 +52,31 @@ module.exports = {
             RoleDeleteManager.finish();
             error ? reject(error) : resolve(output)
         })
+    },
+    add: function (user, role) {
+        return new Promise(async (resolve, reject) => {
+            await RoleAddManager.queue();
+            let output, error;
+            try {
+                output = await app.member(user).roles.add(app.role(role));
+            } catch (err) {
+                error = err;
+            }
+            RoleAddManager.finish();
+            error ? reject(error) : resolve(output)
+        });
+    },
+    remove: function (user, role) {
+        return new Promise(async (resolve, reject) => {
+            await RoleRemoveManager.queue();
+            let output, error;
+            try {
+                output = await app.member(user).roles.remove(app.role(role));
+            } catch (err) {
+                error = err;
+            }
+            RoleRemoveManager.finish();
+            error ? reject(error) : resolve(output)
+        });
     }
 }
