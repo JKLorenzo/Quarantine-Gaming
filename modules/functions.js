@@ -39,5 +39,8 @@ module.exports = {
             hours: Math.floor((diffMs % 86400000) / 3600000),
             minutes: Math.round(((diffMs % 86400000) % 3600000) / 60000)
         };
+    },
+    toAlphanumericString: function (string) {
+        return String(string).replace(/[^a-z0-9]/gi, '')
     }
 }
