@@ -1,4 +1,5 @@
 const app = require('./app.js');
+const constants = require('./constants.js');
 const functions = require('./functions.js');
 
 const ChannelCreateManager = functions.createManager(5000);
@@ -57,5 +58,18 @@ module.exports = {
             ChannelDeleteManager.finish();
             error ? reject(error) : resolve(output)
         })
+    },
+    clearTempChannels: function () {
+        const channels_to_clear = [
+            constants.channels.integrations.game_invites,
+            constants.channels.qg.testing_ground_text
+        ];
+        for (let channel of channels_to_clear) {
+            app.channel(channel).messages.fetch().then(async messages => {
+                for (let message of messages) {
+                    message[1].delete({ timeout: 900000 }).catch(() => { }); // Delete after 15 mins
+                }
+            });
+        }
     }
 }
