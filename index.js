@@ -26,8 +26,8 @@ client.registry
     .registerCommandsIn(path.join(__dirname, 'commands'));
 
 client.once('ready', async () => {
-    console.log('-------------{  Startup  }-------------');
-    await app.initialize(client);
+    console.log('Startup');
+    app.initialize(client);
 });
 
 client.on('message', message => message_manager.manage(message));
