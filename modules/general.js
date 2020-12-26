@@ -5,7 +5,7 @@ const functions = require('./functions.js');
 const error_manager = require('./error_manager.js');
 const message = require('./message.js');
 
-const error_ticket = error_manager.for('member.js');
+const error_ticket = error_manager.for('general.js');
 
 module.exports = {
     checkUnlisted: function () {
