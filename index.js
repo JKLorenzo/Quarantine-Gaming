@@ -2,6 +2,10 @@ const { CommandoClient } = require('discord.js-commando');
 const { MessageEmbed } = require('discord.js');
 const app = require('./modules/app.js');
 const message = require('./modules/message.js');
+const error_manager = require('./error_manager.js');
+const reactions = require('./modules/reaction.js');
+
+const error_ticket = error_manager.for('index.js');
 
 const client = new CommandoClient({
     commandPrefix: '!',
@@ -176,9 +180,39 @@ client.on('presenceUpdate', (oldData, newData) => dynamic_roles.update(oldData, 
 
 client.on('voiceStateUpdate', (oldState, newState) => dynamic_channels.update(oldState, newState));
 
-client.on('messageReactionAdd', (reaction, user) => message_manager.reactionAdd(reaction, user));
+client.on('messageReactionAdd', (reaction, user) => {
+    if (app.isInitialized) {
+        try {
+            if (reaction.partial) await reaction.fetch();
+            if (reaction.message.partial) await reaction.message.fetch();
+            const this_message = reaction.message;
+            const this_member = app.member(user.id);
 
-client.on('messageReactionRemove', (reaction, user) => message_manager.reactionRemove(reaction, user));
+            if (this_member && !this_member.user.bot && this_message && this_message.embeds.length > 0) {
+                reactions.onReactionAdd(this_message.embeds[0], reaction.emoji.name, this_member, this_message);
+            }
+        } catch (error) {
+            error_manager.mark(new error_ticket('messageReactionAdd', error));
+        }
+    }
+});
+
+client.on('messageReactionRemove', (reaction, user) => {
+    if (app.isInitialized) {
+        try {
+            if (reaction.partial) await reaction.fetch();
+            if (reaction.message.partial) await reaction.message.fetch();
+            const this_message = reaction.message;
+            const this_member = app.member(user.id);
+
+            if (this_member && !this_member.user.bot && this_message && this_message.embeds.length > 0) {
+                reactions.onReactionRemove(this_message.embeds[0], reaction.emoji.name, this_member, this_message);
+            }
+        } catch (error) {
+            error_manager.mark(new error_ticket('messageReactionRemove', error));
+        }
+    }
+});
 
 client.on('rateLimit', (rateLimitInfo) => {
     let embed = new MessageEmbed();
