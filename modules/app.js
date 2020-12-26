@@ -24,9 +24,9 @@ module.exports = {
         return global_client.member(user);
     },
     initialize: async function (client) {
-        global_client = client;
-
         try {
+            global_client = client;
+
             await this.setActivity('!help');
 
             if (process.env.STARTUP_REASON) {
@@ -38,11 +38,13 @@ module.exports = {
 
                 await message.sendToChannel(constants.channels.qg.logs, embed);
             }
-        } catch (error) {
-            error_manager.mark(new error_ticket('instantiate', error));
-        }
 
-        initialized = true;
+            initialized = true;
+
+            console.log('Initialized');
+        } catch (error) {
+            error_manager.mark(new error_ticket('initialize', error));
+        }
     },
     setActivity: function (value, type = 'LISTENING') {
         return global_client.user.setActivity(value.trim(), {
