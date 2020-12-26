@@ -1,6 +1,7 @@
 const { CommandoClient } = require('discord.js-commando');
 const { MessageEmbed } = require('discord.js');
 const app = require('./modules/app.js');
+const message = require('./modules/message.js');
 
 const client = new CommandoClient({
     commandPrefix: '!',
@@ -30,7 +31,11 @@ client.once('ready', async () => {
     app.initialize(client);
 });
 
-client.on('message', message => message_manager.manage(message));
+client.on('message', incoming_message => {
+    if (app.isInitialized) {
+        message.process(incoming_message);
+    }
+});
 
 client.on('userUpdate', (oldUser, newUser) => {
     try {

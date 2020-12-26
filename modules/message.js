@@ -1,6 +1,9 @@
 const app = require('./app.js');
+const constants = require('./constants.js');
 const functions = require('./functions.js');
+const error_manager = require('./error_manager.js');
 
+const error_ticket = error_manager.for('message.js');
 const ChannelMessageManager = functions.createManager(1000);
 const DirectMessageManager = functions.createManager(5000);
 
@@ -33,5 +36,38 @@ module.exports = {
             DirectMessageManager.finish();
             error ? reject(error) : resolve(output)
         });
+    },
+    process: function (message) {
+        try {
+            // Help
+            if (message.channel && message.content.toLowerCase() == '!help') {
+                message.channel.send(`Visit <https://quarantinegamingdiscord.wordpress.com/> to learn more.`);
+            }
+
+            // Game Invites Channel Blocking
+            if (message.channel && message.channel.id == constants.channels.integrations.game_invites && (message.embeds.length == 0 || (message.embeds.length > 0 && message.embeds[0].author.name != 'Quarantine Gaming: Game Coordinator'))) {
+                this.sendToUser(message.author, "Hello there! You can't send any messages in " + message.channel + " channel.");
+                message.delete({ timeout: 2500 }).catch(() => { });
+            }
+
+            // DM
+            if (message.guild == null) {
+                const this_member = app.member(message.author);
+                if (this_member && !this_member.user.bot) {
+                    const embed = new MessageEmbed()
+                        .setAuthor('Quarantine Gaming: Direct Message Handler')
+                        .setTitle(`New Message`)
+                        .setThumbnail(message.author.displayAvatarURL())
+                        .addField('Sender:', this_member)
+                        .addField('Message:', message.content)
+                        .setFooter(`To reply, do: !message dm ${this_member.user.id} <message>`)
+                        .setColor(`#00ff6f`);
+
+                    this.sendToChannel(constants.channels.qg.dm, embed);
+                }
+            }
+        } catch (error) {
+            error_manager.mark(new error_ticket('incoming', error));
+        }
     }
 }
