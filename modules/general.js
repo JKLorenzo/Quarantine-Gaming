@@ -9,7 +9,7 @@ const reaction = require('./reaction.js');
 const error_ticket = error_manager.for('general.js');
 
 module.exports = {
-    checkUnlisted: function () {
+    checkUnlisted: async function () {
         try {
             for (let this_member of app.guild.members.cache.array()) {
                 // Check if any member doesnt have member role
