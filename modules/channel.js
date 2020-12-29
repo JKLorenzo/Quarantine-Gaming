@@ -21,16 +21,16 @@ module.exports = {
 
         get: function () {
             const GuildCreateChannelOptions;
-            if (this.bitrate !== null) options.bitrate = this.bitrate;
-            if (this.nsfw !== null) options.nsfw = this.nsfw;
-            if (this.parent !== null) options.parent = this.parent;
-            if (this.permissionOverwrites !== null) options.permissionOverwrites = this.permissionOverwrites;
-            if (this.position !== null) options.position = this.position;
-            if (this.rateLimitPerUser !== null) options.rateLimitPerUser = this.rateLimitPerUser;
-            if (this.reason !== null) options.reason = this.reason;
-            if (this.topic !== null) options.topic = this.topic;
-            if (this.type !== null) options.type = this.type;
-            if (this.userLimit !== null) options.userLimit = this.userLimit;
+            if (this.bitrate !== null) GuildCreateChannelOptions.bitrate = this.bitrate;
+            if (this.nsfw !== null) GuildCreateChannelOptions.nsfw = this.nsfw;
+            if (this.parent !== null) GuildCreateChannelOptions.parent = this.parent;
+            if (this.permissionOverwrites !== null) GuildCreateChannelOptions.permissionOverwrites = this.permissionOverwrites;
+            if (this.position !== null) GuildCreateChannelOptions.position = this.position;
+            if (this.rateLimitPerUser !== null) GuildCreateChannelOptions.rateLimitPerUser = this.rateLimitPerUser;
+            if (this.reason !== null) GuildCreateChannelOptions.reason = this.reason;
+            if (this.topic !== null) GuildCreateChannelOptions.topic = this.topic;
+            if (this.type !== null) GuildCreateChannelOptions.type = this.type;
+            if (this.userLimit !== null) GuildCreateChannelOptions.userLimit = this.userLimit;
             return GuildCreateChannelOptions;
         }
     }) {
