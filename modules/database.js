@@ -15,7 +15,7 @@ let index = 0,
     whitelisted = new Array();
 
 module.exports = {
-    initialize: function () {
+    initialize: async function () {
         try {
             index = 0;
             notifications = new Array();
