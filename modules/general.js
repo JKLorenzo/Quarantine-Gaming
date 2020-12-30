@@ -6,12 +6,14 @@ const error_manager = require('./error_manager.js');
 const message = require('./message.js');
 const reaction = require('./reaction.js');
 const role = require('./role.js');
+const channel = require('./channel.js');
 const database = require('./database.js');
 
 const error_ticket = error_manager.for('general.js');
 
 const OfflineManager = functions.createManager(1000);
 const ActivityManager = functions.createManager(5000);
+const VoiceManager = functions.createManager(1000);
 
 module.exports = {
     checkUnlisted: async function () {
@@ -115,6 +117,104 @@ module.exports = {
             error_manager.mark(new error_ticket('memberActivityUpdate', error));
         }
         ActivityManager.finish();
+    },
+    memberVoiceUpdate: async function (member, oldState, newState) {
+        await VoiceManager.queue();
+        try {
+            if (oldState.channel && oldState.channel.parent.id == constants.channels.category.dedicated) {
+                const text_channel = app.channel(constants.channels.category.dedicated).children.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == oldState.channelID);
+                const linked_data = text_channel.topic.split(' ');
+                const text_role = app.role(linked_data[1]);
+                const team_role = app.role(linked_data[2]);
+
+                if (oldState.channel.members.size > 0 && !(oldState.channel.members.size == 1 && oldState.channel.members.first().user.bot)) {
+                    await role.remove(member, text_role);
+                    await role.remove(member, team_role);
+                    const embed = new MessageEmbed();
+                    embed.setAuthor('Quarantine Gaming: Dedicated Channels');
+                    embed.setTitle(oldState.channel.name);
+                    embed.setDescription(`${oldState.member} left this channel.`);
+                    embed.setThumbnail(member.user.displayAvatarURL());
+                    embed.setFooter(`${member.user.tag} (${member.user.id})`);
+                    embed.setTimestamp();
+                    embed.setColor('#7b00ff');
+                    await message.sendToChannel(text_channel, embed);
+                } else {
+                    await channel.delete(oldState.channel);
+                    await channel.delete(text_channel);
+                    await role.delete(text_role);
+                    await role.delete(team_role);
+                }
+            }
+
+            if (newState.channel) {
+                // Check if members are streaming
+                const streamers = new Array();
+                for (const this_member of newState.channel.members.array()) {
+                    if (member.user.id != this_member.user.id && this_member.roles.cache.has(constants.roles.streaming)) {
+                        streamers.push(this_member);
+                    }
+                }
+                // Notify member
+                if (streamers.length > 0) {
+                    const embed = new MessageEmbed();
+                    embed.setAuthor('Quarantine Gaming: Information');
+                    embed.setTitle(`${streamers.length > 1 ? `${streamers.map(member => member.displayName).join(' and ')} are` : `${streamers.map(member => member.displayName)} is`} currently Streaming`);
+                    embed.setDescription('Please observe proper behavior on your current voice channel.');
+                    embed.setImage('https://pa1.narvii.com/6771/d33918fa87ad0d84b7dc854dcbf6a8545c73f94d_hq.gif');
+                    embed.setColor('#5dff00');
+                    await message.sendToUser(member, embed);
+                }
+
+                if (newState.channel.parent.id == constants.channels.category.dedicated) {
+                    const text_channel = app.channel(constants.channels.category.dedicated).children.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == newState.channelID);
+                    const linked_data = text_channel.topic.split(' ');
+                    const text_role = app.role(linked_data[1]);
+                    const team_role = app.role(linked_data[2]);
+
+                    // Add Text Role
+                    if (!member.roles.cache.has(text_role.id)) {
+                        const embed = new MessageEmbed();
+                        embed.setAuthor('Quarantine Gaming: Dedicated Channels');
+                        embed.setTitle(newState.channel.name);
+                        embed.setDescription(`${newState.member} joined this channel.`);
+                        embed.setThumbnail(newState.member.user.displayAvatarURL());
+                        embed.setFooter(`${newState.member.user.tag} (${newState.member.user.id})`);
+                        embed.setTimestamp();
+                        embed.setColor('#7b00ff');
+                        await message.sendToChannel(text_channel, embed);
+                        await role.add(member, text_role);
+                    }
+
+                    // Add Team Role
+                    if (!member.roles.cache.has(team_role.id)) {
+                        await role.add(member, team_role);
+                    }
+
+                    // Add Dedicated Role
+                    if (!member.roles.cache.has(constants.roles.dedicated)) {
+                        await role.add(member, constants.roles.dedicated);
+                    }
+                } else {
+                    // Remove Text Role
+                    if (member.roles.cache.has(constants.roles.dedicated)) {
+                        await role.remove(member, constants.roles.dedicated);
+                    }
+                }
+            } else {
+                // Remove Streaming Role
+                if (member.roles.cache.has(constants.roles.steaming)) {
+                    await role.remove(member, constants.roles.steaming)
+                }
+                // Remove Text Role
+                if (member.roles.cache.has(constants.roles.dedicated)) {
+                    await role.remove(member, constants.roles.dedicated);
+                }
+            }
+        } catch (error) {
+            error_manager.mark(new error_ticket('memberVoiceUpdate', error));
+        }
+        VoiceManager.finish();
     },
     gameInvite: async function (role, member, count, reserved) {
         try {

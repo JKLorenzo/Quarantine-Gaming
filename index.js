@@ -212,7 +212,16 @@ client.on('presenceUpdate', (oldPresence, newPresence) => {
     }
 });
 
-client.on('voiceStateUpdate', (oldState, newState) => dynamic_channels.update(oldState, newState));
+client.on('voiceStateUpdate', (oldState, newState) => {
+    try {
+        const member = newState.member ? newState.member : oldState.member;
+        if (!member.user.bot && oldState.channel != newState.channel) {
+            general.memberVoiceUpdate(member, oldState, newState);
+        }
+    } catch (error) {
+        error_manager.mark(new error_ticket('voiceStateUpdate', error));
+    }
+});
 
 client.on('messageReactionAdd', (reaction, user) => {
     if (app.isInitialized) {
