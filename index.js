@@ -4,6 +4,8 @@ const app = require('./modules/app.js');
 const message = require('./modules/message.js');
 const error_manager = require('./error_manager.js');
 const reactions = require('./modules/reaction.js');
+const general = require('./modules/general.js');
+const functions = require('./modules/functions.js');
 
 const error_ticket = error_manager.for('index.js');
 
@@ -176,7 +178,39 @@ client.on('guildMemberAdd', async member => {
     }
 });
 
-client.on('presenceUpdate', (oldData, newData) => dynamic_roles.update(oldData, newData));
+client.on('presenceUpdate', (oldPresence, newPresence) => {
+    try {
+        const member = newPresence.member ? newPresence.member : oldPresence.member;
+        if (!member.user.bot) {
+            if (newPresence.status == 'offline') {
+                general.memberOffline(member);
+            }
+
+            // Sort Changed Activities
+            let oldActivities = new Array(), newActivities = new Array();
+            if (oldPresence) oldActivities = oldPresence.activities.map(activity => activity.name.trim());
+            if (newPresence) newActivities = newPresence.activities.map(activity => activity.name.trim());
+            const acitivityDifference = functions.compareArray(oldActivities, newActivities).map(activity_name => {
+                if (newActivities.includes(activity_name)) {
+                    return {
+                        activity: newPresence.activities.find(activity => activity.name.trim() == activity_name),
+                        new: true
+                    }
+                } else {
+                    return {
+                        activity: oldPresence.activities.find(activity => activity.name.trim() == activity_name),
+                        new: false
+                    }
+                }
+            });
+            for (const data of acitivityDifference) {
+                general.memberActivityUpdate(member, data);
+            }
+        }
+    } catch (error) {
+        error_manager.mark(new error_ticket('presenceUpdate', error));
+    }
+});
 
 client.on('voiceStateUpdate', (oldState, newState) => dynamic_channels.update(oldState, newState));
 

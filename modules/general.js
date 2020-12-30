@@ -5,8 +5,13 @@ const functions = require('./functions.js');
 const error_manager = require('./error_manager.js');
 const message = require('./message.js');
 const reaction = require('./reaction.js');
+const role = require('./role.js');
+const database = require('./database.js');
 
 const error_ticket = error_manager.for('general.js');
+
+const OfflineManager = functions.createManager(1000);
+const ActivityManager = functions.createManager(5000);
 
 module.exports = {
     checkUnlisted: async function () {
@@ -35,6 +40,81 @@ module.exports = {
         } catch (error) {
             error_manager.mark(new error_ticket('checkUnlisted', error));
         }
+    },
+    memberOffline: async function (member) {
+        await OfflineManager.queue();
+        try {
+            // Remove Dedicated Channel Role
+            if (member.roles.cache.has(constants.roles.dedicated)) {
+                await role.remove(member, constants.roles.dedicated);
+            }
+
+            // Remove all Dedicated Channel's Text Channel Roles
+            let text_channel_role = null;
+            do {
+                text_channel_role = member.roles.cache.find(role => role.name.startsWith('Text'));
+                if (text_channel_role) await role.remove(member, text_channel_role);
+            } while (text_channel_role);
+
+            // Remove all Team Roles
+            let team_role = null;
+            do {
+                team_role = member.roles.cache.find(role => role.name.startsWith('Team'));
+                if (team_role) await role.remove(member, team_role);
+            } while (team_role);
+        } catch (error) {
+            error_manager.mark(new error_ticket('memberOffline', error));
+        }
+        OfflineManager.finish();
+    },
+    memberActivityUpdate: async function (member, data) {
+        await ActivityManager.queue();
+        try {
+            const activity = data.activity;
+            const activity_name = activity.name.trim();
+            if (activity.type == 'PLAYING' && !database.gameTitles().blacklisted.includes(activity_name.toLowerCase()) && (activity.applicationID || database.gameTitles().whitelisted.includes(activity_name.toLowerCase()))) {
+                const streaming_role = app.role(constants.roles.streaming);
+                const game_role = app.guild.roles.cache.find(role => role.name == activity_name) || await role.create({ name: activity_name, color: '0x00ffff' });
+                let play_role = app.guild.roles.cache.find(role => role.name == 'Play ' + activity_name);
+
+                if (!app.guild.roles.cache.find(role => role.name == activity_name + ' ⭐')) await role.create({ name: activity_name + ' ⭐', color: '0x00fffe' });
+
+                if (data.new) {
+                    if (play_role) {
+                        // Bring Play Role to Top
+                        await play_role.setPosition(streaming_role.position - 1);
+                    } else {
+                        // Create Play Role
+                        play_role = await role.create({ name: 'Play ' + activity_name, color: '0x7b00ff', position: streaming_role.position, hoist: true });
+                    }
+                    await role.add(member, game_role);
+                    await role.add(member, play_role);
+                } else if (play_role) {
+                    // Remove Play Role from this member
+                    if (member.roles.cache.has(play_role.id)) {
+                        await role.remove(member, play_role);
+                    }
+                    // Check if Play Role is still in use
+                    let role_in_use = false;
+                    for (const this_member of app.guild.members.cache.array()) {
+                        if (this_member.roles.cache.find(role => role == play_role)) {
+                            // Check if this member is still playing
+                            if (this_member.presence.activities.map(activity => activity.name.trim()).includes(play_role.name.substring(5))) {
+                                role_in_use = true;
+                            }
+                        }
+                    }
+                    // Delete inactive Play Roles
+                    if (!role_in_use) {
+                        // Delete Play Role
+                        await role.delete(play_role);
+                    }
+                }
+            }
+        } catch (error) {
+            error_manager.mark(new error_ticket('memberActivityUpdate', error));
+        }
+        ActivityManager.finish();
     },
     gameInvite: async function (role, member, count, reserved) {
         try {
