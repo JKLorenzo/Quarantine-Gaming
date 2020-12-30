@@ -7,6 +7,7 @@ const error_manager = require('./error_manager.js');
 const role = require('./role.js');
 const database = require('./database.js');
 const general = require('./general.js');
+const channel = require('./channel.js');
 
 let global_client = new CommandoClient();
 let initialized = false;
@@ -95,6 +96,27 @@ module.exports = {
                         if (!text_channel || (text_channel && !text_channel.members.find(member => member.user.id == this_member.user.id))) {
                             await role.remove(this_member, this_role);
                         }
+                    }
+                }
+            }
+
+            // Manage Inactive Dedicated Channel Related Channels
+            for (const dedicated_channel of this.channel(constants.channels.category.dedicated).children.array()) {
+                if (dedicated_channel.type == 'voice' && dedicated_channel.parent && dedicated_channel.parentID == constants.channels.category.dedicated) {
+                    let empty = true;
+                    for (const this_member of dedicated_channel.members.array()) {
+                        if (!this_member.user.bot) empty = false;
+                    }
+                    if (empty) {
+                        const text_channel = this.guild.channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == dedicated_channel.id);
+                        const linked_data = text_channel.topic.split(' ');
+                        const text_role = this.role(linked_data[1]);
+                        const team_role = this.role(linked_data[2]);
+
+                        await channel.delete(dedicated_channel);
+                        await channel.delete(text_channel);
+                        await role.delete(text_role);
+                        await role.delete(team_role);
                     }
                 }
             }
