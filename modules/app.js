@@ -37,7 +37,7 @@ module.exports = {
             await this.setActivity('!help');
 
             // Manage Active Dedicated Channels
-            for (const dedicated_channel of this.channel(constants.channels.category.dedicated).children) {
+            for (const dedicated_channel of this.channel(constants.channels.category.dedicated).children.array()) {
                 if (dedicated_channel.type == 'text') {
                     const linked_data = dedicated_channel.topic.split(' ');
                     const voice_channel = this.channel(linked_data[0]);
