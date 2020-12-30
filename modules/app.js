@@ -6,6 +6,7 @@ const message = require('./message.js');
 const error_manager = require('./error_manager.js');
 const role = require('./role.js');
 const database = require('./database.js');
+const general = require('./general.js');
 
 let global_client = new CommandoClient();
 let initialized = false;
@@ -163,6 +164,47 @@ module.exports = {
                     await role.delete(this_role);
                 }
             }
+
+            // Auto Dedicate
+            setInterval(() => {
+                try {
+                    const channels_for_dedication = new Array();
+                    for (const this_channel of this.channel(constants.channels.category.voice).children.array()) {
+                        if (this_channel.type == 'voice') channels_for_dedication.push(this_channel);
+                    }
+                    for (const this_channel of this.channel(constants.channels.category.dedicated).children.array()) {
+                        if (this_channel.type == 'voice') channels_for_dedication.push(this_channel);
+                    }
+                    for (const this_channel of channels_for_dedication) {
+                        if (this_channel.members.size > 1) {
+                            // Get baseline activity
+                            let baseline_role, same_acitivities, diff_acitivities;
+                            for (const this_member of this_channel.members.array()) {
+                                for (const this_role of this_member.roles.cache.array()) {
+                                    if (!baseline_role && this_role.name.startsWith('Play')) {
+                                        // Check how many users have the same roles
+                                        same_acitivities = 0;
+                                        diff_acitivities = 0;
+                                        for (const the_member of this_channel.members.array()) {
+                                            if (the_member.roles.cache.find(role => role == this_role)) {
+                                                same_acitivities++;
+                                            } else if (the_member.roles.cache.find(role => role.name.startsWith('Play'))) {
+                                                diff_acitivities++;
+                                            }
+                                        }
+                                        if (same_acitivities > 1 && same_acitivities > diff_acitivities && !this_role.name.substring(5).startsWith(this_channel.name.substring(2))) {
+                                            baseline_role = this_role;
+                                            general.dedicateChannel(this_channel, this_role.name.substring(5));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } catch (error) {
+                    error_manager.mark(new error_ticket('Auto Dedicate', error, 'initialize'));
+                }
+            }, 120000);
 
             if (process.env.STARTUP_REASON) {
                 const embed = new MessageEmbed();
