@@ -8,12 +8,14 @@ const reaction = require('./reaction.js');
 const role = require('./role.js');
 const channel = require('./channel.js');
 const database = require('./database.js');
+const speech = require('./speech.js');
 
 const error_ticket = error_manager.for('general.js');
 
 const OfflineManager = functions.createManager(1000);
 const ActivityManager = functions.createManager(5000);
 const VoiceManager = functions.createManager(1000);
+const DedicateManager = functions.createManager(10000);
 
 module.exports = {
     checkUnlisted: async function () {
@@ -273,5 +275,169 @@ module.exports = {
         } catch (error) {
             error_manager.mark(new error_ticket('gameInvite', error));
         }
+    },
+    dedicateChannel: async function (origin, name) {
+        await DedicateManager.queue();
+        try {
+            const channel_name = '🔰' + name;
+            const channel_origin = app.channel(origin);
+            if (channel_origin) {
+                if (channel_origin.parentID == constants.channels.category.dedicated) {
+                    // Rename
+                    await channel_origin.setName(channel_name);
+                    const text_channel = app.channel(constants.channels.category.dedicated).children.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == this_channel.id);
+                    await text_channel.setName(channel_name);
+                    const hoisted_role = app.role(text_channel.topic.split(' ')[2]);
+                    await hoisted_role.setName(`Team ${channel_name}`);
+
+                    // Set info
+                    const channel_desc = new Array();
+                    channel_desc.push(`• Only members who are in this voice channel can view this text channel.`);
+                    channel_desc.push(`• You can't view other dedicated channels once you're connected to one.`);
+                    channel_desc.push(`• ${text_channel} voice and text channels will automatically be deleted once everyone is disconnected from these channels.`);
+                    channel_desc.push(`• You can lock this channel by doing **!dedicate lock**, and you can do **!dedicate unlock** to unlock it.`);
+                    channel_desc.push(`• You can transfer anyone from another voice channel to this voice channel by doing **!transfer <@member>**.\n\u200b\u200bEx: "!transfer ${app.client.user}"`);
+                    channel_desc.push(`• You can also transfer multiple users at once.\n\u200b\u200bEx: "!transfer ${app.client.user} ${app.client.user}"`);
+                    channel_desc.push(`Note: ${app.role(constants.roles.staff)} and ${app.role(constants.roles.music_bot)} can interact with these channels.`);
+                    const embed = new MessageEmbed();
+                    embed.setAuthor('Quarantine Gaming: Dedicated Channels');
+                    embed.setTitle(`Voice and Text Channels for ${channel_name}`);
+                    embed.setDescription(channel_desc.join('\n\n'));
+                    embed.setColor('#7b00ff');
+
+                    const profile = app.guild.members.cache.find(member => member.displayName == name);
+                    const emoji = app.guild.emojis.cache.find(emoji => emoji.name == name.split(' ').join('').split(':').join('').split('-').join(''));
+                    const qg_emoji = app.guild.emojis.cache.find(emoji => emoji.name == 'quarantinegaming');
+                    if (profile) {
+                        embed.setThumbnail(profile.user.displayAvatarURL());
+                    } else if (emoji) {
+                        embed.setThumbnail(emoji.url);
+                    } else {
+                        embed.setThumbnail(qg_emoji.url);
+                    }
+
+                    await message.sendToChannel(text_channel, embed);
+                } else {
+                    // Notify
+                    await speech.say(`Transferring to ${name} dedicated channel. Please wait.`, channel_origin);
+
+                    const dedicated_voice_channel = await channel.create({
+                        name: channel_name,
+                        type: 'voice',
+                        parent: constants.channels.category.dedicated,
+                        position: 1,
+                        permissionOverwrites: [
+                            {
+                                id: constants.roles.everyone,
+                                deny: ["CREATE_INSTANT_INVITE", "MANAGE_CHANNELS", "MANAGE_ROLES", "MANAGE_WEBHOOKS", "CONNECT", 'MUTE_MEMBERS', 'DEAFEN_MEMBERS', 'MOVE_MEMBERS', 'PRIORITY_SPEAKER']
+                            },
+                            {
+                                id: constants.roles.dedicated,
+                                deny: ["VIEW_CHANNEL"]
+                            },
+                            {
+                                id: constants.roles.member,
+                                allow: ["CONNECT", 'SPEAK', "STREAM"],
+                            },
+                            {
+                                id: constants.roles.music_bot,
+                                allow: ["CONNECT"]
+                            }
+                        ],
+                        bitrate: 128000
+                    });
+
+                    const dedicated_text_role = await role.create({
+                        name: `Text ${dedicated_voice_channel.id}`
+                    });
+
+                    const team_role = await role.create({
+                        name: `Team ${channel_name}`,
+                        color: '#00a5ff',
+                        position: app.channel(constants.roles.dedicated).position,
+                        hoist: true
+                    });
+
+                    const dedicated_text_channel = await channel.create({
+                        name: channel_name,
+                        type: 'text',
+                        parent: constants.channels.category.dedicated,
+                        position: 1,
+                        permissionOverwrites: [
+                            {
+                                id: constants.roles.everyone,
+                                deny: ["CREATE_INSTANT_INVITE", "MANAGE_CHANNELS", "MANAGE_ROLES", "MANAGE_WEBHOOKS", "VIEW_CHANNEL", "MENTION_EVERYONE", "MANAGE_MESSAGES", 'MUTE_MEMBERS', 'DEAFEN_MEMBERS', 'MOVE_MEMBERS', 'PRIORITY_SPEAKER']
+                            },
+                            {
+                                id: constants.roles.music_bot,
+                                allow: ["VIEW_CHANNEL"]
+                            },
+                            {
+                                id: dedicated_text_role.id,
+                                allow: ["VIEW_CHANNEL", "SEND_TTS_MESSAGES", "EMBED_LINKS", "ATTACH_FILES"]
+                            }
+                        ],
+                        topic: `${dedicated_voice_channel.id} ${dedicated_text_role.id} ${team_role.id}`
+                    });
+
+                    await dedicated_voice_channel.updateOverwrite(dedicated_text_role, {
+                        VIEW_CHANNEL: true
+                    });
+
+                    // Set info
+                    const channel_desc = new Array();
+                    channel_desc.push(`• Only members who are in this voice channel can view this text channel.`);
+                    channel_desc.push(`• You can't view other dedicated channels once you're connected to one.`);
+                    channel_desc.push(`• ${dedicated_text_role} voice and text channels will automatically be deleted once everyone is disconnected from these channels.`);
+                    channel_desc.push(`• You can lock this channel by doing **!dedicate lock**, and you can do **!dedicate unlock** to unlock it.`);
+                    channel_desc.push(`• You can transfer anyone from another voice channel to this voice channel by doing **!transfer <@member>**.\n\u200b\u200bEx: "!transfer ${app.client.user}"`);
+                    channel_desc.push(`• You can also transfer multiple users at once.\n\u200b\u200bEx: "!transfer ${app.client.user} ${app.client.user}"`);
+                    channel_desc.push(`Note: ${app.role(constants.roles.staff)} and ${app.role(constants.roles.music_bot)} can interact with these channels.`);
+                    const embed = new MessageEmbed();
+                    embed.setAuthor('Quarantine Gaming: Dedicated Channels');
+                    embed.setTitle(`Voice and Text Channels for ${channel_name}`);
+                    embed.setDescription(channel_desc.join('\n\n'));
+                    embed.setColor('#7b00ff');
+
+                    const profile = app.guild.members.cache.find(member => member.displayName == name);
+                    const emoji = app.guild.emojis.cache.find(emoji => emoji.name == name.split(' ').join('').split(':').join('').split('-').join(''));
+                    const qg_emoji = app.guild.emojis.cache.find(emoji => emoji.name == 'quarantinegaming');
+                    if (profile) {
+                        embed.setThumbnail(profile.user.displayAvatarURL());
+                    } else if (emoji) {
+                        embed.setThumbnail(emoji.url);
+                    } else {
+                        embed.setThumbnail(qg_emoji.url);
+                    }
+
+                    await message.sendToChannel(dedicated_text_channel, embed);
+
+                    // Sort members
+                    const streamers = [], members = [];
+                    for (const this_member of channel_origin.members.array()) {
+                        if (this_member.roles.cache.has(constants.roles.streaming)) {
+                            streamers.push(this_member);
+                        } else {
+                            members.push(this_member);
+                        }
+                    }
+                    // Transfer streamers
+                    for (const this_member of streamers) {
+                        await this_member.voice.setChannel(voice_channel);
+                        await functions.sleep(1000);
+                    }
+                    // Transfer members
+                    for (const this_member of members) {
+                        if (this_member.user.id != g_client.user.id) {
+                            await this_member.voice.setChannel(voice_channel);
+                            await functions.sleep(1000);
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            error_manager.mark(new error_ticket('dedicateChannel', error));
+        }
+        DedicateManager.finish();
     }
 }
