@@ -64,5 +64,8 @@ module.exports = {
             testing_ground_text: '749579412139278399',
             testing_ground_voice: '776976436950990848'
         }
+    },
+    images: {
+        free_games_default: 'https://wallpaper-mania.com/wp-content/uploads/2018/09/High_resolution_wallpaper_background_ID_77700751093.jpg'
     }
 }
