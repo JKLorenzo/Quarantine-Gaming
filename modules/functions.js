@@ -1,3 +1,5 @@
+const gis = require('g-i-s');
+
 module.exports = {
     sleep: function (ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
@@ -88,5 +90,15 @@ module.exports = {
         } else {
             return `http://www.google.com/s2/favicons?domain=${hostname}`;
         }
+    },
+    fetchImage: function (title) {
+        return new Promise((resolve, reject) => {
+            gis(title, (error, results) => {
+                if (error)
+                    reject(error);
+                else
+                    resolve(results);
+            });
+        });
     }
 }
