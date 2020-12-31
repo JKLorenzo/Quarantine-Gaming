@@ -1,4 +1,7 @@
 const { MessageEmbed } = require('discord.js');
+const fetch = require('node-fetch');
+const probe = require('probe-image-size');
+
 const app = require('./app.js');
 const constants = require('./constants.js');
 const functions = require('./functions.js');
@@ -16,6 +19,9 @@ const OfflineManager = functions.createManager(1000);
 const ActivityManager = functions.createManager(5000);
 const VoiceManager = functions.createManager(1000);
 const DedicateManager = functions.createManager(10000);
+const FreeGameManager = functions.createManager(1500000);
+
+let freeGameCollection = new Array();
 
 module.exports = {
     checkUnlisted: async function () {
@@ -439,5 +445,253 @@ module.exports = {
             error_manager.mark(new error_ticket('dedicateChannel', error));
         }
         DedicateManager.finish();
+    },
+    freeGameFetch: async function (url = null) {
+        try {
+            freeGameCollection = await fetch('https://www.reddit.com/r/FreeGameFindings/new/.json?limit=25&sort=new').then(data => data.json()).then(entry => entry.data.children.map(child => child.data));
+            if (freeGameCollection) {
+                for (const freeGameData of freeGameCollection) {
+                    const information = {
+                        title: functions.parseHTML(freeGameData.title),
+                        url: freeGameData.url,
+                        author: freeGameData.author,
+                        description: functions.parseHTML(freeGameData.selftext),
+                        validity: freeGameData.upvote_ratio * 100,
+                        score: freeGameData.score,
+                        flair: freeGameData.link_flair_text,
+                        permalink: `https://www.reddit.com${freeGameData.permalink}`,
+                        createdAt: freeGameData.created_utc
+                    };
+
+                    const notification = database.notificationRecords(information);
+                    const elapsedMinutes = functions.compareDate(new Date(information.createdAt * 1000));
+
+                    if (url) {
+                        if (url.trim().toLowerCase() == information.url.trim().toLowerCase() || url.trim().toLowerCase() == information.permalink.trim().toLowerCase()) {
+                            if (!notification) {
+                                this.freeGameNotify(information);
+                                return 'Got it! Inserting this entry to processing queue for validation.';
+                            } else {
+                                return 'This entry is already posted on the free games channel.';
+                            }
+                        }
+                    } else {
+                        if (!notification && elapsedMinutes >= 30 && elapsedMinutes <= 300 && information.score >= 50 && information.validity >= 75) {
+                            this.freeGameNotify(information);
+                        }
+                    }
+                }
+                if (link) return 'Uh-oh! The link you provided is no longer valid.';
+            }
+        } catch (error) {
+            error_manager.mark(new error_ticket('freeGameFetch', error));
+        }
+    },
+    freeGameUpdate: async function () {
+        await FreeGameManager.queue();
+        try {
+            if (freeGameCollection) {
+                for (const freeGameData of freeGameCollection) {
+                    const information = {
+                        title: functions.parseHTML(freeGameData.title),
+                        url: freeGameData.url,
+                        author: freeGameData.author,
+                        description: functions.parseHTML(freeGameData.selftext),
+                        validity: freeGameData.upvote_ratio * 100,
+                        score: freeGameData.score,
+                        flair: freeGameData.link_flair_text,
+                        permalink: `https://www.reddit.com${freeGameData.permalink}`,
+                        createdAt: freeGameData.created_utc
+                    };
+
+                    const notification = database.notificationRecords(information);
+                    if (notification) {
+                        const message = await app.channel(constants.channels.integrations.free_games).messages.fetch(notification.id);
+                        if (message) {
+                            if (information.description) {
+                                message.embeds[0].spliceFields(1, 3)
+                                    .addFields([
+                                        { name: 'Trust Factor', value: `${information.validity} %`, inline: true },
+                                        { name: 'Margin', value: `${information.score}`, inline: true },
+                                        { name: 'Details', value: `${information.description}` }
+                                    ]).setTimestamp();
+                            } else {
+                                message.embeds[0].spliceFields(1, 2)
+                                    .addFields([
+                                        { name: 'Trust Factor', value: `${information.validity} %`, inline: true },
+                                        { name: 'Margin', value: `${information.score}`, inline: true }
+                                    ]).setTimestamp();
+                            }
+                            if (information.flair) {
+                                if (information.flair.toLowerCase().indexOf('comment') != -1 || information.flair.toLowerCase().indexOf('issue') != -1) {
+                                    message.embeds[0].setDescription(`[${information.flair}](${information.permalink})`);
+                                } else {
+                                    message.embeds[0].setDescription(information.flair);
+                                }
+                            }
+                            await message.edit({ content: message.content, embed: message.embeds[0] });
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            error_manager.mark(new error_ticket('freeGameUpdate', error));
+        }
+        FreeGameManager.finish();
+    },
+    freeGameNotify: async function (notification) {
+        await FreeGameManager.queue();
+        try {
+            const title = notification.title;
+            const url = notification.url;
+            const author = notification.author;
+            const description = notification.description;
+            const validity = notification.validity;
+            const score = notification.score;
+            const flair = notification.flair;
+            const permalink = notification.permalink;
+
+            const embed = new MessageEmbed().setTimestamp();
+            embed.setAuthor('Quarantine Gaming: Free Game/DLC Notification');
+            if (flair) {
+                if (flair.toLowerCase().indexOf('comment') !== -1 || flair.toLowerCase().indexOf('issue') !== -1) {
+                    embed.setDescription(`[${flair}](${permalink})`);
+                } else {
+                    embed.setDescription(flair);
+                }
+            }
+            embed.addFields([
+                { name: 'Author', value: author, inline: true },
+                { name: 'Trust Factor', value: `${validity} %`, inline: true },
+                { name: 'Margin', value: `${score}`, inline: true }
+            ]);
+            if (description) {
+                embed.addField('Details', description);
+            }
+
+            // Title
+            const safe_title = [], exclude_title = [], filtered_content = [];
+            if (title) {
+                const words = title.split(' ');
+                const filters = ['other', 'alpha', 'beta', 'psa'];
+                for (const word of words) {
+                    // Check if the word is not one of the classifiers
+                    if (!word.startsWith('[') && !word.startsWith('(') && !word.endsWith(']') && !word.endsWith(')')) {
+                        safe_title.push(word);
+                    } else {
+                        exclude_title.push(word);
+                        for (const filter of filters) {
+                            if (word.toLowerCase().indexOf(filter) !== -1) {
+                                filtered_content.push(word);
+                            }
+                        }
+                    }
+                }
+                embed.setTitle(`**${safe_title.length > 0 ? safe_title.join(' ') : title}**`);
+            }
+
+            // URL
+            embed.setURL(url);
+            embed.setFooter(`${new URL(url).hostname} | Updated as of `, functions.fetchIcon(hostname));
+
+            // Image
+            const images = await functions.fetchImage(title).catch(() => { });
+            for (const image of images) {
+                const response = await fetch(image.url).catch(() => { });
+                if (response && response.ok) {
+                    const probe_result = await probe(image.url, { timeout: 10000 }).catch(() => { });
+                    if (probe_result) {
+                        const width = parseInt(probe_result.width);
+                        const height = parseInt(probe_result.height);
+                        const ratio = width / height;
+                        if (width >= 200 && height >= 200 && ratio >= 1.7) {
+                            embed.setImage(probe_result.url);
+                            break;
+                        }
+                    }
+                }
+            }
+            if (!embed.image.url) embed.setImage(constants.images.free_games_default);
+
+            const color = {
+                R: 0,
+                G: 0,
+                B: 0,
+                add: function (R, G, B) {
+                    this.R += R;
+                    this.G += G;
+                    this.B += B;
+                    // Scale the colors until its acceptable
+                    while (this.R > 255 || this.G > 255 || this.B > 255) {
+                        if (this.R > 0) this.R--;
+                        if (this.G > 0) this.G--;
+                        if (this.B > 0) this.B--;
+                    }
+                },
+                toHex: function () {
+                    let red = this.R.toString(16);
+                    let green = this.G.toString(16);
+                    let blue = this.B.toString(16);
+                    if (red.length == 1) red = `0${red}`;
+                    if (green.length == 1) green = `0${green}`;
+                    if (blue.length == 1) blue = `0${blue}`;
+                    return `#${red}${green}${blue}`;
+                }
+            }
+
+            const mentionables = new Array();
+            const searchables = (description ? description.toLowerCase() : '*') + ' ' + (url ? url.toLowerCase() : '*');
+
+            if (functions.contains(searchables, 'steampowered.com')) {
+                mentionables.push(constants.roles.steam);
+                color.add(0, 157, 255);
+            }
+            if (functions.contains(searchables, 'epicgames.com')) {
+                mentionables.push(constants.roles.epic);
+                color.add(157, 255, 0);
+            }
+            if (functions.contains(searchables, 'gog.com')) {
+                mentionables.push(constants.roles.gog);
+                color.add(157, 0, 255);
+            }
+            if (functions.contains(searchables, 'ubisoft.com')) {
+                mentionables.push(constants.roles.ubisoft);
+                color.add(200, 120, 255);
+            }
+            const Console_URLs = ['playstation.com', 'wii.com', 'xbox.com', 'microsoft.com'];
+            for (const Console_URL of Console_URLs) {
+                if (!mentionables.includes(constants.roles.console) && functions.contains(searchables, Console_URL)) {
+                    mentionables.push(constants.roles.console);
+                    color.add(200, 80, 200)
+                }
+            }
+
+            embed.setColor(color.toHex());
+
+            if (filtered_content.length == 0 && mentionables.length > 0) {
+                const sent_mesage = await message.sendToChannel(constants.channels.integrations.free_games, { content: mentionables.map(mentionable => app.role(mentionable)).join(', '), embed: embed });
+                await database.notificationPush({
+                    id: sent_mesage.id,
+                    title: safe_title ? safe_title : title,
+                    url: url,
+                    author: author,
+                    permalink: permalink
+                });
+
+                // Crosspost a message
+                if (sent_mesage.channel.type === 'news') {
+                    await sent_mesage.crosspost();
+                    const crosspost_embed = new MessageEmbed();
+                    crosspost_embed.setColor('#da00ff');
+                    crosspost_embed.setAuthor('Quarantine Gaming: Free Game/DLC Crossposting');
+                    crosspost_embed.setTitle(sent_mesage.embeds[0].title);
+                    crosspost_embed.setDescription('This notification is now published and is visible to all external(following) servers.')
+                    await message.sendToChannel(constants.channels.qg.logs, crosspost_embed);
+                }
+            }
+        } catch (error) {
+            error_manager.mark(new error_ticket('freeGameNotify', error));
+        }
+        FreeGameManager.finish();
     }
 }
