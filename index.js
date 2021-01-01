@@ -1,9 +1,10 @@
 const { CommandoClient } = require('discord.js-commando');
 const { MessageEmbed } = require('discord.js');
+const path = require('path');
 const app = require('./modules/app.js');
-const message = require('./modules/message.js');
-const error_manager = require('./error_manager.js');
-const reactions = require('./modules/reaction.js');
+const message_manager = require('./modules/message_manager.js');
+const error_manager = require('./modules/error_manager.js');
+const reaction_manager = require('./modules/reaction_manager.js');
 const general = require('./modules/general.js');
 const functions = require('./modules/functions.js');
 
@@ -38,8 +39,8 @@ client.once('ready', async () => {
 });
 
 client.on('message', incoming_message => {
-    if (app.isInitialized) {
-        message.process(incoming_message);
+    if (app.isInitialized()) {
+        message_manager.process(incoming_message);
     }
 });
 
@@ -223,8 +224,8 @@ client.on('voiceStateUpdate', (oldState, newState) => {
     }
 });
 
-client.on('messageReactionAdd', (reaction, user) => {
-    if (app.isInitialized) {
+client.on('messageReactionAdd', async (reaction, user) => {
+    if (app.isInitialized()) {
         try {
             if (reaction.partial) await reaction.fetch();
             if (reaction.message.partial) await reaction.message.fetch();
@@ -232,7 +233,7 @@ client.on('messageReactionAdd', (reaction, user) => {
             const this_member = app.member(user.id);
 
             if (this_member && !this_member.user.bot && this_message && this_message.embeds.length > 0) {
-                reactions.onReactionAdd(this_message.embeds[0], reaction.emoji.name, this_member, this_message);
+                reaction_manager.onReactionAdd(this_message.embeds[0], reaction.emoji.name, this_member, this_message);
             }
         } catch (error) {
             error_manager.mark(new error_ticket('messageReactionAdd', error));
@@ -240,8 +241,8 @@ client.on('messageReactionAdd', (reaction, user) => {
     }
 });
 
-client.on('messageReactionRemove', (reaction, user) => {
-    if (app.isInitialized) {
+client.on('messageReactionRemove', async (reaction, user) => {
+    if (app.isInitialized()) {
         try {
             if (reaction.partial) await reaction.fetch();
             if (reaction.message.partial) await reaction.message.fetch();
@@ -249,7 +250,7 @@ client.on('messageReactionRemove', (reaction, user) => {
             const this_member = app.member(user.id);
 
             if (this_member && !this_member.user.bot && this_message && this_message.embeds.length > 0) {
-                reactions.onReactionRemove(this_message.embeds[0], reaction.emoji.name, this_member, this_message);
+                reaction_manager.onReactionRemove(this_message.embeds[0], reaction.emoji.name, this_member, this_message);
             }
         } catch (error) {
             error_manager.mark(new error_ticket('messageReactionRemove', error));

@@ -20,7 +20,7 @@ module.exports = {
         userLimit: null,
 
         get: function () {
-            const GuildCreateChannelOptions;
+            const GuildCreateChannelOptions = null;
             if (this.bitrate !== null) GuildCreateChannelOptions.bitrate = this.bitrate;
             if (this.nsfw !== null) GuildCreateChannelOptions.nsfw = this.nsfw;
             if (this.parent !== null) GuildCreateChannelOptions.parent = this.parent;
@@ -38,7 +38,7 @@ module.exports = {
             await ChannelCreateManager.queue();
             let output, error;
             try {
-                output = await app.guild.channels.create(options.name, options.get());
+                output = await app.guild().channels.create(options.name, options.get());
             } catch (err) {
                 error = err;
             }

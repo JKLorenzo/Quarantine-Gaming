@@ -1,9 +1,9 @@
 const constants = require('./constants.js');
 const functions = require('./functions.js');
-const role = require('./role.js');
+const role_manager = require('./role_manager.js');
 const error_manager = require('./error_manager.js');
 const app = require('./app.js');
-const message = require('./message.js');
+const message_manager = require('./message_manager.js');
 const { channel } = require('./app.js');
 
 const error_ticket = error_manager.for('reaction.js');
@@ -32,26 +32,26 @@ module.exports = {
                 case 'Quarantine Gaming: NSFW Content':
                     switch (emoji) {
                         case '🔴':
-                            await role.add(reactor, constants.roles.nsfw).catch(error => error_manager.mark(new error_ticket('nsfw', error, 'onReactionAdd')));
+                            await role_manager.add(reactor, constants.roles.nsfw).catch(error => error_manager.mark(new error_ticket('nsfw', error, 'onReactionAdd')));
                             break;
                     }
                     break;
                 case 'Quarantine Gaming: Free Game Updates':
                     switch (emoji) {
                         case '1️⃣':
-                            await role.add(reactor, constants.roles.steam).catch(error => error_manager.mark(new error_ticket('steam', error, 'onReactionAdd')));
+                            await role_manager.add(reactor, constants.roles.steam).catch(error => error_manager.mark(new error_ticket('steam', error, 'onReactionAdd')));
                             break;
                         case '2️⃣':
-                            await role.add(reactor, constants.roles.epic).catch(error => error_manager.mark(new error_ticket('epic', error, 'onReactionAdd')));
+                            await role_manager.add(reactor, constants.roles.epic).catch(error => error_manager.mark(new error_ticket('epic', error, 'onReactionAdd')));
                             break;
                         case '3️⃣':
-                            await role.add(reactor, constants.roles.gog).catch(error => error_manager.mark(new error_ticket('gog', error, 'onReactionAdd')));
+                            await role_manager.add(reactor, constants.roles.gog).catch(error => error_manager.mark(new error_ticket('gog', error, 'onReactionAdd')));
                             break;
                         case '4️⃣':
-                            await role.add(reactor, constants.roles.console).catch(error => error_manager.mark(new error_ticket('console', error, 'onReactionAdd')));
+                            await role_manager.add(reactor, constants.roles.console).catch(error => error_manager.mark(new error_ticket('console', error, 'onReactionAdd')));
                             break;
                         case '5️⃣':
-                            await role.add(reactor, constants.roles.ubisoft).catch(error => error_manager.mark(new error_ticket('ubisoft', error, 'onReactionAdd')));
+                            await role_manager.add(reactor, constants.roles.ubisoft).catch(error => error_manager.mark(new error_ticket('ubisoft', error, 'onReactionAdd')));
                             break;
                     }
                     break;
@@ -60,12 +60,13 @@ module.exports = {
                         // Check if reactor is a staff and approval is still pending
                         if (reactor.roles.cache.has(constants.roles.staff) && embed.fields[4].name != 'Action Taken:') {
                             const this_user = app.member(embed.fields[1].value);
+                            let final_embed;
                             if (this_user) {
                                 switch (emoji) {
                                     case '✅':
-                                        await role.add(this_user, constants.roles.member).catch(error => error_manager.mark(new error_ticket('approve', error, 'onReactionAdd')));
+                                        await role_manager.add(this_user, constants.roles.member).catch(error => error_manager.mark(new error_ticket('approve', error, 'onReactionAdd')));
                                         await this_message.reactions.removeAll().catch(error => error_manager.mark(new error_ticket('reactions [approve]', error, 'onReactionAdd')));;
-                                        const final_embed = embed.spliceFields(4, 1, [
+                                        final_embed = embed.spliceFields(4, 1, [
                                             { name: 'Action Taken:', value: `Approved by ${this_member}` }
                                         ]).setTimestamp();
                                         await this_message.edit(final_embed).catch(error => error_manager.mark(new error_ticket('edit [approve]', error, 'onReactionAdd')));
@@ -73,12 +74,12 @@ module.exports = {
                                             `Hooraaay! 🥳 Your membership request has been approved! You will now have access to all the features of this server!`,
                                             "Do `!help` on our " + app.channel(constants.channels.text.general) + " text channel to know more about these features or you can visit <https://quarantinegamingdiscord.wordpress.com/> for more info."
                                         ];
-                                        await message.sendToUser(this_user, dm_message.join('\n')).catch(error => error_manager.mark(new error_ticket('dm [approve]', error, 'onReactionAdd')));
+                                        await message_manager.sendToUser(this_user, dm_message.join('\n')).catch(error => error_manager.mark(new error_ticket('dm [approve]', error, 'onReactionAdd')));
                                         break;
                                     case '❌':
                                         await this_user.kick().catch(error => error_manager.mark(new error_ticket('kick', error, 'onReactionAdd')));
                                         await this_message.reactions.removeAll().catch(error => error_manager.mark(new error_ticket('reactions [kick]', error, 'onReactionAdd')));;
-                                        const final_embed = embed.spliceFields(4, 1, [
+                                        final_embed = embed.spliceFields(4, 1, [
                                             { name: 'Action Taken:', value: `Kicked by ${this_member}` }
                                         ]).setTimestamp();
                                         await this_message.edit(final_embed).catch(error => error_manager.mark(new error_ticket('edit [kick]', error, 'onReactionAdd')));;
@@ -86,7 +87,7 @@ module.exports = {
                                     case '⛔':
                                         await this_user.ban().catch(error => error_manager.mark(new error_ticket('ban', error, 'onReactionAdd')));
                                         await this_message.reactions.removeAll().catch(error => error_manager.mark(new error_ticket('reactions [ban]', error, 'onReactionAdd')));
-                                        const final_embed = embed.spliceFields(4, 1, [
+                                        final_embed = embed.spliceFields(4, 1, [
                                             { name: 'Action Taken:', value: `Banned by ${this_member}` }
                                         ]).setTimestamp();
                                         await this_message.edit(final_embed).catch(error => error_manager.mark(new error_ticket('edit [ban]', error, 'onReactionAdd')));
@@ -94,7 +95,7 @@ module.exports = {
                                 }
                             } else {
                                 await this_message.reactions.removeAll().catch(error => error_manager.mark(new error_ticket('reactions [not found]', error, 'onReactionAdd')));
-                                const final_embed = embed.spliceFields(4, 1, [
+                                final_embed = embed.spliceFields(4, 1, [
                                     { name: 'Action Taken:', value: `None. User not found ⚠. Attempted by ${this_member}` }
                                 ]).setTimestamp();
                                 await message.edit(final_embed).catch(error => error_manager.mark(new error_ticket('edit [not found]', error, 'onReactionAdd')));
@@ -241,26 +242,26 @@ module.exports = {
                 case 'Quarantine Gaming: NSFW Content':
                     switch (emoji) {
                         case '🔴':
-                            await role.remove(reactor, constants.roles.nsfw).catch(error => error_manager.mark(new error_ticket('nsfw', error, 'onReactionRemove')));
+                            await role_manager.remove(reactor, constants.roles.nsfw).catch(error => error_manager.mark(new error_ticket('nsfw', error, 'onReactionRemove')));
                             break;
                     }
                     break;
                 case 'Quarantine Gaming: Free Game Updates':
                     switch (emoji) {
                         case '1️⃣':
-                            await role.remove(reactor, constants.roles.steam).catch(error => error_manager.mark(new error_ticket('steam', error, 'onReactionRemove')));
+                            await role_manager.remove(reactor, constants.roles.steam).catch(error => error_manager.mark(new error_ticket('steam', error, 'onReactionRemove')));
                             break;
                         case '2️⃣':
-                            await role.remove(reactor, constants.roles.epic).catch(error => error_manager.mark(new error_ticket('epic', error, 'onReactionRemove')));
+                            await role_manager.remove(reactor, constants.roles.epic).catch(error => error_manager.mark(new error_ticket('epic', error, 'onReactionRemove')));
                             break;
                         case '3️⃣':
-                            await role.remove(reactor, constants.roles.gog).catch(error => error_manager.mark(new error_ticket('gog', error, 'onReactionRemove')));
+                            await role_manager.remove(reactor, constants.roles.gog).catch(error => error_manager.mark(new error_ticket('gog', error, 'onReactionRemove')));
                             break;
                         case '4️⃣':
-                            await role.remove(reactor, constants.roles.console).catch(error => error_manager.mark(new error_ticket('console', error, 'onReactionRemove')));
+                            await role_manager.remove(reactor, constants.roles.console).catch(error => error_manager.mark(new error_ticket('console', error, 'onReactionRemove')));
                             break;
                         case '5️⃣':
-                            await role.remove(reactor, constants.roles.ubisoft).catch(error => error_manager.mark(new error_ticket('ubisoft', error, 'onReactionRemove')));
+                            await role_manager.remove(reactor, constants.roles.ubisoft).catch(error => error_manager.mark(new error_ticket('ubisoft', error, 'onReactionRemove')));
                             break;
                     }
                     break;

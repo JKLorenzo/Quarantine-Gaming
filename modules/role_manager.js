@@ -17,7 +17,7 @@ module.exports = {
         reason: null,
 
         get: function () {
-            const options;
+            const options = null;
             if (this.name !== null) options.data.name = this.name;
             if (this.color !== null) options.data.color = this.color;
             if (this.hoist !== null) options.data.hoist = this.hoist;
@@ -32,7 +32,7 @@ module.exports = {
             await RoleCreateManager.queue();
             let output, error;
             try {
-                output = await app.guild.roles.create(options.get());
+                output = await app.guild().roles.create(options.get());
             } catch (err) {
                 error = err;
             }
