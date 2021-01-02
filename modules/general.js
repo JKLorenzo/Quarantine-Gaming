@@ -33,7 +33,7 @@ module.exports = {
         database = Modules.database;
         speech = Modules.speech;
     },
-    checkUnlisted: async function () {
+    memberUnlisted: async function () {
         try {
             for (let this_member of app.guild().members.cache.array()) {
                 // Check if any member doesnt have member role
@@ -57,7 +57,7 @@ module.exports = {
                 }
             }
         } catch (error) {
-            error_manager.mark(new error_ticket('checkUnlisted', error));
+            error_manager.mark(new error_ticket('memberUnlisted', error));
         }
     },
     memberOffline: async function (member) {

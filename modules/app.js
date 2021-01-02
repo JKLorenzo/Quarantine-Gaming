@@ -200,6 +200,9 @@ module.exports = {
                 }
             }
 
+            // Check for unlisted members
+            await general.memberUnlisted();
+
             // Auto Dedicate
             setInterval(() => {
                 try {
