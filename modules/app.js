@@ -241,6 +241,22 @@ module.exports = {
                 }
             }, 120000);
 
+            // Free Games
+            setTimeout(async () => {
+                // Initial Fetch after 10mins
+                await general.freeGameFetch();
+                await general.freeGameUpdate();
+
+                // Future Fetch every 30mins
+                setInterval(() => {
+                    general.freeGameFetch();
+                }, 1800000);
+                // Future Update every 3hrs
+                setInterval(() => {
+                    general.freeGameUpdate();
+                }, 10800000);
+            }, 600000);
+
             if (process.env.STARTUP_REASON) {
                 const embed = new MessageEmbed();
                 embed.setColor('#ffff00');
