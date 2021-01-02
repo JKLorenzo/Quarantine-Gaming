@@ -1,5 +1,8 @@
 const { Command } = require('discord.js-commando');
 const { MessageEmbed } = require('discord.js');
+const functions = require('../../modules/functions');
+let message_manager = require('../../modules/message_manager');
+let reaction_manager = require('../../modules/reaction_manager');
 
 module.exports = class Audio extends Command {
     constructor(client) {
@@ -13,38 +16,27 @@ module.exports = class Audio extends Command {
     }
 
     async run(message) {
-        let embed = new MessageEmbed()
-            .setColor('#ffff00')
-            .setAuthor('Quarantine Gaming: Experience')
-            .setThumbnail('http://www.extensions.in.th/amitiae/2013/prefs/images/sound_icon.png')
-            .setTitle('Audio Control Extension for Voice Channels')
-            .setDescription('Mute or unmute all members on your current voice channel.')
-            .addFields(
-                { name: 'Actions:', value: '🟠 - Mute', inline: true },
-                { name: '\u200b', value: '🟢 - Unmute', inline: true }
-            )
-            .setFooter('Apply selected actions by reacting below.');
+        // Link
+        const Modules = functions.parseModules(GlobalModules);
+        message_manager = Modules.message_manager;
+        reaction_manager = Modules.reaction_manager;
 
-        let reactions = new Array();
-        reactions.push('🟠');
-        reactions.push('🟢');
-        message.say(embed).then(async this_message => {
-            for (let this_reaction of reactions) {
-                await this_message.react(this_reaction).catch(error => {
-                    g_interface.on_error({
-                        name: 'run -> .react(this_reaction)',
-                        location: 'audio.js',
-                        error: error
-                    });
-                });
-                await g_functions.sleep(1500);
-            }
-        }).catch(error => {
-            g_interface.on_error({
-                name: 'run -> .say(message)',
-                location: 'audio.js',
-                error: error
-            });
-        });
+        const embed = new MessageEmbed();
+        embed.setColor('#ffff00');
+        embed.setAuthor('Quarantine Gaming: Experience');
+        embed.setThumbnail('http://www.extensions.in.th/amitiae/2013/prefs/images/sound_icon.png');
+        embed.setTitle('Audio Control Extension for Voice Channels');
+        embed.setDescription('Mute or unmute all members on your current voice channel.');
+        embed.addFields(
+            { name: 'Actions:', value: '🟠 - Mute', inline: true },
+            { name: '\u200b', value: '🟢 - Unmute', inline: true }
+        );
+        embed.setFooter('Apply selected actions by reacting below.');
+
+        const reactions = ['🟠', '🟢'];
+        await message_manager.sendToChannel(message.channel, embed);
+        for (const reaction of reactions) {
+            reaction_manager.addReaction(message, reaction);
+        }
     }
 };

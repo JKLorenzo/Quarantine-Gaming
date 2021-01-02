@@ -1,5 +1,9 @@
 const { Command } = require('discord.js-commando');
 const { MessageEmbed } = require('discord.js');
+const functions = require('../../modules/functions');
+let app = require('../../modules/app');
+let message_manager = require('../../modules/message_manager');
+
 
 module.exports = class PlayersCommand extends Command {
     constructor(client) {
@@ -8,16 +12,21 @@ module.exports = class PlayersCommand extends Command {
             group: 'experience',
             memberName: 'players',
             description: 'Show all players who played a specified game.',
+            guildOnly: true,
             args: [
                 {
                     key: 'role',
                     prompt: "Mention the play role you want to check.",
                     type: 'role',
                     validate: role => {
-                        let role_id = `${role}`.substring(3, `${role}`.length - 1);
-                        let this_role = g_channels.get().guild.roles.cache.find(role => role.id == role_id);
-                        if (this_role) {
-                            return this_role.hexColor == '#00fffe' && this_role.name.split(' ⭐').length == 2;
+                        // Link
+                        const Modules = functions.parseModules(GlobalModules);
+                        app = Modules.app;
+                        message_manager = Modules.message_manager;
+
+                        const game_role_mentionable = app.role(role);
+                        if (game_role_mentionable) {
+                            return game_role_mentionable.hexColor == '#00fffe' && functions.contains(game_role_mentionable.name, ' ⭐');
                         } else {
                             return false;
                         }
@@ -28,19 +37,18 @@ module.exports = class PlayersCommand extends Command {
     }
 
     run(message, { role }) {
-        const role_id = `${role}`.substring(3, `${role}`.length - 1);
-        let this_role = g_channels.get().guild.roles.cache.find(role => role.id == role_id);
-        let players = new Array();
-        let alphabetical = new Array();
-        let in_game = new Array();
-        let online = new Array();
-        let unavailable = new Array();
+        const game_role_mentionable = app.role(role);
+        const players = new Array();
+        const alphabetical = new Array();
+        const in_game = new Array();
+        const online = new Array();
+        const unavailable = new Array();
 
-        if (this_role) {
-            this_role = g_channels.get().guild.roles.cache.find(role => this_role.name.startsWith(role.name) && role.hexColor == '#00ffff');
-            if (this_role) {
-                for (let member of g_channels.get().guild.members.cache.array()) {
-                    if (member.roles.cache.has(this_role.id)) {
+        if (game_role_mentionable) {
+            const game_role = app.guild().roles.cache.find(role => game_role_mentionable.name.startsWith(role.name) && role.hexColor == '#00ffff');
+            if (game_role) {
+                for (const member of app.guild().members.cache.array()) {
+                    if (member.roles.cache.has(game_role.id)) {
                         players.push(member);
                         alphabetical.push(member.displayName)
                     }
@@ -49,10 +57,11 @@ module.exports = class PlayersCommand extends Command {
                 if (players.length > 0) {
                     // sort players 
                     alphabetical.sort();
-                    for (let name of alphabetical) {
-                        for (let this_player of players) {
+                    for (const name of alphabetical) {
+                        for (const player of players) {
+                            const this_player = app.member(player);
                             if (this_player.displayName == name) {
-                                if (this_player.roles.cache.find(role => role.name == `Play ${this_role.name}`)) {
+                                if (this_player.roles.cache.find(role => role.name == `Play ${game_role.name}`)) {
                                     in_game.push(this_player);
                                 } else if (this_player.presence.status == 'online') {
                                     online.push(this_player);
@@ -63,9 +72,9 @@ module.exports = class PlayersCommand extends Command {
                         }
                     }
 
-                    let embed = new MessageEmbed();
+                    const embed = new MessageEmbed();
                     embed.setAuthor('Quarantine Gaming: List of Players')
-                    embed.setTitle(this_role.name)
+                    embed.setTitle(game_role.name)
                     embed.setDescription(`All members who have played this game before are as follows:`);
                     if (in_game.length > 0) {
                         embed.addField(`In Game: ${in_game.length}`, in_game.join(', '));
@@ -80,31 +89,19 @@ module.exports = class PlayersCommand extends Command {
                     embed.setColor('#25ff00');
                     embed.setTimestamp();
 
-                    let emoji = g_channels.get().guild.emojis.cache.find(emoji => emoji.name == this_role.name.trim().split(' ').join('').split(':').join('').split('-').join(''));
-                    let qg_emoji = g_channels.get().guild.emojis.cache.find(emoji => emoji.name == 'quarantinegaming');
+                    const emoji = app.guild().emojis.cache.find(emoji => emoji.name == game_role.name.trim().split(' ').join('').split(':').join('').split('-').join(''));
+                    const qg_emoji = app.guild().emojis.cache.find(emoji => emoji.name == 'quarantinegaming');
                     if (emoji) {
                         embed.setThumbnail(emoji.url);
                     } else {
                         embed.setThumbnail(qg_emoji.url);
                     }
 
-                    return message.say(embed).catch(error => {
-                        g_interface.on_error({
-                            name: 'run -> .reply(embed)',
-                            location: 'players.js',
-                            error: error
-                        });
-                    });
+                    message_manager.sendToChannel(message.channel, embed);
                 }
             }
         }
 
-        return message.reply('No information is available right now. Please try again later.').catch(error => {
-            g_interface.on_error({
-                name: 'run -> .reply(message)',
-                location: 'players.js',
-                error: error
-            });
-        })
+        message.reply('No information is available right now. Please try again later.');
     }
 };
