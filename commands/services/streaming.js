@@ -1,5 +1,11 @@
 const { Command } = require('discord.js-commando');
 const { MessageEmbed } = require("discord.js");
+const functions = require('../../modules/functions.js');
+const constants = require('../../modules/constants.js');
+let app = require('../../modules/app.js');
+let role_manager = require('../../modules/role_manager.js');
+let message_manager = require('../../modules/message_manager.js');
+let speech = require('../../modules/speech.js');
 
 module.exports = class StreamingCommand extends Command {
     constructor(client) {
@@ -12,56 +18,39 @@ module.exports = class StreamingCommand extends Command {
     }
 
     async run(message) {
-        const this_member = message.member;
-        const this_channel = this_member.voice.channel;
-        if (this_channel) {
-            const streaming_role = g_roles.get().streaming;
-            if (!this_member.roles.cache.find(role => role == streaming_role)) {
+        // Link
+        const Modules = functions.parseModules(GlobalModules);
+        app = Modules.app;
+        role_manager = Modules.role_manager;
+        message_manager = Modules.message_manager;
+        speech = Modules.speech;
+
+        const member = app.member(message.author);
+        const voice_channel = member.voice.channel;
+        if (voice_channel) {
+            const streaming_role = app.role(constants.roles.streaming);
+            if (!member.roles.cache.has(streaming_role)) {
                 // Add streaming role
-                await this_member.roles.add(streaming_role).catch(error => {
-                    g_interface.on_error({
-                        name: 'run -> .add(streaming_role)',
-                        location: 'streaming.js',
-                        error: error
-                    });
-                });
+                await role_manager.add(member, streaming_role);
 
                 // Notify voice channel through DM
-                let embed = new MessageEmbed();
+                const embed = new MessageEmbed();
                 embed.setAuthor('Quarantine Gaming: Information');
-                embed.setTitle(`${this_member.displayName} is currently Streaming`);
+                embed.setTitle(`${member.displayName} is currently Streaming`);
                 embed.setDescription('Please observe proper behavior on your current voice channel.')
                 embed.setImage('https://pa1.narvii.com/6771/d33918fa87ad0d84b7dc854dcbf6a8545c73f94d_hq.gif');
                 embed.setColor('#5dff00');
-                for (let member of this_channel.members.array()) {
-                    if (member.id != this_member.id) {
-                        await g_message_manager.dm_member(member, embed).catch(error => {
-                            g_interface.on_error({
-                                name: 'run -> .dm_member()',
-                                location: 'streaming.js',
-                                error: error
-                            });
-                        });
+                for (const the_member of voice_channel.members.array()) {
+                    if (member.id != the_member.id) {
+                        await message_manager.sendToUser(the_member, embed);
                     }
                 }
 
                 // Notify voice channel through TTS
-                await g_speech.say('Be notified: A member in this voice channel is currently streaming.', this_channel).catch(error => {
-                    g_interface.on_error({
-                        name: 'run -> .say(tts)',
-                        location: 'streaming.js',
-                        error: error
-                    });
-                });
+                await speech.say('Be notified: A member in this voice channel is currently streaming.', voice_channel);
             }
         } else {
-            message.say('You must be active on a voice channel to run this command.').catch(error => {
-                g_interface.on_error({
-                    name: 'run -> .say(message)',
-                    location: 'streaming.js',
-                    error: error
-                });
-            })
+            message.reply('You must be active on a voice channel to run this command.');
         }
     }
 };

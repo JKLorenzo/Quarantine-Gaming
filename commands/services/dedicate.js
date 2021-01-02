@@ -1,5 +1,10 @@
 const { Command } = require('discord.js-commando');
 const { MessageEmbed } = require("discord.js");
+const functions = require('../../modules/functions.js');
+const constants = require('../../modules/constants.js');
+let app = require('../../modules/app.js');
+let general = require('../../modules/general.js');
+let message_manager = require('../../modules/message_manager.js');
 
 module.exports = class DedicateCommand extends Command {
     constructor(client) {
@@ -19,12 +24,19 @@ module.exports = class DedicateCommand extends Command {
         });
     }
 
-    run(message, { name }) {
-        if (message.member.voice.channel) {
+    async run(message, { name }) {
+        // Link
+        const Modules = functions.parseModules(GlobalModules);
+        app = Modules.app;
+        general = Modules.general;
+        message_manager = Modules.message_manager;
+
+        const voice_channel = app.member(message.author).voice.channel;
+        if (voice_channel) {
             if (name.toLowerCase() == 'lock' || name.toLowerCase() == 'unlock') {
-                if (message.member.voice.channel.parent == g_channels.get().dedicated) {
-                    let text_channel = g_channels.get().guild.channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == message.member.voice.channel.id);
-                    let embed = new MessageEmbed();
+                if (voice_channel.parentID == constants.channels.category.dedicated) {
+                    const text_channel = app.guild().channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == voice_channel.id);
+                    const embed = new MessageEmbed();
                     embed.setAuthor('Quarantine Gaming: Dedicated Channels');
                     embed.setThumbnail(message.author.displayAvatarURL());
                     embed.setFooter(`${message.author.tag} (${message.author.id})`);
@@ -32,46 +44,20 @@ module.exports = class DedicateCommand extends Command {
                     embed.setColor('#ffe500');
                     switch (name) {
                         case 'lock':
-                            message.member.voice.channel.updateOverwrite(g_roles.get().member, {
+                            await voice_channel.updateOverwrite(constants.roles.member, {
                                 'CONNECT': false
-                            }).then(channel => {
-                                embed.setTitle(channel.name);
-                                embed.setDescription(`${message.author} locked this channel.`);
-                                text_channel.send(embed).catch(error => {
-                                    g_interface.on_error({
-                                        name: 'run -> .send(embed) [case lock]',
-                                        location: 'dedicate.js',
-                                        error: error
-                                    });
-                                });
-                            }).catch(error => {
-                                g_interface.on_error({
-                                    name: 'run -> .updateOverwrite() [case lock]',
-                                    location: 'dedicate.js',
-                                    error: error
-                                });
                             });
+                            embed.setTitle(voice_channel.name);
+                            embed.setDescription(`${message.author} locked this channel.`);
+                            await message_manager.sendToChannel(text_channel, embed);
                             break;
                         case 'unlock':
-                            message.member.voice.channel.updateOverwrite(g_roles.get().member, {
+                            await voice_channel.updateOverwrite(constants.roles.member, {
                                 'CONNECT': true
-                            }).then(channel => {
-                                embed.setTitle(channel.name);
-                                embed.setDescription(`${message.author} unlocked this channel.`);
-                                text_channel.send(embed).catch(error => {
-                                    g_interface.on_error({
-                                        name: 'run -> .send(embed) [case unlock]',
-                                        location: 'dedicate.js',
-                                        error: error
-                                    });
-                                });
-                            }).catch(error => {
-                                g_interface.on_error({
-                                    name: 'run -> .updateOverwrite() [case unlock]',
-                                    location: 'dedicate.js',
-                                    error: error
-                                });
                             });
+                            embed.setTitle(voice_channel.name);
+                            embed.setDescription(`${message.author} unlocked this channel.`);
+                            await message_manager.sendToChannel(text_channel, embed);
                             break
                     }
                 } else {
@@ -79,41 +65,28 @@ module.exports = class DedicateCommand extends Command {
                 }
             } else {
                 // Only allow on voice channels and dedicated channels category
-                if (message.member.voice.channel.parentID == '782163385910951936' || message.member.voice.channel.parentID == '749231470396309535') {
+                if (voice_channel.parentID == constants.channels.category.voice || voice_channel.parentID == constants.channels.category.dedicated) {
                     // check if it is mentionable
                     name = name.trim();
                     if (name.startsWith('<') && name.endsWith('>')) {
-                        const chars = name.split('')
-                        const id = chars.map(char => {
-                            const parsed = parseInt(char, 10);
-                            if (isNaN(parsed)) {
-                                return '';
-                            } else {
-                                return parsed;
-                            }
-                        }).join('');
-                        if (chars.includes('&')) {
-                            // Role
-                            const role = g_channels.get().guild.roles.cache.get(id);
-                            if (role) name = g_functions.string_alphanumeric(role.name);
-                        } else if (chars.includes('#')) {
-                            // Channel
-                            const channel = g_channels.get().guild.channels.cache.get(id);
-                            if (channel) name = g_functions.string_alphanumeric(channel.name);
-                        } else {
-                            // Member
-                            const member = g_channels.get().guild.members.cache.get(id);
-                            if (member) name = member.displayName;
-                        }
-                        g_channels.dedicate(message.member, name);
+                        // Role
+                        const role = app.role(name);
+                        const channel = app.channel(name);
+                        const member = app.member(name);
+                        if (role) name = functions.toAlphanumericString(role.name);
+                        if (channel) name = functions.toAlphanumericString(channel.name);
+                        if (member) name = member.displayName;
+
+                        message.reply(`Got it! Please wait while I'm preparing **${name}** voice and text channels.`).catch(() => { });
+                        await general.dedicateChannel(voice_channel, name);
                     } else {
                         // Filter
                         name = name.split(' ').map(word => {
-                            return g_functions.string_alphanumeric(word);
+                            return functions.toAlphanumericString(word);
                         }).join(' ')
-                        g_channels.dedicate(message.member, name);
+                        message.reply(`Got it! Please wait while I'm preparing **${name}** voice and text channels.`).catch(() => { });
+                        await general.dedicateChannel(voice_channel, name);
                     }
-                    message.reply(`Got it! Please wait while I'm preparing **${name}** voice and text channels.`).catch(() => { });
                 } else {
                     message.reply(`You can't create a dedicated channel from your current voice channel. Join one of the Voice Room channels to create a dedicated channel.`).catch(() => { });
                 }

@@ -1,4 +1,8 @@
 const { Command } = require('discord.js-commando');
+const functions = require('../../modules/functions.js');
+const constants = require('../../modules/constants.js');
+let app = require('../../modules/app.js');
+let general = require('../../modules/general.js');
 
 module.exports = class PlayCommand extends Command {
     constructor(client) {
@@ -14,10 +18,14 @@ module.exports = class PlayCommand extends Command {
                     prompt: "Mention the play role you want to play.",
                     type: 'role',
                     validate: role => {
-                        let role_id = `${role}`.substring(3, `${role}`.length - 1);
-                        let this_role = g_channels.get().guild.roles.cache.find(role => role.id == role_id);
-                        if (this_role) {
-                            return this_role.hexColor == '#00fffe' && this_role.name.split(' ⭐').length == 2;
+                        // Link
+                        const modules = functions.parseModules(GlobalModules);
+                        app = modules.app;
+                        general = modules.general;
+
+                        const game_role = app.role(role);
+                        if (game_role) {
+                            return game_role.hexColor == '#00fffe' && functions.contains(game_role.name, ' ⭐');
                         } else {
                             return false;
                         }
@@ -34,21 +42,21 @@ module.exports = class PlayCommand extends Command {
     }
 
     async run(message, { role, input }) {
-        const role_id = `${role}`.substring(3, `${role}`.length - 1);
-        const this_role = g_channels.get().guild.roles.cache.find(role => role.id == role_id);
-        const this_member = g_channels.get().guild.member(message.author);
+        const game_role = app.role(role);
+        const member = app.member(message.author);
 
         const args = input.split(' ');
-        let count = g_functions.string_to_int(args[0]);
-        const reserved = args.map(arg => {
-            if (arg.startsWith('<@') && arg.endsWith('>')) {
-                return arg + ' ';
-            } else {
-                return '';
+        let count = 0;
+        let reserved = new Array();
+        for (const arg of args) {
+            if (app.member(arg)) {
+                reserved.push(arg);
+            } else if (!(functions.contains(arg, '<') || functions.contains(arg, '>')) && functions.toCountingInteger(arg) >= 2) {
+                count = functions.toCountingInteger(arg);
             }
-        }).join('');
-        if (count < 2) count = 0;
-        g_coordinator.invite(this_role, this_member, count, reserved);
-        return message.say(`Got it! This bracket will be available on the ${g_channels.get().gaming} channel.`).then(message => message.delete({ timeout: 3600000 }).catch(() => { })).catch(() => { });
+        }
+
+        general.gameInvite(game_role, member, count, reserved.join(' '));
+        message.say(`Got it! This bracket will be available on the ${app.channel(constants.channels.integrations.game_invites)} channel.`).then(message => message.delete({ timeout: 3600000 }).catch(() => { })).catch(() => { });
     }
 };

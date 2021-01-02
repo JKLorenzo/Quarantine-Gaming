@@ -1,4 +1,7 @@
 const { Command } = require('discord.js-commando');
+const functions = require('../../modules/functions');
+let app = require('../../modules/app');
+let message_manager = require('../../modules/message_manager');
 
 module.exports = class TransferCommand extends Command {
     constructor(client) {
@@ -18,27 +21,29 @@ module.exports = class TransferCommand extends Command {
         });
     }
 
-    run(message, { users }) {
-        let channel = g_channels.get().guild.member(message.author).voice.channel;
-        if (channel) {
-            for (let user of users.split(' ')) {
-                let user_id = user.split('<@').join('').split('>').join('').slice(1);
-                let this_member = g_channels.get().guild.members.cache.get(user_id);
+    async run(message, { users }) {
+        // Link 
+        const Modules = functions.parseModules(GlobalModules);
+        app = Modules.app;
+        message_manager = Modules.message_manager;
+
+        const voice_channel = app.member(message.author).voice.channel;
+        if (voice_channel) {
+            for (const user of users.split(' ')) {
+                const this_member = app.member(user);
                 if (this_member) {
                     if (this_member.voice.channelID) {
-                        this_member.voice.setChannel(channel.id).then(member => {
-                            g_message_manager.dm_member(member, `You have been transfered by ${message.author} to ${channel.name}.`);
-                        }).catch(() => { });
+                        await this_member.voice.setChannel(voice_channel.id);
+                        await message_manager.sendToUser(member, `You have been transfered by ${message.author} to ${voice_channel.name}.`);
                     } else {
-                        message.channel.send(`${this_member} must be active to any voice channels.`).catch(() => { });
+                        message.reply(`${this_member} must be active to any voice channels.`);
                     }
                 } else {
-                    message.channel.send(`I can't find user ${user}, please try again.`).catch(() => { });
+                    message.reply(`I can't find user ${user}, please try again.`);
                 }
             }
         } else {
-            message.channel.send('You must be active to any voice channels before you can trasfer other members.').catch(() => { });
+            message.reply('You must be active to any voice channels before you can trasfer other members.');
         }
-        return;
     }
 };
