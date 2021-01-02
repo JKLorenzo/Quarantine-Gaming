@@ -2,7 +2,7 @@ const OpusScript = require('opusscript'); // for TTS
 const fs = require('fs');
 const tts = require('google-translate-tts');
 const functions = require('./functions.js');
-const error_manager = require('./error_manager.js');
+let error_manager = require('./error_manager.js');
 
 const error_ticket = error_manager.for('speech.js');
 const SpeechManager = functions.createManager(5000);
@@ -19,6 +19,11 @@ const format_words = [
 ];
 
 module.exports = {
+    initialize: function (t_Modules) {
+        // Link
+        const Modules = functions.parseModules(t_Modules);
+        error_manager = Modules.error_manager;
+    },
     say: function (message, voice_channel) {
         return new Promise(async (resolve) => {
             await SpeechManager.queue();

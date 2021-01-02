@@ -1,9 +1,31 @@
 const gis = require('g-i-s');
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function createManager(timeout) {
+    return {
+        processID: 0,
+        currentID: 0,
+
+        queue: function () {
+            const id = this.processID++;
+            return new Promise(async resolve => {
+                while (id != this.currentID) await sleep(1000);
+                resolve();
+            });
+        },
+        finish: function () {
+            setTimeout(() => {
+                this.currentID++;
+            }, timeout);
+        }
+    };
+}
+
 module.exports = {
-    sleep: function (ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    },
+    sleep: sleep,
     createStructure: function (properties) {
         const property = properties.split(' ');
         const count = properties.length;
@@ -14,25 +36,7 @@ module.exports = {
         }
         return constructor;
     },
-    createManager: function (timeout) {
-        return {
-            processID: 0,
-            currentID: 0,
-
-            queue: function () {
-                const id = this.processID++;
-                return new Promise(async resolve => {
-                    while (id != this.currentID) await sleep(1000);
-                    resolve();
-                });
-            },
-            finish: function () {
-                setTimeout(() => {
-                    this.currentID++;
-                }, timeout);
-            }
-        };
-    },
+    createManager: createManager,
     compareDate: function (date) {
         const today = new Date();
         const diffMs = (today - date);
@@ -62,8 +66,27 @@ module.exports = {
     toAlphanumericString: function (string) {
         return String(string).replace(/[^a-z0-9]/gi, '')
     },
+    toCountingInteger: function (string) {
+        const parsed = parseInt(string, 10);
+        if (isNaN(parsed)) return 0;
+        return parsed;
+    },
     parseHTML: function (string) {
         return String(string).replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"');
+    },
+    parseModules: function (t_GlobalModules) {
+        const modules = t_GlobalModules();
+        return {
+            app: modules.app,
+            channel_manager: modules.channel_manager,
+            database: modules.database,
+            error_manager: modules.error_manager,
+            general: modules.general,
+            message_manager: modules.message_manager,
+            reaction_manager: modules.reaction_manager,
+            role_manager: modules.role_manager,
+            speech: modules.speech
+        }
     },
     contains: function (whole_string, part_string) {
         return String(whole_string).toLowerCase().indexOf(String(part_string).toLowerCase()) !== -1;

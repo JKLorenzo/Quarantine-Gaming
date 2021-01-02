@@ -1,5 +1,5 @@
-const app = require('./app.js');
 const functions = require('./functions.js');
+let app = require('./app.js');
 
 const RoleCreateManager = functions.createManager(1000);
 const RoleDeleteManager = functions.createManager(5000);
@@ -7,6 +7,11 @@ const RoleAddManager = functions.createManager(1000);
 const RoleRemoveManager = functions.createManager(1000);
 
 module.exports = {
+    initialize: function (t_Modules) {
+        // Link
+        const Modules = functions.parseModules(t_Modules);
+        app = Modules.app;
+    },
     create: function (options = {
         name: null,
         color: null,
@@ -14,25 +19,23 @@ module.exports = {
         mentionable: null,
         permissions: null,
         position: null,
-        reason: null,
-
-        get: function () {
-            const options = null;
-            if (this.name !== null) options.data.name = this.name;
-            if (this.color !== null) options.data.color = this.color;
-            if (this.hoist !== null) options.data.hoist = this.hoist;
-            if (this.mentionable !== null) options.data.mentionable = this.mentionable;
-            if (this.permissions !== null) options.data.permissions = this.permissions;
-            if (this.position !== null) options.data.position = this.position;
-            if (this.reason !== null) options.reason = this.reason;
-            return options;
-        }
+        reason: null
     }) {
         return new Promise(async (resolve, reject) => {
             await RoleCreateManager.queue();
             let output, error;
             try {
-                output = await app.guild().roles.create(options.get());
+                output = await app.guild().roles.create({
+                    data: {
+                        name: options.name,
+                        color: options.color,
+                        hoist: options.hoist,
+                        mentionable: options.mentionable,
+                        permissions: options.permissions,
+                        position: options.position,
+                    },
+                    reason: options.reason
+                });
             } catch (err) {
                 error = err;
             }

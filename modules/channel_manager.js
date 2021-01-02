@@ -1,11 +1,16 @@
-const app = require('./app.js');
 const constants = require('./constants.js');
 const functions = require('./functions.js');
+let app = require('./app.js');
 
 const ChannelCreateManager = functions.createManager(5000);
 const ChannelDeleteManager = functions.createManager(1000);
 
 module.exports = {
+    initialize: function (t_Modules) {
+        // Link
+        const Modules = functions.parseModules(t_Modules);
+        app = Modules.app;
+    },
     create: function (options = {
         name: null,
         bitrate: null,
@@ -17,28 +22,24 @@ module.exports = {
         reason: null,
         topic: null,
         type: null,
-        userLimit: null,
-
-        get: function () {
-            const GuildCreateChannelOptions = null;
-            if (this.bitrate !== null) GuildCreateChannelOptions.bitrate = this.bitrate;
-            if (this.nsfw !== null) GuildCreateChannelOptions.nsfw = this.nsfw;
-            if (this.parent !== null) GuildCreateChannelOptions.parent = this.parent;
-            if (this.permissionOverwrites !== null) GuildCreateChannelOptions.permissionOverwrites = this.permissionOverwrites;
-            if (this.position !== null) GuildCreateChannelOptions.position = this.position;
-            if (this.rateLimitPerUser !== null) GuildCreateChannelOptions.rateLimitPerUser = this.rateLimitPerUser;
-            if (this.reason !== null) GuildCreateChannelOptions.reason = this.reason;
-            if (this.topic !== null) GuildCreateChannelOptions.topic = this.topic;
-            if (this.type !== null) GuildCreateChannelOptions.type = this.type;
-            if (this.userLimit !== null) GuildCreateChannelOptions.userLimit = this.userLimit;
-            return GuildCreateChannelOptions;
-        }
+        userLimit: null
     }) {
         return new Promise(async (resolve, reject) => {
             await ChannelCreateManager.queue();
             let output, error;
             try {
-                output = await app.guild().channels.create(options.name, options.get());
+                output = await app.guild().channels.create(options.name, {
+                    bitrate: options.bitrate,
+                    nsfw: options.nsfw,
+                    parent: options.parent,
+                    permissionOverwrites: options.permissionOverwrites,
+                    position: options.position,
+                    rateLimitPerUser: options.rateLimitPerUser,
+                    reason: options.reason,
+                    topic: options.topic,
+                    type: options.type,
+                    userLimit: options.userLimit
+                });
             } catch (err) {
                 error = err;
             }

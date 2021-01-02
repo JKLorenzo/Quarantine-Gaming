@@ -1,24 +1,24 @@
 const { CommandoClient } = require('discord.js-commando');
 const { MessageEmbed } = require('discord.js');
 const constants = require('./constants.js');
-const message_manager = require('./message_manager.js');
-const error_manager = require('./error_manager.js');
-const role_manager = require('./role_manager.js');
-const database = require('./database.js');
-const general = require('./general.js');
-const channel_manager = require('./channel_manager.js');
-
-let global_client = new CommandoClient();
-let initialized = false;
+const functions = require('./functions.js');
+let message_manager = require('./message_manager.js');
+let error_manager = require('./error_manager.js');
+let role_manager = require('./role_manager.js');
+let database = require('./database.js');
+let general = require('./general.js');
+let channel_manager = require('./channel_manager.js');
 
 const error_ticket = error_manager.for('app.js');
+let client = new CommandoClient();
+let initialized = false;
 
 module.exports = {
     isInitialized: function () {
         return initialized;
     },
     client: function () {
-        return global_client;
+        return client;
     },
     guild: function () {
         return this.client().guilds.cache.get(constants.guild);
@@ -37,11 +37,19 @@ module.exports = {
             type: type.trim().toUpperCase()
         });
     },
-    initialize: async function (client) {
-        try {
-            global_client = client;
+    initialize: async function (t_client, t_Modules) {
+        // Link
+        client = t_client;
+        const Modules = functions.parseModules(t_Modules);
+        message_manager = Modules.message_manager;
+        error_manager = Modules.error_manager;
+        role_manager = Modules.role_manager;
+        database = Modules.database;
+        general = Modules.general;
+        channel_manager = Modules.channel_manager;
 
-            await this.setActivity('!help');
+        try {
+            await this.setActivity('Maintenance Mode (v3)', 'PLAYING');
 
             // Manage Active Dedicated Channels
             for (const dedicated_channel of this.channel(constants.channels.category.dedicated).children.array()) {
@@ -246,6 +254,7 @@ module.exports = {
             console.log('Initialized');
             initialized = true;
         } catch (error) {
+            console.error('Initializing Failed');
             error_manager.mark(new error_ticket('initialize', error));
         }
     }

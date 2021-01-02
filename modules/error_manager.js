@@ -1,19 +1,25 @@
 const { MessageEmbed } = require('discord.js');
-const app = require('./app.js');
 const constants = require('./constants.js');
-const message_manager = require('./message_manager.js');
+const functions = require('./functions.js');
+let app = require('./app.js');
+let message_manager = require('./message_manager.js');
 
-let errors = new Array();
+const MarkManager = functions.createManager(1000);
+let threshold_hit_count = 0;
 let threshold_reached = false;
 let errors_per_minute = new Array();
-let threshold_hit_count = 0;
-let is_processing_errors = false;
 
-async function process_errors() {
-    while (errors.length > 0) {
+module.exports = {
+    initialize: function (t_Modules) {
+        // Link
+        const Modules = functions.parseModules(t_Modules);
+        app = Modules.app;
+        message_manager = Modules.message_manager;
+    },
+    mark: async function (ticket) {
+        await MarkManager.queue();
         try {
-            const details = errors.shift();
-            errors_per_minute.push(details);
+            errors_per_minute.push(ticket);
             setTimeout(() => {
                 errors_per_minute.shift();
                 if (errors_per_minute.length == 0) threshold_reached = false;
@@ -25,17 +31,17 @@ async function process_errors() {
                 const embed = new MessageEmbed();
                 embed.setAuthor('Quarantine Gaming: Telemetry');
                 embed.setTitle('Exception Details');
-                if (details.name) {
-                    embed.addField('Function', details.name);
+                if (ticket.name) {
+                    embed.addField('Function', ticket.name);
                 }
-                if (details.error) {
-                    embed.addField('Message', details.error);
+                if (ticket.error) {
+                    embed.addField('Message', ticket.error);
                 }
-                if (details.location) {
-                    embed.addField('Location', details.location);
+                if (ticket.location) {
+                    embed.addField('Location', ticket.location);
                 }
-                if (details.error.code) {
-                    embed.addField('Code', details.error.code);
+                if (ticket.error.code) {
+                    embed.addField('Code', ticket.error.code);
                 }
                 embed.addField('Errors per Minute', epm);
                 embed.addField('Threshold Hit', threshold_reached ? 'True' : 'False');
@@ -45,7 +51,7 @@ async function process_errors() {
                 await message_manager.sendToChannel(constants.channels.qg.logs, embed);
             }
 
-            if ((epm > 5 || details.error.code == '500') && !threshold_reached) {
+            if ((epm > 5 || ticket.error.code == '500') && !threshold_reached) {
                 // Change bot presence
                 app.setActivity(`SERVER RESTART (${++threshold_hit_count})`);
 
@@ -73,17 +79,7 @@ async function process_errors() {
         } catch (error) {
             console.log(error);
         }
-    }
-    is_processing_errors = false;
-}
-
-module.exports = {
-    mark: function (ticket) {
-        errors.push(ticket);
-        if (!is_processing_errors) {
-            is_processing_errors = true;
-            process_errors();
-        }
+        MarkManager.finish();
     },
     for: function (module) {
         function error_ticket(name, error, root = '') {

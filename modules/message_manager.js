@@ -1,13 +1,19 @@
-const app = require('./app.js');
 const constants = require('./constants.js');
 const functions = require('./functions.js');
-const error_manager = require('./error_manager.js');
+let app = require('./app.js');
+let error_manager = require('./error_manager.js');
 
 const error_ticket = error_manager.for('message.js');
 const ChannelMessageManager = functions.createManager(1000);
 const DirectMessageManager = functions.createManager(5000);
 
 module.exports = {
+    intialize: function (t_Modules) {
+        // Link
+        const Modules = functions.parseModules(t_Modules);
+        app = Modules.app;
+        error_manager = Modules.error_manager;
+    },
     sendToChannel: function (channel_resolvable, message) {
         return new Promise(async (resolve, reject) => {
             await ChannelMessageManager.queue();

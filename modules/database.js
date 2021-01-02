@@ -1,21 +1,24 @@
 const Firebase = require('firebase-admin');
-const error_manager = require('./error_manager.js');
+const functions = require('./functions.js');
+let error_manager = require('./error_manager.js');
 
-const error_ticket = error_manager.for('database.js')
-
-const DB = {
+const error_ticket = error_manager.for('database.js');
+let DB = {
     notifications: null,
     titles_blacklisted: null,
     titles_whitelisted: null
 };
-
 let index = 0,
     notifications = new Array(),
     blacklisted = new Array(),
     whitelisted = new Array();
 
 module.exports = {
-    initialize: async function () {
+    initialize: async function (t_Modules) {
+        // Link
+        const Modules = functions.parseModules(t_Modules);
+        error_manager = Modules.error_manager;
+
         try {
             index = 0;
             notifications = new Array();

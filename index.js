@@ -2,11 +2,15 @@ const { CommandoClient } = require('discord.js-commando');
 const { MessageEmbed } = require('discord.js');
 const path = require('path');
 const app = require('./modules/app.js');
-const message_manager = require('./modules/message_manager.js');
+const channel_manager = require('./modules/channel_manager.js');
+const database = require('./modules/database.js');
 const error_manager = require('./modules/error_manager.js');
-const reaction_manager = require('./modules/reaction_manager.js');
-const general = require('./modules/general.js');
 const functions = require('./modules/functions.js');
+const general = require('./modules/general.js');
+const message_manager = require('./modules/message_manager.js');
+const reaction_manager = require('./modules/reaction_manager.js');
+const role_manager = require('./modules/role_manager.js');
+const speech = require('./modules/speech.js');
 
 const error_ticket = error_manager.for('index.js');
 
@@ -33,9 +37,33 @@ client.registry
     })
     .registerCommandsIn(path.join(__dirname, 'commands'));
 
+function Modules() {
+    return {
+        app: app,
+        channel_manager: channel_manager,
+        database: database,
+        error_manager: error_manager,
+        general: general,
+        message_manager: message_manager,
+        reaction_manager: reaction_manager,
+        role_manager: role_manager,
+        speech: speech
+    }
+}
+
+global.GlobalModules = Modules;
+
 client.once('ready', async () => {
     console.log('Startup');
-    app.initialize(client);
+    channel_manager.initialize(Modules);
+    database.initialize(Modules);
+    general.initialize(Modules);
+    message_manager.intialize(Modules);
+    reaction_manager.initialize(Modules);
+    role_manager.initialize(Modules);
+    speech.initialize(Modules);
+    error_manager.initialize(Modules);
+    app.initialize(client, Modules);
 });
 
 client.on('message', incoming_message => {
@@ -73,11 +101,7 @@ client.on('userUpdate', (oldUser, newUser) => {
         embed.setColor('#6464ff');
         if (description.length > 0) g_interface.log(embed);
     } catch (error) {
-        g_interface.on_error({
-            name: 'userUpdate',
-            location: 'index.js',
-            error: error
-        });
+        error_manager.mark(new error_ticket('userUpdate', error));
     }
 });
 
@@ -122,11 +146,7 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
         embed.setColor('#6464ff');
         if (description.length > 0) g_interface.log(embed);
     } catch (error) {
-        g_interface.on_error({
-            name: 'guildMemberUpdate',
-            location: 'index.js',
-            error: error
-        });
+        error_manager.mark(new error_ticket('guildMemberUpdate', error));
     }
 });
 
@@ -163,19 +183,15 @@ client.on('guildMemberAdd', async member => {
                 embed.setColor('#25c059');
                 await g_channels.get().staff.send({ content: '<@&749235255944413234> action is required.', embed: embed }).then(async this_message => {
                     await this_message.react('✅');
-                    await g_functions.sleep(1500);
+                    await functions.sleep(1500);
                     await this_message.react('❌');
-                    await g_functions.sleep(1500);
+                    await functions.sleep(1500);
                     await this_message.react('⛔');
                 });
             }
         }
     } catch (error) {
-        g_interface.on_error({
-            name: 'guildMemberAdd',
-            location: 'index.js',
-            error: error
-        });
+        error_manager.mark(new error_ticket('guildMemberAdd', error));
     }
 });
 
@@ -273,11 +289,7 @@ client.on('rateLimit', (rateLimitInfo) => {
 
 client.on('error', error => {
     console.log(error);
-    g_interface.on_error({
-        name: 'client error',
-        location: 'index.js',
-        error: error
-    });
+    error_manager.mark(new error_ticket('error', error));
 });
 
 client.login(process.env.BOT_TOKEN);

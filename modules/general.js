@@ -1,29 +1,38 @@
 const { MessageEmbed } = require('discord.js');
 const fetch = require('node-fetch');
 const probe = require('probe-image-size');
-
-const app = require('./app.js');
 const constants = require('./constants.js');
 const functions = require('./functions.js');
-const error_manager = require('./error_manager.js');
-const message_manager = require('./message_manager.js');
-const reaction = require('./reaction_manager.js');
-const role_manager = require('./role_manager.js');
-const channel_manager = require('./channel_manager.js');
-const database = require('./database.js');
-const speech = require('./speech.js');
+let app = require('./app.js');
+let error_manager = require('./error_manager.js');
+let message_manager = require('./message_manager.js');
+let reaction_manager = require('./reaction_manager.js');
+let role_manager = require('./role_manager.js');
+let channel_manager = require('./channel_manager.js');
+let database = require('./database.js');
+let speech = require('./speech.js');
 
 const error_ticket = error_manager.for('general.js');
-
 const OfflineManager = functions.createManager(1000);
 const ActivityManager = functions.createManager(5000);
 const VoiceManager = functions.createManager(1000);
 const DedicateManager = functions.createManager(10000);
 const FreeGameManager = functions.createManager(1500000);
-
 let freeGameCollection = new Array();
 
 module.exports = {
+    initialize: function (t_Modules) {
+        // Link
+        const Modules = functions.parseModules(t_Modules);
+        app = Modules.app;
+        error_manager = Modules.error_manager;
+        message_manager = Modules.message_manager;
+        reaction_manager = Modules.reaction_manager;
+        role_manager = Modules.role_manager;
+        channel_manager = Modules.channel_manager;
+        database = Modules.database;
+        speech = Modules.speech;
+    },
     checkUnlisted: async function () {
         try {
             for (let this_member of app.guild().members.cache.array()) {
@@ -275,7 +284,7 @@ module.exports = {
                 const this_message = await message_manager.sendToChannel(constants.channels.integrations.game_invites, { content: `${member.displayName} is inviting you to play ${mention_role.name}! (${mention_role})`, embed: embed })
                 this_message.delete({ timeout: 3600000 }).catch(() => { });
                 if (!is_full) {
-                    await reaction.addReaction(this_message, emoji ? emoji : qg_emoji).catch(error => error_manager.mark(new error_ticket('addReaction', error, 'gameInvite')));
+                    await reaction_manager.addReaction(this_message, emoji ? emoji : qg_emoji).catch(error => error_manager.mark(new error_ticket('addReaction', error, 'gameInvite')));
                 }
             }
         } catch (error) {

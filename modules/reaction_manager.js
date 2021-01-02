@@ -1,17 +1,23 @@
 const constants = require('./constants.js');
 const functions = require('./functions.js');
-const role_manager = require('./role_manager.js');
-const error_manager = require('./error_manager.js');
-const app = require('./app.js');
-const message_manager = require('./message_manager.js');
-const { channel } = require('./app.js');
+let app = require('./app.js');
+let role_manager = require('./role_manager.js');
+let error_manager = require('./error_manager.js');
+let message_manager = require('./message_manager.js');
 
 const error_ticket = error_manager.for('reaction.js');
-
 const ReactionAddManager = functions.createManager(1500);
 const IncomingReactionManager = functions.createManager(500);
 
 module.exports = {
+    initialize: function (t_Modules) {
+        // Link
+        const Modules = functions.parseModules(t_Modules);
+        app = Modules.app;
+        role_manager = Modules.role_manager;
+        error_manager = Modules.error_manager;
+        message_manager = Modules.message_manager;
+    },
     addReaction: function (message, emoji) {
         return new Promise(async (resolve, reject) => {
             await ReactionAddManager.queue();
@@ -206,7 +212,7 @@ module.exports = {
                                     if (this_field.value && this_field.value.length > 0) {
                                         const player = app.member(this_field.value);
                                         if (player && player.id != reactor.id) {
-                                            await channel.sendToUser(player, `${member} joined your bracket. ${players.length > 1 ? `${players.length} players total.` : ''}`);
+                                            await message_manager.sendToUser(player, `${member} joined your bracket. ${players.length > 1 ? `${players.length} players total.` : ''}`);
                                         }
                                     }
                                 }
@@ -218,7 +224,7 @@ module.exports = {
                                         if (this_field.value && this_field.value.length > 0) {
                                             const player = app.member(this_field.value);
                                             if (player_member && player_member.id != member.id) {
-                                                await channel.sendToUser(player, { content: `Your ${embed.title} bracket is now full.`, embed: embed });
+                                                await message_manager.sendToUser(player, { content: `Your ${embed.title} bracket is now full.`, embed: embed });
                                             }
                                         }
                                     }
@@ -298,7 +304,7 @@ module.exports = {
                                     if (this_field.value && this_field.value.length > 0) {
                                         const player = app.member(this_field.value);
                                         if (player && player.id != reactor.id) {
-                                            await channel.sendToUser(player, `${member} left your bracket. ${players.length > 1 ? `${players.length} players total.` : ''}`);
+                                            await message_manager.sendToUser(player, `${member} left your bracket. ${players.length > 1 ? `${players.length} players total.` : ''}`);
                                         }
                                     }
                                 }
