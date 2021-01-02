@@ -53,10 +53,10 @@ module.exports = {
         },
         integrations: {
             free_games: '699763763859161108',
-            game_invites: '699763763859161108',
-            game_updates: '699763763859161108',
-            music_commands: '699763763859161108',
-            afk: '699763763859161108',
+            game_invites: '759755324264808489',
+            game_updates: '781509022972248064',
+            music_commands: '699782177378009108',
+            afk: '663443529170681857',
         },
         qg: {
             dm: '773425152750125106',
