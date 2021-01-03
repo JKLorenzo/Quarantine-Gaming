@@ -88,6 +88,9 @@ module.exports = {
             speech: modules.speech
         }
     },
+    parseMention: function (string) {
+        return String(string).replace(/\W/g, '');
+    },
     contains: function (whole_string, part_string) {
         return String(whole_string).toLowerCase().indexOf(String(part_string).toLowerCase()) !== -1;
     },
