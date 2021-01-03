@@ -65,6 +65,36 @@ module.exports = {
             testing_ground_voice: '776976436950990848'
         }
     },
+    permissions: {
+        general: {
+            VIEW_CHANNEL: 'VIEW_CHANNEL',
+            MANAGE_CHANNELS: 'MANAGE_CHANNELS',
+            MANAGE_PERMISSIONS: 'MANAGE_PERMISSIONS',
+            MANAGE_WEBHOOKS: 'MANAGE_WEBHOOKS',
+            CREATE_INVITE: 'CREATE_INSTANT_INVITE'
+        },
+        text: {
+            SEND_MESSAGES: 'SEND_MESSAGES',
+            EMBED_LINKS: 'EMBED_LINKS',
+            ATTACH_FILES: 'ATTACH_FILES',
+            ADD_REACTIONS: 'ADD_REACTIONS',
+            USE_EXTERNAL_EMOJIS: 'USE_EXTERNAL_EMOJIS',
+            MENTION_EVERYONE: 'MENTION_EVERYONE',
+            MANAGE_MESSAGES: 'MANAGE_MESSAGES',
+            READ_MESSAGE_HISTORY: 'READ_MESSAGE_HISTORY',
+            SEND_TTS_MESSAGES: 'SEND_TTS_MESSAGES'
+        },
+        voice: {
+            CONNECT: 'CONNECT',
+            SPEAK: 'SPEAK',
+            VIDEO: 'STREAM',
+            USE_VOICE_ACTIVITY: 'USE_VAD',
+            PRIORITY_SPEAKER: 'PRIORITY_SPEAKER',
+            MUTE_MEMBERS: 'MUTE_MEMBERS',
+            DEAFEN_MEMBERS: 'DEAFEN_MEMBERS',
+            MOVE_MEMBERS: 'MOVE_MEMBERS'
+        }
+    },
     images: {
         free_games_default: 'https://wallpaper-mania.com/wp-content/uploads/2018/09/High_resolution_wallpaper_background_ID_77700751093.jpg'
     }
