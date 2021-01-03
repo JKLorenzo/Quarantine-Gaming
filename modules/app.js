@@ -23,14 +23,14 @@ module.exports = {
     guild: function () {
         return this.client().guilds.cache.get(constants.guild);
     },
-    channel: function (resolvable) {
-        return this.guild().channels.resolve(resolvable);
+    channel: function (GuildChannelResolvable) {
+        return this.guild().channels.resolve(GuildChannelResolvable);
     },
-    role: function (resolvable) {
-        return this.guild().roles.resolve(resolvable);
+    role: function (RoleResolvable) {
+        return this.guild().roles.resolve(RoleResolvable);
     },
-    member: function (user) {
-        return this.guild().member(user);
+    member: function (UserResolvable) {
+        return this.guild().members.resolve(UserResolvable);
     },
     setActivity: function (value, type = 'LISTENING') {
         return this.client().user.setActivity(value.trim(), {
