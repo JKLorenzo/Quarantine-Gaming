@@ -72,7 +72,7 @@ module.exports = {
             shorter_string = string1;
         }
 
-        if (longer_string.length == 0 || shorter_string.length) return 0;
+        if (longer_string.length == 0 || shorter_string.length == 0) return 0;
 
         const costs = new Array();
         for (let i = 0; i <= longer_string.length; i++) {
