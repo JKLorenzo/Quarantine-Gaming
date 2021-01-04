@@ -63,6 +63,42 @@ module.exports = {
         }
         return difference;
     },
+    compareString: function (string1, string2) {
+        let longer = string1;
+        let shorter = string2;
+
+        if (string1.length < string2.length) {
+            longer = string2;
+            shorter = string1;
+        }
+
+        const longerLength = longer.length;
+        if (longerLength == 0) {
+            return 100;
+        }
+
+        const costs = new Array();
+        for (const i = 0; i <= longer.length; i++) {
+            let lastValue = i;
+            for (const j = 0; j <= shorter.length; j++) {
+                if (i == 0)
+                    costs[j] = j;
+                else {
+                    if (j > 0) {
+                        let newValue = costs[j - 1];
+                        if (longer.charAt(i - 1) != shorter.charAt(j - 1)) {
+                            newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+                        }
+                        costs[j - 1] = lastValue;
+                        lastValue = newValue;
+                    }
+                }
+            }
+            if (i > 0) costs[shorter.length] = lastValue;
+        }
+
+        return 100 * ((longerLength - costs[shorter.length]) / longerLength);
+    },
     toAlphanumericString: function (string) {
         return String(string).replace(/[^a-z0-9]/gi, '')
     },
