@@ -3,6 +3,7 @@ const { MessageEmbed } = require('discord.js');
 const path = require('path');
 const app = require('./modules/app.js');
 const channel_manager = require('./modules/channel_manager.js');
+const constants = require('./modules/constants.js');
 const database = require('./modules/database.js');
 const error_manager = require('./modules/error_manager.js');
 const functions = require('./modules/functions.js');
@@ -72,7 +73,7 @@ client.on('message', incoming_message => {
     }
 });
 
-client.on('userUpdate', (oldUser, newUser) => {
+client.on('userUpdate', async (oldUser, newUser) => {
     try {
         let embed = new MessageEmbed();
         let this_member = g_channels.get().guild.members.cache.find(member => member.user.tag == newUser.tag);
@@ -99,13 +100,13 @@ client.on('userUpdate', (oldUser, newUser) => {
         embed.setFooter(`${newUser.tag} (${newUser.id})`);
         embed.setTimestamp(new Date());
         embed.setColor('#6464ff');
-        if (description.length > 0) g_interface.log(embed);
+        if (description.length > 0) await message_manager.sendToChannel(constants.channels.qg.logs, embed);
     } catch (error) {
         error_manager.mark(new error_ticket('userUpdate', error));
     }
 });
 
-client.on('guildMemberUpdate', (oldMember, newMember) => {
+client.on('guildMemberUpdate', async (oldMember, newMember) => {
     try {
         let embed = new MessageEmbed();
         embed.setAuthor(newMember.displayName, newMember.user.displayAvatarURL());
@@ -144,7 +145,7 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
         embed.setFooter(`${newMember.user.tag} (${newMember.user.id})`);
         embed.setTimestamp(new Date());
         embed.setColor('#6464ff');
-        if (description.length > 0) g_interface.log(embed);
+        if (description.length > 0) await message_manager.sendToChannel(constants.channels.qg.logs, embed);
     } catch (error) {
         error_manager.mark(new error_ticket('guildMemberUpdate', error));
     }
@@ -274,7 +275,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
     }
 });
 
-client.on('rateLimit', (rateLimitInfo) => {
+client.on('rateLimit', async (rateLimitInfo) => {
     let embed = new MessageEmbed();
     embed.setColor('#ffff00');
     embed.setAuthor('Quarantine Gaming: Telemetry');
@@ -284,7 +285,7 @@ client.on('rateLimit', (rateLimitInfo) => {
     embed.addField('Method', rateLimitInfo.method);
     embed.addField('Path', rateLimitInfo.path);
     embed.addField('Route', rateLimitInfo.route);
-    g_interface.log(embed);
+    await message_manager.sendToChannel(constants.channels.qg.logs, embed);
 });
 
 client.on('error', error => {
