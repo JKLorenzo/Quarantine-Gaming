@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/JKLorenzo/Quarantine-Gaming#readme",
   "dependencies": {
-    "axios": "^0.21.0",
+    "axios": "^0.21.1",
     "discord.js": "^12.5.1",
     "discord.js-commando": "git+https://github.com/discordjs/Commando.git",
     "firebase-admin": "^9.4.1",
