@@ -1,5 +1,5 @@
 const { CommandoClient } = require('discord.js-commando');
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, GuildMember } = require('discord.js');
 const path = require('path');
 const app = require('./modules/app.js');
 const channel_manager = require('./modules/channel_manager.js');
@@ -54,7 +54,7 @@ function Modules() {
 
 global.GlobalModules = Modules;
 
-client.once('ready', async () => {
+client.once('ready', () => {
     console.log('Startup');
     channel_manager.initialize(Modules);
     database.initialize(Modules);
@@ -67,7 +67,7 @@ client.once('ready', async () => {
     app.initialize(client, Modules);
 });
 
-client.on('message', incoming_message => {
+client.on('message', (incoming_message) => {
     if (app.isInitialized()) {
         message_manager.process(incoming_message);
     }
@@ -75,32 +75,34 @@ client.on('message', incoming_message => {
 
 client.on('userUpdate', async (oldUser, newUser) => {
     try {
-        let embed = new MessageEmbed();
-        let this_member = g_channels.get().guild.members.cache.find(member => member.user.tag == newUser.tag);
-        embed.setAuthor(this_member.displayName, oldUser.displayAvatarURL());
-        embed.setTitle('User Update');
+        if (app.isInitialized()) {
+            const embed = new MessageEmbed();
+            const member = app.member(newUser);
+            embed.setAuthor(member.displayName, oldUser.displayAvatarURL());
+            embed.setTitle('User Update');
 
-        let description = new Array();
-        // Avatar
-        if (oldUser.displayAvatarURL() != newUser.displayAvatarURL()) {
-            description.push(`**Avatar**`);
-            description.push(`New: [Avatar Link](${newUser.displayAvatarURL()})`);
-            embed.setThumbnail(newUser.displayAvatarURL());
+            const description = new Array();
+            // Avatar
+            if (oldUser.displayAvatarURL() != newUser.displayAvatarURL()) {
+                description.push(`**Avatar**`);
+                description.push(`New: [Avatar Link](${newUser.displayAvatarURL()})`);
+                embed.setThumbnail(newUser.displayAvatarURL());
+            }
+
+            // Username
+            if (oldUser.username != newUser.username) {
+                if (description.length > 0) description.push(' ');
+                description.push(`**Username**`);
+                description.push(`Old: ${oldUser.username}`);
+                description.push(`New: ${newUser.username}`);
+            }
+
+            embed.setDescription(description.join('\n'));
+            embed.setFooter(`${newUser.tag} (${newUser.id})`);
+            embed.setTimestamp();
+            embed.setColor('#6464ff');
+            if (description.length > 0) await message_manager.sendToChannel(constants.channels.qg.logs, embed);
         }
-
-        // Username
-        if (oldUser.username != newUser.username) {
-            if (description.length > 0) description.push(' ');
-            description.push(`**Username**`);
-            description.push(`Old: ${oldUser.username}`);
-            description.push(`New: ${newUser.username}`);
-        }
-
-        embed.setDescription(description.join('\n'));
-        embed.setFooter(`${newUser.tag} (${newUser.id})`);
-        embed.setTimestamp(new Date());
-        embed.setColor('#6464ff');
-        if (description.length > 0) await message_manager.sendToChannel(constants.channels.qg.logs, embed);
     } catch (error) {
         error_manager.mark(new error_ticket('userUpdate', error));
     }
@@ -108,11 +110,11 @@ client.on('userUpdate', async (oldUser, newUser) => {
 
 client.on('guildMemberUpdate', async (oldMember, newMember) => {
     try {
-        let embed = new MessageEmbed();
+        const embed = new MessageEmbed();
         embed.setAuthor(newMember.displayName, newMember.user.displayAvatarURL());
         embed.setTitle('Guild Member Update');
 
-        let description = new Array();
+        const description = new Array();
         // Display Name
         if (newMember.displayName != oldMember.displayName) {
             if (description.length > 0) description.push(' ');
@@ -123,9 +125,9 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
 
         // Role
         if (newMember.roles.cache.size != oldMember.roles.cache.size) {
-            let added = new Array(), removed = new Array();
-            for (let this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
-                if (!this_role.name.startsWith('Play') && !this_role.name.startsWith('Text') && !this_role.name.startsWith('Team') && this_role != g_roles.get().dedicated) {
+            const added = new Array(), removed = new Array();
+            for (const this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
+                if (!this_role.name.startsWith('Play') && !this_role.name.startsWith('Text') && !this_role.name.startsWith('Team') && this_role.id != constants.roles.dedicated) {
                     if (newMember.roles.cache.has(this_role.id)) {
                         added.push(this_role);
                     } else {
@@ -143,7 +145,7 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
 
         embed.setDescription(description.join('\n'));
         embed.setFooter(`${newMember.user.tag} (${newMember.user.id})`);
-        embed.setTimestamp(new Date());
+        embed.setTimestamp();
         embed.setColor('#6464ff');
         if (description.length > 0) await message_manager.sendToChannel(constants.channels.qg.logs, embed);
     } catch (error) {
@@ -151,26 +153,24 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
     }
 });
 
-client.on('guildMemberAdd', async member => {
+client.on('guildMemberAdd', async (this_member) => {
     try {
-        let this_member = g_channels.get().guild.members.cache.get(member.id);
-
         if (this_member && !this_member.user.bot) {
-            if (!this_member.roles.cache.find(role => role.id == '722699433225224233')) {
-                let dm = new Array();
-                dm.push(`Hi ${member.user.username}, and welcome to **Quarantine Gaming**!`);
-                dm.push('Please wait while our staff is processing your membership approval.');
-                await g_message_manager.dm_member(member, dm.join('\n'));
+            if (!this_member.roles.cache.has(constants.roles.member)) {
+                const MessageToSend = new Array();
+                MessageToSend.push(`Hi ${member.user.username}, and welcome to **Quarantine Gaming**!`);
+                MessageToSend.push(`Please wait while we are processing your membership approval.`);
+                await message_manager.sendToUser(this_member, MessageToSend.join('\n'))
 
-                let today = new Date();
-                let diffMs = (today - this_member.user.createdAt);
-                let diffDays = Math.floor(diffMs / 86400000)
-                let diffHrs = Math.floor((diffMs % 86400000) / 3600000)
-                let diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000);
-                let created_on = diffDays + " days " + diffHrs + " hours " + diffMins + " minutes";
-                let inviters = await g_functions.getInviter();
+                const today = new Date();
+                const diffMs = (today - this_member.user.createdAt);
+                const diffDays = Math.floor(diffMs / 86400000)
+                const diffHrs = Math.floor((diffMs % 86400000) / 3600000)
+                const diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000);
+                const created_on = diffDays + " days " + diffHrs + " hours " + diffMins + " minutes";
+                const inviters = await g_functions.getInviter();
 
-                let embed = new MessageEmbed
+                const embed = new MessageEmbed();
                 embed.setAuthor('Quarantine Gaming: Member Approval');
                 embed.setTitle('Member Details');
                 embed.setThumbnail(this_member.user.displayAvatarURL());
@@ -182,13 +182,14 @@ client.on('guildMemberAdd', async member => {
                     { name: 'Moderation:', value: '✅ - Approve     ❌ - Kick     ⛔ - Ban' }
                 ]);
                 embed.setColor('#25c059');
-                await g_channels.get().staff.send({ content: '<@&749235255944413234> action is required.', embed: embed }).then(async this_message => {
-                    await this_message.react('✅');
-                    await functions.sleep(1500);
-                    await this_message.react('❌');
-                    await functions.sleep(1500);
-                    await this_message.react('⛔');
+                const Message = await message_manager.sendToChannel(constants.channels.server.management, {
+                    content: `${app.role(constants.roles.staff)} and ${app.role(constants.roles.moderator)} action is required.`,
+                    embed: embed
                 });
+                const reactions = ['✅', '❌', '⛔'];
+                for (const emoji of reactions) {
+                    await reaction_manager.addReaction(Message, emoji);
+                }
             }
         }
     } catch (error) {
@@ -288,7 +289,7 @@ client.on('rateLimit', async (rateLimitInfo) => {
     await message_manager.sendToChannel(constants.channels.qg.logs, embed);
 });
 
-client.on('error', error => {
+client.on('error', (error) => {
     console.log(error);
     error_manager.mark(new error_ticket('error', error));
 });
