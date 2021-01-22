@@ -1,5 +1,7 @@
 const { Command } = require('discord.js-commando');
-const fetch = require('node-fetch');
+const functions = require('../../modules/functions.js');
+let app = require('../../modules/app.js');
+let general = require('../../modules/general.js')
 
 module.exports = class PushCommand extends Command {
     constructor(client) {
@@ -7,29 +9,20 @@ module.exports = class PushCommand extends Command {
             name: 'push',
             group: 'management',
             memberName: 'push',
-            description: '[Admin Only] Manually push a free game update link.',
+            description: '[Admin Only] Manually push a free game update url.',
             userPermissions: ["ADMINISTRATOR"],
             args: [
                 {
-                    key: 'link',
-                    prompt: 'Enter the link to the giveaway or the permalink of the source.',
+                    key: 'url',
+                    prompt: 'Enter the url to the giveaway or the permalink of the source.',
                     type: 'string',
                 }
             ]
         });
     }
 
-    async run(message, { link }) {
-        try {
-            message.reply('Checking...').then(async this_message => {
-                this_message.edit(await g_fgu.get(link));
-            });
-        } catch (error) {
-            g_interface.on_error({
-                name: 'run',
-                location: 'push.js',
-                error: error
-            });
-        }
+    async run(message, { url }) {
+        const reply = await message.reply('Checking...');
+        reply.edit(await general.freeGameFetch(url));
     }
 };
