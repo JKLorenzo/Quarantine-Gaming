@@ -620,7 +620,7 @@ module.exports = {
                     }
                 }
             }
-            if (!embed.image.url) embed.setImage(constants.images.free_games_default);
+            if (!embed.image.url) embed.setImage(constants.images.free_games_banner);
 
             const color = {
                 R: 0,
