@@ -1,7 +1,11 @@
 const { Command } = require('discord.js-commando');
 const { MessageEmbed } = require('discord.js');
+const constants = require('../../modules/constants.js');
+const functions = require('../../modules/functions.js');
+let app = require('../../modules/app.js');
+let message_manager = require('../../modules/message_manager.js');
+let reaction_manager = require('../../modules/reaction_manager.js');
 
-let mode;
 module.exports = class ReactionRole extends Command {
     constructor(client) {
         super(client, {
@@ -41,130 +45,88 @@ module.exports = class ReactionRole extends Command {
     }
 
     async run(message, { mode, type, msgID }) {
-        let output;
+        // Link 
+        const Modules = functions.parseModules(GlobalModules);
+        app = Modules.app;
+        message_manager = Modules.message_manager;
+        reaction_manager = Modules.reaction_manager;
+
+        /** @type {NSFW | FreeGameUpdates} */
+        let ReactionRoleType;
         switch (type) {
             case 'nsfw':
-                output = NSFW();
+                ReactionRoleType = NSFW;
                 break;
             case 'fgu':
-                output = FreeGameUpdates();
+                ReactionRoleType = FreeGameUpdates;
                 break;
         }
 
-        let updated = false;
         switch (mode) {
             case 'create':
-                await g_channels.get().roles.send(output.message).then(async this_message => {
-                    for (let this_reaction of output.reactions) {
-                        await this_message.react(this_reaction).catch(error => {
-                            g_interface.on_error({
-                                name: 'run -> .react(this_reaction) [case create]',
-                                location: 'reactionrole.js',
-                                error: error
-                            });
-                        });
-                        await g_functions.sleep(1500);
-                    }
-                    updated = true;
-                }).catch(error => {
-                    g_interface.on_error({
-                        name: 'run -> .say(output.message) [case create]',
-                        location: 'reactionrole.js',
-                        error: error
-                    });
-                });
+                const CreateMessage = await message_manager.sendToChannel(constants.channels.server.roles, ReactionRoleType().message);
+                for (const emoji of ReactionRoleType().reactions) {
+                    await reaction_manager.addReaction(CreateMessage, emoji);
+                }
                 break;
             case 'update':
-                await g_channels.get().roles.messages.fetch({ limit: 25 }).then(async messages => {
-                    let this_messages = new Array();
-                    messages.map(msg => {
-                        if (msg.embeds.length == 0 || !msg.author.bot) return msg;
-                        if (msg.id == msgID) {
-                            this_messages.push(msg);
-                        }
-                    });
-                    if (this_messages.length > 0) {
-                        let this_message = this_messages[0];
-                        await this_message.edit(output.message).then(async this_message => {
-                            for (let this_reaction of output.reactions) {
-                                await this_message.react(this_reaction).catch(error => {
-                                    g_interface.on_error({
-                                        name: 'run -> .react(this_reaction) [case update]',
-                                        location: 'reactionrole.js',
-                                        error: error
-                                    });
-                                });
-                                await g_functions.sleep(1500);
-                            }
-                            updated = true;
-                        }).catch(error => {
-                            g_interface.on_error({
-                                name: 'run -> .edit(output.message) [case update]',
-                                location: 'reactionrole.js',
-                                error: error
-                            });
-                        });
+                const UpdateMessage = await app.message(constants.channels.server.roles, msgID);
+                if (UpdateMessage) {
+                    await UpdateMessage.edit(ReactionRoleType().message);
+                    for (const emoji of ReactionRoleType().reactions) {
+                        await reaction_manager.addReaction(UpdateMessage, emoji);
                     }
-                });
+                }
                 break;
         }
-
-        if (updated) {
-            message.say(`Got it! All changes are made.`).catch(() => { });
-        } else {
-            message.say(`Uh oh! No changes made.`).catch(() => { });
-        }
+        message.reply('Done!');
     }
 };
 
 function NSFW() {
-    let embed = new MessageEmbed()
-        .setColor('#ffff00')
-        .setAuthor('Quarantine Gaming: NSFW Content')
-        .setTitle('Unlock NSFW Bots and Channel')
-        .setThumbnail(g_client.user.displayAvatarURL())
-        .setDescription('<@&700486309655085107> and <#699847972623482931> channel will be unlocked after getting the <@&700481554132107414> role.')
-        .addField('🔴 - Not Safe For Work (NSFW)', 'The marked content may contain nudity, intense sexuality, profanity, violence or other potentially disturbing subject matter.')
-        .setImage('https://s3.amazonaws.com/sofontsy-files-us/wp-content/uploads/2019/02/07163845/NSFW-Bundle_banner.jpg')
-        .setFooter('Update your role by reacting below.');
-
-    let reactions = ['🔴'];
+    const embed = new MessageEmbed();
+    embed.setColor('#ffff00');
+    embed.setAuthor('Quarantine Gaming: NSFW Content');
+    embed.setTitle('Unlock NSFW Bots and Channel');
+    embed.setThumbnail(app.client().user.displayAvatarURL());
+    embed.setDescription(`${app.role(constants.roles.nsfw_bot)} and ${app.channel(constants.channels.text.explicit)} channel will be unlocked after getting the role.`);
+    embed.addField(`🔴 - ${app.role(constants.roles.nsfw)} (Not Safe For Work)`, 'The marked content may contain nudity, intense sexuality, profanity, violence or other potentially disturbing subject matter.');
+    embed.setImage(constants.images.nsfw_banner);
+    embed.setFooter('Update your role by reacting below.');
     return {
         message: embed,
-        reactions: reactions
+        reactions: ['🔴']
     }
 }
 
 function FreeGameUpdates() {
-    let description = new Array();
-    description.push('All notifications will be made available on the <#699763763859161108> channel.');
+    const description = new Array();
+    description.push(`All notifications will be made available on our ${app.channel(constants.channels.integrations.free_games)} channel.`);
     description.push(' ');
-    description.push('1️⃣ - <@&722645979248984084>');
+    description.push(`1️⃣ - ${constants.roles.steam}`);
     description.push('Notifies you with Steam games and DLCs that are currently free.');
     description.push(' ');
-    description.push('2️⃣ - <@&722691589813829672>');
+    description.push(`2️⃣ - ${constants.roles.epic}`);
     description.push('Notifies you with Epic games and DLCs that are currently free.');
     description.push(' ');
-    description.push('3️⃣ - <@&722691679542312970>');
+    description.push(`3️⃣ - ${constants.roles.gog}`);
     description.push('Notifies you with GOG games and DLCs that are currently free.');
     description.push(' ');
-    description.push('4️⃣ - <@&722691724572491776>');
+    description.push(`4️⃣ - ${constants.roles.console}`);
     description.push('Notifies you with games and DLCs that are currently free for Xbox(One/360), PlayStation(3/4/Vita), and Wii(U/3DS/Switch).');
     description.push(' ');
-    description.push('5️⃣ - <@&750517524738605087>');
+    description.push(`5️⃣ - ${constants.roles.ubisoft}`);
     description.push('Notifies you with Ubisoft games and DLCs that are currently free.');
-    let embed = new MessageEmbed()
-        .setColor('#ffff00')
-        .setAuthor('Quarantine Gaming: Free Game Updates')
-        .setTitle('Subscribe to get updated')
-        .setThumbnail(g_client.user.displayAvatarURL())
-        .setDescription(description.join('\n'))
-        .setImage('https://media.playstation.com/is/image/SCEA/playstation-vue-hero-banner-desktop-01-us-22jan19?$native_nt$')
-        .setFooter('Update your role by reacting below.');
-
-    let reactions = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'];
+    const embed = new MessageEmbed();
+    embed.setColor('#ffff00');
+    embed.setAuthor('Quarantine Gaming: Free Game Updates');
+    embed.setTitle('Subscribe to get updated');
+    embed.setThumbnail(app.client().user.displayAvatarURL());
+    embed.setDescription(description.join('\n'));
+    embed.setImage(constants.images.free_games_banner);
+    embed.setFooter('Update your role by reacting below.');
     return {
         message: embed,
-        reactions: reactions
+        reactions: ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣']
     };
 }
