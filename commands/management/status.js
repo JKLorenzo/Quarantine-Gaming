@@ -1,4 +1,6 @@
 const { Command } = require('discord.js-commando');
+const functions = require('../../modules/functions.js');
+let app = require('../../modules/app.js');
 
 module.exports = class Status extends Command {
     constructor(client) {
@@ -26,15 +28,12 @@ module.exports = class Status extends Command {
     }
 
     async run(message, { type, value }) {
-        let reply = await message.reply('Updating status...').catch(() => { });
-        await g_functions.sleep(2500);
-        let activity = await g_functions.setActivity(value, type.toUpperCase()).catch(error => {
-            g_interface.on_error({
-                name: `run -> .setActivity() [${type}, ${value}]`,
-                location: 'status.js',
-                error: error
-            });
-        });
+        // Link 
+        const Modules = functions.parseModules(GlobalModules);
+        app = Modules.app;
+
+        const reply = await message.reply('Updating status...');
+        const activity = await app.setActivity(value, String(type).toUpperCase());
 
         if (activity) {
             reply.edit(`Status updated!`).catch(() => { });
