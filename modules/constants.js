@@ -96,6 +96,7 @@ module.exports = {
         }
     },
     images: {
-        free_games_default: 'https://wallpaper-mania.com/wp-content/uploads/2018/09/High_resolution_wallpaper_background_ID_77700751093.jpg'
+        free_games_default: 'https://wallpaper-mania.com/wp-content/uploads/2018/09/High_resolution_wallpaper_background_ID_77700751093.jpg',
+        nsfw_banner: 'https://s3.amazonaws.com/sofontsy-files-us/wp-content/uploads/2019/02/07163845/NSFW-Bundle_banner.jpg'
     }
 }
