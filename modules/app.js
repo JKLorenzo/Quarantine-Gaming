@@ -1,5 +1,5 @@
 const { CommandoClient } = require('discord.js-commando');
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, TextChannel } = require('discord.js');
 const constants = require('./constants.js');
 const functions = require('./functions.js');
 let message_manager = require('./message_manager.js');
@@ -28,6 +28,13 @@ module.exports = {
     },
     role: function (RoleResolvable) {
         return this.guild().roles.resolve(RoleResolvable);
+    },
+    message: function (GuildChannelResolvable, MessageResolvable) {
+        /** @type {TextChannel} */
+        const channel = this.channel(GuildChannelResolvable)
+        if (channel)
+            return channel.messages.resolve(MessageResolvable);
+        return null;
     },
     member: function (UserResolvable) {
         return this.guild().members.resolve(UserResolvable);
