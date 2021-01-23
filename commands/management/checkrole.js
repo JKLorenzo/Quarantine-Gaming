@@ -76,8 +76,6 @@ module.exports = class CheckRole extends Command {
             switch (this_channel.type) {
                 case 'text':
                     for (const this_permission of Object.entries(constants.permissions.text)) {
-                        console.log(this_permission[1])
-                        console.log(object_permissions.has(this_permission[1]))
                         type_specific_permissions.push({
                             name: this_permission[0].split('_').map(text => text.substring(0, 1).toUpperCase() + text.slice(1).toLowerCase()).join(' '),
                             value: object_permissions.has(this_permission[1])
@@ -87,8 +85,6 @@ module.exports = class CheckRole extends Command {
                     break;
                 case 'voice':
                     for (const this_permission of Object.entries(constants.permissions.voice)) {
-                        console.log(this_permission[1])
-                        console.log(object_permissions.has(this_permission[1]))
                         type_specific_permissions.push({
                             name: this_permission[0].split('_').map(text => text.substring(0, 1).toUpperCase() + text.slice(1).toLowerCase()).join(' '),
                             value: object_permissions.has(this_permission[1])
