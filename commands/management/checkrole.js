@@ -18,6 +18,10 @@ module.exports = class CheckRole extends Command {
                     prompt: 'Mention the target channel/ID.',
                     type: 'string',
                     validate: Channel => {
+                        // Link
+                        const Modules = functions.parseModules(GlobalModules);
+                        app = Modules.app;
+
                         if (app.channel(Channel))
                             return true;
                         return false;
@@ -28,10 +32,6 @@ module.exports = class CheckRole extends Command {
                     prompt: 'Mention the member/ID or role/ID you want to check.',
                     type: 'string',
                     validate: MemberOrRole => {
-                        // Link
-                        const Modules = functions.parseModules(GlobalModules);
-                        app = Modules.app;
-
                         let isValid = false;
                         for (const this_MemberOrRole of String(MemberOrRole).split(' ')) {
                             if (app.member(this_MemberOrRole) || app.role(this_MemberOrRole)) {

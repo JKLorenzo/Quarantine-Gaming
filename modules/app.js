@@ -56,7 +56,7 @@ module.exports = {
         channel_manager = Modules.channel_manager;
 
         try {
-            await this.setActivity('Debugging (v3)', 'PLAYING');
+            await this.setActivity('Prerelease (v3)', 'Listening');
 
             // Manage Active Dedicated Channels
             for (const dedicated_channel of this.channel(constants.channels.category.dedicated).children.array()) {
