@@ -1,8 +1,9 @@
 const Firebase = require('firebase-admin');
 const functions = require('./functions.js');
-let error_manager = require('./error_manager.js');
+/** @type {import('./error_manager.js')} */
+let error_manager;
 
-const error_ticket = error_manager.for('database.js');
+let error_ticket;
 let DB = {
     notifications: null,
     titles_blacklisted: null,
@@ -18,6 +19,7 @@ module.exports = {
         // Link
         const Modules = functions.parseModules(t_Modules);
         error_manager = Modules.error_manager;
+        error_ticket = error_manager.for('database.js');
 
         try {
             index = 0;

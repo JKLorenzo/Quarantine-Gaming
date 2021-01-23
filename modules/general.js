@@ -3,16 +3,24 @@ const fetch = require('node-fetch');
 const probe = require('probe-image-size');
 const constants = require('./constants.js');
 const functions = require('./functions.js');
-let app = require('./app.js');
-let error_manager = require('./error_manager.js');
-let message_manager = require('./message_manager.js');
-let reaction_manager = require('./reaction_manager.js');
-let role_manager = require('./role_manager.js');
-let channel_manager = require('./channel_manager.js');
-let database = require('./database.js');
-let speech = require('./speech.js');
+/** @type {import('./app.js')} */
+let app;
+/** @type {import('./error_manager.js')} */
+let error_manager;
+/** @type {import('./message_manager.js')} */
+let message_manager;
+/** @type {import('./reaction_manager.js')} */
+let reaction_manager;
+/** @type {import('./role_manager.js')} */
+let role_manager;
+/** @type {import('./channel_manager.js')} */
+let channel_manager;
+/** @type {import('./database.js')} */
+let database;
+/** @type {import('./speech.js')} */
+let speech;
 
-const error_ticket = error_manager.for('general.js');
+let error_ticket;
 const OfflineManager = functions.createManager(1000);
 const ActivityManager = functions.createManager(5000);
 const VoiceManager = functions.createManager(1000);
@@ -32,6 +40,7 @@ module.exports = {
         channel_manager = Modules.channel_manager;
         database = Modules.database;
         speech = Modules.speech;
+        error_ticket = error_manager.for('general.js');
     },
     memberUnlisted: async function () {
         try {

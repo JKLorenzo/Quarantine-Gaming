@@ -1,11 +1,15 @@
 const constants = require('./constants.js');
 const functions = require('./functions.js');
-let app = require('./app.js');
-let role_manager = require('./role_manager.js');
-let error_manager = require('./error_manager.js');
-let message_manager = require('./message_manager.js');
+/** @type {import('./app.js')} */
+let app;
+/** @type {import('./role_manager.js')} */
+let role_manager;
+/** @type {import('./error_manager.js')} */
+let error_manager;
+/** @type {import('./message_manager.js')} */
+let message_manager;
 
-const error_ticket = error_manager.for('reaction.js');
+let error_ticket;
 const ReactionAddManager = functions.createManager(1500);
 const IncomingReactionManager = functions.createManager(500);
 
@@ -17,6 +21,7 @@ module.exports = {
         role_manager = Modules.role_manager;
         error_manager = Modules.error_manager;
         message_manager = Modules.message_manager;
+        error_ticket = error_manager.for('reaction.js');
     },
     addReaction: function (message, emoji) {
         return new Promise(async (resolve, reject) => {

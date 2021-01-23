@@ -2,7 +2,8 @@ const { Command } = require('discord.js-commando');
 const { MessageEmbed } = require('discord.js');
 const functions = require('../../modules/functions.js');
 const constants = require('../../modules/constants.js');
-let app = require('../../modules/app.js');
+/** @type {import('../../modules/app.js')} */
+let app;
 
 module.exports = class CheckRole extends Command {
     constructor(client) {

@@ -2,9 +2,12 @@ const { Command } = require('discord.js-commando');
 const { MessageEmbed, Message } = require('discord.js');
 const constants = require('../../modules/constants.js');
 const functions = require('../../modules/functions.js');
-let app = require('../../modules/app.js');
-let message_manager = require('../../modules/message_manager.js');
-let reaction_manager = require('../../modules/reaction_manager.js');
+/** @type {import('../../modules/app.js')} */
+let app;
+/** @type {import('../../modules/message_manager.js')} */
+let message_manager;
+/** @type {import('../../modules/reaction_manager.js')} */
+let reaction_manager;
 
 const modeSelector = {
     /** @type {String} */

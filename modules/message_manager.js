@@ -1,9 +1,11 @@
 const constants = require('./constants.js');
 const functions = require('./functions.js');
-let app = require('./app.js');
-let error_manager = require('./error_manager.js');
+/** @type {import('./app.js')} */
+let app;
+/** @type {import('./error_manager.js')} */
+let error_manager;
 
-const error_ticket = error_manager.for('message.js');
+let error_ticket;
 const ChannelMessageManager = functions.createManager(1000);
 const DirectMessageManager = functions.createManager(5000);
 
@@ -13,6 +15,7 @@ module.exports = {
         const Modules = functions.parseModules(t_Modules);
         app = Modules.app;
         error_manager = Modules.error_manager;
+        error_ticket = error_manager.for('message.js');
     },
     sendToChannel: function (channel_resolvable, message) {
         return new Promise(async (resolve, reject) => {

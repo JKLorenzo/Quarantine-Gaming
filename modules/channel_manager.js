@@ -1,6 +1,7 @@
 const constants = require('./constants.js');
 const functions = require('./functions.js');
-let app = require('./app.js');
+/** @type {import('./app.js')} */
+let app;
 
 const ChannelCreateManager = functions.createManager(5000);
 const ChannelDeleteManager = functions.createManager(1000);

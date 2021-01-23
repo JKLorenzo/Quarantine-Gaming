@@ -2,14 +2,20 @@ const { CommandoClient } = require('discord.js-commando');
 const { MessageEmbed, TextChannel } = require('discord.js');
 const constants = require('./constants.js');
 const functions = require('./functions.js');
-let message_manager = require('./message_manager.js');
-let error_manager = require('./error_manager.js');
-let role_manager = require('./role_manager.js');
-let database = require('./database.js');
-let general = require('./general.js');
-let channel_manager = require('./channel_manager.js');
+/** @type {import('./message_manager.js')} */
+let message_manager;
+/** @type {import('./error_manager.js')} */
+let error_manager;
+/** @type {import('./role_manager.js')} */
+let role_manager;
+/** @type {import('./database.js')} */
+let database;
+/** @type {import('./general.js')} */
+let general;
+/** @type {import('./channel_manager.js')} */
+let channel_manager;
 
-const error_ticket = error_manager.for('app.js');
+let error_ticket;
 let client = new CommandoClient();
 let initialized = false;
 
@@ -54,6 +60,7 @@ module.exports = {
         database = Modules.database;
         general = Modules.general;
         channel_manager = Modules.channel_manager;
+        error_ticket = error_manager.for('app.js');
 
         try {
             await this.setActivity('Prerelease (v3)', 'Listening');

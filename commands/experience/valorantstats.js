@@ -2,8 +2,9 @@ const { Command } = require('discord.js-commando');
 const { MessageEmbed } = require('discord.js');
 const { JSDOM } = require("jsdom");
 const axios = require('axios');
-const functions = require('../../modules/functions');
-let message_manager = require('../../modules/message_manager');
+const functions = require('../../modules/functions.js');
+/** @type {import('../../modules/message_manager.js')} */
+let message_manager;
 
 async function valorant(username, id) {
     await axios.get(`https://tracker.gg/valorant/profile/riot/${username}%23${id}/overview?playlist=competitive`).then(resp => {

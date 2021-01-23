@@ -2,9 +2,12 @@ const { Command } = require('discord.js-commando');
 const { MessageEmbed } = require("discord.js");
 const functions = require('../../modules/functions.js');
 const constants = require('../../modules/constants.js');
-let app = require('../../modules/app.js');
-let general = require('../../modules/general.js');
-let message_manager = require('../../modules/message_manager.js');
+/** @type {import('../../modules/app.js')} */
+let app;
+/** @type {import('../../modules/general.js')} */
+let general;
+/** @type {import('../../modules/message_manager.js')} */
+let message_manager;
 
 module.exports = class DedicateCommand extends Command {
     constructor(client) {

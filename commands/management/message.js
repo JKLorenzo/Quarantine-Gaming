@@ -1,8 +1,10 @@
 const { Command } = require('discord.js-commando');
 const { MessageEmbed, TextChannel, Discord } = require('discord.js');
 const functions = require('../../modules/functions.js');
-let app = require('../../modules/app.js');
-let message_manager = require('../../modules/message_manager.js')
+/** @type {import('../../modules/app.js')} */
+let app;
+/** @type {import('../../modules/message_manager.js')} */
+let message_manager;
 
 function guidelines() {
     const embed = new MessageEmbed();

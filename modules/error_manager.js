@@ -1,8 +1,10 @@
 const { MessageEmbed } = require('discord.js');
 const constants = require('./constants.js');
 const functions = require('./functions.js');
-let app = require('./app.js');
-let message_manager = require('./message_manager.js');
+/** @type {import('./app.js')} */
+let app;
+/** @type {import('./message_manager.js')} */
+let message_manager;
 
 const MarkManager = functions.createManager(1000);
 let threshold_hit_count = 0;

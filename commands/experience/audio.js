@@ -1,8 +1,10 @@
 const { Command } = require('discord.js-commando');
 const { MessageEmbed } = require('discord.js');
-const functions = require('../../modules/functions');
-let message_manager = require('../../modules/message_manager');
-let reaction_manager = require('../../modules/reaction_manager');
+const functions = require('../../modules/functions.js');
+/** @type {import('../../modules/message_manager.js')} */
+let message_manager;
+/** @type {import('../../modules/reaction_manager.js')} */
+let reaction_manager;
 
 module.exports = class Audio extends Command {
     constructor(client) {
@@ -32,7 +34,7 @@ module.exports = class Audio extends Command {
             { name: '\u200b', value: '🟢 - Unmute', inline: true }
         );
         embed.setFooter('Apply selected actions by reacting below.');
-        
+
         const SentMessage = await message_manager.sendToChannel(message.channel, embed);
         const reactions = ['🟠', '🟢'];
         for (const reaction of reactions) {

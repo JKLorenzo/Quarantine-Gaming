@@ -1,8 +1,10 @@
 const { Command } = require('discord.js-commando');
 const functions = require('../../modules/functions.js');
 const constants = require('../../modules/constants.js');
-let app = require('../../modules/app.js');
-let general = require('../../modules/general.js');
+/** @type {import('../../modules/app.js')} */
+let app;
+/** @type {import('../../modules/general.js')} */
+let general;
 
 module.exports = class PlayCommand extends Command {
     constructor(client) {

@@ -1,5 +1,6 @@
 const functions = require('./functions.js');
-let app = require('./app.js');
+/** @type {import('./app.js')} */
+let app;
 
 const RoleCreateManager = functions.createManager(1000);
 const RoleDeleteManager = functions.createManager(5000);

@@ -1,6 +1,7 @@
 const { Command } = require('discord.js-commando');
 const functions = require('../../modules/functions.js');
-let general = require('../../modules/general.js')
+/** @type {import('../../modules/general.js')} */
+let general;
 
 module.exports = class PushCommand extends Command {
     constructor(client) {

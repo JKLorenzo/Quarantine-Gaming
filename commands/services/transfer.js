@@ -1,7 +1,9 @@
 const { Command } = require('discord.js-commando');
 const functions = require('../../modules/functions');
-let app = require('../../modules/app');
-let message_manager = require('../../modules/message_manager');
+/** @type {import('../../modules/app.js')} */
+let app;
+/** @type {import('../../modules/message_manager.js')} */
+let message_manager;
 
 module.exports = class TransferCommand extends Command {
     constructor(client) {

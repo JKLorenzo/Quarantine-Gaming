@@ -2,10 +2,14 @@ const { Command } = require('discord.js-commando');
 const { MessageEmbed } = require("discord.js");
 const functions = require('../../modules/functions.js');
 const constants = require('../../modules/constants.js');
-let app = require('../../modules/app.js');
-let role_manager = require('../../modules/role_manager.js');
-let message_manager = require('../../modules/message_manager.js');
-let speech = require('../../modules/speech.js');
+/** @type {import('../../modules/app.js')} */
+let app;
+/** @type {import('../../modules/role_manager.js')} */
+let role_manager;
+/** @type {import('../../modules/message_manager.js')} */
+let message_manager;
+/** @type {import('../../modules/speech.js')} */
+let speech;
 
 module.exports = class StreamingCommand extends Command {
     constructor(client) {
