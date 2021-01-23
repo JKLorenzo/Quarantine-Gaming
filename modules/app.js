@@ -50,6 +50,14 @@ module.exports = {
             type: type.trim().toUpperCase()
         });
     },
+    hasRole: function (UserResolvable, RoleResolvables) {
+        for (const RoleResolvable of RoleResolvables) {
+            if (this.member(UserResolvable).roles.cache.has(this.role(RoleResolvable).id)) {
+                return true;
+            }
+        }
+        return false;
+    },
     initialize: async function (t_client, t_Modules) {
         // Link
         client = t_client;
