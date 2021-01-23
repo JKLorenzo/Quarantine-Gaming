@@ -52,7 +52,7 @@ function guidelines() {
 
 const modeSelector = {
     /** @type {String} */
-    mode = null
+    mode: ''
 }
 
 module.exports = class Message extends Command {

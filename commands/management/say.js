@@ -1,5 +1,4 @@
 const { Command } = require('discord.js-commando');
-const constants = require('../../modules/constants.js');
 const functions = require('../../modules/functions.js');
 let app = require('../../modules/app.js');
 let speech = require('../../modules/speech.js');
@@ -16,13 +15,14 @@ module.exports = class Say extends Command {
                 {
                     key: 'channelID',
                     prompt: 'Enter the channel ID of the channel where you want your message to be spoken.',
-                    type: 'integer',
+                    type: 'string',
                     validate: channelID => {
                         // Link
                         const Modules = functions.parseModules(GlobalModules);
                         app = Modules.app;
+                        speech = Modules.speech;
 
-                        if (app.channel(channelID))
+                        if (app.channel(channelID) && !app.channel(channelID).isText())
                             return true;
                         return false;
                     }

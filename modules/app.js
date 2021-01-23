@@ -24,20 +24,20 @@ module.exports = {
         return this.client().guilds.cache.get(constants.guild);
     },
     channel: function (GuildChannelResolvable) {
-        return this.guild().channels.resolve(GuildChannelResolvable);
+        return this.guild().channels.resolve(GuildChannelResolvable) || this.guild().channels.resolve(functions.parseMention(GuildChannelResolvable));
     },
     role: function (RoleResolvable) {
-        return this.guild().roles.resolve(RoleResolvable);
+        return this.guild().roles.resolve(RoleResolvable) || this.guild().roles.resolve(functions.parseMention(RoleResolvable));
     },
     message: function (GuildChannelResolvable, MessageResolvable) {
         /** @type {TextChannel} */
-        const channel = this.channel(GuildChannelResolvable)
+        const channel = this.channel(GuildChannelResolvable);
         if (channel)
             return channel.messages.resolve(MessageResolvable);
         return null;
     },
     member: function (UserResolvable) {
-        return this.guild().members.resolve(UserResolvable);
+        return this.guild().members.resolve(UserResolvable) || this.guild().members.resolve(functions.parseMention(UserResolvable));
     },
     setActivity: function (value, type = 'LISTENING') {
         return this.client().user.setActivity(value.trim(), {
@@ -56,7 +56,7 @@ module.exports = {
         channel_manager = Modules.channel_manager;
 
         try {
-            await this.setActivity('Maintenance Mode (v3)', 'PLAYING');
+            await this.setActivity('Debugging (v3)', 'PLAYING');
 
             // Manage Active Dedicated Channels
             for (const dedicated_channel of this.channel(constants.channels.category.dedicated).children.array()) {
@@ -156,21 +156,21 @@ module.exports = {
                             if (!this_member.roles.cache.has(game_role.id)) {
                                 // Add Game Role to this member
                                 await role_manager.add(this_member, game_role);
-                            }
 
-                            const streaming_role = this.role(constants.roles.streaming);
-                            let play_role = this.guild().roles.cache.find(role => role.name == 'Play ' + activity_name);
-                            if (play_role) {
-                                // Bring Play Role to Top
-                                await play_role.setPosition(streaming_role.position - 1);
-                            } else {
-                                // Create Play Role
-                                play_role = await role_manager.create({ name: 'Play ' + activity_name, color: '0x7b00ff', position: streaming_role.position, hoist: true });
-                            }
+                                const streaming_role = this.role(constants.roles.streaming);
+                                let play_role = this.guild().roles.cache.find(role => role.name == 'Play ' + activity_name);
+                                if (play_role) {
+                                    // Bring Play Role to Top
+                                    await play_role.setPosition(streaming_role.position - 1);
+                                } else {
+                                    // Create Play Role
+                                    play_role = await role_manager.create({ name: 'Play ' + activity_name, color: '0x7b00ff', position: streaming_role.position, hoist: true });
+                                }
 
-                            if (!this_member.roles.cache.has(play_role.id)) {
-                                // Add Play Role to this member
-                                await role_manager.add(this_member, play_role);
+                                if (!this_member.roles.cache.has(play_role.id)) {
+                                    // Add Play Role to this member
+                                    await role_manager.add(this_member, play_role);
+                                }
                             }
                         }
                     }
@@ -204,6 +204,13 @@ module.exports = {
                 } else if (this_role.hexColor == '#00fffe' && database.gameTitles().blacklisted.includes(this_role.name.toLowerCase())) {
                     // Delete Game Role Mentionable
                     await role_manager.delete(this_role);
+                }
+            }
+
+            // Manage Inactive Streamers
+            for (const this_member of this.guild().members.cache.array()) {
+                if (this_member.roles.cache.has(constants.roles.streaming)) {
+                    await role_manager.remove(this_member, constants.roles.streaming);
                 }
             }
 

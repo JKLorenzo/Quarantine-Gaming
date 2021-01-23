@@ -30,7 +30,7 @@ module.exports = {
             let connection;
             try {
                 // Format words
-                for (let word of format_words) {
+                for (const word of format_words) {
                     message = message.split(word.original).join(word.formatted);
                 }
                 // Join channel
@@ -42,11 +42,12 @@ module.exports = {
                 });
                 // Write TTS to file
                 fs.writeFileSync('tts.mp3', buffer);
+                await functions.sleep(1000);
                 // Speak to channel
                 const dispatcher = await connection.play('tts.mp3');
                 dispatcher.on('speaking', async speaking => {
                     if (!speaking) {
-                        await g_functions.sleep(1000);
+                        await functions.sleep(2500);
                         await voice_channel.leave();
                         SpeechManager.finish();
                         resolve();

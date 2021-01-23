@@ -70,7 +70,7 @@ module.exports = {
         general: {
             VIEW_CHANNEL: 'VIEW_CHANNEL',
             MANAGE_CHANNELS: 'MANAGE_CHANNELS',
-            MANAGE_PERMISSIONS: 'MANAGE_PERMISSIONS',
+            MANAGE_PERMISSIONS: 'MANAGE_ROLES',
             MANAGE_WEBHOOKS: 'MANAGE_WEBHOOKS',
             CREATE_INVITE: 'CREATE_INSTANT_INVITE'
         },

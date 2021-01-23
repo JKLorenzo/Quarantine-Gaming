@@ -14,7 +14,7 @@ module.exports = class TransferCommand extends Command {
             args: [
                 {
                     key: 'users',
-                    prompt: 'Mention the user/users you want to invite.',
+                    prompt: 'Mention the user/users you want to transfer.',
                     type: 'string',
                 }
             ]
@@ -36,14 +36,14 @@ module.exports = class TransferCommand extends Command {
                         await this_member.voice.setChannel(voice_channel.id);
                         await message_manager.sendToUser(member, `You have been transfered by ${message.author} to ${voice_channel.name}.`);
                     } else {
-                        message.reply(`${this_member} must be active to any voice channels.`);
+                        message.reply(`${this_member} must be connected to a voice channel.`);
                     }
                 } else {
                     message.reply(`I can't find user ${user}, please try again.`);
                 }
             }
         } else {
-            message.reply('You must be active to any voice channels before you can trasfer other members.');
+            message.reply('You must be connected to a voice channel before you can trasfer other members.');
         }
     }
 };

@@ -32,11 +32,11 @@ module.exports = class Audio extends Command {
             { name: '\u200b', value: '🟢 - Unmute', inline: true }
         );
         embed.setFooter('Apply selected actions by reacting below.');
-
+        
+        const SentMessage = await message_manager.sendToChannel(message.channel, embed);
         const reactions = ['🟠', '🟢'];
-        await message_manager.sendToChannel(message.channel, embed);
         for (const reaction of reactions) {
-            reaction_manager.addReaction(message, reaction);
+            reaction_manager.addReaction(SentMessage, reaction);
         }
     }
 };

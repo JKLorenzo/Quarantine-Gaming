@@ -74,15 +74,15 @@ module.exports = class CleanUp extends Command {
 
 		while (count > 100) {
 			await removeMessages(100);
-			await functions.sleep(3500); // Rate Limit
+			await functions.sleep(5000); // Rate Limit
 		}
 		await removeMessages(count);
 
 		const embed = new MessageEmbed();
 		embed.setAuthor('Quarantine Gaming: Cleanup Manager');
 		embed.setTitle('Cleanup Process Complete');
-		embed.setDescription(Object.entries(deleted_messages).map(entry => {
-			return `${app.member(entry[0])} : ${entry[1]}`;
+		embed.setDescription('The total number of messages that were removed from affected authors:\n' + Object.entries(deleted_messages).map(entry => {
+			return `${app.member(entry[0])}: ${entry[1]}`;
 		}).join('\n'));
 		embed.setFooter(`A total of ${deleted_messages_count} messages were removed.`);
 		embed.setColor('#ffff00');

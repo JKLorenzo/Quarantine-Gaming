@@ -32,9 +32,9 @@ module.exports = class SteamSale extends Command {
         }).catch(() => { });
 
         if (response) {
-            await this_message.edit(`${message.author}, Steam ${response.Name} will start in ${response.RemainingTime.days > 0 ? `${response.RemainingTime.days}* day${response.RemainingTime.days > 1 ? 's' : ''}` : 'a few hours'} and it will be available for ${response.Length} days! *Unconfirmed`);
+            await this_message.edit(`${message.author}, Steam ${response.Name} will start in ~${response.RemainingTime.days > 0 ? `${response.RemainingTime.days} day${response.RemainingTime.days > 1 ? 's' : ''}` : 'a few hours'} and it will be available for ~${response.Length} days!`);
         } else {
-            await this_message.edit(`There's an ongoing Steam Sale. *Unconfirmed`);
+            await this_message.edit(`${message.author}, There's a Steam sale happening now or within a few hours from now!`);
         }
     }
 };

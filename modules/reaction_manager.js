@@ -36,14 +36,14 @@ module.exports = {
         try {
             switch (embed.author.name) {
                 case 'Quarantine Gaming: NSFW Content':
-                    switch (emoji) {
+                    switch (emoji.name) {
                         case '🔴':
                             await role_manager.add(reactor, constants.roles.nsfw).catch(error => error_manager.mark(new error_ticket('nsfw', error, 'onReactionAdd')));
                             break;
                     }
                     break;
                 case 'Quarantine Gaming: Free Game Updates':
-                    switch (emoji) {
+                    switch (emoji.name) {
                         case '1️⃣':
                             await role_manager.add(reactor, constants.roles.steam).catch(error => error_manager.mark(new error_ticket('steam', error, 'onReactionAdd')));
                             break;
@@ -68,7 +68,7 @@ module.exports = {
                             const this_user = app.member(embed.fields[1].value);
                             let final_embed;
                             if (this_user) {
-                                switch (emoji) {
+                                switch (emoji.name) {
                                     case '✅':
                                         await role_manager.add(this_user, constants.roles.member).catch(error => error_manager.mark(new error_ticket('approve', error, 'onReactionAdd')));
                                         await this_message.reactions.removeAll().catch(error => error_manager.mark(new error_ticket('reactions [approve]', error, 'onReactionAdd')));;
@@ -117,17 +117,17 @@ module.exports = {
                             try {
                                 // Delete reactions
                                 await this_message.reactions.removeAll();
-                                const this_channel = app.member(user.id).voice.channel;
+                                const this_channel = app.member(reactor.id).voice.channel;
                                 if (this_channel) {
                                     // Get members
-                                    let channel_members = new Array();
-                                    for (let this_entry of this_channel.members) {
+                                    const channel_members = new Array();
+                                    for (const this_entry of this_channel.members) {
                                         channel_members.push(this_entry[1]);
                                     }
 
                                     // Get reaction effect
                                     let effect = null;
-                                    switch (reaction.emoji.name) {
+                                    switch (emoji.name) {
                                         case '🟠':
                                             effect = true;
                                             break;
@@ -138,7 +138,7 @@ module.exports = {
 
                                     if (effect !== null) {
                                         // Apply reaction effect
-                                        for (let this_channel_member of channel_members) {
+                                        for (const this_channel_member of channel_members) {
                                             if (!this_channel_member.user.bot) {
                                                 await this_channel_member.voice.setMute(effect)
                                                 await functions.sleep(1000); // delay burst
@@ -148,7 +148,7 @@ module.exports = {
 
                                     // Add reactions
                                     const reactions = ['🟠', '🟢'];
-                                    for (let this_reaction of reactions) {
+                                    for (const this_reaction of reactions) {
                                         await this.addReaction(this_message, this_reaction);
                                     }
                                 }
@@ -160,16 +160,16 @@ module.exports = {
                     break;
                 case 'Quarantine Gaming: Game Coordinator':
                     try {
-                        if (embed.thumbnail.url == reaction.emoji.url && !(embed.fields[0].value.indexOf(user.id) !== -1)) {
-                            const inviter = app.member(embed.fields[0].value);
+                        const inviter = app.member(embed.fields[0].value);
+                        if (inviter && reactor && embed.thumbnail.url == emoji.url) {
                             if (reactor.id != inviter.id && embed.footer.text != 'Closed. This bracket is now full.') {
-                                let players = new Array();
-                                let max = embed.fields.length;
+                                const players = new Array();
+                                const max = embed.fields.length;
                                 let cur = 0;
                                 let has_caps = false;
                                 let inserted = false;
                                 if (embed.description.indexOf('is looking for') !== -1) has_caps = true;
-                                for (let field of embed.fields) {
+                                for (const field of embed.fields) {
                                     if (field.value != '\u200b') {
                                         players.push(field.value);
                                         cur++;
@@ -207,23 +207,23 @@ module.exports = {
                                 if (has_caps && players.length >= max) {
                                     embed.setFooter('Closed. This bracket is now full.');
                                 }
-                                await this_message.edit({ content: message.content, embed: embed });
+                                await this_message.edit({ content: this_message.content, embed: embed });
                                 for (let this_field of embed.fields) {
                                     if (this_field.value && this_field.value.length > 0) {
                                         const player = app.member(this_field.value);
                                         if (player && player.id != reactor.id) {
-                                            await message_manager.sendToUser(player, `${member} joined your bracket. ${players.length > 1 ? `${players.length} players total.` : ''}`);
+                                            await message_manager.sendToUser(player, `${reactor} joined your bracket. ${players.length > 1 ? `${players.length} players total.` : ''}`);
                                         }
                                     }
                                 }
                                 if (has_caps && players.length >= max) {
-                                    await message.reactions.removeAll();
+                                    await this_message.reactions.removeAll();
                                     embed.setDescription('Your team members are listed below.');
                                     embed.setFooter('Game On!');
-                                    for (let this_field of embed.fields) {
+                                    for (const this_field of embed.fields) {
                                         if (this_field.value && this_field.value.length > 0) {
                                             const player = app.member(this_field.value);
-                                            if (player_member && player_member.id != member.id) {
+                                            if (player && player.id != reactor.id) {
                                                 await message_manager.sendToUser(player, { content: `Your ${embed.title} bracket is now full.`, embed: embed });
                                             }
                                         }
@@ -246,14 +246,14 @@ module.exports = {
         try {
             switch (embed.author.name) {
                 case 'Quarantine Gaming: NSFW Content':
-                    switch (emoji) {
+                    switch (emoji.name) {
                         case '🔴':
                             await role_manager.remove(reactor, constants.roles.nsfw).catch(error => error_manager.mark(new error_ticket('nsfw', error, 'onReactionRemove')));
                             break;
                     }
                     break;
                 case 'Quarantine Gaming: Free Game Updates':
-                    switch (emoji) {
+                    switch (emoji.name) {
                         case '1️⃣':
                             await role_manager.remove(reactor, constants.roles.steam).catch(error => error_manager.mark(new error_ticket('steam', error, 'onReactionRemove')));
                             break;
@@ -273,15 +273,15 @@ module.exports = {
                     break;
                 case 'Quarantine Gaming: Game Coordinator':
                     try {
-                        if (embed.thumbnail.url == reaction.emoji.url && !(embed.fields[0].value.indexOf(user.id) !== -1)) {
-                            const inviter = app.member(embed.fields[0].value);
+                        const inviter = app.member(embed.fields[0].value);
+                        if (inviter && reactor && embed.thumbnail.url == emoji.url) {
                             if (reactor.id != inviter.id && embed.footer.text != 'Closed. This bracket is now full.') {
                                 let players = new Array();
                                 let max = embed.fields.length;
                                 let has_caps = false;
                                 if (embed.description.indexOf('is looking for') !== -1) has_caps = true;
                                 for (let field of embed.fields) {
-                                    if (field.value && field.value != '\u200b' && (!(field.value.indexOf(member.id) !== -1) || embed.description.indexOf(member.displayName) !== -1)) {
+                                    if (field.value && field.value != '\u200b' && (!(field.value.indexOf(reactor.id) !== -1) || embed.description.indexOf(reactor.displayName) !== -1)) {
                                         players.push(field.value);
                                     }
                                 }
@@ -299,12 +299,12 @@ module.exports = {
                                         embed.addField(`Player ${i}:`, players[i - 1]);
                                     }
                                 }
-                                await this_message.edit({ content: message.content, embed: embed });
-                                for (let this_field of embed.fields) {
+                                await this_message.edit({ content: this_message.content, embed: embed });
+                                for (const this_field of embed.fields) {
                                     if (this_field.value && this_field.value.length > 0) {
                                         const player = app.member(this_field.value);
                                         if (player && player.id != reactor.id) {
-                                            await message_manager.sendToUser(player, `${member} left your bracket. ${players.length > 1 ? `${players.length} players total.` : ''}`);
+                                            await message_manager.sendToUser(player, `${reactor} left your bracket. ${players.length > 1 ? `${players.length} players total.` : ''}`);
                                         }
                                     }
                                 }

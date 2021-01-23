@@ -4,7 +4,6 @@ const functions = require('../../modules/functions');
 let app = require('../../modules/app');
 let message_manager = require('../../modules/message_manager');
 
-
 module.exports = class PlayersCommand extends Command {
     constructor(client) {
         super(client, {
@@ -87,7 +86,6 @@ module.exports = class PlayersCommand extends Command {
                     }
                     embed.setFooter(`${players.length} players total.`)
                     embed.setColor('#25ff00');
-                    embed.setTimestamp();
 
                     const emoji = app.guild().emojis.cache.find(emoji => emoji.name == game_role.name.trim().split(' ').join('').split(':').join('').split('-').join(''));
                     const qg_emoji = app.guild().emojis.cache.find(emoji => emoji.name == 'quarantinegaming');
@@ -100,8 +98,8 @@ module.exports = class PlayersCommand extends Command {
                     message_manager.sendToChannel(message.channel, embed);
                 }
             }
+        } else {
+            message.reply('No information is available right now. Please try again later.');
         }
-
-        message.reply('No information is available right now. Please try again later.');
     }
 };

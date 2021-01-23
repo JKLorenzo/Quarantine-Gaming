@@ -45,12 +45,13 @@ module.exports = class PlayCommand extends Command {
         const game_role = app.role(role);
         const member = app.member(message.author);
 
+        /** @type {Array<String>} */
         const args = input.split(' ');
         let count = 0;
         let reserved = new Array();
         for (const arg of args) {
             if (app.member(arg)) {
-                reserved.push(arg);
+                reserved.push(functions.parseMention(arg));
             } else if (!(functions.contains(arg, '<') || functions.contains(arg, '>')) && functions.toCountingInteger(arg) >= 2) {
                 count = functions.toCountingInteger(arg);
             }

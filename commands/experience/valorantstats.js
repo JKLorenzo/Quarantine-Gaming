@@ -2,6 +2,8 @@ const { Command } = require('discord.js-commando');
 const { MessageEmbed } = require('discord.js');
 const { JSDOM } = require("jsdom");
 const axios = require('axios');
+const functions = require('../../modules/functions');
+let message_manager = require('../../modules/message_manager');
 
 async function valorant(username, id) {
     await axios.get(`https://tracker.gg/valorant/profile/riot/${username}%23${id}/overview?playlist=competitive`).then(resp => {
@@ -104,6 +106,10 @@ module.exports = class StatsVALORANT extends Command {
     }
 
     async run(message, { player, target }) {
+        // Link 
+        const Modules = functions.parseModules(GlobalModules);
+        message_manager = Modules.message_manager;
+
         const this_message = message.say(`Getting information...`);
         const stats = await valorant(player.split('#')[0], player.split('#')[1]);
         this_message.delete().catch(() => { });
@@ -206,10 +212,10 @@ module.exports = class StatsVALORANT extends Command {
                     the_message.delete({ timeout: 300000 }).catch(() => { });
                 }).catch(() => { });
             } else {
-                await g_message_manager.dm_member(g_channels.get().guild.member(message.author), embed1);
-                await g_message_manager.dm_member(g_channels.get().guild.member(message.author), embed2);
-                await g_message_manager.dm_member(g_channels.get().guild.member(message.author), embed3);
-                await g_message_manager.dm_member(g_channels.get().guild.member(message.author), embed4);
+                await message_manager.sendToUser(message.author, embed1);
+                await message_manager.sendToUser(message.author, embed2);
+                await message_manager.sendToUser(message.author, embed3);
+                await message_manager.sendToUser(message.author, embed4);
                 message.reply('Sent you a DM with information.');
             }
         } else {

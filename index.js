@@ -1,5 +1,5 @@
 const { CommandoClient } = require('discord.js-commando');
-const { MessageEmbed, GuildMember } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const path = require('path');
 const app = require('./modules/app.js');
 const channel_manager = require('./modules/channel_manager.js');
@@ -54,17 +54,17 @@ function Modules() {
 
 global.GlobalModules = Modules;
 
-client.once('ready', () => {
+client.once('ready', async () => {
     console.log('Startup');
     channel_manager.initialize(Modules);
-    database.initialize(Modules);
+    await database.initialize(Modules);
     general.initialize(Modules);
     message_manager.intialize(Modules);
     reaction_manager.initialize(Modules);
     role_manager.initialize(Modules);
     speech.initialize(Modules);
     error_manager.initialize(Modules);
-    app.initialize(client, Modules);
+    await app.initialize(client, Modules);
 });
 
 client.on('message', (incoming_message) => {
@@ -127,7 +127,7 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
         if (newMember.roles.cache.size != oldMember.roles.cache.size) {
             const added = new Array(), removed = new Array();
             for (const this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
-                if (!this_role.name.startsWith('Play') && !this_role.name.startsWith('Text') && !this_role.name.startsWith('Team') && this_role.id != constants.roles.dedicated) {
+                if (!this_role.name.startsWith('Play') && !this_role.name.startsWith('Text') && !this_role.name.startsWith('Team') && this_role.id != constants.roles.dedicated && this_role.id != constants.roles.streaming) {
                     if (newMember.roles.cache.has(this_role.id)) {
                         added.push(this_role);
                     } else {
@@ -251,7 +251,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
             const this_member = app.member(user.id);
 
             if (this_member && !this_member.user.bot && this_message && this_message.embeds.length > 0) {
-                reaction_manager.onReactionAdd(this_message.embeds[0], reaction.emoji.name, this_member, this_message);
+                reaction_manager.onReactionAdd(this_message.embeds[0], reaction.emoji, this_member, this_message);
             }
         } catch (error) {
             error_manager.mark(new error_ticket('messageReactionAdd', error));
@@ -268,7 +268,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
             const this_member = app.member(user.id);
 
             if (this_member && !this_member.user.bot && this_message && this_message.embeds.length > 0) {
-                reaction_manager.onReactionRemove(this_message.embeds[0], reaction.emoji.name, this_member, this_message);
+                reaction_manager.onReactionRemove(this_message.embeds[0], reaction.emoji, this_member, this_message);
             }
         } catch (error) {
             error_manager.mark(new error_ticket('messageReactionRemove', error));

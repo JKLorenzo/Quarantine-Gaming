@@ -26,14 +26,16 @@ module.exports = class StreamingCommand extends Command {
         speech = Modules.speech;
 
         const member = app.member(message.author);
-        const voice_channel = member.voice.channel;
-        if (voice_channel) {
-            const streaming_role = app.role(constants.roles.streaming);
-            if (!member.roles.cache.has(streaming_role)) {
-                // Add streaming role
-                await role_manager.add(member, streaming_role);
+        const streaming_role = app.role(constants.roles.streaming);
+        if (!member.roles.cache.has(streaming_role)) {
+            message.reply("Got it! Your streaming status will be removed once you're disconnected to a voice channel or when you go offline.");
 
-                // Notify voice channel through DM
+            // Add streaming role
+            await role_manager.add(member, streaming_role);
+
+            const voice_channel = member.voice.channel;
+            if (voice_channel) {
+                // Notify voice channel members through DM
                 const embed = new MessageEmbed();
                 embed.setAuthor('Quarantine Gaming: Information');
                 embed.setTitle(`${member.displayName} is currently Streaming`);
@@ -46,11 +48,9 @@ module.exports = class StreamingCommand extends Command {
                     }
                 }
 
-                // Notify voice channel through TTS
+                // Notify voice channel members through TTS
                 await speech.say('Be notified: A member in this voice channel is currently streaming.', voice_channel);
             }
-        } else {
-            message.reply('You must be active on a voice channel to run this command.');
         }
     }
 };

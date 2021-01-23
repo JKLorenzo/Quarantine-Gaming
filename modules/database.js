@@ -106,8 +106,8 @@ module.exports = {
     notificationRecords: function (notification) {
         try {
             const similarity_threshold = 70;
-            for (let this_notification of notifications) {
-                let this_similarity = g_functions.string_similarity(this_notification.title, notification.title);
+            for (const this_notification of notifications) {
+                const this_similarity = functions.compareString(this_notification.title, notification.title);
                 if (this_similarity >= similarity_threshold || this_notification.url.trim().toLowerCase() == notification.url.trim().toLowerCase()) {
                     return this_notification;
                 }

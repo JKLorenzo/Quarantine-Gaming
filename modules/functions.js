@@ -97,7 +97,7 @@ module.exports = {
         return 100 * ((longer_string.length - costs[shorter_string.length]) / longer_string.length);
     },
     toAlphanumericString: function (string) {
-        return String(string).replace(/[^a-z0-9]/gi, '')
+        return String(string).replace(/[^a-zA-Z0-9 ]/gi, '')
     },
     toCountingInteger: function (string) {
         const parsed = parseInt(string, 10);

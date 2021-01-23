@@ -1,6 +1,5 @@
 const { Command } = require('discord.js-commando');
 const functions = require('../../modules/functions.js');
-let app = require('../../modules/app.js');
 let general = require('../../modules/general.js')
 
 module.exports = class PushCommand extends Command {
@@ -22,6 +21,10 @@ module.exports = class PushCommand extends Command {
     }
 
     async run(message, { url }) {
+        // Link
+        const Modules = functions.parseModules(GlobalModules);
+        general = Modules.general;
+
         const reply = await message.reply('Checking...');
         reply.edit(await general.freeGameFetch(url));
     }
