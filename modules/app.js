@@ -163,29 +163,29 @@ module.exports = {
                         const activity_name = this_activity.name.trim();
                         if (this_activity.type == 'PLAYING' && !database.gameTitles().blacklisted.includes(activity_name.toLowerCase()) && (this_activity.applicationID || database.gameTitles().whitelisted.includes(activity_name.toLowerCase()))) {
                             const game_role = this.guild().roles.cache.find(role => role.name == activity_name) || await role_manager.create({ name: activity_name, color: '0x00ffff' });
-                            if (!this.guild().roles.cache.find(role => role.name == activity_name + ' ⭐')) {
-                                // Create Game Role Mentionable
-                                await role_manager.create({ name: activity_name + ' ⭐', color: '0x00fffe' });
-                            }
 
                             if (!this_member.roles.cache.has(game_role.id)) {
                                 // Add Game Role to this member
                                 await role_manager.add(this_member, game_role);
 
-                                const streaming_role = this.role(constants.roles.streaming);
-                                let play_role = this.guild().roles.cache.find(role => role.name == 'Play ' + activity_name);
-                                if (play_role) {
-                                    // Bring Play Role to Top
-                                    await play_role.setPosition(streaming_role.position - 1);
-                                } else {
-                                    // Create Play Role
-                                    play_role = await role_manager.create({ name: 'Play ' + activity_name, color: '0x7b00ff', position: streaming_role.position, hoist: true });
+                                if (!this.guild().roles.cache.find(role => role.name == activity_name + ' ⭐')) {
+                                    // Create Game Role Mentionable
+                                    await role_manager.create({ name: activity_name + ' ⭐', color: '0x00fffe' });
                                 }
+                            }
 
-                                if (!this_member.roles.cache.has(play_role.id)) {
-                                    // Add Play Role to this member
-                                    await role_manager.add(this_member, play_role);
-                                }
+                            const streaming_role = this.role(constants.roles.streaming);
+                            let play_role = this.guild().roles.cache.find(role => role.name == 'Play ' + activity_name);
+                            if (!play_role) {
+                                // Create Play Role
+                                play_role = await role_manager.create({ name: 'Play ' + activity_name, color: '0x7b00ff', position: streaming_role.position, hoist: true });
+                            }
+
+                            if (!this_member.roles.cache.has(play_role.id)) {
+                                // Add Play Role to this member
+                                await role_manager.add(this_member, play_role);
+                                // Bring Play Role to Top
+                                await play_role.setPosition(streaming_role.position - 1);
                             }
                         }
                     }
