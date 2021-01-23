@@ -11,7 +11,7 @@ module.exports = class Say extends Command {
             name: 'say',
             group: 'management',
             memberName: 'say',
-            description: "[Admin Only] Say a message to a voice channel using Quarantine Gaming's TTS.",
+            description: "[Staff] Say a message to a voice channel using Quarantine Gaming's TTS.",
             userPermissions: ["ADMINISTRATOR"],
             args: [
                 {

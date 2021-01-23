@@ -1,4 +1,5 @@
 const { Command } = require('discord.js-commando');
+const constants = require('../../modules/constants.js');
 const functions = require('../../modules/functions.js');
 /** @type {import('../../modules/app.js')} */
 let app;
@@ -11,8 +12,8 @@ module.exports = class Game extends Command {
             name: 'game',
             group: 'management',
             memberName: 'game',
-            description: '[Admin Only] Whitelist or blacklist a game.',
-            userPermissions: ["ADMINISTRATOR"],
+            description: '[Mod] Whitelist or blacklist a game.',
+            userPermissions: [constants.permissions.general.MANAGE_CHANNELS],
             args: [
                 {
                     key: 'mode',

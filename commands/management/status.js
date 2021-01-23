@@ -9,7 +9,7 @@ module.exports = class Status extends Command {
             name: 'status',
             group: 'management',
             memberName: 'status',
-            description: "[Admin Only] Updates the status of this bot.",
+            description: "[Staff] Updates the status of this bot.",
             userPermissions: ["ADMINISTRATOR"],
             args: [
                 {

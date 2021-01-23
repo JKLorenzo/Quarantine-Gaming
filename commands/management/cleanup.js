@@ -1,5 +1,6 @@
 const { Command } = require('discord.js-commando');
 const { MessageEmbed } = require('discord.js');
+const constants = require('../../modules/constants.js');
 const functions = require('../../modules/functions.js');
 /** @type {import('../../modules/app.js')} */
 let app;
@@ -10,8 +11,8 @@ module.exports = class CleanUp extends Command {
 			name: 'cleanup',
 			group: 'management',
 			memberName: 'clean',
-			description: '[Admin Only] Removes a number of messages on the current channel.',
-			userPermissions: ["ADMINISTRATOR"],
+			description: '[Mod] Removes a number of messages on the current channel.',
+			userPermissions: [constants.permissions.general.MANAGE_CHANNELS],
 			guildOnly: true,
 			args: [
 				{

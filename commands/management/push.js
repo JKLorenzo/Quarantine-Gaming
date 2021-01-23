@@ -1,4 +1,5 @@
 const { Command } = require('discord.js-commando');
+const constants = require('../../modules/constants.js');
 const functions = require('../../modules/functions.js');
 /** @type {import('../../modules/general.js')} */
 let general;
@@ -9,8 +10,8 @@ module.exports = class PushCommand extends Command {
             name: 'push',
             group: 'management',
             memberName: 'push',
-            description: '[Admin Only] Manually push a free game update url.',
-            userPermissions: ["ADMINISTRATOR"],
+            description: '[Mod] Manually push a free game update url.',
+            userPermissions: [constants.permissions.general.MANAGE_CHANNELS],
             args: [
                 {
                     key: 'url',

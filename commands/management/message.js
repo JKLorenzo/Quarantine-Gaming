@@ -1,5 +1,6 @@
 const { Command } = require('discord.js-commando');
-const { MessageEmbed, TextChannel, Discord } = require('discord.js');
+const { MessageEmbed, TextChannel } = require('discord.js');
+const constants = require('../../modules/constants.js');
 const functions = require('../../modules/functions.js');
 /** @type {import('../../modules/app.js')} */
 let app;
@@ -63,8 +64,8 @@ module.exports = class Message extends Command {
             name: 'message',
             group: 'management',
             memberName: 'message',
-            description: '[Admin Only] Send a message to a channel, update a message on a channel, or send a DM to a member as Quarantine Gaming.',
-            userPermissions: ["ADMINISTRATOR"],
+            description: '[Mod] Send a message to a channel, update a message on a channel, or send a DM to a member as Quarantine Gaming.',
+            userPermissions: [constants.permissions.general.MANAGE_CHANNELS],
             args: [
                 {
                     key: 'mode',

@@ -20,7 +20,7 @@ module.exports = class ReactionRole extends Command {
             name: 'reactionrole',
             group: 'management',
             memberName: 'reactionrole',
-            description: '[Admin Only] Send or update a reaction role.',
+            description: '[Staff] Send or update a reaction role.',
             userPermissions: ["ADMINISTRATOR"],
             guildOnly: true,
             args: [
