@@ -21,6 +21,7 @@ module.exports = {
     mark: async function (ticket) {
         await MarkManager.queue();
         try {
+            console.log(`Error: ${ticket.location} / ${ticket.name} - ${ticket.error}`)
             errors_per_minute.push(ticket);
             setTimeout(() => {
                 errors_per_minute.shift();
