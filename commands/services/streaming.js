@@ -17,7 +17,11 @@ module.exports = class StreamingCommand extends Command {
             name: 'streaming',
             group: 'services',
             memberName: 'streaming',
-            description: "Notify all members joining your voice channel that you are currently streaming. This will be turned off automatically once you're offline or disconnected from a voice channel."
+            description: "Notify all members joining your voice channel that you are currently streaming. This will be turned off automatically once you're offline or disconnected from a voice channel.",
+            throttling: {
+                usages: 1,
+                duration: 60
+            }
         });
     }
 

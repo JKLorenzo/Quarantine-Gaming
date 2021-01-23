@@ -1,4 +1,5 @@
 const { Command } = require('discord.js-commando');
+const constants = require('../../modules/constants.js');
 const functions = require('../../modules/functions');
 /** @type {import('../../modules/app.js')} */
 let app;
@@ -12,6 +13,7 @@ module.exports = class TransferCommand extends Command {
             group: 'services',
             memberName: 'transfer',
             description: 'Transfer a user/users to your current voice channel.',
+            userPermissions: [constants.permissions.voice.MOVE_MEMBERS],
             guildOnly: true,
             args: [
                 {
@@ -19,7 +21,11 @@ module.exports = class TransferCommand extends Command {
                     prompt: 'Mention the user/users you want to transfer.',
                     type: 'string',
                 }
-            ]
+            ],
+            throttling: {
+                usages: 1,
+                duration: 10
+            }
         });
     }
 

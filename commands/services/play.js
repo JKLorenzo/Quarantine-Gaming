@@ -39,7 +39,11 @@ module.exports = class PlayCommand extends Command {
                     type: 'string',
                     default: '0'
                 }
-            ]
+            ],
+            throttling: {
+                usages: 3,
+                duration: 10
+            }
         });
     }
 

@@ -23,7 +23,11 @@ module.exports = class DedicateCommand extends Command {
                     type: 'string',
                     validate: name => name.length > 0 && name.length <= 30
                 }
-            ]
+            ],
+            throttling: {
+                usages: 2,
+                duration: 120
+            }
         });
     }
 
