@@ -33,9 +33,13 @@ module.exports = class Status extends Command {
         const Modules = functions.parseModules(GlobalModules);
         app = Modules.app;
 
+        // Check user permissions
+        if (!app.hasRole(message.author, [constants.roles.staff])) {
+            return message.reply("You don't have permissions to use this command.");
+        }
+
         const reply = await message.reply('Updating status...');
         const activity = await app.setActivity(value, String(type).toUpperCase());
-
         if (activity) {
             reply.edit(`Status updated!`).catch(() => { });
         } else {

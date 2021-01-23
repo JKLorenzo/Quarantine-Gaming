@@ -12,7 +12,6 @@ module.exports = class CheckRole extends Command {
             group: 'management',
             memberName: 'checkrole',
             description: '[Mod] Gets the permissions of a member or a role in a channel.',
-            userPermissions: [constants.permissions.general.MANAGE_CHANNELS],
             guildOnly: true,
             args: [
                 {
@@ -49,6 +48,11 @@ module.exports = class CheckRole extends Command {
     }
 
     async run(message, { Channel, MemberOrRole }) {
+        // Check user permissions
+        if (!app.hasRole(message.author, [constants.roles.staff, constants.roles.moderator])) {
+            return message.reply("You don't have permissions to use this command.");
+        }
+
         const this_channel = app.channel(Channel);
         for (const this_MemberOrRole of String(MemberOrRole).split(' ')) {
             const this_object = app.member(this_MemberOrRole) || app.role(this_MemberOrRole);

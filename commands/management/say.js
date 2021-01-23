@@ -44,6 +44,11 @@ module.exports = class Say extends Command {
     }
 
     async run(message, { channelID, content }) {
+        // Check user permissions
+        if (!app.hasRole(message.author, [constants.roles.staff])) {
+            return message.reply("You don't have permissions to use this command.");
+        }
+
         message.delete({ timeout: 5000 }).catch(() => { });
         await speech.say(content, app.channel(channelID));
     }

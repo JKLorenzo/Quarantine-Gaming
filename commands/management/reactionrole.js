@@ -64,6 +64,11 @@ module.exports = class ReactionRole extends Command {
     }
 
     async run(message, { mode, type, msgID }) {
+        // Check user permissions
+        if (!app.hasRole(message.author, [constants.roles.staff])) {
+            return message.reply("You don't have permissions to use this command.");
+        }
+
         /** @type {NSFW | FreeGameUpdates} */
         let ReactionRoleType;
         switch (type) {

@@ -1,6 +1,8 @@
 const { Command } = require('discord.js-commando');
 const constants = require('../../modules/constants.js');
 const functions = require('../../modules/functions.js');
+/** @type {import('../../modules/app.js')} */
+let app;
 /** @type {import('../../modules/general.js')} */
 let general;
 
@@ -25,7 +27,13 @@ module.exports = class PushCommand extends Command {
     async run(message, { url }) {
         // Link
         const Modules = functions.parseModules(GlobalModules);
+        app = Modules.app;
         general = Modules.general;
+
+        // Check user permissions
+        if (!app.hasRole(message.author, [constants.roles.staff, constants.roles.moderator])) {
+            return message.reply("You don't have permissions to use this command.");
+        }
 
         const reply = await message.reply('Checking...');
         reply.edit(await general.freeGameFetch(url));

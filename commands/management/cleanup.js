@@ -12,7 +12,6 @@ module.exports = class CleanUp extends Command {
 			group: 'management',
 			memberName: 'clean',
 			description: '[Mod] Removes a number of messages on the current channel.',
-			userPermissions: [constants.permissions.general.MANAGE_CHANNELS],
 			guildOnly: true,
 			args: [
 				{
@@ -29,6 +28,11 @@ module.exports = class CleanUp extends Command {
 		// Link
 		const Modules = functions.parseModules(GlobalModules);
 		app = Modules.app;
+
+		// Check user permissions
+		if (!app.hasRole(message.author, [constants.roles.staff, constants.roles.moderator])) {
+			return message.reply("You don't have permissions to use this command.");
+		}
 
 		await functions.sleep(1000);
 		await message.delete().catch(() => { });

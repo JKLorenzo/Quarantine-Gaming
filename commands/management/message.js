@@ -65,7 +65,6 @@ module.exports = class Message extends Command {
             group: 'management',
             memberName: 'message',
             description: '[Mod] Send a message to a channel, update a message on a channel, or send a DM to a member as Quarantine Gaming.',
-            userPermissions: [constants.permissions.general.MANAGE_CHANNELS],
             args: [
                 {
                     key: 'mode',
@@ -116,6 +115,11 @@ module.exports = class Message extends Command {
     }
 
     async run(message, { mode, argument }) {
+        // Check user permissions
+        if (!app.hasRole(message.author, [constants.roles.staff, constants.roles.moderator])) {
+            return message.reply("You don't have permissions to use this command.");
+        }
+
         const commands = String(argument).split(' ');
         /** @type {import("discord.js").Message} */
         let MessageReference;

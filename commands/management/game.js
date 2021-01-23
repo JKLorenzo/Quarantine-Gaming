@@ -13,7 +13,6 @@ module.exports = class Game extends Command {
             group: 'management',
             memberName: 'game',
             description: '[Mod] Whitelist or blacklist a game.',
-            userPermissions: [constants.permissions.general.MANAGE_CHANNELS],
             args: [
                 {
                     key: 'mode',
@@ -36,6 +35,11 @@ module.exports = class Game extends Command {
         const Modules = functions.parseModules(GlobalModules);
         app = Modules.app;
         database = Modules.database;
+
+        // Check user permissions
+        if (!app.hasRole(message.author, [constants.roles.staff, constants.roles.moderator])) {
+            return message.reply("You don't have permissions to use this command.");
+        }
 
         // Check if anyone is playing this game name
         name = name.trim().toLowerCase();
