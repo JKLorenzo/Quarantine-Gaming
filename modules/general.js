@@ -554,7 +554,7 @@ module.exports.dedicateChannel = async (channel_origin, name) => {
             for (const this_member of members) {
                 if (this_member.user.id != constants.me) {
                     await this_member.voice.setChannel(dedicated_voice_channel);
-                    await functions.sleep(1000);
+                    await functions.sleep(2500);
                 }
             }
         }
