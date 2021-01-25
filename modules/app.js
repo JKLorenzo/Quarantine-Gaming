@@ -133,7 +133,7 @@ module.exports.initialize = async (ClientInstance, ModulesFunction) => {
     channel_manager = Modules.channel_manager;
 
     try {
-        await this.setActivity('Prerelease (v3)', 'LISTENING');
+        await this.setActivity(process.env.STATUS_TEXT, process.env.STATUS_TYPE);
 
         // Manage Active Dedicated Channels
         for (const dedicated_channel of this.channel(constants.channels.category.dedicated).children.array()) {
