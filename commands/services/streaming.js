@@ -1,5 +1,5 @@
+const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
-const { MessageEmbed } = require("discord.js");
 const functions = require('../../modules/functions.js');
 const constants = require('../../modules/constants.js');
 /** @type {import('../../modules/app.js')} */
@@ -25,6 +25,7 @@ module.exports = class StreamingCommand extends Command {
         });
     }
 
+    /** @param {Discord.Message} message */
     async run(message) {
         // Link
         const Modules = functions.parseModules(GlobalModules);
@@ -44,7 +45,7 @@ module.exports = class StreamingCommand extends Command {
             const voice_channel = member.voice.channel;
             if (voice_channel) {
                 // Notify voice channel members through DM
-                const embed = new MessageEmbed();
+                const embed = new Discord.MessageEmbed();
                 embed.setAuthor('Quarantine Gaming: Information');
                 embed.setTitle(`${member.displayName} is currently Streaming`);
                 embed.setDescription('Please observe proper behavior on your current voice channel.')

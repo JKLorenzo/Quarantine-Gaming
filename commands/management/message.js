@@ -1,5 +1,5 @@
+const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
-const { MessageEmbed, TextChannel } = require('discord.js');
 const constants = require('../../modules/constants.js');
 const functions = require('../../modules/functions.js');
 /** @type {import('../../modules/app.js')} */
@@ -8,7 +8,7 @@ let app;
 let message_manager;
 
 function guidelines() {
-    const embed = new MessageEmbed();
+    const embed = new Discord.MessageEmbed();
     embed.setAuthor('Discord', 'http://orig08.deviantart.net/5d90/f/2016/099/d/a/discord_token_icon_light_by_flexo013-d9y9q3w.png');
     embed.setTitle('**Discord Community Guidelines**');
     embed.setURL('https://discord.com/guidelines')
@@ -114,6 +114,10 @@ module.exports = class Message extends Command {
         });
     }
 
+    /**
+     * @param {Discord.Message} message 
+     * @param {{mode: 'send' | 'update' | 'dm', argument: String}} 
+     */
     async run(message, { mode, argument }) {
         // Check user permissions
         if (!app.hasRole(message.author, [constants.roles.staff, constants.roles.moderator])) {
@@ -121,11 +125,11 @@ module.exports = class Message extends Command {
         }
 
         const commands = String(argument).split(' ');
-        /** @type {import("discord.js").Message} */
+        /** @type {Discord.Message} */
         let MessageReference;
         switch (mode.toLowerCase()) {
             case 'send':
-                /** @type {TextChannel} */
+                /** @type {Discord.TextChannel} */
                 const SendChannel = app.channel(commands[0]);
                 const SendContent = commands.slice(1).join(' ');
                 if (SendContent == 'guidelines')
@@ -134,7 +138,6 @@ module.exports = class Message extends Command {
                     MessageReference = await message_manager.sendToChannel(SendChannel, SendContent);
                 break;
             case 'update':
-                /** @type {TextChannel} */
                 const UpdateMessage = app.message(commands[0], commands[1]);
                 const UpdateContent = commands.slice(2).join(' ');
                 if (UpdateMessage) {

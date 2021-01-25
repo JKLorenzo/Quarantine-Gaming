@@ -1,3 +1,4 @@
+const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
 const functions = require('../../modules/functions.js');
 const constants = require('../../modules/constants.js');
@@ -47,23 +48,28 @@ module.exports = class PlayCommand extends Command {
         });
     }
 
+    /**
+     * @param {Discord.Message} message 
+     * @param {{role: Discord.RoleResolvable, input: String}} 
+     */
     async run(message, { role, input }) {
         const game_role = app.role(role);
-        const member = app.member(message.author);
+        const inviter = app.member(message.author);
 
-        /** @type {Array<String>} */
-        const args = input.split(' ');
         let count = 0;
-        let reserved = new Array();
-        for (const arg of args) {
-            if (app.member(arg)) {
-                reserved.push(functions.parseMention(arg));
-            } else if (!(functions.contains(arg, '<') || functions.contains(arg, '>')) && functions.toCountingInteger(arg) >= 2) {
-                count = functions.toCountingInteger(arg);
+        /** @type {Array<Discord.GuildMember>} */
+        const reserved = new Array();
+        for (const MemberOrCount of input.split(' ')) {
+            const this_member = app.member(MemberOrCount);
+            const this_count = functions.toCountingInteger(MemberOrCount);
+            if (this_member) {
+                reserved.push(this_member);
+            } else if (!(functions.contains(MemberOrCount, '<') || functions.contains(MemberOrCount, '>')) && this_count >= 2 && this_count <= 25) {
+                count = this_count;
             }
         }
 
-        general.gameInvite(game_role, member, count, reserved.join(' '));
+        general.gameInvite(game_role, inviter, count, reserved);
         message.say(`Got it! This bracket will be available on the ${app.channel(constants.channels.integrations.game_invites)} channel.`).then(message => message.delete({ timeout: 3600000 }).catch(() => { })).catch(() => { });
     }
 };

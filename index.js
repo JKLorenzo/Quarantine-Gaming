@@ -1,8 +1,9 @@
 const { CommandoClient } = require('discord.js-commando');
-const { MessageEmbed } = require('discord.js');
+const Discord = require('discord.js');
 const path = require('path');
 const app = require('./modules/app.js');
 const channel_manager = require('./modules/channel_manager.js');
+const classes = require('./modules/classes.js');
 const constants = require('./modules/constants.js');
 const database = require('./modules/database.js');
 const error_manager = require('./modules/error_manager.js');
@@ -13,7 +14,7 @@ const reaction_manager = require('./modules/reaction_manager.js');
 const role_manager = require('./modules/role_manager.js');
 const speech = require('./modules/speech.js');
 
-const error_ticket = error_manager.for('index.js');
+const ErrorTicketManager = new classes.ErrorTicketManager('index.js');
 
 const client = new CommandoClient({
     commandPrefix: '!',
@@ -59,7 +60,7 @@ client.once('ready', async () => {
     channel_manager.initialize(Modules);
     await database.initialize(Modules);
     general.initialize(Modules);
-    message_manager.intialize(Modules);
+    message_manager.initialize(Modules);
     reaction_manager.initialize(Modules);
     role_manager.initialize(Modules);
     speech.initialize(Modules);
@@ -76,7 +77,7 @@ client.on('message', (incoming_message) => {
 client.on('userUpdate', async (oldUser, newUser) => {
     try {
         if (app.isInitialized()) {
-            const embed = new MessageEmbed();
+            const embed = new Discord.MessageEmbed();
             const member = app.member(newUser);
             embed.setAuthor(member.displayName, oldUser.displayAvatarURL());
             embed.setTitle('User Update');
@@ -104,13 +105,13 @@ client.on('userUpdate', async (oldUser, newUser) => {
             if (description.length > 0) await message_manager.sendToChannel(constants.channels.qg.logs, embed);
         }
     } catch (error) {
-        error_manager.mark(new error_ticket('userUpdate', error));
+        error_manager.mark(ErrorTicketManager.create('userUpdate', error));
     }
 });
 
 client.on('guildMemberUpdate', async (oldMember, newMember) => {
     try {
-        const embed = new MessageEmbed();
+        const embed = new Discord.MessageEmbed();
         embed.setAuthor(newMember.displayName, newMember.user.displayAvatarURL());
         embed.setTitle('Guild Member Update');
 
@@ -149,7 +150,7 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
         embed.setColor('#6464ff');
         if (description.length > 0) await message_manager.sendToChannel(constants.channels.qg.logs, embed);
     } catch (error) {
-        error_manager.mark(new error_ticket('guildMemberUpdate', error));
+        error_manager.mark(ErrorTicketManager.create('guildMemberUpdate', error));
     }
 });
 
@@ -158,7 +159,7 @@ client.on('guildMemberAdd', async (this_member) => {
         if (this_member && !this_member.user.bot) {
             if (!this_member.roles.cache.has(constants.roles.member)) {
                 const MessageToSend = new Array();
-                MessageToSend.push(`Hi ${member.user.username}, and welcome to **Quarantine Gaming**!`);
+                MessageToSend.push(`Hi ${this_member.user.username}, and welcome to **Quarantine Gaming**!`);
                 MessageToSend.push(`Please wait while we are processing your membership approval.`);
                 await message_manager.sendToUser(this_member, MessageToSend.join('\n'))
 
@@ -170,7 +171,7 @@ client.on('guildMemberAdd', async (this_member) => {
                 const created_on = diffDays + " days " + diffHrs + " hours " + diffMins + " minutes";
                 const inviters = await g_functions.getInviter();
 
-                const embed = new MessageEmbed();
+                const embed = new Discord.MessageEmbed();
                 embed.setAuthor('Quarantine Gaming: Member Approval');
                 embed.setTitle('Member Details');
                 embed.setThumbnail(this_member.user.displayAvatarURL());
@@ -193,7 +194,7 @@ client.on('guildMemberAdd', async (this_member) => {
             }
         }
     } catch (error) {
-        error_manager.mark(new error_ticket('guildMemberAdd', error));
+        error_manager.mark(ErrorTicketManager.create('guildMemberAdd', error));
     }
 });
 
@@ -228,7 +229,7 @@ client.on('presenceUpdate', (oldPresence, newPresence) => {
                 }
             }
         } catch (error) {
-            error_manager.mark(new error_ticket('presenceUpdate', error));
+            error_manager.mark(ErrorTicketManager.create('presenceUpdate', error));
         }
     }
 });
@@ -241,7 +242,7 @@ client.on('voiceStateUpdate', (oldState, newState) => {
                 general.memberVoiceUpdate(member, oldState, newState);
             }
         } catch (error) {
-            error_manager.mark(new error_ticket('voiceStateUpdate', error));
+            error_manager.mark(ErrorTicketManager.create('voiceStateUpdate', error));
         }
     }
 });
@@ -254,11 +255,11 @@ client.on('messageReactionAdd', async (reaction, user) => {
             const this_message = reaction.message;
             const this_member = app.member(user.id);
 
-            if (this_member && !this_member.user.bot && this_message && this_message.embeds.length > 0) {
-                reaction_manager.onReactionAdd(this_message.embeds[0], reaction.emoji, this_member, this_message);
+            if (this_member && !this_member.user.bot && this_message && this_message.embeds.length > 0 && this_message.author.id == constants.me) {
+                reaction_manager.onReactionAdd(this_message, this_message.embeds[0], reaction.emoji, this_member);
             }
         } catch (error) {
-            error_manager.mark(new error_ticket('messageReactionAdd', error));
+            error_manager.mark(ErrorTicketManager.create('messageReactionAdd', error));
         }
     }
 });
@@ -271,17 +272,17 @@ client.on('messageReactionRemove', async (reaction, user) => {
             const this_message = reaction.message;
             const this_member = app.member(user.id);
 
-            if (this_member && !this_member.user.bot && this_message && this_message.embeds.length > 0) {
-                reaction_manager.onReactionRemove(this_message.embeds[0], reaction.emoji, this_member, this_message);
+            if (this_member && !this_member.user.bot && this_message && this_message.embeds.length > 0 && this_message.author.id == constants.me) {
+                reaction_manager.onReactionRemove(this_message, this_message.embeds[0], reaction.emoji, this_member);
             }
         } catch (error) {
-            error_manager.mark(new error_ticket('messageReactionRemove', error));
+            error_manager.mark(ErrorTicketManager.create('messageReactionRemove', error));
         }
     }
 });
 
 client.on('rateLimit', async (rateLimitInfo) => {
-    const embed = new MessageEmbed();
+    const embed = new Discord.MessageEmbed();
     embed.setColor('#ffff00');
     embed.setAuthor('Quarantine Gaming: Telemetry');
     embed.setTitle('The client hits a rate limit while making a request.');
@@ -295,7 +296,7 @@ client.on('rateLimit', async (rateLimitInfo) => {
 
 client.on('error', (error) => {
     console.log(error);
-    error_manager.mark(new error_ticket('error', error));
+    error_manager.mark(ErrorTicketManager.create('error', error));
 });
 
 client.login(process.env.BOT_TOKEN);

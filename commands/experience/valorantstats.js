@@ -1,5 +1,5 @@
+const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
-const { MessageEmbed } = require('discord.js');
 const { JSDOM } = require("jsdom");
 const axios = require('axios');
 const functions = require('../../modules/functions.js');
@@ -106,6 +106,10 @@ module.exports = class StatsVALORANT extends Command {
         });
     }
 
+    /**
+     * @param {Discord.Message} message 
+     * @param {{player: Discord.UserResolvable, target: String}} 
+     */
     async run(message, { player, target }) {
         // Link 
         const Modules = functions.parseModules(GlobalModules);

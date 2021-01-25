@@ -1,5 +1,5 @@
+const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
-const { MessageEmbed } = require('discord.js');
 const functions = require('../../modules/functions.js');
 /** @type {import('../../modules/app.js')} */
 let app;
@@ -37,6 +37,10 @@ module.exports = class PlayersCommand extends Command {
         });
     }
 
+    /**
+     * @param {Discord.Message} message 
+     * @param {{role: Discord.RoleResolvable}} param1 
+     */
     run(message, { role }) {
         const game_role_mentionable = app.role(role);
         const players = new Array();
@@ -73,7 +77,7 @@ module.exports = class PlayersCommand extends Command {
                         }
                     }
 
-                    const embed = new MessageEmbed();
+                    const embed = new Discord.MessageEmbed();
                     embed.setAuthor('Quarantine Gaming: List of Players')
                     embed.setTitle(game_role.name)
                     embed.setDescription(`All members who have played this game before are as follows:`);

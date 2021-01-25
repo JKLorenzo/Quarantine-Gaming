@@ -1,3 +1,4 @@
+const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
 const constants = require('../../modules/constants.js');
 const functions = require('../../modules/functions.js');
@@ -30,6 +31,10 @@ module.exports = class Game extends Command {
         });
     }
 
+    /**
+     * @param {Discord.Message} message 
+     * @param {{mode: String, name: String}} 
+     */
     async run(message, { mode, name }) {
         // Link
         const Modules = functions.parseModules(GlobalModules);

@@ -1,3 +1,4 @@
+const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
 const { JSDOM } = require("jsdom");
 const axios = require('axios');
@@ -13,6 +14,7 @@ module.exports = class SteamSale extends Command {
         });
     }
 
+    /** @type {Discord.Message} */
     async run(message) {
         const this_message = await message.say(`Getting information...`);
         const response = await axios.get('https://www.whenisthenextsteamsale.com/').then(resp => {

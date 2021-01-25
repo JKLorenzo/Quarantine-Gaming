@@ -1,5 +1,5 @@
+const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
-const { MessageEmbed } = require('discord.js');
 const functions = require('../../modules/functions.js');
 /** @type {import('../../modules/message_manager.js')} */
 let message_manager;
@@ -17,13 +17,14 @@ module.exports = class Audio extends Command {
         });
     }
 
+    /** @param {Discord.Message} */
     async run(message) {
         // Link
         const Modules = functions.parseModules(GlobalModules);
         message_manager = Modules.message_manager;
         reaction_manager = Modules.reaction_manager;
 
-        const embed = new MessageEmbed();
+        const embed = new Discord.MessageEmbed();
         embed.setColor('#ffff00');
         embed.setAuthor('Quarantine Gaming: Experience');
         embed.setThumbnail('http://www.extensions.in.th/amitiae/2013/prefs/images/sound_icon.png');

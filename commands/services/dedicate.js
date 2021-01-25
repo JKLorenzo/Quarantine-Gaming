@@ -1,5 +1,5 @@
+const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
-const { MessageEmbed } = require("discord.js");
 const functions = require('../../modules/functions.js');
 const constants = require('../../modules/constants.js');
 /** @type {import('../../modules/app.js')} */
@@ -31,6 +31,11 @@ module.exports = class DedicateCommand extends Command {
         });
     }
 
+    /**
+     * 
+     * @param {Discord.Message} message 
+     * @param {{name: String}} 
+     */
     async run(message, { name }) {
         // Link
         const Modules = functions.parseModules(GlobalModules);
@@ -43,7 +48,7 @@ module.exports = class DedicateCommand extends Command {
             if (name.toLowerCase() == 'lock' || name.toLowerCase() == 'unlock') {
                 if (voice_channel.parentID == constants.channels.category.dedicated) {
                     const text_channel = app.guild().channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == voice_channel.id);
-                    const embed = new MessageEmbed();
+                    const embed = new Discord.MessageEmbed();
                     embed.setAuthor('Quarantine Gaming: Dedicated Channels');
                     embed.setThumbnail(message.author.displayAvatarURL());
                     embed.setFooter(`${message.author.tag} (${message.author.id})`);

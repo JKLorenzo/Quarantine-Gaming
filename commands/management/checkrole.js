@@ -1,5 +1,5 @@
+const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
-const { MessageEmbed } = require('discord.js');
 const functions = require('../../modules/functions.js');
 const constants = require('../../modules/constants.js');
 /** @type {import('../../modules/app.js')} */
@@ -58,7 +58,7 @@ module.exports = class CheckRole extends Command {
             const this_object = app.member(this_MemberOrRole) || app.role(this_MemberOrRole);
             if (!this_object) continue;
             const object_permissions = this_channel.permissionsFor(this_object);
-            const embed = new MessageEmbed();
+            const embed = new Discord.MessageEmbed();
             embed.setAuthor('Quarantine Gaming: Bitwise Permission Flags');
             embed.setTitle('Channel Permissions')
             embed.setDescription(`${this_object} permissions on ${this_channel} channel.`);

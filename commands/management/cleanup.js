@@ -1,5 +1,5 @@
+const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
-const { MessageEmbed } = require('discord.js');
 const constants = require('../../modules/constants.js');
 const functions = require('../../modules/functions.js');
 /** @type {import('../../modules/app.js')} */
@@ -24,6 +24,10 @@ module.exports = class CleanUp extends Command {
 		});
 	}
 
+	/**
+	 * @param {Discord.Message} message 
+	 * @param {{count: Number}} 
+	 */
 	async run(message, { count }) {
 		// Link
 		const Modules = functions.parseModules(GlobalModules);
@@ -85,7 +89,7 @@ module.exports = class CleanUp extends Command {
 		}
 		await removeMessages(count);
 
-		const embed = new MessageEmbed();
+		const embed = new Discord.MessageEmbed();
 		embed.setAuthor('Quarantine Gaming: Cleanup Manager');
 		embed.setTitle('Cleanup Process Complete');
 		embed.setDescription('The total number of messages that were removed from affected authors:\n' + Object.entries(deleted_messages).map(entry => {

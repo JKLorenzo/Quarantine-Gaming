@@ -1,3 +1,4 @@
+const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
 const functions = require('../../modules/functions.js');
 /** @type {import('../../modules/app.js')} */
@@ -28,6 +29,11 @@ module.exports = class Status extends Command {
         });
     }
 
+    /**
+     * 
+     * @param {Discord.Message} message 
+     * @param {{type: String, value: String}}
+     */
     async run(message, { type, value }) {
         // Link 
         const Modules = functions.parseModules(GlobalModules);
@@ -39,7 +45,7 @@ module.exports = class Status extends Command {
         }
 
         const reply = await message.reply('Updating status...');
-        const activity = await app.setActivity(value, String(type).toUpperCase());
+        const activity = await app.setActivity(value, type.toUpperCase());
         if (activity) {
             reply.edit(`Status updated!`).catch(() => { });
         } else {

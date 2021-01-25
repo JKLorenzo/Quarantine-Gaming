@@ -1,5 +1,5 @@
+const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
-const { MessageEmbed, Message } = require('discord.js');
 const constants = require('../../modules/constants.js');
 const functions = require('../../modules/functions.js');
 /** @type {import('../../modules/app.js')} */
@@ -63,6 +63,10 @@ module.exports = class ReactionRole extends Command {
         });
     }
 
+    /**
+     * @param {Discord.Message} message 
+     * @param {{mode: 'create' | 'update', type: 'nsfw' | 'fgu', msgID: String}} 
+     */
     async run(message, { mode, type, msgID }) {
         // Check user permissions
         if (!app.hasRole(message.author, [constants.roles.staff])) {
@@ -113,7 +117,7 @@ function NSFW() {
     description.push(`${app.role(constants.roles.nsfw_bot)} and ${app.channel(constants.channels.text.explicit)} channel will be unlocked after getting the role.`);
     description.push(' ');
     description.push(`🔴 - ${app.role(constants.roles.nsfw)} (Not Safe For Work)`, 'The marked content may contain nudity, intense sexuality, profanity, violence or other potentially disturbing subject matter.');
-    const embed = new MessageEmbed();
+    const embed = new Discord.MessageEmbed();
     embed.setColor('#ffff00');
     embed.setAuthor('Quarantine Gaming: NSFW Content');
     embed.setTitle('Unlock NSFW Bots and Channel');
@@ -145,7 +149,7 @@ function FreeGameUpdates() {
     description.push(' ');
     description.push(`5️⃣ - ${app.role(constants.roles.ubisoft)}`);
     description.push('Notifies you with Ubisoft games and DLCs that are currently free.');
-    const embed = new MessageEmbed();
+    const embed = new Discord.MessageEmbed();
     embed.setColor('#ffff00');
     embed.setAuthor('Quarantine Gaming: Free Game Updates');
     embed.setTitle('Subscribe to get updated');

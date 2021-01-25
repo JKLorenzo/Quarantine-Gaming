@@ -1,3 +1,4 @@
+const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
 const functions = require('../../modules/functions.js');
 /** @type {import('../../modules/app.js')} */
@@ -43,6 +44,11 @@ module.exports = class Say extends Command {
         });
     }
 
+    /**
+     * 
+     * @param {Discord.Message} message 
+     * @param {{channelID: String, content: String}} 
+     */
     async run(message, { channelID, content }) {
         // Check user permissions
         if (!app.hasRole(message.author, [constants.roles.staff])) {
