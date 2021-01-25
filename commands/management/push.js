@@ -1,5 +1,11 @@
+const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
-const fetch = require('node-fetch');
+const constants = require('../../modules/constants.js');
+const functions = require('../../modules/functions.js');
+/** @type {import('../../modules/app.js')} */
+let app;
+/** @type {import('../../modules/general.js')} */
+let general;
 
 module.exports = class PushCommand extends Command {
     constructor(client) {
@@ -7,29 +13,34 @@ module.exports = class PushCommand extends Command {
             name: 'push',
             group: 'management',
             memberName: 'push',
-            description: '[Admin Only] Manually push a free game update link.',
-            userPermissions: ["ADMINISTRATOR"],
+            description: '[Mod] Manually push a free game update url.',
+            userPermissions: [constants.permissions.general.MANAGE_CHANNELS],
             args: [
                 {
-                    key: 'link',
-                    prompt: 'Enter the link to the giveaway or the permalink of the source.',
+                    key: 'url',
+                    prompt: 'Enter the url to the giveaway or the permalink of the source.',
                     type: 'string',
                 }
             ]
         });
     }
 
-    async run(message, { link }) {
-        try {
-            message.reply('Checking...').then(async this_message => {
-                this_message.edit(await g_fgu.get(link));
-            });
-        } catch (error) {
-            g_interface.on_error({
-                name: 'run',
-                location: 'push.js',
-                error: error
-            });
+    /**
+     * @param {Discord.Message} message 
+     * @param {{url: String}}
+     */
+    async run(message, { url }) {
+        // Link
+        const Modules = functions.parseModules(GlobalModules);
+        app = Modules.app;
+        general = Modules.general;
+
+        // Check user permissions
+        if (!app.hasRole(message.author, [constants.roles.staff, constants.roles.moderator])) {
+            return message.reply("You don't have permissions to use this command.");
         }
+
+        const reply = await message.reply('Checking...');
+        reply.edit(await general.freeGameFetch(url));
     }
 };

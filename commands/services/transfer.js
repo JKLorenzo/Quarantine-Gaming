@@ -1,4 +1,11 @@
+const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
+const constants = require('../../modules/constants.js');
+const functions = require('../../modules/functions');
+/** @type {import('../../modules/app.js')} */
+let app;
+/** @type {import('../../modules/message_manager.js')} */
+let message_manager;
 
 module.exports = class TransferCommand extends Command {
     constructor(client) {
@@ -7,38 +14,49 @@ module.exports = class TransferCommand extends Command {
             group: 'services',
             memberName: 'transfer',
             description: 'Transfer a user/users to your current voice channel.',
+            userPermissions: [constants.permissions.voice.MOVE_MEMBERS],
             guildOnly: true,
             args: [
                 {
                     key: 'users',
-                    prompt: 'Mention the user/users you want to invite.',
+                    prompt: 'Mention the user/users you want to transfer.',
                     type: 'string',
                 }
-            ]
+            ],
+            throttling: {
+                usages: 1,
+                duration: 10
+            }
         });
     }
 
-    run(message, { users }) {
-        let channel = g_channels.get().guild.member(message.author).voice.channel;
-        if (channel) {
-            for (let user of users.split(' ')) {
-                let user_id = user.split('<@').join('').split('>').join('').slice(1);
-                let this_member = g_channels.get().guild.members.cache.get(user_id);
+    /**
+     * @param {Discord.Message} message 
+     * @param {{users: String}} 
+     */
+    async run(message, { users }) {
+        // Link 
+        const Modules = functions.parseModules(GlobalModules);
+        app = Modules.app;
+        message_manager = Modules.message_manager;
+
+        const voice_channel = app.member(message.author).voice.channel;
+        if (voice_channel) {
+            for (const user of users.split(' ')) {
+                const this_member = app.member(user);
                 if (this_member) {
                     if (this_member.voice.channelID) {
-                        this_member.voice.setChannel(channel.id).then(member => {
-                            g_message_manager.dm_member(member, `You have been transfered by ${message.author} to ${channel.name}.`);
-                        }).catch(() => { });
+                        await this_member.voice.setChannel(voice_channel.id);
+                        await message_manager.sendToUser(member, `You have been transfered by ${message.author} to ${voice_channel.name}.`);
                     } else {
-                        message.channel.send(`${this_member} must be active to any voice channels.`).catch(() => { });
+                        message.reply(`${this_member} must be connected to a voice channel.`);
                     }
                 } else {
-                    message.channel.send(`I can't find user ${user}, please try again.`).catch(() => { });
+                    message.reply(`I can't find user ${user}, please try again.`);
                 }
             }
         } else {
-            message.channel.send('You must be active to any voice channels before you can trasfer other members.').catch(() => { });
+            message.reply('You must be connected to a voice channel before you can trasfer other members.');
         }
-        return;
     }
 };

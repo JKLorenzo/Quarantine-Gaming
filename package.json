@@ -1,6 +1,6 @@
 {
   "name": "quarantine-gaming",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "",
   "main": "index.js",
   "engines": {
@@ -22,7 +22,7 @@
     "discord.js-commando": "git+https://github.com/discordjs/Commando.git",
     "firebase-admin": "^9.4.2",
     "g-i-s": "^2.1.6",
-    "google-translate-tts": "^0.3.0",
+    "google-translate-tts": "^0.2.0",
     "jsdom": "^16.4.0",
     "node-fetch": "^2.6.1",
     "opusscript": "0.0.7",

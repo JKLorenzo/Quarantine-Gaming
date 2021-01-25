@@ -1,17 +1,20 @@
 const { CommandoClient } = require('discord.js-commando');
-const { MessageEmbed } = require('discord.js');
+const Discord = require('discord.js');
 const path = require('path');
-const db = require(path.join(__dirname, 'internal_commands', 'database.js'));
-const interface = require(path.join(__dirname, 'internal_commands', 'interface.js'));
-const fgu = require(path.join(__dirname, 'internal_commands', 'fgu.js'));
-const coordinator = require(path.join(__dirname, 'internal_commands', 'coordinator.js'));
-const dynamic_roles = require(path.join(__dirname, 'internal_commands', 'dynamic_roles.js'));
-const dynamic_channels = require(path.join(__dirname, 'internal_commands', 'dynamic_channels.js'));
-const message_manager = require(path.join(__dirname, 'internal_commands', 'message_manager.js'));
-const speech = require(path.join(__dirname, 'internal_commands', 'speech.js'));
-const functions = require(path.join(__dirname, 'internal_commands', 'functions.js'));
-const channels = require(path.join(__dirname, 'internal_commands', 'channels.js'));
-const roles = require(path.join(__dirname, 'internal_commands', 'roles.js'));
+const app = require('./modules/app.js');
+const channel_manager = require('./modules/channel_manager.js');
+const classes = require('./modules/classes.js');
+const constants = require('./modules/constants.js');
+const database = require('./modules/database.js');
+const error_manager = require('./modules/error_manager.js');
+const functions = require('./modules/functions.js');
+const general = require('./modules/general.js');
+const message_manager = require('./modules/message_manager.js');
+const reaction_manager = require('./modules/reaction_manager.js');
+const role_manager = require('./modules/role_manager.js');
+const speech = require('./modules/speech.js');
+
+const ErrorTicketManager = new classes.ErrorTicketManager('index.js');
 
 const client = new CommandoClient({
     commandPrefix: '!',
@@ -20,21 +23,6 @@ const client = new CommandoClient({
         'MESSAGE', 'CHANNEL', 'REACTION'
     ]
 });
-
-// Global Variables
-global.rootDir = path.resolve(__dirname);
-global.g_db = db;
-global.g_fgu = fgu;
-global.g_interface = interface;
-global.g_speech = speech;
-global.g_functions = functions;
-global.g_channels = channels;
-global.g_message_manager = message_manager;
-global.g_roles = roles;
-global.g_dynamic_channels = dynamic_channels;
-global.g_dynamic_roles = dynamic_roles;
-global.g_coordinator = coordinator;
-global.g_client = client;
 
 client.registry
     .registerDefaultTypes()
@@ -51,94 +39,83 @@ client.registry
     })
     .registerCommandsIn(path.join(__dirname, 'commands'));
 
+function Modules() {
+    return {
+        app: app,
+        channel_manager: channel_manager,
+        database: database,
+        error_manager: error_manager,
+        general: general,
+        message_manager: message_manager,
+        reaction_manager: reaction_manager,
+        role_manager: role_manager,
+        speech: speech
+    }
+}
+
+global.GlobalModules = Modules;
+
 client.once('ready', async () => {
-    try {
-        console.log('-------------{  Startup  }-------------');
+    console.log('Startup');
+    channel_manager.initialize(Modules);
+    await database.initialize(Modules);
+    general.initialize(Modules);
+    message_manager.initialize(Modules);
+    reaction_manager.initialize(Modules);
+    role_manager.initialize(Modules);
+    speech.initialize(Modules);
+    error_manager.initialize(Modules);
+    await app.initialize(client, Modules);
+});
 
-        // Initialize modules
-        roles.init();
-        await channels.init();
-        await db.init();
-        dynamic_roles.init();
-        dynamic_channels.init();
-        await functions.getInviter();
-        await roles.checkUnlisted();
-        fgu.begin()
-
-        // Clear Messages
-        message_manager.clear_channels();
-
-        functions.setActivity('!help').catch(error => {
-            g_interface.on_error({
-                name: `ready -> .setActivity() [default]`,
-                location: 'index.js',
-                error: error
-            });
-        });
-
-        if (process.env.STARTUP_REASON) {
-            let embed = new MessageEmbed();
-            embed.setColor('#ffff00');
-            embed.setAuthor('Quarantine Gaming', client.user.displayAvatarURL());
-            embed.setTitle('Startup Initiated');
-            embed.addField('Reason', process.env.STARTUP_REASON);
-            g_interface.log(embed);
-        }
-    } catch (error) {
-        g_interface.on_error({
-            name: 'ready',
-            location: 'index.js',
-            error: error
-        });
+client.on('message', (incoming_message) => {
+    if (app.isInitialized()) {
+        message_manager.process(incoming_message);
     }
 });
 
-client.on('message', message => message_manager.manage(message));
-
-client.on('userUpdate', (oldUser, newUser) => {
+client.on('userUpdate', async (oldUser, newUser) => {
     try {
-        let embed = new MessageEmbed();
-        let this_member = g_channels.get().guild.members.cache.find(member => member.user.tag == newUser.tag);
-        embed.setAuthor(this_member.displayName, oldUser.displayAvatarURL());
-        embed.setTitle('User Update');
+        if (app.isInitialized()) {
+            const embed = new Discord.MessageEmbed();
+            const member = app.member(newUser);
+            embed.setAuthor(member.displayName, oldUser.displayAvatarURL());
+            embed.setTitle('User Update');
 
-        let description = new Array();
-        // Avatar
-        if (oldUser.displayAvatarURL() != newUser.displayAvatarURL()) {
-            description.push(`**Avatar**`);
-            description.push(`New: [Avatar Link](${newUser.displayAvatarURL()})`);
-            embed.setThumbnail(newUser.displayAvatarURL());
+            const description = new Array();
+            // Avatar
+            if (oldUser.displayAvatarURL() != newUser.displayAvatarURL()) {
+                description.push(`**Avatar**`);
+                description.push(`New: [Avatar Link](${newUser.displayAvatarURL()})`);
+                embed.setThumbnail(newUser.displayAvatarURL());
+            }
+
+            // Username
+            if (oldUser.username != newUser.username) {
+                if (description.length > 0) description.push(' ');
+                description.push(`**Username**`);
+                description.push(`Old: ${oldUser.username}`);
+                description.push(`New: ${newUser.username}`);
+            }
+
+            embed.setDescription(description.join('\n'));
+            embed.setFooter(`${newUser.tag} (${newUser.id})`);
+            embed.setTimestamp();
+            embed.setColor('#6464ff');
+            if (description.length > 0) await message_manager.sendToChannel(constants.channels.qg.logs, embed);
         }
-
-        // Username
-        if (oldUser.username != newUser.username) {
-            if (description.length > 0) description.push(' ');
-            description.push(`**Username**`);
-            description.push(`Old: ${oldUser.username}`);
-            description.push(`New: ${newUser.username}`);
-        }
-
-        embed.setDescription(description.join('\n'));
-        embed.setFooter(`${newUser.tag} (${newUser.id})`);
-        embed.setTimestamp(new Date());
-        embed.setColor('#6464ff');
-        if (description.length > 0) g_interface.log(embed);
     } catch (error) {
-        g_interface.on_error({
-            name: 'userUpdate',
-            location: 'index.js',
-            error: error
-        });
+        error_manager.mark(ErrorTicketManager.create('userUpdate', error));
     }
 });
 
-client.on('guildMemberUpdate', (oldMember, newMember) => {
+client.on('guildMemberUpdate', async (oldMember, newMember) => {
     try {
-        let embed = new MessageEmbed();
+        const embed = new Discord.MessageEmbed();
         embed.setAuthor(newMember.displayName, newMember.user.displayAvatarURL());
         embed.setTitle('Guild Member Update');
 
-        let description = new Array();
+        const description = new Array();
         // Display Name
         if (newMember.displayName != oldMember.displayName) {
             if (description.length > 0) description.push(' ');
@@ -149,9 +126,9 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
 
         // Role
         if (newMember.roles.cache.size != oldMember.roles.cache.size) {
-            let added = new Array(), removed = new Array();
-            for (let this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
-                if (!this_role.name.startsWith('Play') && !this_role.name.startsWith('Text') && !this_role.name.startsWith('Team') && this_role != g_roles.get().dedicated) {
+            const added = new Array(), removed = new Array();
+            for (const this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
+                if (!this_role.name.startsWith('Play') && !this_role.name.startsWith('Text') && !this_role.name.startsWith('Team') && this_role.id != constants.roles.dedicated && this_role.id != constants.roles.streaming) {
                     if (newMember.roles.cache.has(this_role.id)) {
                         added.push(this_role);
                     } else {
@@ -169,38 +146,32 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
 
         embed.setDescription(description.join('\n'));
         embed.setFooter(`${newMember.user.tag} (${newMember.user.id})`);
-        embed.setTimestamp(new Date());
+        embed.setTimestamp();
         embed.setColor('#6464ff');
-        if (description.length > 0) g_interface.log(embed);
+        if (description.length > 0) await message_manager.sendToChannel(constants.channels.qg.logs, embed);
     } catch (error) {
-        g_interface.on_error({
-            name: 'guildMemberUpdate',
-            location: 'index.js',
-            error: error
-        });
+        error_manager.mark(ErrorTicketManager.create('guildMemberUpdate', error));
     }
 });
 
-client.on('guildMemberAdd', async member => {
+client.on('guildMemberAdd', async (this_member) => {
     try {
-        let this_member = g_channels.get().guild.members.cache.get(member.id);
-
         if (this_member && !this_member.user.bot) {
-            if (!this_member.roles.cache.find(role => role.id == '722699433225224233')) {
-                let dm = new Array();
-                dm.push(`Hi ${member.user.username}, and welcome to **Quarantine Gaming**!`);
-                dm.push('Please wait while our staff is processing your membership approval.');
-                await g_message_manager.dm_member(member, dm.join('\n'));
+            if (!this_member.roles.cache.has(constants.roles.member)) {
+                const MessageToSend = new Array();
+                MessageToSend.push(`Hi ${this_member.user.username}, and welcome to **Quarantine Gaming**!`);
+                MessageToSend.push(`Please wait while we are processing your membership approval.`);
+                await message_manager.sendToUser(this_member, MessageToSend.join('\n'))
 
-                let today = new Date();
-                let diffMs = (today - this_member.user.createdAt);
-                let diffDays = Math.floor(diffMs / 86400000)
-                let diffHrs = Math.floor((diffMs % 86400000) / 3600000)
-                let diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000);
-                let created_on = diffDays + " days " + diffHrs + " hours " + diffMins + " minutes";
-                let inviters = await g_functions.getInviter();
+                const today = new Date();
+                const diffMs = (today - this_member.user.createdAt);
+                const diffDays = Math.floor(diffMs / 86400000)
+                const diffHrs = Math.floor((diffMs % 86400000) / 3600000)
+                const diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000);
+                const created_on = diffDays + " days " + diffHrs + " hours " + diffMins + " minutes";
+                const inviters = await g_functions.getInviter();
 
-                let embed = new MessageEmbed
+                const embed = new Discord.MessageEmbed();
                 embed.setAuthor('Quarantine Gaming: Member Approval');
                 embed.setTitle('Member Details');
                 embed.setThumbnail(this_member.user.displayAvatarURL());
@@ -212,34 +183,106 @@ client.on('guildMemberAdd', async member => {
                     { name: 'Moderation:', value: '✅ - Approve     ❌ - Kick     ⛔ - Ban' }
                 ]);
                 embed.setColor('#25c059');
-                await g_channels.get().staff.send({ content: '<@&749235255944413234> action is required.', embed: embed }).then(async this_message => {
-                    await this_message.react('✅');
-                    await g_functions.sleep(1500);
-                    await this_message.react('❌');
-                    await g_functions.sleep(1500);
-                    await this_message.react('⛔');
+                const Message = await message_manager.sendToChannel(constants.channels.server.management, {
+                    content: `${app.role(constants.roles.staff)} and ${app.role(constants.roles.moderator)} action is required.`,
+                    embed: embed
                 });
+                const reactions = ['✅', '❌', '⛔'];
+                for (const emoji of reactions) {
+                    await reaction_manager.addReaction(Message, emoji);
+                }
             }
         }
     } catch (error) {
-        g_interface.on_error({
-            name: 'guildMemberAdd',
-            location: 'index.js',
-            error: error
-        });
+        error_manager.mark(ErrorTicketManager.create('guildMemberAdd', error));
     }
 });
 
-client.on('presenceUpdate', (oldData, newData) => dynamic_roles.update(oldData, newData));
+client.on('presenceUpdate', (oldPresence, newPresence) => {
+    if (app.isInitialized()) {
+        try {
+            const member = newPresence.member ? newPresence.member : oldPresence.member;
+            if (!member.user.bot) {
+                if (newPresence.status == 'offline') {
+                    general.memberOffline(member);
+                }
 
-client.on('voiceStateUpdate', (oldState, newState) => dynamic_channels.update(oldState, newState));
+                // Sort Changed Activities
+                let oldActivities = new Array(), newActivities = new Array();
+                if (oldPresence) oldActivities = oldPresence.activities.map(activity => activity.name.trim());
+                if (newPresence) newActivities = newPresence.activities.map(activity => activity.name.trim());
+                const acitivityDifference = functions.compareArray(oldActivities, newActivities).map(activity_name => {
+                    if (newActivities.includes(activity_name)) {
+                        return {
+                            activity: newPresence.activities.find(activity => activity.name.trim() == activity_name),
+                            new: true
+                        }
+                    } else {
+                        return {
+                            activity: oldPresence.activities.find(activity => activity.name.trim() == activity_name),
+                            new: false
+                        }
+                    }
+                });
+                for (const data of acitivityDifference) {
+                    general.memberActivityUpdate(member, data);
+                }
+            }
+        } catch (error) {
+            error_manager.mark(ErrorTicketManager.create('presenceUpdate', error));
+        }
+    }
+});
 
-client.on('messageReactionAdd', (reaction, user) => message_manager.reactionAdd(reaction, user));
+client.on('voiceStateUpdate', (oldState, newState) => {
+    if (app.isInitialized()) {
+        try {
+            const member = newState.member ? newState.member : oldState.member;
+            if (!member.user.bot && oldState.channel != newState.channel) {
+                general.memberVoiceUpdate(member, oldState, newState);
+            }
+        } catch (error) {
+            error_manager.mark(ErrorTicketManager.create('voiceStateUpdate', error));
+        }
+    }
+});
 
-client.on('messageReactionRemove', (reaction, user) => message_manager.reactionRemove(reaction, user));
+client.on('messageReactionAdd', async (reaction, user) => {
+    if (app.isInitialized()) {
+        try {
+            if (reaction.partial) await reaction.fetch();
+            if (reaction.message.partial) await reaction.message.fetch();
+            const this_message = reaction.message;
+            const this_member = app.member(user.id);
 
-client.on('rateLimit', (rateLimitInfo) => {
-    let embed = new MessageEmbed();
+            if (this_member && !this_member.user.bot && this_message && this_message.embeds.length > 0 && this_message.author.id == constants.me) {
+                reaction_manager.onReactionAdd(this_message, this_message.embeds[0], reaction.emoji, this_member);
+            }
+        } catch (error) {
+            error_manager.mark(ErrorTicketManager.create('messageReactionAdd', error));
+        }
+    }
+});
+
+client.on('messageReactionRemove', async (reaction, user) => {
+    if (app.isInitialized()) {
+        try {
+            if (reaction.partial) await reaction.fetch();
+            if (reaction.message.partial) await reaction.message.fetch();
+            const this_message = reaction.message;
+            const this_member = app.member(user.id);
+
+            if (this_member && !this_member.user.bot && this_message && this_message.embeds.length > 0 && this_message.author.id == constants.me) {
+                reaction_manager.onReactionRemove(this_message, this_message.embeds[0], reaction.emoji, this_member);
+            }
+        } catch (error) {
+            error_manager.mark(ErrorTicketManager.create('messageReactionRemove', error));
+        }
+    }
+});
+
+client.on('rateLimit', async (rateLimitInfo) => {
+    const embed = new Discord.MessageEmbed();
     embed.setColor('#ffff00');
     embed.setAuthor('Quarantine Gaming: Telemetry');
     embed.setTitle('The client hits a rate limit while making a request.');
@@ -248,16 +291,12 @@ client.on('rateLimit', (rateLimitInfo) => {
     embed.addField('Method', rateLimitInfo.method);
     embed.addField('Path', rateLimitInfo.path);
     embed.addField('Route', rateLimitInfo.route);
-    g_interface.log(embed);
+    await message_manager.sendToChannel(constants.channels.qg.logs, embed);
 });
 
-client.on('error', error => {
+client.on('error', (error) => {
     console.log(error);
-    g_interface.on_error({
-        name: 'client error',
-        location: 'index.js',
-        error: error
-    });
+    error_manager.mark(ErrorTicketManager.create('error', error));
 });
 
 client.login(process.env.BOT_TOKEN);

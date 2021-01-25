@@ -1,5 +1,15 @@
+const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
-const { MessageEmbed } = require("discord.js");
+const functions = require('../../modules/functions.js');
+const constants = require('../../modules/constants.js');
+/** @type {import('../../modules/app.js')} */
+let app;
+/** @type {import('../../modules/role_manager.js')} */
+let role_manager;
+/** @type {import('../../modules/message_manager.js')} */
+let message_manager;
+/** @type {import('../../modules/speech.js')} */
+let speech;
 
 module.exports = class StreamingCommand extends Command {
     constructor(client) {
@@ -7,61 +17,49 @@ module.exports = class StreamingCommand extends Command {
             name: 'streaming',
             group: 'services',
             memberName: 'streaming',
-            description: "Notify all members joining your voice channel that you are currently streaming. This will be turned off automatically once you're offline or disconnected from a voice channel."
+            description: "Notify all members joining your voice channel that you are currently streaming. This will be turned off automatically once you're offline or disconnected from a voice channel.",
+            throttling: {
+                usages: 1,
+                duration: 60
+            }
         });
     }
 
+    /** @param {Discord.Message} message */
     async run(message) {
-        const this_member = message.member;
-        const this_channel = this_member.voice.channel;
-        if (this_channel) {
-            const streaming_role = g_roles.get().streaming;
-            if (!this_member.roles.cache.find(role => role == streaming_role)) {
-                // Add streaming role
-                await this_member.roles.add(streaming_role).catch(error => {
-                    g_interface.on_error({
-                        name: 'run -> .add(streaming_role)',
-                        location: 'streaming.js',
-                        error: error
-                    });
-                });
+        // Link
+        const Modules = functions.parseModules(GlobalModules);
+        app = Modules.app;
+        role_manager = Modules.role_manager;
+        message_manager = Modules.message_manager;
+        speech = Modules.speech;
 
-                // Notify voice channel through DM
-                let embed = new MessageEmbed();
+        const member = app.member(message.author);
+        const streaming_role = app.role(constants.roles.streaming);
+        if (!member.roles.cache.has(streaming_role)) {
+            message.reply("Got it! Your streaming status will be removed once you're disconnected to a voice channel or when you go offline.");
+
+            // Add streaming role
+            await role_manager.add(member, streaming_role);
+
+            const voice_channel = member.voice.channel;
+            if (voice_channel) {
+                // Notify voice channel members through DM
+                const embed = new Discord.MessageEmbed();
                 embed.setAuthor('Quarantine Gaming: Information');
-                embed.setTitle(`${this_member.displayName} is currently Streaming`);
+                embed.setTitle(`${member.displayName} is currently Streaming`);
                 embed.setDescription('Please observe proper behavior on your current voice channel.')
                 embed.setImage('https://pa1.narvii.com/6771/d33918fa87ad0d84b7dc854dcbf6a8545c73f94d_hq.gif');
                 embed.setColor('#5dff00');
-                for (let member of this_channel.members.array()) {
-                    if (member.id != this_member.id) {
-                        await g_message_manager.dm_member(member, embed).catch(error => {
-                            g_interface.on_error({
-                                name: 'run -> .dm_member()',
-                                location: 'streaming.js',
-                                error: error
-                            });
-                        });
+                for (const the_member of voice_channel.members.array()) {
+                    if (member.id != the_member.id) {
+                        await message_manager.sendToUser(the_member, embed);
                     }
                 }
 
-                // Notify voice channel through TTS
-                await g_speech.say('Be notified: A member in this voice channel is currently streaming.', this_channel).catch(error => {
-                    g_interface.on_error({
-                        name: 'run -> .say(tts)',
-                        location: 'streaming.js',
-                        error: error
-                    });
-                });
+                // Notify voice channel members through TTS
+                await speech.say('Be notified: A member in this voice channel is currently streaming.', voice_channel);
             }
-        } else {
-            message.say('You must be active on a voice channel to run this command.').catch(error => {
-                g_interface.on_error({
-                    name: 'run -> .say(message)',
-                    location: 'streaming.js',
-                    error: error
-                });
-            })
         }
     }
 };

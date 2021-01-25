@@ -1,12 +1,18 @@
+const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
-const { MessageEmbed } = require('discord.js');
+const constants = require('../../modules/constants.js');
+const functions = require('../../modules/functions.js');
+/** @type {import('../../modules/app.js')} */
+let app;
+/** @type {import('../../modules/message_manager.js')} */
+let message_manager;
 
 function guidelines() {
-    let embed = new MessageEmbed();
+    const embed = new Discord.MessageEmbed();
     embed.setAuthor('Discord', 'http://orig08.deviantart.net/5d90/f/2016/099/d/a/discord_token_icon_light_by_flexo013-d9y9q3w.png');
     embed.setTitle('**Discord Community Guidelines**');
     embed.setURL('https://discord.com/guidelines')
-    let description = new Array();
+    const description = new Array();
     description.push("Our community guidelines are meant to explain what is and isn’t allowed on Discord, and ensure that everyone has a good experience. If you come across a message that appears to break these rules, please report it to us. We may take a number of steps, including issuing a warning, removing the content, or removing the accounts and/or servers responsible.");
     description.push(" ");
     description.push("**Here are some rules for interacting with others:**");
@@ -47,21 +53,18 @@ function guidelines() {
     return embed;
 }
 
-let this_mode;
-function setMode(val) {
-    this_mode = val;
+const modeSelector = {
+    /** @type {String} */
+    mode: ''
 }
-function getMode() {
-    return this_mode;
-}
+
 module.exports = class Message extends Command {
     constructor(client) {
         super(client, {
             name: 'message',
             group: 'management',
             memberName: 'message',
-            description: '[Admin Only] Send a message to a channel, update a message on a channel, or send a DM to a member as Quarantine Gaming.',
-            userPermissions: ["ADMINISTRATOR"],
+            description: '[Mod] Send a message to a channel, update a message on a channel, or send a DM to a member as Quarantine Gaming.',
             args: [
                 {
                     key: 'mode',
@@ -69,43 +72,41 @@ module.exports = class Message extends Command {
                     type: 'string',
                     oneOf: ['send', 'update', 'dm'],
                     validate: mode => {
-                        setMode(mode.toLowerCase());
-                        return mode == 'send' || mode == 'update' || mode == 'dm';
+                        if (mode == 'send' || mode == 'update' || mode == 'dm') {
+                            modeSelector.mode = mode;
+                            return true;
+                        }
+                        return false;
                     }
                 },
                 {
-                    key: 'args',
+                    key: 'argument',
                     prompt: `**Arguments:**\n` +
-                        `On Send: *<Channel ID> [Message]*\n` +
-                        `On Update: *<Channel ID> [Message ID] {Message}*\n` +
-                        `On DM: *<User ID> [Message]*`,
+                        `On Send: \`<Channel ID> [Message]\`\n` +
+                        `On Update: \`<Channel ID> [Message ID] {Message}\`\n` +
+                        `On DM: \`<User ID> [Message]\``,
                     type: 'string',
-                    validate: async args => {
-                        let commands = args.split(' ');
-                        if (commands.length < 2) return false;
-                        let this_channel, the_message, this_member;
-                        switch (getMode()) {
+                    validate: async argument => {
+                        // Link
+                        const Modules = functions.parseModules(GlobalModules);
+                        app = Modules.app;
+                        message_manager = Modules.message_manager;
+
+                        const commands = String(argument).split(' ');
+                        if (commands.length < 2 || !modeSelector.mode) return false;
+                        switch (modeSelector.mode) {
                             case 'send':
-                                this_channel = g_channels.get().guild.channels.cache.find(channel => channel.id == commands[0]);
-                                the_message = commands.slice(1).join(' ');
-                                return (this_channel && the_message) ? true : false;
-                                break;
+                                if (app.channel(commands[0]) && commands.slice(1).length > 0)
+                                    return true;
+                                return false;
                             case 'update':
-                                this_channel = g_channels.get().guild.channels.cache.find(channel => channel.id == commands[0]);
-                                let this_message;
-                                if (this_channel) {
-                                    await this_channel.messages.fetch(commands[1]).then(message => {
-                                        this_message = message;
-                                    }).catch(error => { });
-                                }
-                                the_message = commands.slice(2).join(' ');
-                                return (this_channel && this_message && the_message) ? true : false;
-                                break;
+                                if (app.message(commands[0], commands[1]) && commands.slice(2).length > 0)
+                                    return true;
+                                return false;
                             case 'dm':
-                                this_member = g_channels.get().guild.members.cache.find(member => member.user.id == commands[0]);
-                                the_message = commands.slice(1).join(' ');
-                                return (this_member && the_message) ? true : false;
-                                break;
+                                if (app.member(commands[0]) && commands.slice(1).length > 0)
+                                    return true;
+                                return false;
                         }
                     }
                 }
@@ -113,56 +114,40 @@ module.exports = class Message extends Command {
         });
     }
 
-    async run(message, { mode, args }) {
-        let this_channel, the_message, this_member;
-        let commands = args.split(' ');
+    /**
+     * @param {Discord.Message} message 
+     * @param {{mode: 'send' | 'update' | 'dm', argument: String}} 
+     */
+    async run(message, { mode, argument }) {
+        // Check user permissions
+        if (!app.hasRole(message.author, [constants.roles.staff, constants.roles.moderator])) {
+            return message.reply("You don't have permissions to use this command.");
+        }
+
+        const commands = String(argument).split(' ');
+        /** @type {Discord.Message} */
+        let MessageReference;
         switch (mode.toLowerCase()) {
             case 'send':
-                this_channel = g_channels.get().guild.channels.cache.find(channel => channel.id == commands[0]);
-                the_message = commands.slice(1).join(' ');
-                if (the_message == 'guidelines') {
-                    await this_channel.send(guidelines()).catch(error => {
-                        g_interface.on_error({
-                            name: 'run -> .send(guidelines)',
-                            location: 'message.js',
-                            error: error
-                        });
-                    });
-                } else {
-                    await this_channel.send(the_message).catch(error => {
-                        g_interface.on_error({
-                            name: 'run -> .send(the_message)',
-                            location: 'message.js',
-                            error: error
-                        });
-                    });
-                }
+                /** @type {Discord.TextChannel} */
+                const SendChannel = app.channel(commands[0]);
+                const SendContent = commands.slice(1).join(' ');
+                if (SendContent == 'guidelines')
+                    MessageReference = await message_manager.sendToChannel(SendChannel, guidelines());
+                else
+                    MessageReference = await message_manager.sendToChannel(SendChannel, SendContent);
                 break;
             case 'update':
-                this_channel = g_channels.get().guild.channels.cache.find(channel => channel.id == commands[0]);
-                the_message = commands.slice(2).join(' ');
-                if (this_channel) {
-                    await this_channel.messages.fetch(commands[1]).then(async this_message => {
-                        await this_message.edit(the_message).catch(async error => {
-                            await message.say(`Uh oh! ${error}`).then(this_error_message => {
-                                this_error_message.delete({ timeout: 5000 }).catch(() => { });
-                            });
-                        });
-                    }).catch(error => {
-                        g_interface.on_error({
-                            name: 'run -> .fetch(the_message)',
-                            location: 'message.js',
-                            error: error
-                        });
-                    });
+                const UpdateMessage = app.message(commands[0], commands[1]);
+                const UpdateContent = commands.slice(2).join(' ');
+                if (UpdateMessage) {
+                    MessageReference = await UpdateMessage.edit(UpdateContent);
                 }
                 break;
             case 'dm':
-                this_member = g_channels.get().guild.members.cache.find(member => member.user.id == commands[0]);
-                the_message = commands.slice(1).join(' ');
-                await g_message_manager.dm_member(this_member, the_message);
+                MessageReference = await message_manager.sendToUser(commands[0], commands.slice(1).join(' '));
                 break;
         }
-        return message.say('Done!').catch(() => { });;
+        return message.reply(`Done! Reference ID: \`${MessageReference.id}\``);
     }
 };
