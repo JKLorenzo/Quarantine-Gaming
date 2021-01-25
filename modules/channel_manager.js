@@ -19,7 +19,7 @@ module.exports.initialize = (ModulesFunction) => {
 
 /**
  * Creates a new channel in the guild.
- * @param {{name: String, bitrate: Number?, nsfw: Boolean?, parent: Discord.ChannelResolvable?, permissionOverwrites: Array<Discord.OverwriteResolvable> | Discord.Collection<String, Discord.OverwriteResolvable> | null, position: Number?, rateLimitPerUser: Number?, reason: String?, topic: String?, type: "text" | "voice" | "category", userLimit: Number?}} options
+ * @param {{name: String, bitrate?: Number, nsfw?: Boolean, parent?: Discord.ChannelResolvable, permissionOverwrites?: Array<Discord.OverwriteResolvable> | Discord.Collection<String, Discord.OverwriteResolvable>, position?: Number, rateLimitPerUser?: Number, reason?: String, topic?: String, type: "text" | "voice" | "category", userLimit?: Number}} options
  * @returns {Promise<Discord.GuildChannel>} A Text Channel, a Voice Channel, or a Category Channel Object
  */
 module.exports.create = (options) => {
@@ -53,10 +53,10 @@ module.exports.create = (options) => {
 /**
  * Deletes a Guild Channel.
  * @param {Discord.GuildChannelResolvable} GuildChannelResolvable A GuildChannel Object or a Snowflake.
- * @param {String?} reason Reason for deleting this channel.
+ * @param {String} reason Reason for deleting this channel.
  * @returns {Promise<Discord.Channel>} A Channel Object
  */
-module.exports.delete = (GuildChannelResolvable, reason) => {
+module.exports.delete = (GuildChannelResolvable, reason = '') => {
     return new Promise(async (resolve, reject) => {
         console.log(`ChannelDelete: Queueing ${ChannelDeleteManager.processID + 1}`);
         await ChannelDeleteManager.queue();
