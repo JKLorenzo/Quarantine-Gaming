@@ -47,6 +47,10 @@ module.exports = class CheckRole extends Command {
         });
     }
 
+    /**
+     * @param {Discord.Message} message 
+     * @param {{Channel: Discord.ChannelResolvable, MemberOrRole: String}} 
+     */
     async run(message, { Channel, MemberOrRole }) {
         // Check user permissions
         if (!app.hasRole(message.author, [constants.roles.staff, constants.roles.moderator])) {
@@ -54,7 +58,7 @@ module.exports = class CheckRole extends Command {
         }
 
         const this_channel = app.channel(Channel);
-        for (const this_MemberOrRole of String(MemberOrRole).split(' ')) {
+        for (const this_MemberOrRole of MemberOrRole.split(' ')) {
             const this_object = app.member(this_MemberOrRole) || app.role(this_MemberOrRole);
             if (!this_object) continue;
             const object_permissions = this_channel.permissionsFor(this_object);

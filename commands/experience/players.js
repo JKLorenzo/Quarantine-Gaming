@@ -39,7 +39,7 @@ module.exports = class PlayersCommand extends Command {
 
     /**
      * @param {Discord.Message} message 
-     * @param {{role: Discord.RoleResolvable}} param1 
+     * @param {{role: Discord.RoleResolvable}} 
      */
     run(message, { role }) {
         const game_role_mentionable = app.role(role);
