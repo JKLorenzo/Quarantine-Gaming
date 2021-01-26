@@ -364,7 +364,7 @@ module.exports.initialize = async (ClientInstance, ModulesFunction) => {
             embed.setTitle('Startup Initiated');
             embed.addField('Reason', process.env.STARTUP_REASON);
 
-            await message_manager.sendToChannel(constants.channels.qg.logs, embed);
+            await message_manager.sendToChannel(constants.channels.qg.updates, embed);
         }
 
         console.log('Initialized');
