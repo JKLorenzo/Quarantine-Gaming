@@ -5,8 +5,8 @@ on:
     - cron: "0 16 * * 5"
 
 jobs:
-  analyze:
-    name: Analyze
+  cron-analyze:
+    name: CodeQL Analyze
     runs-on: ubuntu-latest
 
     strategy:

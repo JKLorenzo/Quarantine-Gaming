@@ -3,8 +3,8 @@ name: "Testing Node Engine and Dependecies"
 on: ["push", "pull_request"]
 
 jobs:
-  analyze:
-    name: Analyze
+  test:
+    name: Node Engine and Dependecies Test
     runs-on: ubuntu-latest
 
     strategy:

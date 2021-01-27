@@ -5,8 +5,8 @@ on:
     - cron: "0 16 * * 5"
 
 jobs:
-  analyze:
-    name: Analyze
+  cron-test:
+    name: Node Engine and Dependecies Test
     runs-on: ubuntu-latest
 
     strategy:
