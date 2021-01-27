@@ -23,9 +23,9 @@ let speech;
 
 const ErrorTicketManager = new classes.ErrorTicketManager('general.js');
 const OfflineManager = new classes.ProcessQueue(1000);
-const ActivityManager = new classes.ProcessQueue(5000);
-const VoiceManager = new classes.ProcessQueue(1000);
-const DedicateManager = new classes.ProcessQueue(10000);
+const ActivityManager = new classes.ProcessQueue(500);
+const VoiceManager = new classes.ProcessQueue(500);
+const DedicateManager = new classes.ProcessQueue(5000);
 const FreeGameManager = new classes.ProcessQueue(1500000);
 let freeGameCollection = new Array();
 

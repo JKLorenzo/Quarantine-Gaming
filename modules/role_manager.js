@@ -4,8 +4,8 @@ const classes = require('./classes.js');
 /** @type {import('./app.js')} */
 let app;
 
-const RoleCreateDeleteManager = new classes.ProcessQueue(1000);
-const RoleAddRemoveManager = new classes.ProcessQueue(1000);
+const RoleCreateDeleteManager = new classes.ProcessQueue(2500);
+const RoleAddRemoveManager = new classes.ProcessQueue(2500);
 
 /**
  * Initializes this module.

@@ -4,7 +4,7 @@ const classes = require('./classes.js');
 /** @type {import('./app.js')} */
 let app;
 
-const ChannelCreateManager = new classes.ProcessQueue(5000);
+const ChannelCreateManager = new classes.ProcessQueue(2500);
 const ChannelDeleteManager = new classes.ProcessQueue(1000);
 
 /**

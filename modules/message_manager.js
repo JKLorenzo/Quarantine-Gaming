@@ -8,8 +8,8 @@ let app;
 let error_manager;
 
 const ErrorTicketManager = new classes.ErrorTicketManager('message_manager.js');
-const ChannelMessageManager = new classes.ProcessQueue(1000);
-const DirectMessageManager = new classes.ProcessQueue(5000);
+const ChannelMessageManager = new classes.ProcessQueue(2500);
+const DirectMessageManager = new classes.ProcessQueue(2500);
 
 /**
  * Initializes the module.
