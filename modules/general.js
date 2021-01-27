@@ -744,32 +744,6 @@ module.exports.freeGameNotify = async (notification) => {
         }
         if (!embed.image.url) embed.setImage(constants.images.free_games_banner);
 
-        const color = {
-            R: 0,
-            G: 0,
-            B: 0,
-            add: function (R, G, B) {
-                this.R += R;
-                this.G += G;
-                this.B += B;
-                // Scale the colors until its acceptable
-                while (this.R > 255 || this.G > 255 || this.B > 255) {
-                    if (this.R > 0) this.R--;
-                    if (this.G > 0) this.G--;
-                    if (this.B > 0) this.B--;
-                }
-            },
-            toHex: function () {
-                let red = this.R.toString(16);
-                let green = this.G.toString(16);
-                let blue = this.B.toString(16);
-                if (red.length == 1) red = `0${red}`;
-                if (green.length == 1) green = `0${green}`;
-                if (blue.length == 1) blue = `0${blue}`;
-                return `#${red}${green}${blue}`;
-            }
-        }
-
         const color = new classes.Color();
         const mentionables = new Array();
         const searchables = (description ? description.toLowerCase() : '*') + ' ' + (url ? url.toLowerCase() : '*');
