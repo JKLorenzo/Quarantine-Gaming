@@ -104,3 +104,49 @@ module.exports.ProcessQueue = class {
         }, this.timeout);
     }
 }
+
+/**
+ * A Color Object.
+ */
+module.exports.Color = class {
+    /**
+     * Creates a Color Object.
+     * @param {Number} Red From 0 to 255.
+     * @param {Number} Green From 0 to 255.
+     * @param {Number} Blue From 0 to 255.
+     */
+    constructor(Red = 0, Green = 0, Blue = 0) {
+        this.Red = Red;
+        this.Green = Green;
+        this.Blue = Blue;
+    }
+
+    /**
+     * Adds the values to this color then scales it accordingly.
+     * @param {Number} R From 0 to 255.
+     * @param {Number} G From 0 to 255.
+     * @param {Number} B From 0 to 255.
+     */
+    set(R, G, B) {
+        this.Red += R;
+        this.Green += G;
+        this.Blue += B;
+
+        // Scale the colors until its acceptable
+        while (this.R > 255 || this.G > 255 || this.B > 255) {
+            if (this.Red > 0) this.Red--;
+            if (this.Green > 0) this.Green--;
+            if (this.Blue > 0) this.Blue--;
+        }
+    }
+
+    toHex() {
+        let red = this.R.toString(16);
+        let green = this.G.toString(16);
+        let blue = this.B.toString(16);
+        if (red.length == 1) red = `0${red}`;
+        if (green.length == 1) green = `0${green}`;
+        if (blue.length == 1) blue = `0${blue}`;
+        return `#${red}${green}${blue}`;
+    }
+}
