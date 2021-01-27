@@ -4,10 +4,8 @@ const classes = require('./classes.js');
 /** @type {import('./app.js')} */
 let app;
 
-const RoleCreateManager = new classes.ProcessQueue(1000);
-const RoleDeleteManager = new classes.ProcessQueue(5000);
-const RoleAddManager = new classes.ProcessQueue(1000);
-const RoleRemoveManager = new classes.ProcessQueue(1000);
+const RoleCreateDeleteManager = new classes.ProcessQueue(1000);
+const RoleAddRemoveManager = new classes.ProcessQueue(1000);
 
 /**
  * Initializes this module.
@@ -26,9 +24,9 @@ module.exports.initialize = (ModulesFunction) => {
  */
 module.exports.create = (options) => {
     return new Promise(async (resolve, reject) => {
-        console.log(`RoleCreate: Queueing ${RoleCreateManager.processID + 1}`);
-        await RoleCreateManager.queue();
-        console.log(`RoleCreate: Started ${RoleCreateManager.processID}`);
+        console.log(`RoleCreate: Queueing ${RoleCreateDeleteManager.processID + 1}`);
+        await RoleCreateDeleteManager.queue();
+        console.log(`RoleCreate: Started ${RoleCreateDeleteManager.processID}`);
         let output, error;
         try {
             output = await app.guild().roles.create({
@@ -45,8 +43,8 @@ module.exports.create = (options) => {
         } catch (err) {
             error = err;
         }
-        console.log(`RoleCreate: Finished ${RoleCreateManager.processID}`);
-        RoleCreateManager.finish();
+        console.log(`RoleCreate: Finished ${RoleCreateDeleteManager.processID}`);
+        RoleCreateDeleteManager.finish();
         error ? reject(error) : resolve(output)
     });
 }
@@ -59,17 +57,17 @@ module.exports.create = (options) => {
  */
 module.exports.delete = (RoleResolvable, reason = '') => {
     return new Promise(async (resolve, reject) => {
-        console.log(`RoleDelete: Queueing ${RoleDeleteManager.processID + 1}`);
-        await RoleDeleteManager.queue();
-        console.log(`RoleDelete: Started ${RoleDeleteManager.processID}`);
+        console.log(`RoleDelete: Queueing ${RoleCreateDeleteManager.processID + 1}`);
+        await RoleCreateDeleteManager.queue();
+        console.log(`RoleDelete: Started ${RoleCreateDeleteManager.processID}`);
         let output, error = '';
         try {
             output = await app.role(RoleResolvable).delete(reason);
         } catch (err) {
             error = err;
         }
-        console.log(`RoleDelete: Finished ${RoleDeleteManager.processID}`);
-        RoleDeleteManager.finish();
+        console.log(`RoleDelete: Finished ${RoleCreateDeleteManager.processID}`);
+        RoleCreateDeleteManager.finish();
         error ? reject(error) : resolve(output)
     });
 }
@@ -82,17 +80,17 @@ module.exports.delete = (RoleResolvable, reason = '') => {
  */
 module.exports.add = (UserResolvable, RoleResolvable) => {
     return new Promise(async (resolve, reject) => {
-        console.log(`RoleAdd: Queueing ${RoleAddManager.processID + 1}`);
-        await RoleAddManager.queue();
-        console.log(`RoleAdd: Started ${RoleAddManager.processID}`);
+        console.log(`RoleAdd: Queueing ${RoleAddRemoveManager.processID + 1}`);
+        await RoleAddRemoveManager.queue();
+        console.log(`RoleAdd: Started ${RoleAddRemoveManager.processID}`);
         let output, error;
         try {
             output = await app.member(UserResolvable).roles.add(app.role(RoleResolvable));
         } catch (err) {
             error = err;
         }
-        console.log(`RoleAdd: Finished ${RoleAddManager.processID}`);
-        RoleAddManager.finish();
+        console.log(`RoleAdd: Finished ${RoleAddRemoveManager.processID}`);
+        RoleAddRemoveManager.finish();
         error ? reject(error) : resolve(output)
     });
 }
@@ -105,17 +103,17 @@ module.exports.add = (UserResolvable, RoleResolvable) => {
  */
 module.exports.remove = (UserResolvable, RoleResolvable) => {
     return new Promise(async (resolve, reject) => {
-        console.log(`RoleRemove: Queueing ${RoleRemoveManager.processID + 1}`);
-        await RoleRemoveManager.queue();
-        console.log(`RoleRemove: Started ${RoleRemoveManager.processID}`);
+        console.log(`RoleRemove: Queueing ${RoleAddRemoveManager.processID + 1}`);
+        await RoleAddRemoveManager.queue();
+        console.log(`RoleRemove: Started ${RoleAddRemoveManager.processID}`);
         let output, error;
         try {
             output = await app.member(UserResolvable).roles.remove(app.role(RoleResolvable));
         } catch (err) {
             error = err;
         }
-        console.log(`RoleRemove: Finished ${RoleRemoveManager.processID}`);
-        RoleRemoveManager.finish();
+        console.log(`RoleRemove: Finished ${RoleAddRemoveManager.processID}`);
+        RoleAddRemoveManager.finish();
         error ? reject(error) : resolve(output)
     });
 }
