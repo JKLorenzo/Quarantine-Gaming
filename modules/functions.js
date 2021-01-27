@@ -174,11 +174,20 @@ module.exports.parseMention = (mention) => {
 /**
  * Checks if the base string contains the part string.
  * @param {String} base The string where we search.
- * @param {String} part The string to search for.
+ * @param {String | Array<String>} part The string to search for.
  * @returns {Boolean} boolean
  */
 module.exports.contains = (base, part) => {
-    return String(base).toLowerCase().indexOf(String(part).toLowerCase()) !== -1;
+    switch (typeof (part)) {
+        case 'string':
+            return String(base).toLowerCase().indexOf(String(part).toLowerCase()) !== -1;
+        case 'object':
+            for (const this_part of part) {
+                if (String(base).toLowerCase().indexOf(String(this_part).toLowerCase()) !== -1)
+                    return true;
+            }
+    }
+    return false;
 }
 
 /**
