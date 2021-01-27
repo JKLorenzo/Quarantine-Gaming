@@ -30,9 +30,9 @@ module.exports.initialize = (ModulesFunction) => {
  */
 module.exports.sendToChannel = (GuildChannelResolvable, content) => {
     return new Promise(async (resolve, reject) => {
-        console.log(`MessageChannelSend: Queueing ${ChannelMessageManager.processID + 1}`);
+        console.log(`MessageChannelSend: Queueing ${ChannelMessageManager.processID}`);
         await ChannelMessageManager.queue();
-        console.log(`MessageChannelSend: Started ${ChannelMessageManager.processID}`);
+        console.log(`MessageChannelSend: Started ${ChannelMessageManager.currentID}`);
         let output, error;
         /** @type {Discord.TextChannel} */
         const channel = app.channel(GuildChannelResolvable);
@@ -41,7 +41,7 @@ module.exports.sendToChannel = (GuildChannelResolvable, content) => {
         } catch (err) {
             error = err;
         }
-        console.log(`MessageChannelSend: Finished ${ChannelMessageManager.processID}`);
+        console.log(`MessageChannelSend: Finished ${ChannelMessageManager.currentID}`);
         ChannelMessageManager.finish();
         error ? reject(error) : resolve(output)
     });
@@ -55,9 +55,9 @@ module.exports.sendToChannel = (GuildChannelResolvable, content) => {
  */
 module.exports.sendToUser = (UserResolvable, content) => {
     return new Promise(async (resolve, reject) => {
-        console.log(`MessageUserSend: Queueing ${DirectMessageManager.processID + 1}`);
+        console.log(`MessageUserSend: Queueing ${DirectMessageManager.processID}`);
         await DirectMessageManager.queue();
-        console.log(`MessageUserSend: Started ${DirectMessageManager.processID}`);
+        console.log(`MessageUserSend: Started ${DirectMessageManager.currentID}`);
         let output, error;
         try {
             const channel = await app.member(UserResolvable).createDM();
@@ -66,7 +66,7 @@ module.exports.sendToUser = (UserResolvable, content) => {
         } catch (err) {
             error = err;
         }
-        console.log(`MessageUserSend: Finished ${DirectMessageManager.processID}`);
+        console.log(`MessageUserSend: Finished ${DirectMessageManager.currentID}`);
         DirectMessageManager.finish();
         error ? reject(error) : resolve(output)
     });

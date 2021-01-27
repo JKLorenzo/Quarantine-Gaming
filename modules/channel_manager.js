@@ -24,9 +24,9 @@ module.exports.initialize = (ModulesFunction) => {
  */
 module.exports.create = (options) => {
     return new Promise(async (resolve, reject) => {
-        console.log(`ChannelCreate: Queueing ${ChannelCreateManager.processID + 1}`);
+        console.log(`ChannelCreate: Queueing ${ChannelCreateManager.processID}`);
         await ChannelCreateManager.queue();
-        console.log(`ChannelCreate: Started ${ChannelCreateManager.processID}`);
+        console.log(`ChannelCreate: Started ${ChannelCreateManager.currentID}`);
         let output, error;
         try {
             output = await app.guild().channels.create(options.name, {
@@ -44,7 +44,7 @@ module.exports.create = (options) => {
         } catch (err) {
             error = err;
         }
-        console.log(`ChannelCreate: Finished ${ChannelCreateManager.processID}`);
+        console.log(`ChannelCreate: Finished ${ChannelCreateManager.currentID}`);
         ChannelCreateManager.finish();
         error ? reject(error) : resolve(output)
     });
@@ -58,16 +58,16 @@ module.exports.create = (options) => {
  */
 module.exports.delete = (GuildChannelResolvable, reason = '') => {
     return new Promise(async (resolve, reject) => {
-        console.log(`ChannelDelete: Queueing ${ChannelDeleteManager.processID + 1}`);
+        console.log(`ChannelDelete: Queueing ${ChannelDeleteManager.processID}`);
         await ChannelDeleteManager.queue();
-        console.log(`ChannelDelete: Started ${ChannelDeleteManager.processID}`);
+        console.log(`ChannelDelete: Started ${ChannelDeleteManager.currentID}`);
         let output, error = '';
         try {
             output = await app.channel(GuildChannelResolvable).delete(reason);
         } catch (err) {
             error = err;
         }
-        console.log(`ChannelDelete: Finished ${ChannelDeleteManager.processID}`);
+        console.log(`ChannelDelete: Finished ${ChannelDeleteManager.currentID}`);
         ChannelDeleteManager.finish();
         error ? reject(error) : resolve(output)
     });

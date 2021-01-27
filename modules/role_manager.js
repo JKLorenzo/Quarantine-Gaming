@@ -24,9 +24,9 @@ module.exports.initialize = (ModulesFunction) => {
  */
 module.exports.create = (options) => {
     return new Promise(async (resolve, reject) => {
-        console.log(`RoleCreate: Queueing ${RoleCreateDeleteManager.processID + 1}`);
+        console.log(`RoleCreate: Queueing ${RoleCreateDeleteManager.processID}`);
         await RoleCreateDeleteManager.queue();
-        console.log(`RoleCreate: Started ${RoleCreateDeleteManager.processID}`);
+        console.log(`RoleCreate: Started ${RoleCreateDeleteManager.currentID}`);
         let output, error;
         try {
             output = await app.guild().roles.create({
@@ -43,7 +43,7 @@ module.exports.create = (options) => {
         } catch (err) {
             error = err;
         }
-        console.log(`RoleCreate: Finished ${RoleCreateDeleteManager.processID}`);
+        console.log(`RoleCreate: Finished ${RoleCreateDeleteManager.currentID}`);
         RoleCreateDeleteManager.finish();
         error ? reject(error) : resolve(output)
     });
@@ -57,16 +57,16 @@ module.exports.create = (options) => {
  */
 module.exports.delete = (RoleResolvable, reason = '') => {
     return new Promise(async (resolve, reject) => {
-        console.log(`RoleDelete: Queueing ${RoleCreateDeleteManager.processID + 1}`);
+        console.log(`RoleDelete: Queueing ${RoleCreateDeleteManager.processID}`);
         await RoleCreateDeleteManager.queue();
-        console.log(`RoleDelete: Started ${RoleCreateDeleteManager.processID}`);
+        console.log(`RoleDelete: Started ${RoleCreateDeleteManager.currentID}`);
         let output, error = '';
         try {
             output = await app.role(RoleResolvable).delete(reason);
         } catch (err) {
             error = err;
         }
-        console.log(`RoleDelete: Finished ${RoleCreateDeleteManager.processID}`);
+        console.log(`RoleDelete: Finished ${RoleCreateDeleteManager.currentID}`);
         RoleCreateDeleteManager.finish();
         error ? reject(error) : resolve(output)
     });
@@ -80,16 +80,16 @@ module.exports.delete = (RoleResolvable, reason = '') => {
  */
 module.exports.add = (UserResolvable, RoleResolvable) => {
     return new Promise(async (resolve, reject) => {
-        console.log(`RoleAdd: Queueing ${RoleAddRemoveManager.processID + 1}`);
+        console.log(`RoleAdd: Queueing ${RoleAddRemoveManager.processID}`);
         await RoleAddRemoveManager.queue();
-        console.log(`RoleAdd: Started ${RoleAddRemoveManager.processID}`);
+        console.log(`RoleAdd: Started ${RoleAddRemoveManager.currentID}`);
         let output, error;
         try {
             output = await app.member(UserResolvable).roles.add(app.role(RoleResolvable));
         } catch (err) {
             error = err;
         }
-        console.log(`RoleAdd: Finished ${RoleAddRemoveManager.processID}`);
+        console.log(`RoleAdd: Finished ${RoleAddRemoveManager.currentID}`);
         RoleAddRemoveManager.finish();
         error ? reject(error) : resolve(output)
     });
@@ -103,16 +103,16 @@ module.exports.add = (UserResolvable, RoleResolvable) => {
  */
 module.exports.remove = (UserResolvable, RoleResolvable) => {
     return new Promise(async (resolve, reject) => {
-        console.log(`RoleRemove: Queueing ${RoleAddRemoveManager.processID + 1}`);
+        console.log(`RoleRemove: Queueing ${RoleAddRemoveManager.processID}`);
         await RoleAddRemoveManager.queue();
-        console.log(`RoleRemove: Started ${RoleAddRemoveManager.processID}`);
+        console.log(`RoleRemove: Started ${RoleAddRemoveManager.currentID}`);
         let output, error;
         try {
             output = await app.member(UserResolvable).roles.remove(app.role(RoleResolvable));
         } catch (err) {
             error = err;
         }
-        console.log(`RoleRemove: Finished ${RoleAddRemoveManager.processID}`);
+        console.log(`RoleRemove: Finished ${RoleAddRemoveManager.currentID}`);
         RoleAddRemoveManager.finish();
         error ? reject(error) : resolve(output)
     });
