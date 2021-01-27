@@ -1,4 +1,4 @@
-name: "CodeQL Testing master [Cron]"
+name: "CodeQL [Cron]"
 
 on:
   schedule:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   cron-analyze:
-    name: CodeQL Analyze
+    name: CodeQL Analysis [Cron]
     runs-on: ubuntu-latest
 
     strategy:

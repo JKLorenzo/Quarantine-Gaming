@@ -1,10 +1,10 @@
-name: "CodeQL Testing Push / Pull Request"
+name: "CodeQL"
 
 on: ["push", "pull_request"]
 
 jobs:
   analyze:
-    name: CodeQL Analyze
+    name: CodeQL Analysis
     runs-on: ubuntu-latest
 
     strategy:

@@ -1,10 +1,10 @@
-name: "Testing Node Engine and Dependecies"
+name: "Dependecies Test"
 
 on: ["push", "pull_request"]
 
 jobs:
   test:
-    name: Node Engine and Dependecies Test
+    name: Dependecies Test
     runs-on: ubuntu-latest
 
     strategy:

@@ -1,4 +1,4 @@
-name: "Testing Node Engine and Dependecies [Cron]"
+name: "Dependecies Test [Cron]"
 
 on:
   schedule:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   cron-test:
-    name: Node Engine and Dependecies Test
+    name: Dependecies Test [Cron]
     runs-on: ubuntu-latest
 
     strategy:
