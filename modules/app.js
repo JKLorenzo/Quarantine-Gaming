@@ -133,7 +133,7 @@ module.exports.initialize = async (ClientInstance, ModulesFunction) => {
     channel_manager = Modules.channel_manager;
 
     try {
-        await this.setActivity(process.env.STATUS_TEXT, process.env.STATUS_TYPE);
+        await this.setActivity('Startup', 'LISTENING');
 
         // Manage Active Dedicated Channels
         for (const dedicated_channel of this.channel(constants.channels.category.dedicated).children.array()) {
@@ -205,7 +205,7 @@ module.exports.initialize = async (ClientInstance, ModulesFunction) => {
                     if (!this_member.user.bot) empty = false;
                 }
                 if (empty) {
-                    const text_channel = this.guild().channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == dedicated_channel.id);
+                    const text_channel = this.guild().channels.cache.find(channel => channel.type == 'text' && channel.topic && functions.parseMention(channel.topic.split(' ')[0]) == dedicated_channel.id);
                     const linked_data = text_channel.topic.split(' ');
                     const text_role = this.role(linked_data[1]);
                     const team_role = this.role(linked_data[2]);
@@ -357,6 +357,8 @@ module.exports.initialize = async (ClientInstance, ModulesFunction) => {
             constants.channels.qg.testing_ground_text
         ]);
 
+        await this.setActivity(process.env.STATUS_TEXT, process.env.STATUS_TYPE);
+
         if (process.env.STARTUP_REASON) {
             const embed = new Discord.MessageEmbed();
             embed.setColor('#ffff00');
@@ -371,6 +373,7 @@ module.exports.initialize = async (ClientInstance, ModulesFunction) => {
         initialized = true;
     } catch (error) {
         console.error('Initializing Failed');
+        await this.setActivity('Startup Failed', 'PLAYING');
         error_manager.mark(ErrorTicketManager.create('initialize', error));
     }
 }
