@@ -86,27 +86,23 @@ module.exports.memberOffline = async (member) => {
     try {
         // Remove Streaming Role
         if (app.hasRole(member, [constants.roles.streaming])) {
-            await role_manager.remove(member, constants.roles.streaming);
+            role_manager.remove(member, constants.roles.streaming);
         }
 
         // Remove Dedicated Channel Role
         if (app.hasRole(member, [constants.roles.dedicated])) {
-            await role_manager.remove(member, constants.roles.dedicated);
+            role_manager.remove(member, constants.roles.dedicated);
         }
 
         // Remove all Dedicated Channel's Text Channel Roles
-        let text_channel_role = null;
-        do {
-            text_channel_role = member.roles.cache.find(role => role.name.startsWith('Text'));
-            if (text_channel_role) await role_manager.remove(member, text_channel_role);
-        } while (text_channel_role);
+        for (const text_channel_role of member.roles.cache.array().filter(role => role.name.startsWith('Text'))) {
+            role_manager.remove(member, text_channel_role);
+        }
 
         // Remove all Team Roles
-        let team_role = null;
-        do {
-            team_role = member.roles.cache.find(role => role.name.startsWith('Team'));
-            if (team_role) await role_manager.remove(member, team_role);
-        } while (team_role);
+        for (const team_role of member.roles.cache.array().filter(role => role.name.startsWith('Team'))) {
+            role_manager.remove(member, team_role);
+        }
     } catch (error) {
         error_manager.mark(ErrorTicketManager.create('memberOffline', error));
     }
@@ -133,17 +129,17 @@ module.exports.memberActivityUpdate = async (member, data) => {
             if (data.new) {
                 if (play_role) {
                     // Bring Play Role to Top
-                    await play_role.setPosition(streaming_role.position - 1);
+                    play_role.setPosition(streaming_role.position - 1);
                 } else {
                     // Create Play Role
                     play_role = await role_manager.create({ name: 'Play ' + activity_name, color: '0x7b00ff', position: streaming_role.position, hoist: true });
                 }
-                await role_manager.add(member, game_role);
-                await role_manager.add(member, play_role);
+                role_manager.add(member, game_role);
+                role_manager.add(member, play_role);
             } else if (play_role) {
                 // Remove Play Role from this member
                 if (member.roles.cache.has(play_role.id)) {
-                    await role_manager.remove(member, play_role);
+                    role_manager.remove(member, play_role);
                 }
                 // Check if Play Role is still in use
                 let role_in_use = false;
@@ -158,7 +154,7 @@ module.exports.memberActivityUpdate = async (member, data) => {
                 // Delete inactive Play Roles
                 if (!role_in_use) {
                     // Delete Play Role
-                    await role_manager.delete(play_role);
+                    role_manager.delete(play_role);
                 }
             }
         }
@@ -184,8 +180,8 @@ module.exports.memberVoiceUpdate = async (member, oldState, newState) => {
             const team_role = app.role(linked_data[2]);
 
             if (oldState.channel.members.size > 0 && !(oldState.channel.members.size == 1 && oldState.channel.members.first().user.bot)) {
-                await role_manager.remove(member, text_role);
-                await role_manager.remove(member, team_role);
+                role_manager.remove(member, text_role);
+                role_manager.remove(member, team_role);
                 const embed = new Discord.MessageEmbed();
                 embed.setAuthor('Quarantine Gaming: Dedicated Channels');
                 embed.setTitle(oldState.channel.name);
@@ -194,12 +190,12 @@ module.exports.memberVoiceUpdate = async (member, oldState, newState) => {
                 embed.setFooter(`${member.user.tag} (${member.user.id})`);
                 embed.setTimestamp();
                 embed.setColor('#7b00ff');
-                await message_manager.sendToChannel(text_channel, embed);
+                message_manager.sendToChannel(text_channel, embed);
             } else {
-                await channel_manager.delete(oldState.channel);
-                await channel_manager.delete(text_channel);
-                await role_manager.delete(text_role);
-                await role_manager.delete(team_role);
+                channel_manager.delete(oldState.channel);
+                channel_manager.delete(text_channel);
+                role_manager.delete(text_role);
+                role_manager.delete(team_role);
             }
         }
 
@@ -219,7 +215,7 @@ module.exports.memberVoiceUpdate = async (member, oldState, newState) => {
                 embed.setDescription('Please observe proper behavior on your current voice channel.');
                 embed.setImage('https://pa1.narvii.com/6771/d33918fa87ad0d84b7dc854dcbf6a8545c73f94d_hq.gif');
                 embed.setColor('#5dff00');
-                await message_manager.sendToUser(member, embed);
+                message_manager.sendToUser(member, embed);
             }
 
             if (newState.channel.parent.id == constants.channels.category.dedicated) {
@@ -238,33 +234,33 @@ module.exports.memberVoiceUpdate = async (member, oldState, newState) => {
                     embed.setFooter(`${newState.member.user.tag} (${newState.member.user.id})`);
                     embed.setTimestamp();
                     embed.setColor('#7b00ff');
-                    await message_manager.sendToChannel(text_channel, embed);
-                    await role_manager.add(member, text_role);
+                    message_manager.sendToChannel(text_channel, embed);
+                    role_manager.add(member, text_role);
                 }
 
                 // Add Team Role
                 if (!member.roles.cache.has(team_role.id)) {
-                    await role_manager.add(member, team_role);
+                    role_manager.add(member, team_role);
                 }
 
                 // Add Dedicated Role
                 if (!member.roles.cache.has(constants.roles.dedicated)) {
-                    await role_manager.add(member, constants.roles.dedicated);
+                    role_manager.add(member, constants.roles.dedicated);
                 }
             } else {
                 // Remove Text Role
                 if (member.roles.cache.has(constants.roles.dedicated)) {
-                    await role_manager.remove(member, constants.roles.dedicated);
+                    role_manager.remove(member, constants.roles.dedicated);
                 }
             }
         } else {
             // Remove Streaming Role
             if (member.roles.cache.has(constants.roles.streaming)) {
-                await role_manager.remove(member, constants.roles.streaming)
+                role_manager.remove(member, constants.roles.streaming)
             }
             // Remove Text Role
             if (member.roles.cache.has(constants.roles.dedicated)) {
-                await role_manager.remove(member, constants.roles.dedicated);
+                role_manager.remove(member, constants.roles.dedicated);
             }
         }
     } catch (error) {
@@ -380,7 +376,7 @@ module.exports.dedicateChannel = async (channel_origin, name) => {
                 embed.setThumbnail(qg_emoji.url);
             }
 
-            await message_manager.sendToChannel(text_channel, embed);
+            message_manager.sendToChannel(text_channel, embed);
         } else {
             // Notify
             await speech.say(`Transferring to ${name} dedicated channel. Please wait.`, channel_origin);
@@ -548,13 +544,13 @@ module.exports.dedicateChannel = async (channel_origin, name) => {
             // Transfer streamers
             for (const this_member of streamers) {
                 await this_member.voice.setChannel(dedicated_voice_channel);
-                await functions.sleep(1000);
+                await functions.sleep(2000);
             }
             // Transfer members
             for (const this_member of members) {
                 if (this_member.user.id != constants.me) {
                     await this_member.voice.setChannel(dedicated_voice_channel);
-                    await functions.sleep(2500);
+                    await functions.sleep(2000);
                 }
             }
         }
@@ -653,7 +649,7 @@ module.exports.freeGameUpdate = async () => {
                                 ]).setTimestamp();
                         }
                         if (notification.flair) {
-                            if (notification.flair.toLowerCase().indexOf('comment') != -1 || notification.flair.toLowerCase().indexOf('issue') != -1) {
+                            if (functions.contains(notification.flair.toLowerCase(), ['comment', 'issue'])) {
                                 message.embeds[0].setDescription(`[${notification.flair}](${notification.permalink})`);
                             } else {
                                 message.embeds[0].setDescription(notification.flair);
@@ -716,7 +712,7 @@ module.exports.freeGameNotify = async (notification) => {
                 } else {
                     exclude_title.push(word);
                     for (const filter of filters) {
-                        if (word.toLowerCase().indexOf(filter) !== -1) {
+                        if (functions.contains(word, filter)) {
                             filtered_content.push(word);
                         }
                     }
@@ -774,6 +770,7 @@ module.exports.freeGameNotify = async (notification) => {
             }
         }
 
+        const color = new classes.Color();
         const mentionables = new Array();
         const searchables = (description ? description.toLowerCase() : '*') + ' ' + (url ? url.toLowerCase() : '*');
 
@@ -793,27 +790,18 @@ module.exports.freeGameNotify = async (notification) => {
             mentionables.push(constants.roles.ubisoft);
             color.add(200, 120, 255);
         }
-        const Console_URLs = ['playstation.com', 'wii.com', 'xbox.com', 'microsoft.com'];
-        for (const Console_URL of Console_URLs) {
-            if (!mentionables.includes(constants.roles.console) && functions.contains(searchables, Console_URL)) {
-                mentionables.push(constants.roles.console);
-                color.add(200, 80, 200)
-            }
+        if (functions.contains(searchables, ['playstation.com', 'wii.com', 'xbox.com', 'microsoft.com'])) {
+            mentionables.push(constants.roles.console);
+            color.add(200, 80, 200)
         }
 
         embed.setColor(color.toHex());
         if (filtered_content.length == 0 && mentionables.length > 0) {
-            const sent_mesage = await message_manager.sendToChannel(constants.channels.integrations.free_games, { content: mentionables.map(mentionable => app.role(mentionable)).join(', '), embed: embed });
+            notification.title = safe_title ? safe_title : title;
 
-            await database.notificationPush(parseNotification(sent_mesage.id, safe_title ? safe_title : title, url, author, permalink));
-
-            await database.notificationPush({
-                id: sent_mesage.id,
-                title: safe_title ? safe_title : title,
-                url: url,
-                author: author,
-                permalink: permalink
-            });
+            const sent_mesage = await message_manager.sendToChannel(constants.channels.integrations.free_games, { content: notification.title + ' is now available on ' + mentionables.map(mentionable => app.role(mentionable)).join(' and ') + '.', embed: embed });
+            notification.id = sent_mesage.id;
+            await database.notificationPush(notification);
 
             // Crosspost a message
             if (sent_mesage.channel.type === 'news') {
