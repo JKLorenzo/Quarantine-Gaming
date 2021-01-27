@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: modules/message_manager.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: modules/message_manager.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const Discord = require('discord.js');
+const constants = require('./constants.js');
+const functions = require('./functions.js');
+const classes = require('./classes.js');
+/** @type {import('./app.js')} */
+let app;
+/** @type {import('./error_manager.js')} */
+let error_manager;
+
+const ErrorTicketManager = new classes.ErrorTicketManager('message_manager.js');
+const ChannelMessageManager = new classes.ProcessQueue(1000);
+const DirectMessageManager = new classes.ProcessQueue(5000);
+
+/**
+ * Initializes the module.
+ * @param {Function} ModulesFunction The GlobalModules function.
+ */
+module.exports.initialize = (ModulesFunction) => {
+    // Link
+    const Modules = functions.parseModules(ModulesFunction);
+    app = Modules.app;
+    error_manager = Modules.error_manager;
+};
+
+/**
+ * Sends a message to a channel with respect to the messaging queue.
+ * @param {Discord.GuildChannelResolvable} GuildChannelResolvable A GuildChannel object or a Snowflake.
+ * @param {any} content The content of the message.
+ * @returns {Promise&lt;Discord.Message | Array&lt;Discord.Message>>} A message object or an array of message objects
+ */
+module.exports.sendToChannel = (GuildChannelResolvable, content) => {
+    return new Promise(async (resolve, reject) => {
+        console.log(`MessageChannelSend: Queueing ${ChannelMessageManager.processID + 1}`);
+        await ChannelMessageManager.queue();
+        console.log(`MessageChannelSend: Started ${ChannelMessageManager.processID}`);
+        let output, error;
+        /** @type {Discord.TextChannel} */
+        const channel = app.channel(GuildChannelResolvable);
+        try {
+            output = await channel.send(content);
+        } catch (err) {
+            error = err;
+        }
+        console.log(`MessageChannelSend: Finished ${ChannelMessageManager.processID}`);
+        ChannelMessageManager.finish();
+        error ? reject(error) : resolve(output)
+    });
+}
+
+/**
+ * Sends a message to a user with respect to the messaging queue.
+ * @param {Discord.UserResolvable} UserResolvable A message object, a guild member object, a user object, or a Snowflake.
+ * @param {any} content The content of the message.
+ * @returns {Promise&lt;Discord.Message> | Array&lt;Discord.Message>>} A message object or an array of message objects
+ */
+module.exports.sendToUser = (UserResolvable, content) => {
+    return new Promise(async (resolve, reject) => {
+        console.log(`MessageUserSend: Queueing ${DirectMessageManager.processID + 1}`);
+        await DirectMessageManager.queue();
+        console.log(`MessageUserSend: Started ${DirectMessageManager.processID}`);
+        let output, error;
+        try {
+            const channel = await app.member(UserResolvable).createDM();
+            output = await channel.send(content);
+            output.delete({ timeout: 3600000 }).catch(() => { });
+        } catch (err) {
+            error = err;
+        }
+        console.log(`MessageUserSend: Finished ${DirectMessageManager.processID}`);
+        DirectMessageManager.finish();
+        error ? reject(error) : resolve(output)
+    });
+}
+
+/**
+ * Processes all incoming messages.
+ * @param {Discord.Message} message The message object.
+ */
+module.exports.process = async (message) => {
+    try {
+        // Help
+        if (message.channel &amp;&amp; message.content.toLowerCase() == '!help') {
+            await functions.sleep(1000);
+            await message.channel.send(`Visit &lt;https://quarantinegamingdiscord.wordpress.com/> to learn more.`);
+        }
+
+        // Game Invites Channel Blocking
+        if (message.channel &amp;&amp; message.channel.id == constants.channels.integrations.game_invites &amp;&amp; (message.embeds.length == 0 || (message.embeds.length > 0 &amp;&amp; message.embeds[0].author.name != 'Quarantine Gaming: Game Coordinator'))) {
+            await this.sendToUser(message.author, "Hello there! You can't send any messages in " + message.channel + " channel.");
+            await message.delete({ timeout: 2500 }).catch(() => { });
+        }
+
+        // DM
+        if (message.guild == null) {
+            const this_member = app.member(message.author);
+            if (this_member &amp;&amp; !this_member.user.bot) {
+                const embed = new Discord.MessageEmbed();
+                embed.setAuthor('Quarantine Gaming: Direct Message Handler');
+                embed.setTitle(`New Message`);
+                embed.setThumbnail(message.author.displayAvatarURL());
+                embed.addField('Sender:', this_member);
+                embed.addField('Message:', message.content);
+                embed.setFooter(`To reply, do: !message dm ${this_member.user.id} &lt;message>`);
+                embed.setColor(`#00ff6f`);
+
+                await this.sendToChannel(constants.channels.qg.dm, embed);
+            }
+        }
+    } catch (error) {
+        error_manager.mark(ErrorTicketManager.create('incoming', error));
+    }
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ErrorTicket.html">ErrorTicket</a></li><li><a href="ErrorTicketManager.html">ErrorTicketManager</a></li><li><a href="Notification.html">Notification</a></li><li><a href="ProcessQueue.html">ProcessQueue</a></li></ul><h3>Global</h3><ul><li><a href="global.html#add">add</a></li><li><a href="global.html#addReaction">addReaction</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#blacklisted">blacklisted</a></li><li><a href="global.html#channel">channel</a></li><li><a href="global.html#channel_manager">channel_manager</a></li><li><a href="global.html#clearTempChannels">clearTempChannels</a></li><li><a href="global.html#client">client</a></li><li><a href="global.html#compareArray">compareArray</a></li><li><a href="global.html#compareDate">compareDate</a></li><li><a href="global.html#compareString">compareString</a></li><li><a href="global.html#contains">contains</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#createStructure">createStructure</a></li><li><a href="global.html#database">database</a></li><li><a href="global.html#DB">DB</a></li><li><a href="global.html#dedicateChannel">dedicateChannel</a></li><li><a href="global.html#delete">delete</a></li><li><a href="global.html#error_manager">error_manager</a></li><li><a href="global.html#fetchIcon">fetchIcon</a></li><li><a href="global.html#fetchImage">fetchImage</a></li><li><a href="global.html#freeGameFetch">freeGameFetch</a></li><li><a href="global.html#freeGameNotify">freeGameNotify</a></li><li><a href="global.html#freeGameUpdate">freeGameUpdate</a></li><li><a href="global.html#gameBlacklist">gameBlacklist</a></li><li><a href="global.html#gameInvite">gameInvite</a></li><li><a href="global.html#gameTitles">gameTitles</a></li><li><a href="global.html#gameWhitelist">gameWhitelist</a></li><li><a href="global.html#general">general</a></li><li><a href="global.html#guild">guild</a></li><li><a href="global.html#hasRole">hasRole</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#initialized">initialized</a></li><li><a href="global.html#isInitialized">isInitialized</a></li><li><a href="global.html#mark">mark</a></li><li><a href="global.html#member">member</a></li><li><a href="global.html#memberActivityUpdate">memberActivityUpdate</a></li><li><a href="global.html#memberOffline">memberOffline</a></li><li><a href="global.html#memberUnlisted">memberUnlisted</a></li><li><a href="global.html#memberVoiceUpdate">memberVoiceUpdate</a></li><li><a href="global.html#message">message</a></li><li><a href="global.html#message_manager">message_manager</a></li><li><a href="global.html#notificationPush">notificationPush</a></li><li><a href="global.html#notificationRecords">notificationRecords</a></li><li><a href="global.html#notifications">notifications</a></li><li><a href="global.html#notificationTrim">notificationTrim</a></li><li><a href="global.html#onReactionAdd">onReactionAdd</a></li><li><a href="global.html#onReactionRemove">onReactionRemove</a></li><li><a href="global.html#parseHTML">parseHTML</a></li><li><a href="global.html#parseMention">parseMention</a></li><li><a href="global.html#parseModules">parseModules</a></li><li><a href="global.html#process">process</a></li><li><a href="global.html#reaction_manager">reaction_manager</a></li><li><a href="global.html#remove">remove</a></li><li><a href="global.html#role">role</a></li><li><a href="global.html#role_manager">role_manager</a></li><li><a href="global.html#say">say</a></li><li><a href="global.html#sendToChannel">sendToChannel</a></li><li><a href="global.html#sendToUser">sendToUser</a></li><li><a href="global.html#setActivity">setActivity</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#speech">speech</a></li><li><a href="global.html#toAlphanumericString">toAlphanumericString</a></li><li><a href="global.html#toCountingInteger">toCountingInteger</a></li><li><a href="global.html#whitelisted">whitelisted</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Wed Jan 27 2021 19:14:34 GMT+0800 (China Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

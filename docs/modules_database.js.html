@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: modules/database.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: modules/database.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const Firebase = require('firebase-admin');
+const functions = require('./functions.js');
+const classes = require('./classes.js');
+/** @type {import('./error_manager.js')} */
+let error_manager;
+
+const ErrorTicketManager = new classes.ErrorTicketManager('database.js');
+
+/**
+ * @type {{notifications: Firebase.firestore.CollectionReference, titles_blacklisted: Firebase.firestore.CollectionReference, titles_whitelisted: Firebase.firestore.CollectionReference}}
+ */
+let DB = {
+    notifications: null,
+    titles_blacklisted: null,
+    titles_whitelisted: null
+};
+
+let index = 0;
+/** @type {Array&lt;Notification>} */
+let notifications = new Array();
+/** @type {Array&lt;String>} */
+let blacklisted = new Array();
+/** @type {Array&lt;String>} */
+let whitelisted = new Array();
+
+/**
+ * Initializes the module and begins to connect to Firebase.
+ * @param {Function} ModulesFunction The GlobalModules function.
+ */
+module.exports.initialize = async (ModulesFunction) => {
+    // Link
+    const Modules = functions.parseModules(ModulesFunction);
+    error_manager = Modules.error_manager;
+
+    try {
+        index = 0;
+        notifications = new Array();
+        blacklisted = new Array();
+        whitelisted = new Array();
+
+        Firebase.initializeApp({
+            credential: Firebase.credential.cert({
+                "type": 'service_account',
+                "project_id": 'fg-updates-bot',
+                "private_key_id": '0824c03f15a9b7a42e192200f7fbfeec4e14fe99',
+                "private_key": '-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCRTiFNPLZWyXhr\nZGGpHQRks3v3prPIzCzsbOBv5lAym4e+n4RKwGwy9KHJrlg/wgv2OLu8ggJk2el+\nPsmEH+y+WlSnHBODrvlZ9eXJb15XW+e7Sb3DUTehepQ223VcLO74493BStEMUgbc\nQd/MyJsmnhqcsIjsHMw1HDjOKRoFD300MGQauS+5ZIPcTRLTtkIqNVAiME+ICgHE\nRkPlAxKHgWue8dwzDF9VPgLCR2ZpGOF3tZ5VZPRi6VTElxFDsYyA2NwuEyg7Frpq\n0XDBkK0wqRgK3zfmQZzgD/IRUGLHb74HsaNhbu1XPWBsMNai//gKME25P5j/Ciq4\n11SIwyy3AgMBAAECggEAIU938uzoIB0vre7lNI+iYjODR9K/hFjKM6kCCqUR3Ygq\nJlkLStex9jx+mm2NbZBejaOT5jMnuVb7YCWkrNVkwH6UyXp2Psnt/+GPPA574ir/\nhL/y8MO9rRccwzasQOVMI2KZg6ZTJi/nwraXR6r1ZnT4RNNzkC1J4yMFIr3paR87\ndP1EoyGEaZliIz0HDH3d5tmxIoPYN4rf93GJQNhcOsmTei1h4dwQJIqydHVW86Y8\nC6EJUrhTJYW4i4k4KnAwaCyl/yS9zeMhgaHYys29pBaEvWjpf7DipsosC9taj6Ea\n6Sp87x60LUpkuZQW2i4Pq8cF5yPuadtAfQalKWgkgQKBgQDDTSGXueWjgl3KOKRt\nsqYiN5wZowY9SPVUzXhOEKkb7ydHLYF5ALgKvub3wTua3t1DthxPMFFOXgvrd46G\nlJc/sb4tvn6J1bnAeb8M+Q6zMu3QEteaIEtbl4ilqk6xOc/XvAS3ZLCmsmEQ6hkN\niZYkT1Gf4gpvLS7H5DUM4PQxjQKBgQC+dyFyIXiiG80ACRduKxEJyMGy4X/EWkqH\nTTPphULW6pZsWoX+EEkeUtDKIebLqNDAE3AOvXL4HhGERRjWI+s5CX9QLWvGs1HP\nDrs+N6EvZUKgx4qiQuwgtaKDXvlnwX+MsqNGnAil3DqbO1TY8Pr4o9rVZ0L5Dn0m\n+8VpdfaMUwKBgF66jsy1UnlYxn1LtBWxTXvTVVfqByC6vqR/dRcIZb4y5e5UWDSE\n8L/lkMojY/Hen5w0PM78NLO6UjXIK82DTUmLwR8XAvGARTTi2JRGSacJ0OfX+9O6\nTlMC0Tjpvnmf/Pw7Kl557GUuqH43zicO0VCTWJggX8dFNyelvUWd51QRAoGAErFe\ndvUSAdb4p6g8xHM1mOA7InM/NuYlqmHJVoHdrXoYiUnZHLY8dt1p4GyzWgmXc0J1\nHP06618IGRMu/NVJoK9t71CF41p2DPxFJDYRe7VUdLMgyAwJYKxy5rHLiINVIVnm\n7Gcj8iNLHTEVgrUj7IMoVwlraUYiwlCzb0ZEjEECgYBgIkcGR4mTltbQUob/EbZq\nXa+oPcy3q9ZaAes8yzPSuCLDw56eOuUuKi2jMnJsVwC+9zH2LPQjkHuzBienyD9H\nOGSsoqEmxwr5O16djfjk5EE2GZMvuPwf3kOuS/QR3+PeNfCjGbaksb4D9hWxiQIJ\n4NytO5rR6XWNNqIJ0C8SZQ==\n-----END PRIVATE KEY-----\n',
+                "client_email": 'firebase-adminsdk-rxhqf@fg-updates-bot.iam.gserviceaccount.com',
+                "client_id": '116447630978026448805',
+                "auth_uri": 'https://accounts.google.com/o/oauth2/auth',
+                "token_uri": 'https://oauth2.googleapis.com/token',
+                "auth_provider_x509_cert_url": 'https://www.googleapis.com/oauth2/v1/certs',
+                "client_x509_cert_url": 'https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-rxhqf%40fg-updates-bot.iam.gserviceaccount.com'
+            })
+        });
+
+        const Firestore = Firebase.firestore();
+
+        DB = {
+            notifications: Firestore.collection('notifications'),
+            titles_blacklisted: Firestore.collection('t_blacklisted'),
+            titles_whitelisted: Firestore.collection('t_whitelisted')
+        };
+
+        const firebase_notifications = await DB.notifications.orderBy('index').get();
+        for (let firebase_notification of firebase_notifications.docs) {
+            const data = firebase_notification.data();
+            if (data.index > index) index = data.index;
+            notifications.push({
+                id: firebase_notification.id,
+                title: data.title,
+                url: data.url,
+                author: data.author,
+                permalink: data.permalink
+            });
+        }
+
+        await this.notificationTrim();
+
+        const firebase_blacklisted = await DB.titles_blacklisted.get();
+        for (let title of firebase_blacklisted.docs) {
+            blacklisted.push(title.id);
+        }
+
+        const firebase_whitelisted = await DB.titles_whitelisted.get();
+        for (const title of firebase_whitelisted.docs) {
+            whitelisted.push(title.id);
+        }
+    } catch (error) {
+        error_manager.mark(ErrorTicketManager.create('initialize', error))
+    }
+}
+
+/**
+ * Trims the free games database notifications list to a maximum of 5 items.
+ */
+module.exports.notificationTrim = async () => {
+    while (notifications.length > 5) {
+        try {
+            const expired_notif = notifications.shift();
+            await DB.notifications.doc(expired_notif.id).delete();
+        } catch (error) {
+            error_manager.mark(ErrorTicketManager.create('notificationTrim', error));
+        }
+    }
+}
+
+/**
+ * Pushes this notification to the database.
+ * @param {classes.Notification} notification 
+ */
+module.exports.notificationPush = async (notification) => {
+    try {
+        notifications.push(notification);
+
+        await DB.notifications.doc(notification.id).set({
+            title: notification.title,
+            url: notification.url,
+            author: notification.author,
+            permalink: notification.permalink,
+            index: ++index
+        });
+
+        await this.notificationTrim();
+    } catch (error) {
+        error_manager.mark(ErrorTicketManager.create('notificationPush', error));
+    }
+}
+
+/**
+ * Checks if this notification is in the database.
+ * @param {classes.Notification} notification The notification to check.
+ */
+module.exports.notificationRecords = (notification) => {
+    try {
+        const similarity_threshold = 70;
+        for (const this_notification of notifications) {
+            const this_similarity = functions.compareString(this_notification.title, notification.title);
+            if (this_similarity >= similarity_threshold || this_notification.url.trim().toLowerCase() == notification.url.trim().toLowerCase()) {
+                return this_notification;
+            }
+        }
+        return false;
+    } catch (error) {
+        error_manager.mark(ErrorTicketManager.create('notificationRecords', error));
+    }
+}
+
+/**
+ * Gets the blacklisted and whitelisted games from the database.
+ * @returns {{blacklisted: Array&lt;String>, whitelisted: Array&lt;String>}} The array of blacklisted and whitelisted game titles.
+ */
+module.exports.gameTitles = () => {
+    return {
+        blacklisted: blacklisted,
+        whitelisted: whitelisted
+    }
+}
+
+/**
+ * Blacklists a game.
+ * @param {String} title The title of the game.
+ */
+module.exports.gameBlacklist = async (title) => {
+    try {
+        title = title.toLowerCase();
+        let updated = false;
+        if (!blacklisted.includes(title)) {
+            blacklisted.push(title);
+            await DB.titles_blacklisted.doc(title).set({});
+            updated = true;
+        }
+
+        let index = whitelisted.indexOf(title);
+        if (index + 1) {
+            whitelisted.splice(index, 1);
+            await DB.titles_whitelisted.doc(title).delete();
+            updated = true;
+        }
+        return updated;
+    } catch (error) {
+        error_manager.mark(ErrorTicketManager.create('gameBlacklist', error));
+    }
+}
+
+/**
+ * Whitelists a game.
+ * @param {String} title The title of the game.
+ */
+module.exports.gameWhitelist = async (title) => {
+    try {
+        title = title.toLowerCase();
+        let updated = false;
+        if (!whitelisted.includes(title)) {
+            whitelisted.push(title);
+            await DB.titles_whitelisted.doc(title).set({});
+            updated = true;
+        }
+
+        let index = blacklisted.indexOf(title);
+        if (index + 1) {
+            blacklisted.splice(index, 1);
+            await DB.titles_blacklisted.doc(title).delete();
+            updated = true;
+        }
+        return updated;
+    } catch (error) {
+        error_manager.mark(ErrorTicketManager.create('gameWhitelist', error));
+    }
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ErrorTicket.html">ErrorTicket</a></li><li><a href="ErrorTicketManager.html">ErrorTicketManager</a></li><li><a href="Notification.html">Notification</a></li><li><a href="ProcessQueue.html">ProcessQueue</a></li></ul><h3>Global</h3><ul><li><a href="global.html#add">add</a></li><li><a href="global.html#addReaction">addReaction</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#blacklisted">blacklisted</a></li><li><a href="global.html#channel">channel</a></li><li><a href="global.html#channel_manager">channel_manager</a></li><li><a href="global.html#clearTempChannels">clearTempChannels</a></li><li><a href="global.html#client">client</a></li><li><a href="global.html#compareArray">compareArray</a></li><li><a href="global.html#compareDate">compareDate</a></li><li><a href="global.html#compareString">compareString</a></li><li><a href="global.html#contains">contains</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#createStructure">createStructure</a></li><li><a href="global.html#database">database</a></li><li><a href="global.html#DB">DB</a></li><li><a href="global.html#dedicateChannel">dedicateChannel</a></li><li><a href="global.html#delete">delete</a></li><li><a href="global.html#error_manager">error_manager</a></li><li><a href="global.html#fetchIcon">fetchIcon</a></li><li><a href="global.html#fetchImage">fetchImage</a></li><li><a href="global.html#freeGameFetch">freeGameFetch</a></li><li><a href="global.html#freeGameNotify">freeGameNotify</a></li><li><a href="global.html#freeGameUpdate">freeGameUpdate</a></li><li><a href="global.html#gameBlacklist">gameBlacklist</a></li><li><a href="global.html#gameInvite">gameInvite</a></li><li><a href="global.html#gameTitles">gameTitles</a></li><li><a href="global.html#gameWhitelist">gameWhitelist</a></li><li><a href="global.html#general">general</a></li><li><a href="global.html#guild">guild</a></li><li><a href="global.html#hasRole">hasRole</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#initialized">initialized</a></li><li><a href="global.html#isInitialized">isInitialized</a></li><li><a href="global.html#mark">mark</a></li><li><a href="global.html#member">member</a></li><li><a href="global.html#memberActivityUpdate">memberActivityUpdate</a></li><li><a href="global.html#memberOffline">memberOffline</a></li><li><a href="global.html#memberUnlisted">memberUnlisted</a></li><li><a href="global.html#memberVoiceUpdate">memberVoiceUpdate</a></li><li><a href="global.html#message">message</a></li><li><a href="global.html#message_manager">message_manager</a></li><li><a href="global.html#notificationPush">notificationPush</a></li><li><a href="global.html#notificationRecords">notificationRecords</a></li><li><a href="global.html#notifications">notifications</a></li><li><a href="global.html#notificationTrim">notificationTrim</a></li><li><a href="global.html#onReactionAdd">onReactionAdd</a></li><li><a href="global.html#onReactionRemove">onReactionRemove</a></li><li><a href="global.html#parseHTML">parseHTML</a></li><li><a href="global.html#parseMention">parseMention</a></li><li><a href="global.html#parseModules">parseModules</a></li><li><a href="global.html#process">process</a></li><li><a href="global.html#reaction_manager">reaction_manager</a></li><li><a href="global.html#remove">remove</a></li><li><a href="global.html#role">role</a></li><li><a href="global.html#role_manager">role_manager</a></li><li><a href="global.html#say">say</a></li><li><a href="global.html#sendToChannel">sendToChannel</a></li><li><a href="global.html#sendToUser">sendToUser</a></li><li><a href="global.html#setActivity">setActivity</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#speech">speech</a></li><li><a href="global.html#toAlphanumericString">toAlphanumericString</a></li><li><a href="global.html#toCountingInteger">toCountingInteger</a></li><li><a href="global.html#whitelisted">whitelisted</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Wed Jan 27 2021 19:14:34 GMT+0800 (China Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

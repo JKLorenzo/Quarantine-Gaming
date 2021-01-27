@@ -6,6 +6,9 @@
   "engines": {
     "node": "14.x"
   },
+  "scripts": {
+    "doc": "jsdoc -c jsdoc.json"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/JKLorenzo/Quarantine-Gaming.git"
@@ -27,5 +30,8 @@
     "node-fetch": "^2.6.1",
     "opusscript": "0.0.7",
     "probe-image-size": "^6.0.0"
+  },
+  "devDependencies": {
+    "jsdoc": "^3.6.6"
   }
 }

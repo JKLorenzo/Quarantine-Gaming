@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: commands/services/streaming.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: commands/services/streaming.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const Discord = require('discord.js');
+const { Command } = require('discord.js-commando');
+const functions = require('../../modules/functions.js');
+const constants = require('../../modules/constants.js');
+/** @type {import('../../modules/app.js')} */
+let app;
+/** @type {import('../../modules/role_manager.js')} */
+let role_manager;
+/** @type {import('../../modules/message_manager.js')} */
+let message_manager;
+/** @type {import('../../modules/speech.js')} */
+let speech;
+
+module.exports = class StreamingCommand extends Command {
+    constructor(client) {
+        super(client, {
+            name: 'streaming',
+            group: 'services',
+            memberName: 'streaming',
+            description: "Notify all members joining your voice channel that you are currently streaming. This will be turned off automatically once you're offline or disconnected from a voice channel.",
+            throttling: {
+                usages: 1,
+                duration: 60
+            }
+        });
+    }
+
+    /** @param {Discord.Message} message */
+    async run(message) {
+        // Link
+        const Modules = functions.parseModules(GlobalModules);
+        app = Modules.app;
+        role_manager = Modules.role_manager;
+        message_manager = Modules.message_manager;
+        speech = Modules.speech;
+
+        const member = app.member(message.author);
+        const streaming_role = app.role(constants.roles.streaming);
+        if (!member.roles.cache.has(streaming_role)) {
+            message.reply("Got it! Your streaming status will be removed once you're disconnected to a voice channel or when you go offline.");
+
+            // Add streaming role
+            await role_manager.add(member, streaming_role);
+
+            const voice_channel = member.voice.channel;
+            if (voice_channel) {
+                // Notify voice channel members through DM
+                const embed = new Discord.MessageEmbed();
+                embed.setAuthor('Quarantine Gaming: Information');
+                embed.setTitle(`${member.displayName} is currently Streaming`);
+                embed.setDescription('Please observe proper behavior on your current voice channel.')
+                embed.setImage('https://pa1.narvii.com/6771/d33918fa87ad0d84b7dc854dcbf6a8545c73f94d_hq.gif');
+                embed.setColor('#5dff00');
+                for (const the_member of voice_channel.members.array()) {
+                    if (member.id != the_member.id) {
+                        await message_manager.sendToUser(the_member, embed);
+                    }
+                }
+
+                // Notify voice channel members through TTS
+                await speech.say('Be notified: A member in this voice channel is currently streaming.', voice_channel);
+            }
+        }
+    }
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="ErrorTicket.html">ErrorTicket</a></li><li><a href="ErrorTicketManager.html">ErrorTicketManager</a></li><li><a href="Notification.html">Notification</a></li><li><a href="ProcessQueue.html">ProcessQueue</a></li></ul><h3>Global</h3><ul><li><a href="global.html#add">add</a></li><li><a href="global.html#addReaction">addReaction</a></li><li><a href="global.html#app">app</a></li><li><a href="global.html#blacklisted">blacklisted</a></li><li><a href="global.html#channel">channel</a></li><li><a href="global.html#channel_manager">channel_manager</a></li><li><a href="global.html#clearTempChannels">clearTempChannels</a></li><li><a href="global.html#client">client</a></li><li><a href="global.html#compareArray">compareArray</a></li><li><a href="global.html#compareDate">compareDate</a></li><li><a href="global.html#compareString">compareString</a></li><li><a href="global.html#contains">contains</a></li><li><a href="global.html#create">create</a></li><li><a href="global.html#createStructure">createStructure</a></li><li><a href="global.html#database">database</a></li><li><a href="global.html#DB">DB</a></li><li><a href="global.html#dedicateChannel">dedicateChannel</a></li><li><a href="global.html#delete">delete</a></li><li><a href="global.html#error_manager">error_manager</a></li><li><a href="global.html#fetchIcon">fetchIcon</a></li><li><a href="global.html#fetchImage">fetchImage</a></li><li><a href="global.html#freeGameFetch">freeGameFetch</a></li><li><a href="global.html#freeGameNotify">freeGameNotify</a></li><li><a href="global.html#freeGameUpdate">freeGameUpdate</a></li><li><a href="global.html#gameBlacklist">gameBlacklist</a></li><li><a href="global.html#gameInvite">gameInvite</a></li><li><a href="global.html#gameTitles">gameTitles</a></li><li><a href="global.html#gameWhitelist">gameWhitelist</a></li><li><a href="global.html#general">general</a></li><li><a href="global.html#guild">guild</a></li><li><a href="global.html#hasRole">hasRole</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#initialized">initialized</a></li><li><a href="global.html#isInitialized">isInitialized</a></li><li><a href="global.html#mark">mark</a></li><li><a href="global.html#member">member</a></li><li><a href="global.html#memberActivityUpdate">memberActivityUpdate</a></li><li><a href="global.html#memberOffline">memberOffline</a></li><li><a href="global.html#memberUnlisted">memberUnlisted</a></li><li><a href="global.html#memberVoiceUpdate">memberVoiceUpdate</a></li><li><a href="global.html#message">message</a></li><li><a href="global.html#message_manager">message_manager</a></li><li><a href="global.html#notificationPush">notificationPush</a></li><li><a href="global.html#notificationRecords">notificationRecords</a></li><li><a href="global.html#notifications">notifications</a></li><li><a href="global.html#notificationTrim">notificationTrim</a></li><li><a href="global.html#onReactionAdd">onReactionAdd</a></li><li><a href="global.html#onReactionRemove">onReactionRemove</a></li><li><a href="global.html#parseHTML">parseHTML</a></li><li><a href="global.html#parseMention">parseMention</a></li><li><a href="global.html#parseModules">parseModules</a></li><li><a href="global.html#process">process</a></li><li><a href="global.html#reaction_manager">reaction_manager</a></li><li><a href="global.html#remove">remove</a></li><li><a href="global.html#role">role</a></li><li><a href="global.html#role_manager">role_manager</a></li><li><a href="global.html#say">say</a></li><li><a href="global.html#sendToChannel">sendToChannel</a></li><li><a href="global.html#sendToUser">sendToUser</a></li><li><a href="global.html#setActivity">setActivity</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#speech">speech</a></li><li><a href="global.html#toAlphanumericString">toAlphanumericString</a></li><li><a href="global.html#toCountingInteger">toCountingInteger</a></li><li><a href="global.html#whitelisted">whitelisted</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Wed Jan 27 2021 19:14:34 GMT+0800 (China Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
