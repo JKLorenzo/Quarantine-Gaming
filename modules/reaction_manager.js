@@ -103,7 +103,7 @@ module.exports.onReactionAdd = async (message, embed, emoji, reactor) => {
                                     await message.edit(embed).catch(error => error_manager.mark(ErrorTicketManager.create('message.edit() [approve]', error, 'onReactionAdd')));
                                     const dm_message = [
                                         `Hooraaay! 🥳 Your membership request has been approved! You will now have access to all the features of this server!`,
-                                        "Do `!help` on our " + app.channel(constants.channels.text.general) + " text channel to know more about these features or you can visit <https://quarantinegamingdiscord.wordpress.com/> for more info."
+                                        "Do `!help` on our " + app.channel(constants.channels.text.general).name + " text channel to know more about these features or you can visit <https://quarantinegamingdiscord.wordpress.com/> for more info."
                                     ];
                                     await message_manager.sendToUser(this_user, dm_message.join('\n')).catch(error => error_manager.mark(ErrorTicketManager.create('message_manager.sendToUser() [approve]', error, 'onReactionAdd')));
                                     break;
