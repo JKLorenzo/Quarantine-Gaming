@@ -89,19 +89,18 @@ module.exports.onReactionAdd = async (message, embed, emoji, reactor) => {
                 break;
             case 'Quarantine Gaming: Member Approval':
                 try {
-                    // Check if reactor is a staff and approval is still pending
-                    if (reactor.roles.cache.has(constants.roles.staff) && embed.fields[4].name != 'Action Taken:') {
-                        const this_user = app.member(embed.fields[1].value);
-                        let final_embed;
+                    // Check if reactor is a staff or mod and if the approval is still pending and the reaction add process is complete
+                    if (app.hasRole(reactor, [constants.roles.staff, constants.roles.moderator]) && embed.fields[3].name != 'Action Taken:' && message.reactions.cache.array().length >= 3) {
+                        const this_user = app.member(embed.fields[0].value);
                         if (this_user) {
                             switch (emoji.name) {
                                 case '✅':
                                     await role_manager.add(this_user, constants.roles.member).catch(error => error_manager.mark(ErrorTicketManager.create('role_manager.add() [approve]', error, 'onReactionAdd')));
                                     await message.reactions.removeAll().catch(error => error_manager.mark(ErrorTicketManager.create('reactions.removeAll() [approve]', error, 'onReactionAdd')));;
-                                    final_embed = embed.spliceFields(4, 1, [
-                                        { name: 'Action Taken:', value: `Approved by ${this_member}` }
+                                    embed.spliceFields(3, 1, [
+                                        { name: 'Action Taken:', value: `Approved by ${reactor}` }
                                     ]).setTimestamp();
-                                    await message.edit(final_embed).catch(error => error_manager.mark(ErrorTicketManager.create('message.edit() [approve]', error, 'onReactionAdd')));
+                                    await message.edit(embed).catch(error => error_manager.mark(ErrorTicketManager.create('message.edit() [approve]', error, 'onReactionAdd')));
                                     const dm_message = [
                                         `Hooraaay! 🥳 Your membership request has been approved! You will now have access to all the features of this server!`,
                                         "Do `!help` on our " + app.channel(constants.channels.text.general) + " text channel to know more about these features or you can visit <https://quarantinegamingdiscord.wordpress.com/> for more info."
@@ -111,27 +110,29 @@ module.exports.onReactionAdd = async (message, embed, emoji, reactor) => {
                                 case '❌':
                                     await this_user.kick().catch(error => error_manager.mark(ErrorTicketManager.create('this_user.kick() [kick]', error, 'onReactionAdd')));
                                     await message.reactions.removeAll().catch(error => error_manager.mark(ErrorTicketManager.create('reactions.removeAll() [kick]', error, 'onReactionAdd')));;
-                                    final_embed = embed.spliceFields(4, 1, [
-                                        { name: 'Action Taken:', value: `Kicked by ${this_member}` }
+                                    embed.spliceFields(3, 1, [
+                                        { name: 'Action Taken:', value: `Kicked by ${reactor}` }
                                     ]).setTimestamp();
-                                    await message.edit(final_embed).catch(error => error_manager.mark(ErrorTicketManager.create('message.edit() [kick]', error, 'onReactionAdd')));;
+                                    await message.edit(embed).catch(error => error_manager.mark(ErrorTicketManager.create('message.edit() [kick]', error, 'onReactionAdd')));;
                                     break;
                                 case '⛔':
                                     await this_user.ban().catch(error => error_manager.mark(ErrorTicketManager.create('this_user.ban() [ban]', error, 'onReactionAdd')));
                                     await message.reactions.removeAll().catch(error => error_manager.mark(ErrorTicketManager.create('reactions.removeAll() [ban]', error, 'onReactionAdd')));
-                                    final_embed = embed.spliceFields(4, 1, [
-                                        { name: 'Action Taken:', value: `Banned by ${this_member}` }
+                                    embed.spliceFields(3, 1, [
+                                        { name: 'Action Taken:', value: `Banned by ${reactor}` }
                                     ]).setTimestamp();
-                                    await message.edit(final_embed).catch(error => error_manager.mark(ErrorTicketManager.create('message.edit() [ban]', error, 'onReactionAdd')));
+                                    await message.edit(embed).catch(error => error_manager.mark(ErrorTicketManager.create('message.edit() [ban]', error, 'onReactionAdd')));
                                     break;
                             }
                         } else {
                             await message.reactions.removeAll().catch(error => error_manager.mark(ErrorTicketManager.create('reactions.removeAll() [not found]', error, 'onReactionAdd')));
-                            final_embed = embed.spliceFields(4, 1, [
-                                { name: 'Action Taken:', value: `None. User not found ⚠. Attempted by ${this_member}` }
+                            embed.spliceFields(3, 1, [
+                                { name: 'Action Taken:', value: `${emoji.name} attempted by ${reactor}. User not found ⚠` }
                             ]).setTimestamp();
-                            await message.edit(final_embed).catch(error => error_manager.mark(ErrorTicketManager.create('message.edit() [not found]', error, 'onReactionAdd')));
+                            await message.edit(embed).catch(error => error_manager.mark(ErrorTicketManager.create('message.edit() [not found]', error, 'onReactionAdd')));
                         }
+                    } else {
+                        await message.reactions.removeAll().catch(error => error_manager.mark(ErrorTicketManager.create('reactions.removeAll() [invalid]', error, 'onReactionAdd')));
                     }
                 } catch (error) {
                     error_manager.mark(ErrorTicketManager.create('Member Approval', error, 'onReactionAdd'));

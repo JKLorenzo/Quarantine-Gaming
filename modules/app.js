@@ -24,6 +24,9 @@ let client;
 /** @type {Boolean} */
 let initialized = false;
 
+/** @type {Array<Discord.Invite>} */
+const invites_list = new Array();
+
 /**
  * Checks if the app is initialized.
  * @returns {Boolean} boolean
@@ -114,6 +117,56 @@ module.exports.hasRole = (UserResolvable, RoleResolvables) => {
         }
     }
     return false;
+}
+
+/**
+ * Gets the used and updated invites.
+ * @returns {Promise<Array<Discord.Invite>>} The array of discord invites that are used or updated.
+ */
+module.exports.getInvites = () => {
+    return new Promise(async resolve => {
+        /** @type {Array<Discord.Invite>} */
+        const invite_changes = new Array();
+        try {
+            const guild_invites = (await this.guild().fetchInvites()).array();
+            for (const invite of guild_invites) {
+                const the_invite = invites_list.find(this_invite => this_invite.code == invite.code);
+                if (!the_invite) {
+                    // Add to list
+                    invites_list.push(invite);
+                    // Add to changes
+                    if (invite.uses > 0) {
+                        invite_changes.push(invite);
+                    }
+                } else if (the_invite.uses != invite.uses) {
+                    // Add to changes
+                    invite_changes.push(invite);
+                    // Replace
+                    invites_list.splice(invites_list.indexOf(the_invite), 1, [invite]);
+                }
+            }
+            if (invite_changes.length == 0) {
+                for (const deleted_invite_code of functions.compareArray(invites_list.map(invite => invite.code), guild_invites.map(invite => invite.code))) {
+                    // Add to changes
+                    invite_changes.push(invites_list.find(invite => invite.code = deleted_invite_code));
+                    // Remove from invites list
+                    invites_list.splice(invites_list.indexOf(deleted_invite_code), 1);
+                }
+            }
+        } catch (error) {
+            error_manager.mark(ErrorTicketManager.create('getInvites', error));
+        }
+        resolve(invite_changes);
+    });
+}
+
+/**
+ * Adds the invite to the invites list.
+ * @param {Discord.Invite} new_invite The invite that was created.
+ */
+module.exports.addInvite = (new_invite) => {
+    // Add to list
+    invites_list.push(new_invite);
 }
 
 /**

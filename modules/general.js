@@ -52,29 +52,61 @@ module.exports.initialize = (ModulesFunction) => {
 module.exports.memberUnlisted = async () => {
     try {
         for (const this_member of app.guild().members.cache.array()) {
-            // Check if any member doesnt have member role
-            if (!this_member.user.bot && !app.hasRole(this_member, [constants.roles.member])) {
-                const created_from = functions.compareDate(this_member.user.createdAt);
-                const embed = new Discord.MessageEmbed();
-                embed.setAuthor('Quarantine Gaming: Unlisted Member');
-                embed.setTitle('Member Details');
-                embed.setThumbnail(this_member.user.displayAvatarURL());
-                embed.addFields([
-                    { name: 'User:', value: this_member },
-                    { name: 'ID:', value: this_member.id },
-                    { name: 'Account Created:', value: created_from.days + " days " + created_from.hours + " hours " + created_from.minutes + " minutes" }
-                ]);
-                embed.setColor('#ff5f5f');
-
-                await message_manager.sendToChannel(constants.channels.server.management, {
-                    content: `This user doesn't have a member role. Manual action is required.`,
-                    embed: embed
-                });
+            if (this_member && !this_member.user.bot && !app.hasRole(this_member, [constants.roles.member])) {
+                await this.memberScreening(this_member);
             }
         }
     } catch (error) {
         error_manager.mark(ErrorTicketManager.create('memberUnlisted', error));
     }
+}
+
+
+/**
+ * Adds the member to the screening process.
+ * @param {Discord.GuildMember} this_member The GuildMember object to undergo screening.
+ * @returns {Promise<Discord.Message>} The Message object of the screening process.
+ */
+module.exports.memberScreening = (this_member) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const MessageToSend = new Array();
+            MessageToSend.push(`Hi ${this_member.user.username}, and welcome to **Quarantine Gaming**!`);
+            MessageToSend.push(`Please wait while we are processing your membership approval.`);
+            await message_manager.sendToUser(this_member, MessageToSend.join('\n'))
+
+            const today = new Date();
+            const diffMs = (today - this_member.user.createdAt);
+            const diffDays = Math.floor(diffMs / 86400000)
+            const diffHrs = Math.floor((diffMs % 86400000) / 3600000)
+            const diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000);
+            const created_on = diffDays + " days " + diffHrs + " hours " + diffMins + " minutes";
+            const inviters = await app.getInvites();
+
+            const embed = new Discord.MessageEmbed();
+            embed.setAuthor('Quarantine Gaming: Member Approval');
+            embed.setTitle('Member Details');
+            embed.setThumbnail(this_member.user.displayAvatarURL());
+            embed.addFields([
+                { name: 'User:', value: this_member },
+                { name: 'Account Created:', value: created_on },
+                { name: 'Inviter:', value: inviters.length > 0 ? inviters.map(this_invite => this_invite.inviter).join(' or ') : 'Information is not available.' },
+                { name: 'Actions:', value: '✅ - Approve     ❌ - Kick     ⛔ - Ban' }
+            ]);
+            embed.setColor('#25c059');
+            const Message = await message_manager.sendToChannel(constants.channels.server.management, {
+                content: `${this_member} wants to join this server. ${app.role(constants.roles.staff)} or ${app.role(constants.roles.moderator)} action is required.`,
+                embed: embed
+            });
+            const reactions = ['✅', '❌', '⛔'];
+            for (const emoji of reactions) {
+                await reaction_manager.addReaction(Message, emoji);
+            }
+            resolve(Message);
+        } catch (error) {
+            reject(error);
+        }
+    });
 }
 
 /**

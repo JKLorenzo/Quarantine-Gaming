@@ -154,44 +154,46 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
     }
 });
 
+client.on('inviteCreate', invite => {
+    if (app.isInitialized()) {
+        try {
+            app.addInvite(invite);
+
+            const embed = new Discord.MessageEmbed();
+            embed.setAuthor('Quarantine Gaming: Invites Submanager');
+            embed.setTitle('New Invite Created');
+            if (invite.inviter) {
+                embed.addField('Inviter:', invite.inviter, true);
+                embed.setThumbnail(invite.inviter.displayAvatarURL());
+            }
+            if (invite.targetUser) embed.addField('Target User:', invite.targetUser, true);
+            embed.addFields([
+                { name: 'Channel:', value: invite.channel, inline: true },
+                { name: 'Code:', value: invite.code, inline: true }
+            ]);
+            if (invite.maxUses) {
+                embed.addField('Max Uses:', invite.maxUses, true);
+            } else {
+                embed.addField('Max Uses:', 'Infinite', true);
+            }
+            if (invite.expiresTimestamp) {
+                embed.setTimestamp(invite.expiresTimestamp);
+                embed.setFooter('Expires ');
+            } else {
+                embed.setFooter('NO EXPIRATION DATE ⚠');
+            }
+            embed.setColor('#25c081');
+            message_manager.sendToChannel(constants.channels.server.management, embed);
+        } catch (error) {
+            error_manager.mark(ErrorTicketManager.create('inviteCreate', error));
+        }
+    }
+})
+
 client.on('guildMemberAdd', async (this_member) => {
     try {
-        if (this_member && !this_member.user.bot) {
-            if (!this_member.roles.cache.has(constants.roles.member)) {
-                const MessageToSend = new Array();
-                MessageToSend.push(`Hi ${this_member.user.username}, and welcome to **Quarantine Gaming**!`);
-                MessageToSend.push(`Please wait while we are processing your membership approval.`);
-                await message_manager.sendToUser(this_member, MessageToSend.join('\n'))
-
-                const today = new Date();
-                const diffMs = (today - this_member.user.createdAt);
-                const diffDays = Math.floor(diffMs / 86400000)
-                const diffHrs = Math.floor((diffMs % 86400000) / 3600000)
-                const diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000);
-                const created_on = diffDays + " days " + diffHrs + " hours " + diffMins + " minutes";
-                const inviters = await g_functions.getInviter();
-
-                const embed = new Discord.MessageEmbed();
-                embed.setAuthor('Quarantine Gaming: Member Approval');
-                embed.setTitle('Member Details');
-                embed.setThumbnail(this_member.user.displayAvatarURL());
-                embed.addFields([
-                    { name: 'User:', value: this_member },
-                    { name: 'ID:', value: this_member.id },
-                    { name: 'Account Created:', value: created_on },
-                    { name: 'Inviter:', value: inviters.length > 0 ? inviters.map(this_invite => this_invite.inviter).join(' or ') : 'Not Traced.' },
-                    { name: 'Moderation:', value: '✅ - Approve     ❌ - Kick     ⛔ - Ban' }
-                ]);
-                embed.setColor('#25c059');
-                const Message = await message_manager.sendToChannel(constants.channels.server.management, {
-                    content: `${app.role(constants.roles.staff)} and ${app.role(constants.roles.moderator)} action is required.`,
-                    embed: embed
-                });
-                const reactions = ['✅', '❌', '⛔'];
-                for (const emoji of reactions) {
-                    await reaction_manager.addReaction(Message, emoji);
-                }
-            }
+        if (this_member && !this_member.user.bot && !app.hasRole(this_member, [constants.roles.member])) {
+            await general.memberScreening(this_member);
         }
     } catch (error) {
         error_manager.mark(ErrorTicketManager.create('guildMemberAdd', error));
