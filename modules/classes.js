@@ -127,7 +127,7 @@ module.exports.Color = class {
      * @param {Number} G From 0 to 255.
      * @param {Number} B From 0 to 255.
      */
-    set(R, G, B) {
+    add(R, G, B) {
         this.Red += R;
         this.Green += G;
         this.Blue += B;
@@ -140,10 +140,14 @@ module.exports.Color = class {
         }
     }
 
+    /**
+     * Converts this color to its Hex value.
+     * @returns {String} Hex Value
+     */
     toHex() {
-        let red = this.R.toString(16);
-        let green = this.G.toString(16);
-        let blue = this.B.toString(16);
+        let red = this.Red.toString(16);
+        let green = this.Green.toString(16);
+        let blue = this.Blue.toString(16);
         if (red.length == 1) red = `0${red}`;
         if (green.length == 1) green = `0${green}`;
         if (blue.length == 1) blue = `0${blue}`;
