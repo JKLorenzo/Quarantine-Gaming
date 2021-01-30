@@ -16,7 +16,7 @@ let DB = {
 };
 
 let index = 0;
-/** @type {Array<Notification>} */
+/** @type {Array<classes.Notification>} */
 let notifications = new Array();
 /** @type {Array<String>} */
 let blacklisted = new Array();
