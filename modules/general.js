@@ -627,7 +627,7 @@ module.exports.freeGameFetch = async (url = '') => {
                         }
                     }
                 } else {
-                    const elapsedMinutes = functions.compareDate(new Date(notification.createdAt * 1000));
+                    const elapsedMinutes = functions.compareDate(new Date(notification.createdAt * 1000)).minutes;
                     if (!this_notification && elapsedMinutes >= 30 && elapsedMinutes <= 300 && notification.score >= 50 && notification.validity >= 75) {
                         this.freeGameNotify(notification);
                     }
@@ -755,7 +755,8 @@ module.exports.freeGameNotify = async (notification) => {
 
         // URL
         embed.setURL(url);
-        embed.setFooter(`${new URL(url).hostname} | Updated as of `, functions.fetchIcon(hostname));
+        const hostname = (new URL(url)).hostname;
+        embed.setFooter(`${hostname} | Updated as of `, functions.fetchIcon(hostname));
 
         // Image
         const images = await functions.fetchImage(title).catch(() => { });
@@ -803,9 +804,8 @@ module.exports.freeGameNotify = async (notification) => {
 
         embed.setColor(color.toHex());
         if (filtered_content.length == 0 && mentionables.length > 0) {
-            notification.title = safe_title ? safe_title : title;
-
-            const sent_mesage = await message_manager.sendToChannel(constants.channels.integrations.free_games, { content: notification.title + ' is now available on ' + mentionables.map(mentionable => app.role(mentionable)).join(' and ') + '.', embed: embed });
+            const sent_mesage = await message_manager.sendToChannel(constants.channels.integrations.free_games, { content: embed.title + ' is now available on ' + mentionables.map(mentionable => app.role(mentionable)).join(' and ') + '.', embed: embed });
+            notification.title = embed.title;
             notification.id = sent_mesage.id;
             await database.notificationPush(notification);
 
