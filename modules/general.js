@@ -26,7 +26,7 @@ const OfflineManager = new classes.ProcessQueue(1000);
 const ActivityManager = new classes.ProcessQueue(500);
 const VoiceManager = new classes.ProcessQueue(500);
 const DedicateManager = new classes.ProcessQueue(5000);
-const FreeGameManager = new classes.ProcessQueue(1500000);
+const FreeGameUpdateManager = new classes.ProcessQueue(1500000); // 25mins
 let freeGameCollection = new Array();
 
 /**
@@ -644,7 +644,6 @@ module.exports.freeGameFetch = async (url = '') => {
  * Updates all active notifications.
  */
 module.exports.freeGameUpdate = async () => {
-    await FreeGameManager.queue();
     try {
         if (freeGameCollection) {
             for (const freeGameData of freeGameCollection) {
@@ -666,6 +665,7 @@ module.exports.freeGameUpdate = async () => {
                 if (this_notification) {
                     const message = await app.channel(constants.channels.integrations.free_games).messages.fetch(this_notification.id);
                     if (message) {
+                        await FreeGameUpdateManager.queue();
                         if (notification.description) {
                             message.embeds[0].spliceFields(1, 3)
                                 .addFields([
@@ -688,6 +688,7 @@ module.exports.freeGameUpdate = async () => {
                             }
                         }
                         await message.edit({ content: message.content, embed: message.embeds[0] });
+                        FreeGameUpdateManager.finish();
                     }
                 }
             }
@@ -695,7 +696,6 @@ module.exports.freeGameUpdate = async () => {
     } catch (error) {
         error_manager.mark(ErrorTicketManager.create('freeGameUpdate', error));
     }
-    FreeGameManager.finish();
 }
 
 /**
@@ -703,7 +703,6 @@ module.exports.freeGameUpdate = async () => {
  * @param {classes.Notification} notification The notification object to send.
  */
 module.exports.freeGameNotify = async (notification) => {
-    await FreeGameManager.queue();
     try {
         const title = notification.title;
         const url = notification.url;
@@ -823,5 +822,4 @@ module.exports.freeGameNotify = async (notification) => {
     } catch (error) {
         error_manager.mark(ErrorTicketManager.create('freeGameNotify', error));
     }
-    FreeGameManager.finish();
 }
