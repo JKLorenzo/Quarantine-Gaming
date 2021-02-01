@@ -51,13 +51,13 @@ module.exports.say = (message, channel) => {
             // TTS
             const buffer = await tts.synthesize({
                 text: message,
-                voice: 'en-US'
+                voice: 'en',
             });
             // Write TTS to file
             fs.writeFileSync('tts.mp3', buffer);
             await functions.sleep(1000);
             // Speak to channel
-            const dispatcher = await connection.play('tts.mp3');
+            const dispatcher = connection.play('tts.mp3');
             dispatcher.on('speaking', async speaking => {
                 if (!speaking) {
                     await functions.sleep(2500);
@@ -67,8 +67,8 @@ module.exports.say = (message, channel) => {
                 }
             });
         } catch (error) {
-            if (connection) await channel.leave().catch(() => { });
-            error_manager.mark(ErrorTicketManager('say', error));
+            if (connection) channel.leave();
+            error_manager.mark(ErrorTicketManager.create('say', error));
             SpeechManager.finish();
             resolve();
         }
