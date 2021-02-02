@@ -1,6 +1,5 @@
 const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
-const functions = require('../../modules/functions.js');
 /** @type {import('../../modules/message_manager.js')} */
 let message_manager;
 /** @type {import('../../modules/reaction_manager.js')} */
@@ -20,9 +19,8 @@ module.exports = class Audio extends Command {
     /** @param {Discord.Message} */
     async run(message) {
         // Link
-        const Modules = functions.parseModules(GlobalModules);
-        message_manager = Modules.message_manager;
-        reaction_manager = Modules.reaction_manager;
+        message_manager = this.client.modules.message_manager;
+        reaction_manager = this.client.modules.reaction_manager;
 
         const embed = new Discord.MessageEmbed();
         embed.setColor('#ffff00');

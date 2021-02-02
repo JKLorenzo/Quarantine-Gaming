@@ -20,13 +20,12 @@ let blacklisted = new Array();
 let whitelisted = new Array();
 
 /**
- * Initializes the module and begins to connect to Firebase.
- * @param {Function} ModulesFunction The GlobalModules function.
+ * Initializes the module.
+ * @param {CommandoClient} ClientInstance The Commando Client instance used to login.
  */
-module.exports.initialize = async (ModulesFunction) => {
+module.exports.initialize = async (ClientInstance) => {
     // Link
-    const Modules = functions.parseModules(ModulesFunction);
-    error_manager = Modules.error_manager;
+    error_manager = ClientInstance.modules.error_manager;
 
     try {
         index = 0;

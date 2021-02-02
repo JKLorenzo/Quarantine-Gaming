@@ -1,7 +1,6 @@
 const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
 const constants = require('../../modules/constants.js');
-const functions = require('../../modules/functions.js');
 /** @type {import('../../modules/app.js')} */
 let app;
 /** @type {import('../../modules/message_manager.js')} */
@@ -88,9 +87,8 @@ module.exports = class Message extends Command {
                     type: 'string',
                     validate: async argument => {
                         // Link
-                        const Modules = functions.parseModules(GlobalModules);
-                        app = Modules.app;
-                        message_manager = Modules.message_manager;
+                        app = this.client.modules.app;
+                        message_manager = this.client.modules.message_manager;
 
                         const commands = String(argument).split(' ');
                         if (commands.length < 2 || !modeSelector.mode) return false;

@@ -8,13 +8,12 @@ const RoleCreateDeleteManager = new classes.ProcessQueue(2500);
 const RoleAddRemoveManager = new classes.ProcessQueue(2500);
 
 /**
- * Initializes this module.
- * @param {Function} ModulesFunction 
+ * Initializes the module.
+ * @param {CommandoClient} ClientInstance The Commando Client instance used to login.
  */
-module.exports.initialize = (ModulesFunction) => {
+module.exports.initialize = (ClientInstance) => {
     // Link
-    const Modules = functions.parseModules(ModulesFunction);
-    app = Modules.app;
+    app = ClientInstance.modules.app;
 }
 
 /**

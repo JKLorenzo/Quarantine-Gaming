@@ -1,7 +1,6 @@
 const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
 const constants = require('../../modules/constants.js');
-const functions = require('../../modules/functions.js');
 /** @type {import('../../modules/app.js')} */
 let app;
 /** @type {import('../../modules/message_manager.js')} */
@@ -47,10 +46,9 @@ module.exports = class ReactionRole extends Command {
                     default: '',
                     validate: async msgID => {
                         // Link 
-                        const Modules = functions.parseModules(GlobalModules);
-                        app = Modules.app;
-                        message_manager = Modules.message_manager;
-                        reaction_manager = Modules.reaction_manager;
+                        app = this.client.modules.app;
+                        message_manager = this.client.modules.message_manager;
+                        reaction_manager = this.client.modules.reaction_manager;
 
                         const message_to_update = app.message(constants.channels.server.roles, msgID) || await app.channel(constants.channels.server.roles).messages.fetch(msgID);
 

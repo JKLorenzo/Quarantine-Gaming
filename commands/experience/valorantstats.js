@@ -2,7 +2,6 @@ const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
 const { JSDOM } = require("jsdom");
 const axios = require('axios');
-const functions = require('../../modules/functions.js');
 /** @type {import('../../modules/message_manager.js')} */
 let message_manager;
 
@@ -112,8 +111,7 @@ module.exports = class StatsVALORANT extends Command {
      */
     async run(message, { player, target }) {
         // Link 
-        const Modules = functions.parseModules(GlobalModules);
-        message_manager = Modules.message_manager;
+        message_manager = this.client.modules.message_manager;
 
         const this_message = message.say(`Getting information...`);
         const stats = await valorant(player.split('#')[0], player.split('#')[1]);

@@ -17,15 +17,14 @@ const IncomingReactionManager = new classes.ProcessQueue(500);
 
 /**
  * Initializes the module.
- * @param {Function} ModulesFunction The GlobalModule Function.
+ * @param {CommandoClient} ClientInstance The Commando Client instance used to login.
  */
-module.exports.initialize = (ModulesFunction) => {
+module.exports.initialize = (ClientInstance) => {
     // Link
-    const Modules = functions.parseModules(ModulesFunction);
-    app = Modules.app;
-    role_manager = Modules.role_manager;
-    error_manager = Modules.error_manager;
-    message_manager = Modules.message_manager;
+    app = ClientInstance.modules.app;
+    role_manager = ClientInstance.modules.role_manager;
+    error_manager = ClientInstance.modules.error_manager;
+    message_manager = ClientInstance.modules.message_manager;
 }
 
 /**

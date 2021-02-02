@@ -172,18 +172,16 @@ module.exports.addInvite = (new_invite) => {
 /**
  * Initializes the module.
  * @param {CommandoClient} ClientInstance The Commando Client instance used to login.
- * @param {Function} ModulesFunction The GlobalModules function.
  */
-module.exports.initialize = async (ClientInstance, ModulesFunction) => {
+module.exports.initialize = async (ClientInstance) => {
     // Link
     client = ClientInstance;
-    const Modules = functions.parseModules(ModulesFunction);
-    message_manager = Modules.message_manager;
-    error_manager = Modules.error_manager;
-    role_manager = Modules.role_manager;
-    database = Modules.database;
-    general = Modules.general;
-    channel_manager = Modules.channel_manager;
+    message_manager = client.modules.message_manager;
+    error_manager = client.modules.error_manager;
+    role_manager = client.modules.role_manager;
+    database = client.modules.database;
+    general = client.modules.general;
+    channel_manager = client.modules.channel_manager;
 
     try {
         await this.setActivity('Startup', 'LISTENING');

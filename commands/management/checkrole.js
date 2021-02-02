@@ -1,6 +1,5 @@
 const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
-const functions = require('../../modules/functions.js');
 const constants = require('../../modules/constants.js');
 /** @type {import('../../modules/app.js')} */
 let app;
@@ -20,8 +19,7 @@ module.exports = class CheckRole extends Command {
                     type: 'string',
                     validate: Channel => {
                         // Link
-                        const Modules = functions.parseModules(GlobalModules);
-                        app = Modules.app;
+                        app = this.client.modules.app;
 
                         if (app.channel(Channel))
                             return true;

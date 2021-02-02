@@ -32,19 +32,18 @@ let freeGameCollection = new Array();
 
 /**
  * Initializes the module.
- * @param {Function} ModulesFunction The GlobalModules function.
+ * @param {CommandoClient} ClientInstance The Commando Client instance used to login.
  */
-module.exports.initialize = (ModulesFunction) => {
+module.exports.initialize = (ClientInstance) => {
     // Link
-    const Modules = functions.parseModules(ModulesFunction);
-    app = Modules.app;
-    error_manager = Modules.error_manager;
-    message_manager = Modules.message_manager;
-    reaction_manager = Modules.reaction_manager;
-    role_manager = Modules.role_manager;
-    channel_manager = Modules.channel_manager;
-    database = Modules.database;
-    speech = Modules.speech;
+    app = ClientInstance.modules.app;
+    error_manager = ClientInstance.modules.error_manager;
+    message_manager = ClientInstance.modules.message_manager;
+    reaction_manager = ClientInstance.modules.reaction_manager;
+    role_manager = ClientInstance.modules.role_manager;
+    channel_manager = ClientInstance.modules.channel_manager;
+    database = ClientInstance.modules.database;
+    speech = ClientInstance.modules.speech;
 }
 
 /**

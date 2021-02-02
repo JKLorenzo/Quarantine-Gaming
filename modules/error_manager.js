@@ -14,13 +14,12 @@ let errors_per_minute = new Array(classes.ErrorTicket);
 
 /**
  * Initializes the module.
- * @param {Function} ModulesFunction The GlobalModules Function.
+ * @param {CommandoClient} ClientInstance The Commando Client instance used to login.
  */
-module.exports.initialize = (ModulesFunction) => {
+module.exports.initialize = (ClientInstance) => {
     // Link
-    const Modules = functions.parseModules(ModulesFunction);
-    app = Modules.app;
-    message_manager = Modules.message_manager;
+    app = ClientInstance.modules.app;
+    message_manager = ClientInstance.modules.message_manager;
 }
 
 /**

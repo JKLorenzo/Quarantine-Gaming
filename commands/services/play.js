@@ -22,9 +22,8 @@ module.exports = class PlayCommand extends Command {
                     type: 'role',
                     validate: role => {
                         // Link
-                        const modules = functions.parseModules(GlobalModules);
-                        app = modules.app;
-                        general = modules.general;
+                        app = this.client.modules.app;
+                        general = this.client.modules.general;
 
                         const game_role = app.role(role);
                         if (game_role) {

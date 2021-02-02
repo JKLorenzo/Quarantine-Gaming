@@ -37,9 +37,8 @@ module.exports = class Game extends Command {
      */
     async run(message, { mode, name }) {
         // Link
-        const Modules = functions.parseModules(GlobalModules);
-        app = Modules.app;
-        database = Modules.database;
+        app = this.client.modules.app;
+        database = this.client.modules.database;
 
         // Check user permissions
         if (!app.hasRole(message.author, [constants.roles.staff, constants.roles.moderator])) {
