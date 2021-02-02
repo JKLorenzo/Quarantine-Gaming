@@ -1,6 +1,5 @@
 const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
-const functions = require('../../modules/functions.js');
 /** @type {import('../../modules/app.js')} */
 let app;
 
@@ -36,8 +35,7 @@ module.exports = class Status extends Command {
      */
     async run(message, { type, value }) {
         // Link 
-        const Modules = functions.parseModules(GlobalModules);
-        app = Modules.app;
+        app = this.client.modules.app;
 
         // Check user permissions
         if (!app.hasRole(message.author, [constants.roles.staff])) {

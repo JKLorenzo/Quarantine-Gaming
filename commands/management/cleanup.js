@@ -30,8 +30,7 @@ module.exports = class CleanUp extends Command {
 	 */
 	async run(message, { count }) {
 		// Link
-		const Modules = functions.parseModules(GlobalModules);
-		app = Modules.app;
+		app = this.client.modules.app;
 
 		// Check user permissions
 		if (!app.hasRole(message.author, [constants.roles.staff, constants.roles.moderator])) {

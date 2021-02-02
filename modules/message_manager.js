@@ -13,13 +13,12 @@ const DirectMessageManager = new classes.ProcessQueue(2500);
 
 /**
  * Initializes the module.
- * @param {Function} ModulesFunction The GlobalModules function.
+ * @param {CommandoClient} ClientInstance The Commando Client instance used to login.
  */
-module.exports.initialize = (ModulesFunction) => {
+module.exports.initialize = (ClientInstance) => {
     // Link
-    const Modules = functions.parseModules(ModulesFunction);
-    app = Modules.app;
-    error_manager = Modules.error_manager;
+    app = ClientInstance.modules.app;
+    error_manager = ClientInstance.modules.error_manager;
 };
 
 /**

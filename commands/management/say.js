@@ -1,6 +1,5 @@
 const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
-const functions = require('../../modules/functions.js');
 /** @type {import('../../modules/app.js')} */
 let app;
 /** @type {import('../../modules/speech.js')} */
@@ -21,9 +20,8 @@ module.exports = class Say extends Command {
                     type: 'string',
                     validate: channelID => {
                         // Link
-                        const Modules = functions.parseModules(GlobalModules);
-                        app = Modules.app;
-                        speech = Modules.speech;
+                        app = this.client.modules.app;
+                        speech = this.client.modules.speech;
 
                         if (app.channel(channelID) && !app.channel(channelID).isText())
                             return true;

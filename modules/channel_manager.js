@@ -9,12 +9,11 @@ const ChannelDeleteManager = new classes.ProcessQueue(1000);
 
 /**
  * Initializes the module.
- * @param {Function} ModulesFunction The GlobalModules function.
+ * @param {CommandoClient} ClientInstance The Commando Client instance used to login.
  */
-module.exports.initialize = (ModulesFunction) => {
+module.exports.initialize = (ClientInstance) => {
     // Link
-    const Modules = functions.parseModules(ModulesFunction);
-    app = Modules.app;
+    app = ClientInstance.modules.app;
 }
 
 /**

@@ -23,12 +23,11 @@ const format_words = [
 
 /**
  * Initializes the module.
- * @param {Function} ModulesFunction The GlobalModules Function.
+ * @param {CommandoClient} ClientInstance The Commando Client instance used to login.
  */
-module.exports.initialize = (ModulesFunction) => {
+module.exports.initialize = (ClientInstance) => {
     // Link
-    const Modules = functions.parseModules(ModulesFunction);
-    error_manager = Modules.error_manager;
+    error_manager = ClientInstance.modules.error_manager;
 }
 
 /**

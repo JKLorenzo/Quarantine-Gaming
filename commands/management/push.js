@@ -1,7 +1,6 @@
 const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
 const constants = require('../../modules/constants.js');
-const functions = require('../../modules/functions.js');
 /** @type {import('../../modules/app.js')} */
 let app;
 /** @type {import('../../modules/general.js')} */
@@ -31,9 +30,8 @@ module.exports = class PushCommand extends Command {
      */
     async run(message, { url }) {
         // Link
-        const Modules = functions.parseModules(GlobalModules);
-        app = Modules.app;
-        general = Modules.general;
+        app = this.client.modules.app;
+        general = this.client.modules.general;
 
         // Check user permissions
         if (!app.hasRole(message.author, [constants.roles.staff, constants.roles.moderator])) {

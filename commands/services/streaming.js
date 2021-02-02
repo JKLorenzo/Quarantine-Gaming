@@ -1,6 +1,5 @@
 const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
-const functions = require('../../modules/functions.js');
 const constants = require('../../modules/constants.js');
 /** @type {import('../../modules/app.js')} */
 let app;
@@ -28,11 +27,10 @@ module.exports = class StreamingCommand extends Command {
     /** @param {Discord.Message} message */
     async run(message) {
         // Link
-        const Modules = functions.parseModules(GlobalModules);
-        app = Modules.app;
-        role_manager = Modules.role_manager;
-        message_manager = Modules.message_manager;
-        speech = Modules.speech;
+        app = this.client.modules.app;
+        role_manager = this.client.modules.role_manager;
+        message_manager = this.client.modules.message_manager;
+        speech = this.client.modules.speech;
 
         const member = app.member(message.author);
         const streaming_role = app.role(constants.roles.streaming);

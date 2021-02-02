@@ -39,33 +39,29 @@ client.registry
     })
     .registerCommandsIn(path.join(__dirname, 'commands'));
 
-function Modules() {
-    return {
-        app: app,
-        channel_manager: channel_manager,
-        database: database,
-        error_manager: error_manager,
-        general: general,
-        message_manager: message_manager,
-        reaction_manager: reaction_manager,
-        role_manager: role_manager,
-        speech: speech
-    }
+client.modules = {
+    app: app,
+    channel_manager: channel_manager,
+    database: database,
+    error_manager: error_manager,
+    general: general,
+    message_manager: message_manager,
+    reaction_manager: reaction_manager,
+    role_manager: role_manager,
+    speech: speech
 }
-
-global.GlobalModules = Modules;
 
 client.once('ready', async () => {
     console.log('Startup');
-    channel_manager.initialize(Modules);
-    await database.initialize(Modules);
-    general.initialize(Modules);
-    message_manager.initialize(Modules);
-    reaction_manager.initialize(Modules);
-    role_manager.initialize(Modules);
-    speech.initialize(Modules);
-    error_manager.initialize(Modules);
-    await app.initialize(client, Modules);
+    channel_manager.initialize(client);
+    await database.initialize(client);
+    general.initialize(client);
+    message_manager.initialize(client);
+    reaction_manager.initialize(client);
+    role_manager.initialize(client);
+    speech.initialize(client);
+    error_manager.initialize(client);
+    await app.initialize(client);
 });
 
 client.on('message', (incoming_message) => {

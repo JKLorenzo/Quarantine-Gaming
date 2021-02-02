@@ -38,10 +38,9 @@ module.exports = class DedicateCommand extends Command {
      */
     async run(message, { name }) {
         // Link
-        const Modules = functions.parseModules(GlobalModules);
-        app = Modules.app;
-        general = Modules.general;
-        message_manager = Modules.message_manager;
+        app = this.client.modules.app;
+        general = this.client.modules.general;
+        message_manager = this.client.modules.message_manager;
 
         const voice_channel = app.member(message.author).voice.channel;
         if (voice_channel) {

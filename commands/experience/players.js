@@ -21,9 +21,8 @@ module.exports = class PlayersCommand extends Command {
                     type: 'role',
                     validate: role => {
                         // Link
-                        const Modules = functions.parseModules(GlobalModules);
-                        app = Modules.app;
-                        message_manager = Modules.message_manager;
+                        app = this.client.modules.app;
+                        message_manager = this.client.modules.message_manager;
 
                         const game_role_mentionable = app.role(role);
                         if (game_role_mentionable) {
