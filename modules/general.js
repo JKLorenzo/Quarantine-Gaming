@@ -27,6 +27,7 @@ const ActivityManager = new classes.ProcessQueue(500);
 const VoiceManager = new classes.ProcessQueue(500);
 const DedicateManager = new classes.ProcessQueue(5000);
 const FreeGameUpdateManager = new classes.ProcessQueue(1500000); // 25mins
+const FreeGameNotifyManager = new classes.ProcessQueue(1000);
 /** @type {Array<classes.Notification>} */
 let freeGameCollection = new Array();
 
@@ -684,6 +685,7 @@ module.exports.freeGameUpdate = async () => {
  * @param {classes.Notification} notification The notification object to send.
  */
 module.exports.freeGameNotify = async (notification) => {
+    await FreeGameNotifyManager.queue();
     try {
         const title = notification.title;
         const url = notification.url;
@@ -738,25 +740,6 @@ module.exports.freeGameNotify = async (notification) => {
         const hostname = (new URL(url)).hostname;
         embed.setFooter(`${hostname} | Updated as of `, functions.fetchIcon(hostname));
 
-        // Image
-        const images = await functions.fetchImage(title).catch(() => { });
-        for (const image of images) {
-            const response = await fetch(image.url).catch(() => { });
-            if (response && response.ok) {
-                const probe_result = await probe(image.url, { timeout: 10000 }).catch(() => { });
-                if (probe_result) {
-                    const width = parseInt(probe_result.width);
-                    const height = parseInt(probe_result.height);
-                    const ratio = width / height;
-                    if (width >= 200 && height >= 200 && ratio >= 1.7) {
-                        embed.setImage(probe_result.url);
-                        break;
-                    }
-                }
-            }
-        }
-        if (!embed.image.url) embed.setImage(constants.images.free_games_banner);
-
         const color = new classes.Color();
         const mentionables = new Array();
         const searchables = (description ? description.toLowerCase() : '*') + ' ' + (url ? url.toLowerCase() : '*');
@@ -784,6 +767,25 @@ module.exports.freeGameNotify = async (notification) => {
 
         embed.setColor(color.toHex());
         if (filtered_content.length == 0 && mentionables.length > 0) {
+            // Image
+            const images = await functions.fetchImage(title).catch(() => { });
+            for (const image of images) {
+                const response = await fetch(image.url).catch(() => { });
+                if (response && response.ok) {
+                    const probe_result = await probe(image.url, { timeout: 10000 }).catch(() => { });
+                    if (probe_result) {
+                        const width = parseInt(probe_result.width);
+                        const height = parseInt(probe_result.height);
+                        const ratio = width / height;
+                        if (width >= 200 && height >= 200 && ratio >= 1.7) {
+                            embed.setImage(probe_result.url);
+                            break;
+                        }
+                    }
+                }
+            }
+            if (!embed.image.url) embed.setImage(constants.images.free_games_banner);
+
             const sent_mesage = await message_manager.sendToChannel(constants.channels.integrations.free_games, { content: embed.title + ' is now available on ' + mentionables.map(mentionable => app.role(mentionable)).join(' and ') + '.', embed: embed });
             notification.title = embed.title;
             notification.id = sent_mesage.id;
@@ -803,4 +805,5 @@ module.exports.freeGameNotify = async (notification) => {
     } catch (error) {
         error_manager.mark(ErrorTicketManager.create('freeGameNotify', error));
     }
+    FreeGameNotifyManager.finish();
 }
