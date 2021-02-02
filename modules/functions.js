@@ -193,19 +193,22 @@ module.exports.fetchIcon = (hostname) => {
 /**
  * Search for images using Google Image Search.
  * @param {String} title The search term to search for.
- * @returns {Promise<Array<String>>} A Promised Array of Image URLs
+ * @returns {Promise<Array<{url: String, width: number, height: number}>>} A Promised Array of Image URLs
  */
 module.exports.fetchImage = (title) => {
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
+        const this_result = new Array();
         try {
             gis(title, (error, results) => {
-                if (error)
-                    reject(error);
-                else
-                    resolve(results);
+                if (results) {
+                    for (const result of results) {
+                        this_result.push(result)
+                    }
+                }
+                resolve(this_result);
             });
         } catch (error) {
-            reject(error);
+            resolve(this_result);
         }
     });
 }
