@@ -134,35 +134,6 @@ module.exports.parseHTML = (html) => {
 }
 
 /**
- * Parses the Modules that was declared in the Global Scope.
- * @param {Function} ModulesFunction The Global Modules function.
- * @returns The Modules
- */
-module.exports.parseModules = (ModulesFunction) => {
-    const modules = ModulesFunction();
-    return {
-        /** @type {import('./app.js')} */
-        app: modules.app,
-        /** @type {import('./channel_manager.js')} */
-        channel_manager: modules.channel_manager,
-        /** @type {import('./database.js')} */
-        database: modules.database,
-        /** @type {import('./error_manager.js')} */
-        error_manager: modules.error_manager,
-        /** @type {import('./general.js')} */
-        general: modules.general,
-        /** @type {import('./message_manager.js')} */
-        message_manager: modules.message_manager,
-        /** @type {import('./reaction_manager.js')} */
-        reaction_manager: modules.reaction_manager,
-        /** @type {import('./role_manager.js')} */
-        role_manager: modules.role_manager,
-        /** @type {import('./speech.js')} */
-        speech: modules.speech
-    }
-}
-
-/**
  * Filters out symbols used to signify a mentioned object.
  * @param {String} mention The mentioned object.
  * @returns {String} Mentioned ID
