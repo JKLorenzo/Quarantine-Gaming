@@ -276,7 +276,7 @@ module.exports.initialize = async (ClientInstance, ModulesFunction) => {
             if (!this_member.user.bot) {
                 for (const this_activity of this_member.presence.activities) {
                     const activity_name = this_activity.name.trim();
-                    if (this_activity.type == 'PLAYING' && !database.gameTitles().blacklisted.includes(activity_name.toLowerCase()) && (this_activity.applicationID || database.gameTitles().whitelisted.includes(activity_name.toLowerCase()))) {
+                    if (this_activity.type == 'PLAYING' && !database.gameBlacklisted(activity_name) && (this_activity.applicationID || database.gameWhitelisted(activity_name))) {
                         const game_role = this.guild().roles.cache.find(role => role.name == activity_name) || await role_manager.create({ name: activity_name, color: '0x00ffff' });
 
                         if (!this_member.roles.cache.has(game_role.id)) {
@@ -324,14 +324,14 @@ module.exports.initialize = async (ClientInstance, ModulesFunction) => {
                     }
                 }
                 // Delete blacklisted and inactive Play Roles
-                if (!role_in_use || database.gameTitles().blacklisted.includes(this_role.name.substring(5).toLowerCase())) {
+                if (!role_in_use || database.gameBlacklisted(this_role.name.substring(5))) {
                     // Delete Play Role
                     await role_manager.delete(this_role);
                 }
-            } else if (this_role.hexColor == '#00ffff' && database.gameTitles().blacklisted.includes(this_role.name.toLowerCase())) {
+            } else if (this_role.hexColor == '#00ffff' && database.gameBlacklisted(this_role.name)) {
                 // Delete Game Role
                 await role_manager.delete(this_role);
-            } else if (this_role.hexColor == '#00fffe' && database.gameTitles().blacklisted.includes(this_role.name.toLowerCase())) {
+            } else if (this_role.hexColor == '#00fffe' && database.gameBlacklisted(this_role.name)) {
                 // Delete Game Role Mentionable
                 await role_manager.delete(this_role);
             }

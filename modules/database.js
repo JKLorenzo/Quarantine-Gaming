@@ -71,10 +71,10 @@ module.exports.initialize = async (ModulesFunction) => {
         for (const override of GameOverrides.docs) {
             switch (override.data().category) {
                 case 'whitelist':
-                    whitelisted.push(override.id);
+                    whitelisted.push(override.id.trim());
                     break;
                 case 'blacklist':
-                    blacklisted.push(override.id);
+                    blacklisted.push(override.id.trim());
                     break;
             }
         }
@@ -139,14 +139,19 @@ module.exports.notificationRecords = (notification) => {
 }
 
 /**
- * Gets the blacklisted and whitelisted games from the database.
- * @returns {{blacklisted: Array<String>, whitelisted: Array<String>}} The array of blacklisted and whitelisted game titles.
+ * Checks if this game title is whitelisted.
+ * @param {String} title The title of the game.
  */
-module.exports.gameTitles = () => {
-    return {
-        blacklisted: blacklisted,
-        whitelisted: whitelisted
-    }
+module.exports.gameWhitelisted = (title) => {
+    return whitelisted.includes(title.toLowerCase().trim());
+}
+
+/**
+ * Checks if this game title is blacklisted.
+ * @param {String} title The title of the game.
+ */
+module.exports.gameBlacklisted = (title) => {
+    return blacklisted.includes(title.toLowerCase().trim());
 }
 
 /**

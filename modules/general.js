@@ -152,7 +152,7 @@ module.exports.memberActivityUpdate = async (member, data) => {
     try {
         const activity = data.activity;
         const activity_name = activity.name.trim();
-        if (activity.type == 'PLAYING' && !database.gameTitles().blacklisted.includes(activity_name.toLowerCase()) && (activity.applicationID || database.gameTitles().whitelisted.includes(activity_name.toLowerCase()))) {
+        if (activity.type == 'PLAYING' && !database.gameBlacklisted(activity_name) && (activity.applicationID || database.gameWhitelisted(activity_name))) {
             const streaming_role = app.role(constants.roles.streaming);
             const game_role = app.guild().roles.cache.find(role => role.name == activity_name) || await role_manager.create({ name: activity_name, color: '0x00ffff' });
             let play_role = app.guild().roles.cache.find(role => role.name == 'Play ' + activity_name);
