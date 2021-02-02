@@ -27,6 +27,7 @@ const ActivityManager = new classes.ProcessQueue(500);
 const VoiceManager = new classes.ProcessQueue(500);
 const DedicateManager = new classes.ProcessQueue(5000);
 const FreeGameUpdateManager = new classes.ProcessQueue(1500000); // 25mins
+/** @type {Array<classes.Notification>} */
 let freeGameCollection = new Array();
 
 /**
@@ -599,22 +600,19 @@ module.exports.dedicateChannel = async (channel_origin, name) => {
  */
 module.exports.freeGameFetch = async (url = '') => {
     try {
-        freeGameCollection = await fetch('https://www.reddit.com/r/FreeGameFindings/new/.json?limit=25&sort=new').then(data => data.json()).then(entry => entry.data.children.map(child => child.data));
-        if (freeGameCollection) {
-            for (const freeGameData of freeGameCollection) {
-                const notification = new classes.Notification(
-                    null,
-                    functions.parseHTML(freeGameData.title),
-                    freeGameData.url,
-                    freeGameData.author,
-                    `https://www.reddit.com${freeGameData.permalink}`,
-                    {
-                        createdAt: freeGameData.created_utc,
-                        description: functions.parseHTML(freeGameData.selftext),
-                        flair: freeGameData.link_flair_text,
-                        score: freeGameData.score,
-                        validity: freeGameData.upvote_ratio * 100
-                    });
+        const response = await fetch('https://www.reddit.com/r/FreeGameFindings/new/.json?limit=25&sort=new').then(data => data.json()).then(entry => entry.data.children.map(child => child.data));
+        if (response) {
+            freeGameCollection = new Array();
+            for (const data of response) {
+                const notification = new classes.Notification(functions.parseHTML(data.title), data.url, data.author, `https://www.reddit.com${data.permalink}`, {
+                    createdAt: data.created_utc,
+                    description: functions.parseHTML(data.selftext),
+                    flair: data.link_flair_text,
+                    score: data.score,
+                    validity: data.upvote_ratio * 100
+                });
+
+                freeGameCollection.push(notification);
 
                 const this_notification = database.notificationRecords(notification);
                 if (url) {
@@ -645,51 +643,35 @@ module.exports.freeGameFetch = async (url = '') => {
  */
 module.exports.freeGameUpdate = async () => {
     try {
-        if (freeGameCollection) {
-            for (const freeGameData of freeGameCollection) {
-                const notification = new classes.Notification(
-                    null,
-                    functions.parseHTML(freeGameData.title),
-                    freeGameData.url,
-                    freeGameData.author,
-                    `https://www.reddit.com${freeGameData.permalink}`,
-                    {
-                        createdAt: freeGameData.created_utc,
-                        description: functions.parseHTML(freeGameData.selftext),
-                        flair: freeGameData.link_flair_text,
-                        score: freeGameData.score,
-                        validity: freeGameData.upvote_ratio * 100
-                    });
-
-                const this_notification = database.notificationRecords(notification);
-                if (this_notification) {
-                    const message = await app.channel(constants.channels.integrations.free_games).messages.fetch(this_notification.id);
-                    if (message) {
-                        await FreeGameUpdateManager.queue();
-                        if (notification.description) {
-                            message.embeds[0].spliceFields(1, 3)
-                                .addFields([
-                                    { name: 'Trust Factor', value: `${notification.validity} %`, inline: true },
-                                    { name: 'Margin', value: `${notification.score}`, inline: true },
-                                    { name: 'Details', value: `${notification.description}` }
-                                ]).setTimestamp();
-                        } else {
-                            message.embeds[0].spliceFields(1, 2)
-                                .addFields([
-                                    { name: 'Trust Factor', value: `${notification.validity} %`, inline: true },
-                                    { name: 'Margin', value: `${notification.score}`, inline: true }
-                                ]).setTimestamp();
-                        }
-                        if (notification.flair) {
-                            if (functions.contains(notification.flair.toLowerCase(), ['comment', 'issue'])) {
-                                message.embeds[0].setDescription(`[${notification.flair}](${notification.permalink})`);
-                            } else {
-                                message.embeds[0].setDescription(notification.flair);
-                            }
-                        }
-                        await message.edit({ content: message.content, embed: message.embeds[0] });
-                        FreeGameUpdateManager.finish();
+        for (const notification of freeGameCollection) {
+            const this_notification = database.notificationRecords(notification);
+            if (this_notification) {
+                const message = await app.channel(constants.channels.integrations.free_games).messages.fetch(this_notification.id);
+                if (message) {
+                    await FreeGameUpdateManager.queue();
+                    if (notification.description) {
+                        message.embeds[0].spliceFields(1, 3)
+                            .addFields([
+                                { name: 'Trust Factor', value: `${notification.validity} %`, inline: true },
+                                { name: 'Margin', value: `${notification.score}`, inline: true },
+                                { name: 'Details', value: `${notification.description}` }
+                            ]).setTimestamp();
+                    } else {
+                        message.embeds[0].spliceFields(1, 2)
+                            .addFields([
+                                { name: 'Trust Factor', value: `${notification.validity} %`, inline: true },
+                                { name: 'Margin', value: `${notification.score}`, inline: true }
+                            ]).setTimestamp();
                     }
+                    if (notification.flair) {
+                        if (functions.contains(notification.flair.toLowerCase(), ['comment', 'issue'])) {
+                            message.embeds[0].setDescription(`[${notification.flair}](${notification.permalink})`);
+                        } else {
+                            message.embeds[0].setDescription(notification.flair);
+                        }
+                    }
+                    await message.edit({ content: message.content, embed: message.embeds[0] });
+                    FreeGameUpdateManager.finish();
                 }
             }
         }
