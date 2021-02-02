@@ -6,19 +6,18 @@ const functions = require('./functions.js');
 module.exports.Notification = class {
     /**
      * Constructs a notification object.
-     * @param {String | null} id The message ID of this notification.
      * @param {String} title The title of this notification.
      * @param {String} url The giveaway URL of this notification.
      * @param {String} author The author of this notification.
      * @param {String} permalink The permalink for the giveaway.
-     * @param {{description?: String, validity?: Number, score?: Number, flair?: String, createdAt?: Date}} partials The partials of this notification.
+     * @param {{id?: String, description?: String, validity?: Number, score?: Number, flair?: String, createdAt?: Date}} partials The partials of this notification.
      */
-    constructor(id = null, title, url, author, permalink, partials = {}) {
-        this.id = id;
+    constructor(title, url, author, permalink, partials = {}) {
         this.title = title;
         this.url = url;
         this.author = author;
         this.permalink = permalink;
+        this.id = partials.id;
         this.description = partials.description;
         this.validity = partials.validity;
         this.score = partials.score;
