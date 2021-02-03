@@ -412,7 +412,7 @@ module.exports.dedicateChannel = async (channel_origin, name) => {
             message_manager.sendToChannel(text_channel, embed);
         } else {
             // Notify
-            await speech.say(`Transferring to ${name} dedicated channel. Please wait.`, channel_origin);
+            await speech.say(`You will be transferred to ${name} dedicated channel. Please wait.`, channel_origin);
 
             const p = constants.permissions;
             const dedicated_voice_channel = await channel_manager.create({
@@ -575,8 +575,8 @@ module.exports.dedicateChannel = async (channel_origin, name) => {
                 }
             }
 
-            // Delay for 5 seconds
-            await functions.sleep(5000);
+            // Delay for 10 seconds
+            await functions.sleep(10000);
 
             // Transfer streamers
             for (const this_member of streamers) {
