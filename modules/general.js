@@ -378,7 +378,7 @@ module.exports.dedicateChannel = async (channel_origin, name) => {
         if (channel_origin.parentID == constants.channels.category.dedicated) {
             // Rename
             await channel_origin.setName(channel_name);
-            const text_channel = app.channel(constants.channels.category.dedicated).children.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == channel_origin.id);
+            const text_channel = app.guild().channels.cache.find(channel => channel.type == 'text' && channel.topic && functions.parseMention(channel.topic.split(' ')[0]) == channel_origin.id);
             await text_channel.setName(channel_name);
             const hoisted_role = app.role(text_channel.topic.split(' ')[2]);
             await hoisted_role.setName(`Team ${channel_name}`);
@@ -574,6 +574,10 @@ module.exports.dedicateChannel = async (channel_origin, name) => {
                     members.push(this_member);
                 }
             }
+
+            // Delay for 5 seconds
+            await functions.sleep(5000);
+
             // Transfer streamers
             for (const this_member of streamers) {
                 await this_member.voice.setChannel(dedicated_voice_channel);
