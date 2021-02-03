@@ -249,7 +249,9 @@ module.exports.initialize = async (ClientInstance) => {
         }
 
         // Manage Inactive Dedicated Channel Related Channels
-        for (const dedicated_channel of this.channel(constants.channels.category.dedicated).children.array()) {
+        /** @type {Discord.CategoryChannel} */
+        const dedicated_category_channel = this.channel(constants.channels.category.dedicated);
+        for (const dedicated_channel of dedicated_category_channel.children.array()) {
             if (dedicated_channel.type == 'voice' && dedicated_channel.parent && dedicated_channel.parentID == constants.channels.category.dedicated) {
                 let empty = true;
                 for (const this_member of dedicated_channel.members.array()) {
