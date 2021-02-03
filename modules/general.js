@@ -160,6 +160,9 @@ module.exports.memberActivityUpdate = async (member, data) => {
             if (!app.guild().roles.cache.find(role => role.name == activity_name + ' ⭐')) await role_manager.create({ name: activity_name + ' ⭐', color: '0x00fffe' });
 
             if (data.new) {
+                // Update database
+                database.memberGameRoleSet(member.id, game_role.id);
+
                 if (play_role) {
                     // Bring Play Role to Top
                     play_role.setPosition(streaming_role.position - 1);
