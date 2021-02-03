@@ -51,6 +51,7 @@ module.exports.say = (message, channel) => {
             const buffer = await tts.synthesize({
                 text: message,
                 voice: 'en',
+                slow: true
             });
             // Write TTS to file
             fs.writeFileSync('tts.mp3', buffer);
