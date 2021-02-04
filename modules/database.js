@@ -125,7 +125,14 @@ module.exports.memberGameRoleSet = async (member, role) => {
     try {
         const dr_member = DB.Members.doc(member.id);
         const ds_member = await dr_member.get();
-        if (!ds_member.exists) {
+        if (ds_member.exists) {
+            // Update name when database is outdated
+            if (ds_member.data().name != member.displayName) {
+                await dr_member.update({
+                    name: member.displayName
+                });
+            }
+        } else {
             await dr_member.set({
                 name: member.displayName
             });
