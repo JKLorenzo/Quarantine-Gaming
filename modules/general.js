@@ -170,8 +170,8 @@ module.exports.memberActivityUpdate = async (member, data) => {
                     // Create Play Role
                     play_role = await role_manager.create({ name: 'Play ' + activity_name, color: '0x7b00ff', position: streaming_role.position, hoist: true });
                 }
-                role_manager.add(member, game_role);
-                role_manager.add(member, play_role);
+                await role_manager.add(member, game_role);
+                await role_manager.add(member, play_role);
             } else if (play_role) {
                 // Remove Play Role from this member
                 if (member.roles.cache.has(play_role.id)) {
@@ -271,17 +271,17 @@ module.exports.memberVoiceUpdate = async (member, oldState, newState) => {
                     embed.setTimestamp();
                     embed.setColor('#7b00ff');
                     message_manager.sendToChannel(text_channel, embed);
-                    role_manager.add(member, text_role);
+                    await role_manager.add(member, text_role);
                 }
 
                 // Add Team Role
                 if (!member.roles.cache.has(team_role.id)) {
-                    role_manager.add(member, team_role);
+                    await role_manager.add(member, team_role);
                 }
 
                 // Add Dedicated Role
                 if (!member.roles.cache.has(constants.roles.dedicated)) {
-                    role_manager.add(member, constants.roles.dedicated);
+                    await role_manager.add(member, constants.roles.dedicated);
                 }
             } else {
                 // Remove Text Role
