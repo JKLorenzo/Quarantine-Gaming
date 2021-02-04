@@ -797,17 +797,6 @@ module.exports.freeGameNotify = async (notification) => {
             notification.title = embed.title;
             notification.id = sent_mesage.id;
             await database.notificationPush(notification);
-
-            // Crosspost a message
-            if (sent_mesage.channel.type === 'news') {
-                await sent_mesage.crosspost();
-                const crosspost_embed = new Discord.MessageEmbed();
-                crosspost_embed.setColor('#da00ff');
-                crosspost_embed.setAuthor('Quarantine Gaming: Free Game/DLC Crossposting');
-                crosspost_embed.setTitle(sent_mesage.embeds[0].title);
-                crosspost_embed.setDescription('This notification is now published and is visible to all external(following) servers.')
-                await message_manager.sendToChannel(constants.channels.qg.logs, crosspost_embed);
-            }
         }
     } catch (error) {
         error_manager.mark(ErrorTicketManager.create('freeGameNotify', error));
