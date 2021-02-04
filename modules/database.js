@@ -193,7 +193,7 @@ module.exports.notificationPush = async (notification) => {
     try {
         notifications.push(notification);
 
-        await DB.notifications.doc(notification.id).set({
+        await DB.FreeGames.doc(notification.id).set({
             title: notification.title,
             url: notification.url,
             author: notification.author,
