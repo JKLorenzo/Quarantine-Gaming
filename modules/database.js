@@ -1,3 +1,4 @@
+const Discord = require('discord.js');
 const Firebase = require('firebase-admin');
 const functions = require('./functions.js');
 const classes = require('./classes.js');
@@ -5,9 +6,12 @@ const classes = require('./classes.js');
 let error_manager;
 
 const ErrorTicketManager = new classes.ErrorTicketManager('database.js');
+const ExpiredGameRoleManager = new classes.ProcessQueue(2500);
+const GameRoleSetManager = new classes.ProcessQueue(2500);
+const GameRoleDeleteManager = new classes.ProcessQueue(2500);
 
 /**
- * @type {{FreeGames: Firebase.firestore.CollectionReference, GameOverrides: Firebase.firestore.CollectionReference}}
+ * @type {{FreeGames: Firebase.firestore.CollectionReference, GameOverrides: Firebase.firestore.CollectionReference, Members: Firebase.firestore.CollectionReference}}
  */
 let DB;
 
@@ -53,6 +57,7 @@ module.exports.initialize = async (ClientInstance) => {
         DB = {
             FreeGames: Firestore.collection('FreeGames'),
             GameOverrides: Firestore.collection('GameOverrides'),
+            Members: Firestore.collection('Members')
         };
 
         const FreeGames = await DB.FreeGames.orderBy('index').get();
@@ -80,6 +85,67 @@ module.exports.initialize = async (ClientInstance) => {
     } catch (error) {
         error_manager.mark(ErrorTicketManager.create('initialize', error))
     }
+}
+
+/**
+ * Gets the list of expired game roles from members.
+ * @returns {Promise<Array<{memberID: Discord.UserResolvable, roleID: Discord.RoleResolvable}>>}
+ */
+module.exports.getExpiredGameRoles = async () => {
+    const expired = new Array();
+    try {
+        const members = await DB.Members.get();
+        for (const member of members.docs) {
+            await ExpiredGameRoleManager.queue()
+            const GameRoles = member.ref.collection('GameRoles');
+            const gameroles = await GameRoles.where('lastUpdated', '<=', (new Date()).getTime() - 604800000).get();
+            for (const gamerole of gameroles.docs) {
+                const lastUpdated = gamerole.data().lastUpdated;
+                console.log(functions.compareDate(new Date(lastUpdated)).days)
+                // Add to expired array
+                expired.push({
+                    memberID: member.id,
+                    roleID: gamerole.id
+                });
+            }
+            ExpiredGameRoleManager.finish()
+        }
+    } catch (error) {
+        error_manager.mark(ErrorTicketManager.create('getExpiredGameRoles', error));
+    }
+    return expired;
+}
+
+/**
+ * Updates the member's game role timestamp.
+ * @param {String} memberID The ID of the member.
+ * @param {String} roleID The ID of the game role.
+ */
+module.exports.memberGameRoleSet = async (memberID, roleID) => {
+    await GameRoleSetManager.queue();
+    try {
+        await DB.Members.doc(memberID).collection('GameRoles').doc(roleID).set({
+            lastUpdated: (new Date()).getTime()
+        });
+    } catch (error) {
+        error_manager.mark(ErrorTicketManager.create('memberGameRoleSet', error));
+    }
+    GameRoleSetManager.finish();
+}
+
+/**
+ * Deletes the game role from this member.
+ * @param {String} memberID The ID of the member.
+ * @param {String} roleID The ID of the game role.
+ */
+module.exports.memberGameRoleDelete = async (memberID, roleID) => {
+    await GameRoleDeleteManager.queue();
+    try {
+        await DB.Members.doc(memberID).collection('GameRoles').doc(roleID).delete();
+    } catch (error) {
+        error_manager.mark(ErrorTicketManager.create('memberGameRoleDelete', error));
+    }
+    GameRoleDeleteManager.finish();
 }
 
 /**

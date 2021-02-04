@@ -279,6 +279,9 @@ module.exports.initialize = async (ClientInstance) => {
                     if (this_activity.type == 'PLAYING' && !database.gameBlacklisted(activity_name) && (this_activity.applicationID || database.gameWhitelisted(activity_name))) {
                         const game_role = this.guild().roles.cache.find(role => role.name == activity_name) || await role_manager.create({ name: activity_name, color: '0x00ffff' });
 
+                        // Update database
+                        database.memberGameRoleSet(this_member.id, game_role.id);
+
                         if (!this_member.roles.cache.has(game_role.id)) {
                             // Add Game Role to this member
                             await role_manager.add(this_member, game_role);
@@ -346,6 +349,37 @@ module.exports.initialize = async (ClientInstance) => {
 
         // Check for unlisted members
         await general.memberUnlisted();
+
+        // Get expired game roles after 5 mins
+        setTimeout(async () => {
+            try {
+                for (const data of await database.getExpiredGameRoles()) {
+                    const member = this.member(data.memberID);
+                    const game_role = this.role(data.roleID);
+                    database.memberGameRoleDelete(member, game_role);
+                    if (member && game_role) {
+                        // Update member
+                        await role_manager.remove(member, game_role);
+
+                        // Check if role is still in use
+                        let inUse = false;
+                        for (const member of this.guild().members.cache.array()) {
+                            if (this.hasRole(member, [game_role])) {
+                                inUse = true;
+                                break;
+                            }
+                        }
+                        if (!inUse) {
+                            role_manager.delete(game_role, 'Game Role is no longer in use by anyone.')
+                            const game_role_mentionable = this.guild().roles.cache.find(role => role.name.startsWith(game_role.name) && role.hexColor == '#00fffe' && functions.contains(role.name, ' ⭐'))
+                            if (game_role_mentionable) role_manager.delete(game_role_mentionable, 'Game Role Mentionable is no longer in use by anyone.');
+                        };
+                    }
+                }
+            } catch (error) {
+                error_manager.mark(ErrorTicketManager.create('Expired Game Roles', error, 'initialize'));
+            }
+        }, 300000);
 
         // Auto Dedicate
         setInterval(() => {
