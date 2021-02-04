@@ -161,7 +161,7 @@ module.exports.memberActivityUpdate = async (member, data) => {
 
             if (data.new) {
                 // Update database
-                database.memberGameRoleSet(member.id, game_role.id);
+                database.memberGameRoleSet(member, game_role);
 
                 if (play_role) {
                     // Bring Play Role to Top

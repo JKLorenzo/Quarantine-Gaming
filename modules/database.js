@@ -97,18 +97,17 @@ module.exports.getExpiredGameRoles = async () => {
         const members = await DB.Members.get();
         for (const member of members.docs) {
             await ExpiredGameRoleManager.queue()
+            const now = new Date();
             const GameRoles = member.ref.collection('GameRoles');
-            const gameroles = await GameRoles.where('lastUpdated', '<=', (new Date()).getTime() - 604800000).get();
+            const gameroles = await GameRoles.where('lastUpdated', '<=', now.getTime() - 604800000).get();
             for (const gamerole of gameroles.docs) {
-                const lastUpdated = gamerole.data().lastUpdated;
-                console.log(functions.compareDate(new Date(lastUpdated)).days)
                 // Add to expired array
                 expired.push({
                     memberID: member.id,
                     roleID: gamerole.id
                 });
             }
-            ExpiredGameRoleManager.finish()
+            ExpiredGameRoleManager.finish();
         }
     } catch (error) {
         error_manager.mark(ErrorTicketManager.create('getExpiredGameRoles', error));
@@ -118,15 +117,32 @@ module.exports.getExpiredGameRoles = async () => {
 
 /**
  * Updates the member's game role timestamp.
- * @param {String} memberID The ID of the member.
- * @param {String} roleID The ID of the game role.
+ * @param {Discord.GuildMember} member The member object.
+ * @param {Discord.Role} role Th game role object.
  */
-module.exports.memberGameRoleSet = async (memberID, roleID) => {
+module.exports.memberGameRoleSet = async (member, role) => {
     await GameRoleSetManager.queue();
     try {
-        await DB.Members.doc(memberID).collection('GameRoles').doc(roleID).set({
-            lastUpdated: (new Date()).getTime()
-        });
+        const dr_member = DB.Members.doc(member.id);
+        const ds_member = await dr_member.get();
+        if (!ds_member.exists) {
+            await dr_member.set({
+                name: member.displayName
+            });
+        }
+        const now = new Date();
+        const dr_role = dr_member.collection('GameRoles').doc(role.id);
+        const ds_role = await dr_role.get();
+        if (ds_role.exists) {
+            await dr_role.update({
+                lastUpdated: now.getTime()
+            });
+        } else {
+            await dr_role.set({
+                name: role.name,
+                lastUpdated: now.getTime()
+            });
+        }
     } catch (error) {
         error_manager.mark(ErrorTicketManager.create('memberGameRoleSet', error));
     }
@@ -135,13 +151,13 @@ module.exports.memberGameRoleSet = async (memberID, roleID) => {
 
 /**
  * Deletes the game role from this member.
- * @param {String} memberID The ID of the member.
- * @param {String} roleID The ID of the game role.
+ * @param {Discord.GuildMember} member The member object.
+ * @param {Discord.Role} role Th game role object.
  */
-module.exports.memberGameRoleDelete = async (memberID, roleID) => {
+module.exports.memberGameRoleDelete = async (member, role) => {
     await GameRoleDeleteManager.queue();
     try {
-        await DB.Members.doc(memberID).collection('GameRoles').doc(roleID).delete();
+        await DB.Members.doc(member.id).collection('GameRoles').doc(role.id).delete();
     } catch (error) {
         error_manager.mark(ErrorTicketManager.create('memberGameRoleDelete', error));
     }

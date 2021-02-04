@@ -280,7 +280,7 @@ module.exports.initialize = async (ClientInstance) => {
                         const game_role = this.guild().roles.cache.find(role => role.name == activity_name) || await role_manager.create({ name: activity_name, color: '0x00ffff' });
 
                         // Update database
-                        database.memberGameRoleSet(this_member.id, game_role.id);
+                        database.memberGameRoleSet(this_member, game_role);
 
                         if (!this_member.roles.cache.has(game_role.id)) {
                             // Add Game Role to this member
@@ -356,8 +356,10 @@ module.exports.initialize = async (ClientInstance) => {
                 for (const data of await database.getExpiredGameRoles()) {
                     const member = this.member(data.memberID);
                     const game_role = this.role(data.roleID);
-                    database.memberGameRoleDelete(member, game_role);
                     if (member && game_role) {
+                        // Update database
+                        database.memberGameRoleDelete(member, game_role);
+
                         // Update member
                         await role_manager.remove(member, game_role);
 
