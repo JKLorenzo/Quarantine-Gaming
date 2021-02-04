@@ -79,16 +79,16 @@ module.exports.delete = (RoleResolvable, reason = '') => {
  */
 module.exports.add = (UserResolvable, RoleResolvable) => {
     return new Promise(async (resolve, reject) => {
-        console.log(`RoleAdd: Queueing ${RoleAddRemoveManager.processID}`);
+        console.log(`RoleAdd: Queueing ${RoleAddRemoveManager.processID} => ${UserResolvable} | ${RoleResolvable}`);
         await RoleAddRemoveManager.queue();
-        console.log(`RoleAdd: Started ${RoleAddRemoveManager.currentID}`);
+        console.log(`RoleAdd: Started ${RoleAddRemoveManager.currentID} => ${UserResolvable} | ${RoleResolvable}`);
         let output, error;
         try {
             output = await app.member(UserResolvable).roles.add(app.role(RoleResolvable));
         } catch (err) {
             error = err;
         }
-        console.log(`RoleAdd: Finished ${RoleAddRemoveManager.currentID}`);
+        console.log(`RoleAdd: Finished ${RoleAddRemoveManager.currentID} => ${UserResolvable} | ${RoleResolvable}`);
         RoleAddRemoveManager.finish();
         error ? reject(error) : resolve(output)
     });
@@ -102,16 +102,16 @@ module.exports.add = (UserResolvable, RoleResolvable) => {
  */
 module.exports.remove = (UserResolvable, RoleResolvable) => {
     return new Promise(async (resolve, reject) => {
-        console.log(`RoleRemove: Queueing ${RoleAddRemoveManager.processID}`);
+        console.log(`RoleRemove: Queueing ${RoleAddRemoveManager.processID} => ${UserResolvable} | ${RoleResolvable}`);
         await RoleAddRemoveManager.queue();
-        console.log(`RoleRemove: Started ${RoleAddRemoveManager.currentID}`);
+        console.log(`RoleRemove: Started ${RoleAddRemoveManager.currentID} => ${UserResolvable} | ${RoleResolvable}`);
         let output, error;
         try {
             output = await app.member(UserResolvable).roles.remove(app.role(RoleResolvable));
         } catch (err) {
             error = err;
         }
-        console.log(`RoleRemove: Finished ${RoleAddRemoveManager.currentID}`);
+        console.log(`RoleRemove: Finished ${RoleAddRemoveManager.currentID} => ${UserResolvable} | ${RoleResolvable}`);
         RoleAddRemoveManager.finish();
         error ? reject(error) : resolve(output)
     });
