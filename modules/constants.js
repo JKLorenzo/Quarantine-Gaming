@@ -9,6 +9,7 @@ module.exports = {
         everyone: '351178660725915649',
         booster: '757461486934163517',
         // integrations
+        multiplayer: '806794690035712001',
         nsfw: '700481554132107414',
         dedicated: '767344383418433547',
         streaming: '757128062276993115',
@@ -99,6 +100,7 @@ module.exports = {
     },
     images: {
         free_games_banner: 'https://media.playstation.com/is/image/SCEA/playstation-vue-hero-banner-desktop-01-us-22jan19?$native_nt$',
-        nsfw_banner: 'https://s3.amazonaws.com/sofontsy-files-us/wp-content/uploads/2019/02/07163845/NSFW-Bundle_banner.jpg'
+        nsfw_banner: 'https://s3.amazonaws.com/sofontsy-files-us/wp-content/uploads/2019/02/07163845/NSFW-Bundle_banner.jpg',
+        multiplayer_banner: 'https://playbingerepeat.files.wordpress.com/2018/05/fortnite-banner.png?w=1332&h=666&crop=1'
     }
 }

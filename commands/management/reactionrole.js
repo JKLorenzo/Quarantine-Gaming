@@ -35,9 +35,9 @@ module.exports = class ReactionRole extends Command {
                 },
                 {
                     key: 'type',
-                    prompt: 'NSFW or FGU?',
+                    prompt: 'NSFW, FGU, or Multiplayer?',
                     type: 'string',
-                    oneOf: ['nsfw', 'fgu']
+                    oneOf: ['nsfw', 'fgu', 'multiplayer']
                 },
                 {
                     key: 'msgID',
@@ -63,9 +63,14 @@ module.exports = class ReactionRole extends Command {
 
     /**
      * @param {Discord.Message} message 
-     * @param {{mode: 'create' | 'update', type: 'nsfw' | 'fgu', msgID: String}} 
+     * @param {{mode: 'create' | 'update', type: 'nsfw' | 'fgu' | 'multiplayer', msgID: String}} 
      */
     async run(message, { mode, type, msgID }) {
+        // Link 
+        app = this.client.modules.app;
+        message_manager = this.client.modules.message_manager;
+        reaction_manager = this.client.modules.reaction_manager;
+
         // Check user permissions
         if (!app.hasRole(message.author, [constants.roles.staff])) {
             return message.reply("You don't have permissions to use this command.");
@@ -79,6 +84,9 @@ module.exports = class ReactionRole extends Command {
                 break;
             case 'fgu':
                 ReactionRoleType = FreeGameUpdates;
+                break;
+            case 'multiplayer':
+                ReactionRoleType = Multiplayer;
                 break;
         }
 
@@ -114,12 +122,12 @@ function NSFW() {
     const description = new Array();
     description.push(`${app.role(constants.roles.nsfw_bot)} and ${app.channel(constants.channels.text.explicit)} channel will be unlocked after getting the role.`);
     description.push(' ');
-    description.push(`🔴 - ${app.role(constants.roles.nsfw)} (Not Safe For Work)`, 'The marked content may contain nudity, intense sexuality, profanity, violence or other potentially disturbing subject matter.');
+    description.push(`🔴 - ${app.role(constants.roles.nsfw)} (Not Safe For Work)`);
+    description.push('The marked content may contain nudity, intense sexuality, profanity, violence or other potentially disturbing subject matter.');
     const embed = new Discord.MessageEmbed();
     embed.setColor('#ffff00');
-    embed.setAuthor('Quarantine Gaming: NSFW Content');
+    embed.setAuthor('Quarantine Gaming: NSFW');
     embed.setTitle('Unlock NSFW Bots and Channel');
-    embed.setThumbnail(app.client().user.displayAvatarURL());
     embed.setDescription(description.join('\n'));
     embed.setImage(constants.images.nsfw_banner);
     embed.setFooter('Update your role by reacting below.');
@@ -150,8 +158,7 @@ function FreeGameUpdates() {
     const embed = new Discord.MessageEmbed();
     embed.setColor('#ffff00');
     embed.setAuthor('Quarantine Gaming: Free Game Updates');
-    embed.setTitle('Subscribe to get updated');
-    embed.setThumbnail(app.client().user.displayAvatarURL());
+    embed.setTitle('Subscribe to get Updated');
     embed.setDescription(description.join('\n'));
     embed.setImage(constants.images.free_games_banner);
     embed.setFooter('Update your role by reacting below.');
@@ -159,4 +166,23 @@ function FreeGameUpdates() {
         message: embed,
         reactions: ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣']
     };
+}
+
+function Multiplayer() {
+    const description = new Array();
+    description.push(`The ${app.channel(constants.channels.integrations.game_invites)} channel will be unlocked after getting the role.`);
+    description.push(' ');
+    description.push(`⚔ - ${app.role(constants.roles.multiplayer)}`);
+    description.push('Receive game invites from other members through Game Roles. Do `!play` to get started.');
+    const embed = new Discord.MessageEmbed();
+    embed.setColor('#ffff00');
+    embed.setAuthor('Quarantine Gaming: Multiplayer');
+    embed.setTitle('Receive Game Invites from Members');
+    embed.setDescription(description.join('\n'));
+    embed.setImage(constants.images.multiplayer_banner);
+    embed.setFooter('Update your role by reacting below.');
+    return {
+        message: embed,
+        reactions: ['⚔']
+    }
 }

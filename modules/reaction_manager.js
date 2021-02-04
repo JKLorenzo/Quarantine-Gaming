@@ -86,6 +86,13 @@ module.exports.onReactionAdd = async (message, embed, emoji, reactor) => {
                         break;
                 }
                 break;
+            case 'Quarantine Gaming: Multiplayer':
+                switch (emoji.name) {
+                    case '⚔':
+                        await role_manager.add(reactor, constants.roles.multiplayer).catch(error => error_manager.mark(ErrorTicketManager.create('multiplayer', error, 'onReactionAdd')));
+                        break;
+                }
+                break;
             case 'Quarantine Gaming: Member Approval':
                 try {
                     // Check if reactor is a staff or mod and if the approval is still pending and the reaction add process is complete
@@ -305,6 +312,13 @@ module.exports.onReactionRemove = async (message, embed, emoji, reactor) => {
                         break;
                     case '5️⃣':
                         await role_manager.remove(reactor, constants.roles.ubisoft).catch(error => error_manager.mark(ErrorTicketManager.create('ubisoft', error, 'onReactionRemove')));
+                        break;
+                }
+                break;
+            case 'Quarantine Gaming: Multiplayer':
+                switch (emoji.name) {
+                    case '⚔':
+                        await role_manager.remove(reactor, constants.roles.multiplayer).catch(error => error_manager.mark(ErrorTicketManager.create('multiplayer', error, 'onReactionRemove')));
                         break;
                 }
                 break;
