@@ -31,6 +31,9 @@ module.exports = class CheckRole extends Command {
                     prompt: 'Mention the member/ID or role/ID you want to check.',
                     type: 'string',
                     validate: MemberOrRole => {
+                        // Link
+                        app = this.client.modules.app;
+
                         let isValid = false;
                         for (const this_MemberOrRole of String(MemberOrRole).split(' ')) {
                             if (app.member(this_MemberOrRole) || app.role(this_MemberOrRole)) {
@@ -50,6 +53,9 @@ module.exports = class CheckRole extends Command {
      * @param {{Channel: Discord.ChannelResolvable, MemberOrRole: String}} 
      */
     async run(message, { Channel, MemberOrRole }) {
+        // Link
+        app = this.client.modules.app;
+
         // Check user permissions
         if (!app.hasRole(message.author, [constants.roles.staff, constants.roles.moderator])) {
             return message.reply("You don't have permissions to use this command.");

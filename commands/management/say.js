@@ -21,7 +21,6 @@ module.exports = class Say extends Command {
                     validate: channelID => {
                         // Link
                         app = this.client.modules.app;
-                        speech = this.client.modules.speech;
 
                         if (app.channel(channelID) && !app.channel(channelID).isText())
                             return true;
@@ -48,6 +47,10 @@ module.exports = class Say extends Command {
      * @param {{channelID: String, content: String}} 
      */
     async run(message, { channelID, content }) {
+        // Link
+        app = this.client.modules.app;
+        speech = this.client.modules.speech;
+
         // Check user permissions
         if (!app.hasRole(message.author, [constants.roles.staff])) {
             return message.reply("You don't have permissions to use this command.");

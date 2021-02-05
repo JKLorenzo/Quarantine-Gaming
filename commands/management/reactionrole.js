@@ -47,11 +47,8 @@ module.exports = class ReactionRole extends Command {
                     validate: async msgID => {
                         // Link 
                         app = this.client.modules.app;
-                        message_manager = this.client.modules.message_manager;
-                        reaction_manager = this.client.modules.reaction_manager;
 
                         const message_to_update = app.message(constants.channels.server.roles, msgID) || await app.channel(constants.channels.server.roles).messages.fetch(msgID);
-
                         if (modeSelector.mode == 'create' || message_to_update)
                             return true;
                         return false;

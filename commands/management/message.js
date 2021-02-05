@@ -88,7 +88,6 @@ module.exports = class Message extends Command {
                     validate: async argument => {
                         // Link
                         app = this.client.modules.app;
-                        message_manager = this.client.modules.message_manager;
 
                         const commands = String(argument).split(' ');
                         if (commands.length < 2 || !modeSelector.mode) return false;
@@ -117,6 +116,10 @@ module.exports = class Message extends Command {
      * @param {{mode: 'send' | 'update' | 'dm', argument: String}} 
      */
     async run(message, { mode, argument }) {
+        // Link
+        app = this.client.modules.app;
+        message_manager = this.client.modules.message_manager;
+
         // Check user permissions
         if (!app.hasRole(message.author, [constants.roles.staff, constants.roles.moderator])) {
             return message.reply("You don't have permissions to use this command.");

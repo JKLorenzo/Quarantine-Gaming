@@ -23,7 +23,6 @@ module.exports = class PlayCommand extends Command {
                     validate: role => {
                         // Link
                         app = this.client.modules.app;
-                        general = this.client.modules.general;
 
                         const game_role = app.role(role);
                         if (game_role) {
@@ -52,6 +51,10 @@ module.exports = class PlayCommand extends Command {
      * @param {{role: Discord.RoleResolvable, input: String}} 
      */
     async run(message, { role, input }) {
+        // Link
+        app = this.client.modules.app;
+        general = this.client.modules.general;
+
         const game_role = app.role(role);
         const inviter = app.member(message.author);
 

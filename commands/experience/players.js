@@ -22,7 +22,6 @@ module.exports = class PlayersCommand extends Command {
                     validate: role => {
                         // Link
                         app = this.client.modules.app;
-                        message_manager = this.client.modules.message_manager;
 
                         const game_role_mentionable = app.role(role);
                         if (game_role_mentionable) {
@@ -41,6 +40,10 @@ module.exports = class PlayersCommand extends Command {
      * @param {{role: Discord.RoleResolvable}} 
      */
     run(message, { role }) {
+        // Link
+        app = this.client.modules.app;
+        message_manager = this.client.modules.message_manager;
+
         const game_role_mentionable = app.role(role);
         const players = new Array();
         const alphabetical = new Array();
