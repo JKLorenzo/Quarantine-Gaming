@@ -48,7 +48,12 @@ module.exports = class Emoji extends Command {
 
         const reference = message.reference;
         if (reference) {
-            const message_reference = app.message(reference.channelID, reference.messageID);
+            let message_reference = app.message(reference.channelID, reference.messageID)
+            if (!message_reference) {
+                /** @type {Discord.TextChannel} */
+                const channel = app.guild().channels.cache.get(reference.channelID);
+                if (channel) message_reference = await channel.messages.fetch(reference.messageID);
+            }
             if (message_reference) {
                 for (const name of emojiName.split(' ')) {
                     const emoji = app.guild().emojis.cache.find(emoji => emoji.name == name);
