@@ -30,7 +30,7 @@ module.exports.initialize = (ClientInstance) => {
 /**
  * Adds a reaction to a message.
  * @param {Discord.Message} message The message object.
- * @param {String} emoji The emoji to use.
+ * @param {Discord.EmojiIdentifierResolvable} emoji The emoji to use.
  * @returns {Promise<Discord.MessageReaction>} A message reaction promise object
  */
 module.exports.addReaction = (message, emoji) => {
