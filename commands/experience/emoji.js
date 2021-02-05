@@ -46,21 +46,27 @@ module.exports = class Emoji extends Command {
         app = this.client.modules.app;
         reaction_manager = this.client.modules.reaction_manager;
 
+        const reference = message.reference;
+        if (reference) {
+            const message_reference = app.message(reference.channelID, reference.messageID);
+            if (message_reference) {
+                for (const name of emojiName.split(' ')) {
+                    const emoji = app.guild().emojis.cache.find(emoji => emoji.name == name);
+                    if (emoji) {
+                        reaction_manager.addReaction(message_reference, emoji);
+                    }
+                }
+            } else {
+                message.reply("The message you're replying to no longer exists.").then(message => message.delete({ timeout: 10000 }).catch(() => { }));
+            }
+        } else {
+            message.reply('You must reply to a message when using this command.').then(message => message.delete({ timeout: 10000 }).catch(() => { }));
+        }
+
         // Delete command
         message.delete({
             timeout: 2000,
             reason: 'Emoji command'
         });
-
-        const reference = message.reference;
-        if (reference) {
-            const message_reference = app.message(reference.channelID, reference.messageID);
-            for (const name of emojiName.split(' ')) {
-                const emoji = app.guild().emojis.cache.find(emoji => emoji.name == name);
-                if (message_reference && emoji) {
-                    reaction_manager.addReaction(message_reference, emoji);
-                }
-            }
-        }
     }
 };
