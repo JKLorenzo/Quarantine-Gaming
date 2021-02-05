@@ -53,15 +53,27 @@ client.modules = {
 
 client.once('ready', async () => {
     console.log('Startup');
-    channel_manager.initialize(client);
-    await database.initialize(client);
-    general.initialize(client);
-    message_manager.initialize(client);
-    reaction_manager.initialize(client);
-    role_manager.initialize(client);
-    speech.initialize(client);
-    error_manager.initialize(client);
-    await app.initialize(client);
+    try {
+        await client.user.setActivity('Startup', {
+            type: 'WATCHING'
+        });
+
+        // Initialize Modules
+        channel_manager.initialize(client);
+        await database.initialize(client);
+        general.initialize(client);
+        message_manager.initialize(client);
+        reaction_manager.initialize(client);
+        role_manager.initialize(client);
+        speech.initialize(client);
+        error_manager.initialize(client);
+        await app.initialize(client);
+    } catch (error) {
+        console.error(`Error during Startup: ${error}`);
+        await client.user.setActivity('Startup Failed', {
+            type: 'WATCHING'
+        });
+    }
 });
 
 client.on('message', (incoming_message) => {
@@ -71,8 +83,8 @@ client.on('message', (incoming_message) => {
 });
 
 client.on('userUpdate', async (oldUser, newUser) => {
-    try {
-        if (app.isInitialized()) {
+    if (app.isInitialized()) {
+        try {
             const embed = new Discord.MessageEmbed();
             const member = app.member(newUser);
             embed.setAuthor(member.displayName, oldUser.displayAvatarURL());
@@ -99,54 +111,56 @@ client.on('userUpdate', async (oldUser, newUser) => {
             embed.setTimestamp();
             embed.setColor('#6464ff');
             if (description.length > 0) await message_manager.sendToChannel(constants.channels.qg.logs, embed);
+        } catch (error) {
+            error_manager.mark(ErrorTicketManager.create('userUpdate', error));
         }
-    } catch (error) {
-        error_manager.mark(ErrorTicketManager.create('userUpdate', error));
     }
 });
 
 client.on('guildMemberUpdate', async (oldMember, newMember) => {
-    try {
-        const embed = new Discord.MessageEmbed();
-        embed.setAuthor(newMember.displayName, newMember.user.displayAvatarURL());
-        embed.setTitle('Guild Member Update');
+    if (app.isInitialized()) {
+        try {
+            const embed = new Discord.MessageEmbed();
+            embed.setAuthor(newMember.displayName, newMember.user.displayAvatarURL());
+            embed.setTitle('Guild Member Update');
 
-        const description = new Array();
-        // Display Name
-        if (newMember.displayName != oldMember.displayName) {
-            if (description.length > 0) description.push(' ');
-            description.push(`**Display Name**`);
-            description.push(`Old: ${oldMember.displayName}`);
-            description.push(`New: ${newMember.displayName}`);
-        }
+            const description = new Array();
+            // Display Name
+            if (newMember.displayName != oldMember.displayName) {
+                if (description.length > 0) description.push(' ');
+                description.push(`**Display Name**`);
+                description.push(`Old: ${oldMember.displayName}`);
+                description.push(`New: ${newMember.displayName}`);
+            }
 
-        // Role
-        if (newMember.roles.cache.size != oldMember.roles.cache.size) {
-            const added = new Array(), removed = new Array();
-            for (const this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
-                if (!this_role.name.startsWith('Play') && !this_role.name.startsWith('Text') && !this_role.name.startsWith('Team') && this_role.id != constants.roles.dedicated && this_role.id != constants.roles.streaming) {
-                    if (newMember.roles.cache.has(this_role.id)) {
-                        added.push(this_role);
-                    } else {
-                        removed.push(this_role);
+            // Role
+            if (newMember.roles.cache.size != oldMember.roles.cache.size) {
+                const added = new Array(), removed = new Array();
+                for (const this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
+                    if (!this_role.name.startsWith('Play') && !this_role.name.startsWith('Text') && !this_role.name.startsWith('Team') && this_role.id != constants.roles.dedicated && this_role.id != constants.roles.streaming) {
+                        if (newMember.roles.cache.has(this_role.id)) {
+                            added.push(this_role);
+                        } else {
+                            removed.push(this_role);
+                        }
                     }
                 }
+                if (added.length > 0 || removed.length > 0) {
+                    if (description.length > 0) description.push(' ');
+                    description.push(`**Role**`);
+                }
+                if (added.length > 0) description.push(`Added: ${added.join(', ')}`);
+                if (removed.length > 0) description.push(`Removed: ${removed.join(', ')}`);
             }
-            if (added.length > 0 || removed.length > 0) {
-                if (description.length > 0) description.push(' ');
-                description.push(`**Role**`);
-            }
-            if (added.length > 0) description.push(`Added: ${added.join(', ')}`);
-            if (removed.length > 0) description.push(`Removed: ${removed.join(', ')}`);
-        }
 
-        embed.setDescription(description.join('\n'));
-        embed.setFooter(`${newMember.user.tag} (${newMember.user.id})`);
-        embed.setTimestamp();
-        embed.setColor('#6464ff');
-        if (description.length > 0) await message_manager.sendToChannel(constants.channels.qg.logs, embed);
-    } catch (error) {
-        error_manager.mark(ErrorTicketManager.create('guildMemberUpdate', error));
+            embed.setDescription(description.join('\n'));
+            embed.setFooter(`${newMember.user.tag} (${newMember.user.id})`);
+            embed.setTimestamp();
+            embed.setColor('#6464ff');
+            if (description.length > 0) await message_manager.sendToChannel(constants.channels.qg.logs, embed);
+        } catch (error) {
+            error_manager.mark(ErrorTicketManager.create('guildMemberUpdate', error));
+        }
     }
 });
 
@@ -187,12 +201,14 @@ client.on('inviteCreate', invite => {
 })
 
 client.on('guildMemberAdd', async (this_member) => {
-    try {
-        if (this_member && !this_member.user.bot && !app.hasRole(this_member, [constants.roles.member])) {
-            await general.memberScreening(this_member);
+    if (app.isInitialized()) {
+        try {
+            if (this_member && !this_member.user.bot && !app.hasRole(this_member, [constants.roles.member])) {
+                await general.memberScreening(this_member);
+            }
+        } catch (error) {
+            error_manager.mark(ErrorTicketManager.create('guildMemberAdd', error));
         }
-    } catch (error) {
-        error_manager.mark(ErrorTicketManager.create('guildMemberAdd', error));
     }
 });
 
@@ -280,21 +296,32 @@ client.on('messageReactionRemove', async (reaction, user) => {
 });
 
 client.on('rateLimit', async (rateLimitInfo) => {
-    const embed = new Discord.MessageEmbed();
-    embed.setColor('#ffff00');
-    embed.setAuthor('Quarantine Gaming: Telemetry');
-    embed.setTitle('The client hits a rate limit while making a request.');
-    embed.addField('Timeout', rateLimitInfo.timeout);
-    embed.addField('Limit', rateLimitInfo.limit);
-    embed.addField('Method', rateLimitInfo.method);
-    embed.addField('Path', rateLimitInfo.path);
-    embed.addField('Route', rateLimitInfo.route);
-    await message_manager.sendToChannel(constants.channels.qg.logs, embed);
+    if (app.isInitialized()) {
+        try {
+            const embed = new Discord.MessageEmbed();
+            embed.setColor('#ffff00');
+            embed.setAuthor('Quarantine Gaming: Telemetry');
+            embed.setTitle('The client hits a rate limit while making a request.');
+            embed.addField('Timeout', rateLimitInfo.timeout);
+            embed.addField('Limit', rateLimitInfo.limit);
+            embed.addField('Method', rateLimitInfo.method);
+            embed.addField('Path', rateLimitInfo.path);
+            embed.addField('Route', rateLimitInfo.route);
+            await message_manager.sendToChannel(constants.channels.qg.logs, embed);
+        } catch (error) {
+            error_manager.mark(ErrorTicketManager.create('rateLimit', error));
+        }
+    } else {
+        console.error(error);
+    }
 });
 
 client.on('error', (error) => {
-    console.log(error);
-    error_manager.mark(ErrorTicketManager.create('error', error));
+    if (app.isInitialized()) {
+        error_manager.mark(ErrorTicketManager.create('Client Error', error));
+    } else {
+        console.error(error);
+    }
 });
 
 client.login(process.env.BOT_TOKEN);

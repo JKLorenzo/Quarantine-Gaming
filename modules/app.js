@@ -184,8 +184,6 @@ module.exports.initialize = async (ClientInstance) => {
     channel_manager = client.modules.channel_manager;
 
     try {
-        await this.setActivity('Startup', 'LISTENING');
-
         // Manage Active Dedicated Channels
         for (const dedicated_channel of this.channel(constants.channels.category.dedicated).children.array()) {
             if (dedicated_channel.type == 'text') {
@@ -451,9 +449,9 @@ module.exports.initialize = async (ClientInstance) => {
         if (process.env.STARTUP_REASON) {
             const embed = new Discord.MessageEmbed();
             embed.setColor('#ffff00');
-            embed.setAuthor('Quarantine Gaming', this.client().user.displayAvatarURL());
-            embed.setTitle('Startup Initiated');
-            embed.addField('Reason', process.env.STARTUP_REASON);
+            embed.setAuthor('Quarantine Gaming: Startup');
+            embed.setTitle('Initialized');
+            embed.setDescription(process.env.STARTUP_REASON);
 
             await message_manager.sendToChannel(constants.channels.qg.updates, embed);
         }
@@ -461,8 +459,8 @@ module.exports.initialize = async (ClientInstance) => {
         console.log('Initialized');
         initialized = true;
     } catch (error) {
-        console.error('Initializing Failed');
-        await this.setActivity('Startup Failed', 'PLAYING');
+        console.error(`Error during Initializing: ${error}`);
+        await this.setActivity('Initializing Failed', 'WATCHING');
         error_manager.mark(ErrorTicketManager.create('initialize', error));
     }
 }
