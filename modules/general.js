@@ -632,8 +632,8 @@ module.exports.freeGameFetch = async (url = '') => {
                         }
                     }
                 } else {
-                    const elapsedMinutes = functions.compareDate(new Date(notification.createdAt * 1000)).minutes;
-                    if (!this_notification && elapsedMinutes >= 30 && elapsedMinutes <= 300 && notification.score >= 50 && notification.validity >= 75) {
+                    const elapsedMinutes = functions.compareDate(new Date(notification.createdAt * 1000)).totalMinutes;
+                    if (!this_notification && notification.score >= 100 && notification.validity >= 75 && elapsedMinutes >= 30 && elapsedMinutes <= 300) {
                         this.freeGameNotify(notification);
                     }
                 }
