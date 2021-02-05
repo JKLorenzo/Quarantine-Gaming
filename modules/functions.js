@@ -36,7 +36,8 @@ module.exports.compareDate = (date) => {
     return {
         days: Math.floor(diffMs / 86400000),
         hours: Math.floor((diffMs % 86400000) / 3600000),
-        minutes: Math.round(((diffMs % 86400000) % 3600000) / 60000)
+        minutes: Math.round(((diffMs % 86400000) % 3600000) / 60000),
+        totalMinutes: Math.round(diffMs / 60000)
     };
 }
 
