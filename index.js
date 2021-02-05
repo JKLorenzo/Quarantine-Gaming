@@ -2,6 +2,7 @@ const { CommandoClient } = require('discord.js-commando');
 const Discord = require('discord.js');
 const path = require('path');
 const app = require('./modules/app.js');
+const fs = require('fs');
 const channel_manager = require('./modules/channel_manager.js');
 const classes = require('./modules/classes.js');
 const constants = require('./modules/constants.js');
@@ -51,6 +52,37 @@ client.modules = {
     speech: speech
 }
 
+async function uploadLocalEmojis() {
+    try {
+        const emojis_dir = path.join(__dirname, 'emojis');
+        if (fs.existsSync(emojis_dir)) {
+            const emojis = fs.readdirSync(emojis_dir);
+            for (const emoji of emojis) {
+                const emoji_path = path.join(emojis_dir, emoji);
+                const emoji_name = path.parse(emoji_path).name;
+                if (emoji_name && emoji_path) {
+                    try {
+                        console.log(`Uploading: ${emoji_name}`);
+                        const response = await app.guild().emojis.create(emoji_path, emoji_name, {
+                            reason: 'Local Emoji Upload'
+                        });
+                        if (response) {
+                            console.log(`Finished uploading: ${emoji_name}`);
+                        } else {
+                            console.error(`Failed to upload: ${emoji_name}`);
+                        }
+                    } catch (error) {
+                        console.error(`Failed to upload: ${emoji_name}`);
+                    }
+                    await functions.sleep(5000);
+                }
+            }
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
+
 client.once('ready', async () => {
     console.log('Startup');
     try {
@@ -68,6 +100,7 @@ client.once('ready', async () => {
         speech.initialize(client);
         error_manager.initialize(client);
         await app.initialize(client);
+        uploadLocalEmojis();
     } catch (error) {
         console.error(`Error during Startup: ${error}`);
         await client.user.setActivity('Startup Failed', {
