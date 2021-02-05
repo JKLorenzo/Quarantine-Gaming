@@ -295,6 +295,60 @@ client.on('messageReactionRemove', async (reaction, user) => {
     }
 });
 
+client.on('emojiCreate', emoji => {
+    if (app.isInitialized()) {
+        try {
+            const embed = new Discord.MessageEmbed();
+            embed.setAuthor('Quarantine Gaming: Guild Emoji Manager');
+            embed.setTitle('Emoji Created');
+            embed.addField('Name:', emoji.name);
+            embed.setThumbnail(emoji.url);
+            embed.setColor('#6464ff');
+            embed.setTimestamp();
+            message_manager.sendToChannel(constants.channels.qg.logs, embed);
+        } catch (error) {
+            error_manager.mark(ErrorTicketManager.create('emojiCreate', error));
+        }
+    }
+});
+
+client.on('emojiUpdate', (oldEmoji, newEmoji) => {
+    if (app.isInitialized()) {
+        try {
+            const embed = new Discord.MessageEmbed();
+            embed.setAuthor('Quarantine Gaming: Guild Emoji Manager');
+            embed.setTitle('Emoji Updated');
+            if (oldEmoji.name != newEmoji.name) {
+                embed.addField('Old Name:', oldEmoji.name);
+                embed.addField('Updated Name:', newEmoji.name);
+                embed.setThumbnail(newEmoji.url);
+                embed.setColor('#6464ff');
+                embed.setTimestamp();
+                message_manager.sendToChannel(constants.channels.qg.logs, embed);
+            }
+        } catch (error) {
+            error_manager.mark(ErrorTicketManager.create('emojiCreate', error));
+        }
+    }
+});
+
+client.on('emojiDelete', emoji => {
+    if (app.isInitialized()) {
+        try {
+            const embed = new Discord.MessageEmbed();
+            embed.setAuthor('Quarantine Gaming: Guild Emoji Manager');
+            embed.setTitle('Emoji Deleted');
+            embed.addField('Name:', emoji.name);
+            embed.addField('ID:', emoji.id);
+            embed.setColor('#6464ff');
+            embed.setTimestamp();
+            message_manager.sendToChannel(constants.channels.qg.logs, embed);
+        } catch (error) {
+            error_manager.mark(ErrorTicketManager.create('emojiCreate', error));
+        }
+    }
+});
+
 client.on('rateLimit', async (rateLimitInfo) => {
     if (app.isInitialized()) {
         try {
