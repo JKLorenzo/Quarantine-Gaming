@@ -4,8 +4,7 @@ const classes = require('./classes.js');
 /** @type {import('./app.js')} */
 let app;
 
-const ChannelCreateManager = new classes.ProcessQueue(2500);
-const ChannelDeleteManager = new classes.ProcessQueue(2500);
+const ChannelQueueManager = new classes.ProcessQueue(2500);
 
 /**
  * Initializes the module.
@@ -23,9 +22,9 @@ module.exports.initialize = (ClientInstance) => {
  */
 module.exports.create = (options) => {
     return new Promise(async (resolve, reject) => {
-        console.log(`ChannelCreate: Queueing ${ChannelCreateManager.processID}`);
-        await ChannelCreateManager.queue();
-        console.log(`ChannelCreate: Started ${ChannelCreateManager.currentID}`);
+        console.log(`ChannelCreate: Queueing ${ChannelQueueManager.processID}`);
+        await ChannelQueueManager.queue();
+        console.log(`ChannelCreate: Started ${ChannelQueueManager.currentID}`);
         let output, error;
         try {
             output = await app.guild().channels.create(options.name, {
@@ -43,8 +42,8 @@ module.exports.create = (options) => {
         } catch (err) {
             error = err;
         }
-        console.log(`ChannelCreate: Finished ${ChannelCreateManager.currentID}`);
-        ChannelCreateManager.finish();
+        console.log(`ChannelCreate: Finished ${ChannelQueueManager.currentID}`);
+        ChannelQueueManager.finish();
         error ? reject(error) : resolve(output)
     });
 }
@@ -57,17 +56,17 @@ module.exports.create = (options) => {
  */
 module.exports.delete = (GuildChannelResolvable, reason = '') => {
     return new Promise(async (resolve, reject) => {
-        console.log(`ChannelDelete: Queueing ${ChannelDeleteManager.processID}`);
-        await ChannelDeleteManager.queue();
-        console.log(`ChannelDelete: Started ${ChannelDeleteManager.currentID}`);
+        console.log(`ChannelDelete: Queueing ${ChannelQueueManager.processID}`);
+        await ChannelQueueManager.queue();
+        console.log(`ChannelDelete: Started ${ChannelQueueManager.currentID}`);
         let output, error = '';
         try {
             output = await app.channel(GuildChannelResolvable).delete(reason);
         } catch (err) {
             error = err;
         }
-        console.log(`ChannelDelete: Finished ${ChannelDeleteManager.currentID}`);
-        ChannelDeleteManager.finish();
+        console.log(`ChannelDelete: Finished ${ChannelQueueManager.currentID}`);
+        ChannelQueueManager.finish();
         error ? reject(error) : resolve(output)
     });
 }
