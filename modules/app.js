@@ -348,14 +348,6 @@ module.exports.initialize = async (ClientInstance) => {
         // Check for unlisted members
         await general.memberUnlisted();
 
-        // Get expired game roles after 5 mins
-        setTimeout(() => {
-            // Get expired game roles every after 1 hour
-            setInterval(() => {
-                general.updateExpiredGameRoles();
-            }, 3600000);
-        }, 300000);
-
         // Auto Dedicate
         setInterval(() => {
             try {
@@ -396,6 +388,17 @@ module.exports.initialize = async (ClientInstance) => {
                 error_manager.mark(ErrorTicketManager.create('Auto Dedicate', error, 'initialize'));
             }
         }, 120000);
+
+        // Expired Game Roles
+        setTimeout(() => {
+            // Initial update after 5mins
+            await general.updateExpiredGameRoles();
+
+            // Future update every 1 hour
+            setInterval(() => {
+                general.updateExpiredGameRoles();
+            }, 3600000);
+        }, 300000);
 
         // Free Games
         setTimeout(async () => {
