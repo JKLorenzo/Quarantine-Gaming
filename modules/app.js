@@ -390,7 +390,7 @@ module.exports.initialize = async (ClientInstance) => {
         }, 120000);
 
         // Expired Game Roles
-        setTimeout(() => {
+        setTimeout(async () => {
             // Initial update after 5mins
             await general.updateExpiredGameRoles();
 
