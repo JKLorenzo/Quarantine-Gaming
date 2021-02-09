@@ -349,36 +349,11 @@ module.exports.initialize = async (ClientInstance) => {
         await general.memberUnlisted();
 
         // Get expired game roles after 5 mins
-        setTimeout(async () => {
-            try {
-                for (const data of await database.getExpiredGameRoles()) {
-                    const member = this.member(data.memberID);
-                    const game_role = this.role(data.roleID);
-                    if (member && game_role) {
-                        // Update database
-                        database.memberGameRoleDelete(member, game_role);
-
-                        // Update member
-                        await role_manager.remove(member, game_role);
-
-                        // Check if role is still in use
-                        let inUse = false;
-                        for (const member of this.guild().members.cache.array()) {
-                            if (this.hasRole(member, [game_role])) {
-                                inUse = true;
-                                break;
-                            }
-                        }
-                        if (!inUse) {
-                            role_manager.delete(game_role, 'Game Role is no longer in use by anyone.')
-                            const game_role_mentionable = this.guild().roles.cache.find(role => role.name.startsWith(game_role.name) && role.hexColor == '#00fffe' && functions.contains(role.name, ' ⭐'))
-                            if (game_role_mentionable) role_manager.delete(game_role_mentionable, 'Game Role Mentionable is no longer in use by anyone.');
-                        };
-                    }
-                }
-            } catch (error) {
-                error_manager.mark(ErrorTicketManager.create('Expired Game Roles', error, 'initialize'));
-            }
+        setTimeout(() => {
+            // Get expired game roles every after 1 hour
+            setInterval(() => {
+                general.updateExpiredGameRoles();
+            }, 3600000);
         }, 300000);
 
         // Auto Dedicate
