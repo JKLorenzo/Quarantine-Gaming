@@ -111,6 +111,37 @@ module.exports.memberScreening = (this_member) => {
 }
 
 /**
+ * Checks for any expired game roles and updates the client and the database when necessary.
+ */
+module.exports.updateExpiredGameRoles = async () => {
+    try {
+        console.log('Checking for expired game roles...')
+        const expiredGameRoles = await database.getExpiredGameRoles();
+        console.log(`${expiredGameRoles.length} expired game roles found.`)
+        for (const data of expiredGameRoles) {
+            const member = app.member(data.memberID);
+            const game_role = app.role(data.roleID);
+            if (member && game_role) {
+                // Update database
+                await database.memberGameRoleDelete(member, game_role);
+
+                // Update member
+                role_manager.remove(member, game_role);
+
+                // Check if role is still in use
+                if (app.guild().members.cache.array().filter(member => app.hasRole(member, [game_role])).length == 0) {
+                    await role_manager.delete(game_role, 'Game Role is no longer in use by anyone.')
+                    const game_role_mentionable = app.guild().roles.cache.find(role => role.name.startsWith(game_role.name) && role.hexColor == '#00fffe' && functions.contains(role.name, ' ⭐'))
+                    if (game_role_mentionable) await role_manager.delete(game_role_mentionable, 'Game Role Mentionable is no longer in use by anyone.');
+                };
+            }
+        }
+    } catch (error) {
+        error_manager.mark(ErrorTicketManager.create('Expired Game Roles', error));
+    }
+}
+
+/**
  * Performs processes that clears the status of this member on this server.
  * @param {Discord.GuildMember} member The guild member object.
  */
