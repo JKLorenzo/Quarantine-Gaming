@@ -1,10 +1,10 @@
 const Discord = require('discord.js');
-const { Command } = require('discord.js-commando');
+const Commando = require('discord.js-commando');
 const constants = require('../../modules/constants.js');
 /** @type {import('../../modules/app.js')} */
 let app;
 
-module.exports = class CheckRole extends Command {
+module.exports = class CheckRole extends Commando.Command {
 	constructor(client) {
 		super(client, {
 			name: 'checkrole',
@@ -48,7 +48,7 @@ module.exports = class CheckRole extends Command {
 	}
 
 	/**
-     * @param {Discord.Message} message
+     * @param {Commando.CommandoMessage} message
      * @param {{Channel: Discord.ChannelResolvable, MemberOrRole: String}}
      */
 	async run(message, { Channel, MemberOrRole }) {
@@ -57,7 +57,9 @@ module.exports = class CheckRole extends Command {
 
 		// Check user permissions
 		if (!app.hasRole(message.author, [constants.roles.staff, constants.roles.moderator])) {
-			return message.reply('You don\'t have permissions to use this command.');
+			return message.reply('You don\'t have permissions to use this command.').then(this_message => {
+				this_message.delete({ timeout: 10000 }).catch(e => void e);
+			}).catch(e => void e);
 		}
 
 		const this_channel = app.channel(Channel);

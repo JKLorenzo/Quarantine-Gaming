@@ -1,6 +1,4 @@
-// eslint-disable-next-line no-unused-vars
-const Discord = require('discord.js');
-const { Command } = require('discord.js-commando');
+const Commando = require('discord.js-commando');
 const constants = require('../../modules/constants.js');
 const functions = require('../../modules/functions.js');
 /** @type {import('../../modules/app.js')} */
@@ -8,7 +6,7 @@ let app;
 /** @type {import('../../modules/database.js')} */
 let database;
 
-module.exports = class Game extends Command {
+module.exports = class Game extends Commando.Command {
 	constructor(client) {
 		super(client, {
 			name: 'game',
@@ -33,7 +31,7 @@ module.exports = class Game extends Command {
 	}
 
 	/**
-     * @param {Discord.Message} message
+     * @param {Commando.CommandoMessage} message
      * @param {{mode: String, name: String}}
      */
 	async run(message, { mode, name }) {
@@ -43,13 +41,15 @@ module.exports = class Game extends Command {
 
 		// Check user permissions
 		if (!app.hasRole(message.author, [constants.roles.staff, constants.roles.moderator])) {
-			return message.reply('You don\'t have permissions to use this command.');
+			return message.reply('You don\'t have permissions to use this command.').then(this_message => {
+				this_message.delete({ timeout: 10000 }).catch(e => void e);
+			}).catch(e => void e);
 		}
 
 		// Check if anyone is playing this game name
 		name = name.trim().toLowerCase();
 		let updated = false;
-		const reply = await message.reply('Checking for players...').catch(e => void e);
+		const reply = await message.reply('Checking for players...');
 		let game_name = '';
 		// Check Roles
 		for (const this_role of app.guild().roles.cache.array()) {

@@ -1,12 +1,12 @@
 const Discord = require('discord.js');
-const { Command } = require('discord.js-commando');
+const Commando = require('discord.js-commando');
 const functions = require('../../modules/functions.js');
 /** @type {import('../../modules/app.js')} */
 let app;
 /** @type {import('../../modules/message_manager.js')} */
 let message_manager;
 
-module.exports = class PlayersCommand extends Command {
+module.exports = class PlayersCommand extends Commando.Command {
 	constructor(client) {
 		super(client, {
 			name: 'players',
@@ -37,7 +37,7 @@ module.exports = class PlayersCommand extends Command {
 	}
 
 	/**
-     * @param {Discord.Message} message
+     * @param {Commando.CommandoMessage} message
      * @param {{role: Discord.RoleResolvable}}
      */
 	run(message, { role }) {
@@ -45,6 +45,7 @@ module.exports = class PlayersCommand extends Command {
 		app = this.client.modules.app;
 		message_manager = this.client.modules.message_manager;
 
+		message.delete({ timeout: 10000 }).catch(e => void e);
 		const game_role_mentionable = app.role(role);
 		const players = new Array();
 		const alphabetical = new Array();
@@ -112,7 +113,9 @@ module.exports = class PlayersCommand extends Command {
 			}
 		}
 		else {
-			message.reply('No information is available right now. Please try again later.');
+			message.reply('No information is available right now. Please try again later.').then(this_message => {
+				this_message.delete({ timeout: 10000 }).catch(e => void e);
+			}).catch(e => void e);
 		}
 	}
 };

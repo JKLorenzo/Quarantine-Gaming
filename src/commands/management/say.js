@@ -1,13 +1,13 @@
 // eslint-disable-next-line no-unused-vars
 const Discord = require('discord.js');
-const { Command } = require('discord.js-commando');
+const Commando = require('discord.js-commando');
 const constants = require('../../modules/constants.js');
 /** @type {import('../../modules/app.js')} */
 let app;
 /** @type {import('../../modules/speech.js')} */
 let speech;
 
-module.exports = class Say extends Command {
+module.exports = class Say extends Commando.Command {
 	constructor(client) {
 		super(client, {
 			name: 'say',
@@ -43,7 +43,7 @@ module.exports = class Say extends Command {
 
 	/**
      *
-     * @param {Discord.Message} message
+     * @param {Commando.CommandoMessage} message
      * @param {{channelID: String, content: String}}
      */
 	async run(message, { channelID, content }) {
@@ -51,12 +51,14 @@ module.exports = class Say extends Command {
 		app = this.client.modules.app;
 		speech = this.client.modules.speech;
 
+		message.delete({ timeout: 10000 }).catch(e => void e);
+
 		// Check user permissions
 		if (!app.hasRole(message.author, [constants.roles.staff])) {
-			return message.reply('You don\'t have permissions to use this command.');
+			return message.reply('You don\'t have permissions to use this command.').then(this_message => {
+				this_message.delete({ timeout: 10000 }).catch(e => void e);
+			}).catch(e => void e);
 		}
-
-		message.delete({ timeout: 5000 }).catch(e => void e);
 		await speech.say(content, app.channel(channelID));
 	}
 };

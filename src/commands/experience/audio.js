@@ -1,11 +1,11 @@
 const Discord = require('discord.js');
-const { Command } = require('discord.js-commando');
+const Commando = require('discord.js-commando');
 /** @type {import('../../modules/message_manager.js')} */
 let message_manager;
 /** @type {import('../../modules/reaction_manager.js')} */
 let reaction_manager;
 
-module.exports = class Audio extends Command {
+module.exports = class Audio extends Commando.Command {
 	constructor(client) {
 		super(client, {
 			name: 'audio',
@@ -16,12 +16,13 @@ module.exports = class Audio extends Command {
 		});
 	}
 
-	/** @param {Discord.Message} */
+	/** @param {Commando.CommandoMessage} message */
 	async run(message) {
 		// Link
 		message_manager = this.client.modules.message_manager;
 		reaction_manager = this.client.modules.reaction_manager;
 
+		message.delete({ timeout: 10000 }).catch(e => void e);
 		const embed = new Discord.MessageEmbed();
 		embed.setColor('#ffff00');
 		embed.setAuthor('Quarantine Gaming: Experience');

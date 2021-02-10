@@ -1,12 +1,12 @@
 // eslint-disable-next-line no-unused-vars
 const Discord = require('discord.js');
-const { Command } = require('discord.js-commando');
+const Commando = require('discord.js-commando');
 /** @type {import('../../modules/app.js')} */
 let app;
 /** @type {import('../../modules/reaction_manager.js')} */
 let reaction_manager;
 
-module.exports = class Emoji extends Command {
+module.exports = class Emoji extends Commando.Command {
 	constructor(client) {
 		super(client, {
 			name: 'e',
@@ -39,7 +39,7 @@ module.exports = class Emoji extends Command {
 
 	/**
      *
-     * @param {Discord.Message} message
+     * @param {Commando.CommandoMessage} message
      * @param {{emojiName: String}}
      */
 	async run(message, { emojiName }) {
@@ -47,6 +47,7 @@ module.exports = class Emoji extends Command {
 		app = this.client.modules.app;
 		reaction_manager = this.client.modules.reaction_manager;
 
+		message.delete({ timeout: 2000 }).catch(e => void e);
 		const reference = message.reference;
 		if (reference) {
 			let message_reference = app.message(reference.channelID, reference.messageID);
@@ -64,17 +65,15 @@ module.exports = class Emoji extends Command {
 				}
 			}
 			else {
-				message.reply('The message you\'re replying to no longer exists.').then(this_message => this_message.delete({ timeout: 10000 }).catch(e => void e));
+				message.reply('The message you\'re replying to no longer exists.').then(this_message => {
+					this_message.delete({ timeout: 10000 }).catch(e => void e);
+				}).catch(e => void e);
 			}
 		}
 		else {
-			message.reply('You must reply to a message when using this command.').then(this_message => this_message.delete({ timeout: 10000 }).catch(e => void e));
+			message.reply('You must reply to a message when using this command.').then(this_message => {
+				this_message.delete({ timeout: 10000 }).catch(e => void e);
+			}).catch(e => void e);
 		}
-
-		// Delete command
-		message.delete({
-			timeout: 2000,
-			reason: 'Emoji command',
-		});
 	}
 };

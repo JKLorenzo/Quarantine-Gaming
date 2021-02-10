@@ -1,10 +1,10 @@
 // eslint-disable-next-line no-unused-vars
 const Discord = require('discord.js');
-const { Command } = require('discord.js-commando');
+const Commando = require('discord.js-commando');
 const { JSDOM } = require('jsdom');
 const axios = require('axios');
 
-module.exports = class SteamSale extends Command {
+module.exports = class SteamSale extends Commando.Command {
 	constructor(client) {
 		super(client, {
 			name: 'steamsale',
@@ -15,9 +15,10 @@ module.exports = class SteamSale extends Command {
 		});
 	}
 
-	/** @type {Discord.Message} */
+	/** @type {Commando.CommandoMessage} */
 	async run(message) {
-		const this_message = await message.say('Getting information...');
+		message.delete({ timeout: 10000 }).catch(e => void e);
+		const reply = await message.say('Getting information...');
 		const response = await axios.get('https://www.whenisthenextsteamsale.com/').then(resp => {
 			const { document } = (new JSDOM(resp.data)).window;
 			const data = JSON.parse(document.getElementById('hdnNextSale').getAttribute('value'));
@@ -35,10 +36,12 @@ module.exports = class SteamSale extends Command {
 		}).catch(e => void e);
 
 		if (response) {
-			await this_message.edit(`${message.author}, Steam ${response.Name} will start in ~${response.RemainingTime.days > 0 ? `${response.RemainingTime.days} day${response.RemainingTime.days > 1 ? 's' : ''}` : 'a few hours'} and it will be available for ~${response.Length} days!`);
+			reply.edit(`${message.author}, Steam ${response.Name} will start in ~${response.RemainingTime.days > 0 ? `${response.RemainingTime.days} day${response.RemainingTime.days > 1 ? 's' : ''}` : 'a few hours'} and it will be available for ~${response.Length} days!`);
 		}
 		else {
-			await this_message.edit(`${message.author}, There's a Steam sale happening now or within a few hours from now!`);
+			reply.edit(`${message.author}, There's a Steam sale happening now or within a few hours from now!`).then(this_message => {
+				this_message.delete({ timeout: 10000 }).catch(e => void e);
+			}).catch(e => void e);
 		}
 	}
 };

@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const { Command } = require('discord.js-commando');
+const Commando = require('discord.js-commando');
 const { JSDOM } = require('jsdom');
 const axios = require('axios');
 /** @type {import('../../modules/message_manager.js')} */
@@ -80,7 +80,7 @@ async function valorant(username, id) {
 	}).catch(e => void e);
 }
 
-module.exports = class StatsVALORANT extends Command {
+module.exports = class StatsVALORANT extends Commando.Command {
 	constructor(client) {
 		super(client, {
 			name: 'valorantstats',
@@ -106,16 +106,16 @@ module.exports = class StatsVALORANT extends Command {
 	}
 
 	/**
-     * @param {Discord.Message} message
+     * @param {Commando.CommandoMessage} message
      * @param {{player: Discord.UserResolvable, target: String}}
      */
 	async run(message, { player, target }) {
 		// Link
 		message_manager = this.client.modules.message_manager;
 
-		const this_message = message.say('Getting information...');
+		message.delete({ timeout: 10000 }).catch(e => void e);
+		const reply = await message.say('Getting information...');
 		const stats = await valorant(player.split('#')[0], player.split('#')[1]);
-		this_message.delete().catch(e => void e);
 
 		if (stats) {
 			const embed1 = new Discord.MessageEmbed();
@@ -220,11 +220,15 @@ module.exports = class StatsVALORANT extends Command {
 				await message_manager.sendToUser(message.author, embed2);
 				await message_manager.sendToUser(message.author, embed3);
 				await message_manager.sendToUser(message.author, embed4);
-				message.reply('Sent you a DM with information.');
+				reply.edit('Sent you a DM with information.').then(this_message => {
+					this_message.delete({ timeout: 10000 }).catch(e => void e);
+				}).catch(e => void e);
 			}
 		}
 		else {
-			this_message.edit('Failed to get information from this account. The account may be private or the account does not exist.\nTo make your account public, you must sign up your riot account here: <https://tracker.gg/valorant>.').catch(e => void e);
+			reply.edit('Failed to get information from this account. The account may be private or the account does not exist.\nTo make your account public, you must sign up your riot account here: <https://tracker.gg/valorant>.').then(this_message => {
+				this_message.delete({ timeout: 10000 }).catch(e => void e);
+			}).catch(e => void e);
 		}
 	}
 };

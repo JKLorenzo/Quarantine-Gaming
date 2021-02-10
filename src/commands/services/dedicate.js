@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const { Command } = require('discord.js-commando');
+const Commando = require('discord.js-commando');
 const functions = require('../../modules/functions.js');
 const constants = require('../../modules/constants.js');
 /** @type {import('../../modules/app.js')} */
@@ -9,7 +9,7 @@ let general;
 /** @type {import('../../modules/message_manager.js')} */
 let message_manager;
 
-module.exports = class DedicateCommand extends Command {
+module.exports = class DedicateCommand extends Commando.Command {
 	constructor(client) {
 		super(client, {
 			name: 'dedicate',
@@ -32,8 +32,7 @@ module.exports = class DedicateCommand extends Command {
 	}
 
 	/**
-     *
-     * @param {Discord.Message} message
+     * @param {Commando.CommandoMessage} message
      * @param {{name: String}}
      */
 	async run(message, { name }) {
@@ -42,6 +41,7 @@ module.exports = class DedicateCommand extends Command {
 		general = this.client.modules.general;
 		message_manager = this.client.modules.message_manager;
 
+		message.delete({ timeout: 10000 }).catch(e => void e);
 		const voice_channel = app.member(message.author).voice.channel;
 		if (voice_channel) {
 			if (name.toLowerCase() == 'lock' || name.toLowerCase() == 'unlock') {
@@ -73,7 +73,9 @@ module.exports = class DedicateCommand extends Command {
 					}
 				}
 				else {
-					message.reply('You must be on a dedicated channel to lock or unlock a voice channel.').catch(e => void e);
+					message.reply('You must be on a dedicated channel to lock or unlock a voice channel.').then(this_message => {
+						this_message.delete({ timeout: 10000 }).catch(e => void e);
+					}).catch(e => void e);
 				}
 			}
 			else {
@@ -87,7 +89,9 @@ module.exports = class DedicateCommand extends Command {
 					if (channel) name = functions.toAlphanumericString(channel.name);
 					if (member) name = member.displayName;
 
-					message.reply(`Got it! Please wait while I'm preparing **${name}** voice and text channels.`).catch(e => void e);
+					message.reply(`Got it! Please wait while I'm preparing **${name}** voice and text channels.`).then(this_message => {
+						this_message.delete({ timeout: 10000 }).catch(e => void e);
+					}).catch(e => void e);
 					await general.dedicateChannel(voice_channel, name);
 				}
 				else {
@@ -95,13 +99,17 @@ module.exports = class DedicateCommand extends Command {
 					name = name.split(' ').map(word => {
 						return functions.toAlphanumericString(word);
 					}).join(' ');
-					message.reply(`Got it! Please wait while I'm preparing **${name}** voice and text channels.`).catch(e => void e);
+					message.reply(`Got it! Please wait while I'm preparing **${name}** voice and text channels.`).then(this_message => {
+						this_message.delete({ timeout: 10000 }).catch(e => void e);
+					}).catch(e => void e);
 					await general.dedicateChannel(voice_channel, name);
 				}
 			}
 		}
 		else {
-			message.reply('You must be connected to any Voice Room channels to create a dedicated channel.').catch(e => void e);
+			message.reply('You must be connected to any Voice Room channels to create a dedicated channel.').then(this_message => {
+				this_message.delete({ timeout: 10000 }).catch(e => void e);
+			}).catch(e => void e);
 		}
 	}
 };

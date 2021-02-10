@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const { Command } = require('discord.js-commando');
+const Commando = require('discord.js-commando');
 const constants = require('../../modules/constants.js');
 /** @type {import('../../modules/app.js')} */
 let app;
@@ -10,7 +10,7 @@ let message_manager;
 /** @type {import('../../modules/speech.js')} */
 let speech;
 
-module.exports = class StreamingCommand extends Command {
+module.exports = class StreamingCommand extends Commando.Command {
 	constructor(client) {
 		super(client, {
 			name: 'streaming',
@@ -24,7 +24,7 @@ module.exports = class StreamingCommand extends Command {
 		});
 	}
 
-	/** @param {Discord.Message} message */
+	/** @param {Commando.CommandoMessage} message */
 	async run(message) {
 		// Link
 		app = this.client.modules.app;
@@ -32,10 +32,13 @@ module.exports = class StreamingCommand extends Command {
 		message_manager = this.client.modules.message_manager;
 		speech = this.client.modules.speech;
 
+		message.delete({ timeout: 10000 }).catch(e => void e);
 		const member = app.member(message.author);
 		const streaming_role = app.role(constants.roles.streaming);
 		if (!member.roles.cache.has(streaming_role)) {
-			message.reply('Got it! Your streaming status will be removed once you\'re disconnected to a voice channel or when you go offline.');
+			message.reply('Got it! Your streaming status will be removed once you\'re disconnected to a voice channel or when you go offline.').then(this_message => {
+				this_message.delete({ timeout: 10000 }).catch(e => void e);
+			}).catch(e => void e);
 
 			// Add streaming role
 			await role_manager.add(member, streaming_role);

@@ -1,6 +1,6 @@
 // eslint-disable-next-line no-unused-vars
 const Discord = require('discord.js');
-const { Command } = require('discord.js-commando');
+const Commando = require('discord.js-commando');
 const functions = require('../../modules/functions.js');
 const constants = require('../../modules/constants.js');
 /** @type {import('../../modules/app.js')} */
@@ -8,7 +8,7 @@ let app;
 /** @type {import('../../modules/general.js')} */
 let general;
 
-module.exports = class PlayCommand extends Command {
+module.exports = class PlayCommand extends Commando.Command {
 	constructor(client) {
 		super(client, {
 			name: 'play',
@@ -49,7 +49,7 @@ module.exports = class PlayCommand extends Command {
 	}
 
 	/**
-     * @param {Discord.Message} message
+     * @param {Commando.CommandoMessage} message
      * @param {{role: Discord.RoleResolvable, input: String}}
      */
 	async run(message, { role, input }) {
@@ -57,6 +57,7 @@ module.exports = class PlayCommand extends Command {
 		app = this.client.modules.app;
 		general = this.client.modules.general;
 
+		message.delete({ timeout: 10000 }).catch(e => void e);
 		const game_role = app.role(role);
 		const inviter = app.member(message.author);
 
@@ -76,7 +77,7 @@ module.exports = class PlayCommand extends Command {
 
 		general.gameInvite(game_role, inviter, count, reserved);
 		message.say(`Got it! This bracket will be available on the ${app.channel(constants.channels.integrations.game_invites)} channel.`).then(this_message => {
-			this_message.delete({ timeout: 3600000 }).catch(e => void e);
+			this_message.delete({ timeout: 10000 }).catch(e => void e);
 		}).catch(e => void e);
 	}
 };

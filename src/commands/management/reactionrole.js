@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const { Command } = require('discord.js-commando');
+const Commando = require('discord.js-commando');
 const constants = require('../../modules/constants.js');
 /** @type {import('../../modules/app.js')} */
 let app;
@@ -13,7 +13,7 @@ const modeSelector = {
 	mode: '',
 };
 
-module.exports = class ReactionRole extends Command {
+module.exports = class ReactionRole extends Commando.Command {
 	constructor(client) {
 		super(client, {
 			name: 'reactionrole',
@@ -58,7 +58,7 @@ module.exports = class ReactionRole extends Command {
 	}
 
 	/**
-     * @param {Discord.Message} message
+     * @param {Commando.CommandoMessage} message
      * @param {{mode: 'create' | 'update', type: 'nsfw' | 'fgu' | 'multiplayer', msgID: String}}
      */
 	async run(message, { mode, type, msgID }) {
@@ -69,7 +69,9 @@ module.exports = class ReactionRole extends Command {
 
 		// Check user permissions
 		if (!app.hasRole(message.author, [constants.roles.staff])) {
-			return message.reply('You don\'t have permissions to use this command.');
+			return message.reply('You don\'t have permissions to use this command.').then(this_message => {
+				this_message.delete({ timeout: 10000 }).catch(e => void e);
+			}).catch(e => void e);
 		}
 
 		/** @type {NSFW | FreeGameUpdates} */

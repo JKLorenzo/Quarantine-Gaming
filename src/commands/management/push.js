@@ -1,13 +1,11 @@
-// eslint-disable-next-line no-unused-vars
-const Discord = require('discord.js');
-const { Command } = require('discord.js-commando');
+const Commando = require('discord.js-commando');
 const constants = require('../../modules/constants.js');
 /** @type {import('../../modules/app.js')} */
 let app;
 /** @type {import('../../modules/general.js')} */
 let general;
 
-module.exports = class PushCommand extends Command {
+module.exports = class PushCommand extends Commando.Command {
 	constructor(client) {
 		super(client, {
 			name: 'push',
@@ -26,7 +24,7 @@ module.exports = class PushCommand extends Command {
 	}
 
 	/**
-     * @param {Discord.Message} message
+     * @param {Commando.CommandoMessage} message
      * @param {{url: String}}
      */
 	async run(message, { url }) {
@@ -36,10 +34,14 @@ module.exports = class PushCommand extends Command {
 
 		// Check user permissions
 		if (!app.hasRole(message.author, [constants.roles.staff, constants.roles.moderator])) {
-			return message.reply('You don\'t have permissions to use this command.');
+			return message.reply('You don\'t have permissions to use this command.').then(this_message => {
+				this_message.delete({ timeout: 10000 }).catch(e => void e);
+			}).catch(e => void e);
 		}
 
 		const reply = await message.reply('Checking...');
-		reply.edit(await general.freeGameFetch(url));
+		reply.edit(await general.freeGameFetch(url)).then(this_message => {
+			this_message.delete({ timeout: 10000 }).catch(e => void e);
+		}).catch(e => void e);
 	}
 };

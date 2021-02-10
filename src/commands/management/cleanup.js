@@ -1,11 +1,11 @@
 const Discord = require('discord.js');
-const { Command } = require('discord.js-commando');
+const Commando = require('discord.js-commando');
 const constants = require('../../modules/constants.js');
 const functions = require('../../modules/functions.js');
 /** @type {import('../../modules/app.js')} */
 let app;
 
-module.exports = class CleanUp extends Command {
+module.exports = class CleanUp extends Commando.Command {
 	constructor(client) {
 		super(client, {
 			name: 'cleanup',
@@ -25,7 +25,7 @@ module.exports = class CleanUp extends Command {
 	}
 
 	/**
-	 * @param {Discord.Message} message
+	 * @param {Commando.CommandoMessage} message
 	 * @param {{count: Number}}
 	 */
 	async run(message, { count }) {
@@ -34,7 +34,10 @@ module.exports = class CleanUp extends Command {
 
 		// Check user permissions
 		if (!app.hasRole(message.author, [constants.roles.staff, constants.roles.moderator])) {
-			return message.reply('You don\'t have permissions to use this command.');
+			message.delete({ timeout: 10000 }).catch(e => void e);
+			return message.reply('You don\'t have permissions to use this command.').then(this_message => {
+				this_message.delete({ timeout: 10000 }).catch(e => void e);
+			}).catch(e => void e);
 		}
 
 		await functions.sleep(1000);
@@ -104,7 +107,7 @@ module.exports = class CleanUp extends Command {
 		embed.setColor('#ffff00');
 
 		message.say(embed).then(this_message => {
-			this_message.delete({ timeout: 60000 }).catch(e => void e);
-		});
+			this_message.delete({ timeout: 10000 }).catch(e => void e);
+		}).catch(e => void e);
 	}
 };
