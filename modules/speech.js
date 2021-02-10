@@ -17,7 +17,9 @@ const format_words = [
     { original: 'DOOMEternal', formatted: 'Doom Eternal' },
     { original: 'FINAL FANTASY XIV', formatted: 'Final Fantasy 14' },
     { original: 'Total War: WARHAMMER II', formatted: 'Total War: War Hammer 2' },
-    { original: 'A Total War Saga: TROY', formatted: 'A Total War Saga: Troy' }
+    { original: 'A Total War Saga: TROY', formatted: 'A Total War Saga: Troy' },
+    { original: 'ACE COMBAT™ 7: SKIES UNKNOWN', formatted: 'Ace Combat 7: Skies Unknown' },
+    { original: 'VA-11 HALL-A', formatted: 'Vallhalla' }
 ];
 
 /**
