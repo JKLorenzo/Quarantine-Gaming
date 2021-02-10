@@ -22,7 +22,7 @@
     "discord.js-commando": "git+https://github.com/discordjs/Commando.git",
     "firebase-admin": "^9.4.2",
     "g-i-s": "^2.1.6",
-    "google-translate-tts": "^0.2.0",
+    "google-tts-api": "^2.0.1",
     "jsdom": "^16.4.0",
     "node-fetch": "^2.6.1",
     "opusscript": "0.0.7",
