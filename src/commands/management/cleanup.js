@@ -41,10 +41,12 @@ module.exports = class CleanUp extends Command {
 		await message.delete().catch(e => void e);
 		await functions.sleep(1000);
 		let deleted_messages_count = 0;
+		/** @type {Discord.TextChannel} */
+		const channel = message.channel;
 		const deleted_messages = new Array();
 		async function removeMessages(number_of_messages) {
 			if (number_of_messages > 0) {
-				await message.channel.bulkDelete(number_of_messages).then(messages => messages.array()).then(messages => {
+				await channel.bulkDelete(number_of_messages).then(messages => messages.array()).then(messages => {
 					number_of_messages -= messages.length;
 					count -= messages.length;
 					deleted_messages_count += messages.length;
@@ -59,7 +61,7 @@ module.exports = class CleanUp extends Command {
 				}).catch(e => void e);
 			}
 			while (count > 0 && number_of_messages > 0) {
-				await message.channel.messages.fetch({ limit: count }).then(messages => messages.array()).then(async messages => {
+				await channel.messages.fetch({ limit: count }).then(messages => messages.array()).then(async messages => {
 					if (messages.length > 0) {
 						for (const this_message of messages) {
 							await this_message.delete().then(async () => {
@@ -95,7 +97,8 @@ module.exports = class CleanUp extends Command {
 		embed.setAuthor('Quarantine Gaming: Cleanup Manager');
 		embed.setTitle('Cleanup Process Complete');
 		embed.setDescription('The total number of messages that were removed from affected authors:\n' + Object.entries(deleted_messages).map(entry => {
-			return `${app.member(entry[0])}: ${entry[1]}`;
+			const author = app.member(entry[0]);
+			return `${author ? author : entry[0] == null ? 'Webhooks' : entry[0]}: ${entry[1]}`;
 		}).join('\n'));
 		embed.setFooter(`A total of ${deleted_messages_count} messages were removed.`);
 		embed.setColor('#ffff00');
