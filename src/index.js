@@ -62,19 +62,19 @@ async function uploadLocalEmojis() {
 				const emoji_name = path.parse(emoji_path).name;
 				if (emoji_name && emoji_path) {
 					try {
-						console.log(`Uploading: ${emoji_name}`);
+						console.log(`uploadLocalEmojis: Uploading ${emoji_name}`);
 						const response = await app.guild().emojis.create(emoji_path, emoji_name, {
 							reason: 'Local Emoji Upload',
 						});
 						if (response) {
-							console.log(`Finished uploading: ${emoji_name}`);
+							console.log(`uploadLocalEmojis: Finished uploading ${emoji_name}`);
 						}
 						else {
-							console.error(`Failed to upload: ${emoji_name}`);
+							console.error(`uploadLocalEmojis: Failed to upload ${emoji_name}`);
 						}
 					}
 					catch (error) {
-						console.error(`Failed to upload: ${emoji_name}`);
+						console.error(`uploadLocalEmojis: Failed to upload ${emoji_name}`);
 					}
 					await functions.sleep(5000);
 				}
@@ -82,12 +82,12 @@ async function uploadLocalEmojis() {
 		}
 	}
 	catch (error) {
-		console.error(error);
+		console.error(`uploadLocalEmojis: Failed with error ${error}`);
 	}
 }
 
 client.once('ready', async () => {
-	console.log('Startup');
+	console.log('Startup: Ready');
 	try {
 		await client.user.setActivity('Startup', {
 			type: 'WATCHING',
@@ -106,7 +106,7 @@ client.once('ready', async () => {
 		uploadLocalEmojis();
 	}
 	catch (error) {
-		console.error(`Error during Startup: ${error}`);
+		console.error(`Startup: Failed with error ${error}`);
 		await client.user.setActivity('Startup Failed', {
 			type: 'WATCHING',
 		});
@@ -402,6 +402,8 @@ client.on('emojiDelete', emoji => {
 });
 
 client.on('rateLimit', async (rateLimitInfo) => {
+	console.error('Client RateLimit:');
+	console.error(rateLimitInfo);
 	if (app.isInitialized()) {
 		try {
 			const embed = new Discord.MessageEmbed();
@@ -419,17 +421,16 @@ client.on('rateLimit', async (rateLimitInfo) => {
 			error_manager.mark(ErrorTicketManager.create('rateLimit', error));
 		}
 	}
-	else {
-		console.error(rateLimitInfo);
-	}
+});
+
+client.on('debug', info => {
+	console.log(`Client Debug: ${info}`);
 });
 
 client.on('error', (error) => {
+	console.error(`Client Error: ${error}`);
 	if (app.isInitialized()) {
 		error_manager.mark(ErrorTicketManager.create('Client Error', error));
-	}
-	else {
-		console.error(error);
 	}
 });
 

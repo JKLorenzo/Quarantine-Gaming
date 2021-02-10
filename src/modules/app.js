@@ -443,11 +443,11 @@ module.exports.initialize = async (ClientInstance) => {
 			await message_manager.sendToChannel(constants.channels.qg.updates, embed);
 		}
 
-		console.log('Initialized');
+		console.log('Startup: Initialized');
 		initialized = true;
 	}
 	catch (error) {
-		console.error(`Error during Initializing: ${error}`);
+		console.error(`Startup: Initialize failed with error ${error}`);
 		await this.setActivity('Initializing Failed', 'WATCHING');
 		error_manager.mark(ErrorTicketManager.create('initialize', error));
 	}

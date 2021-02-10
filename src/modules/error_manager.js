@@ -30,7 +30,7 @@ module.exports.mark = async (ErrorTicket) => {
 	await MarkManager.queue();
 	if (app.isInitialized()) {
 		try {
-			console.error(`ErrorManager Processing: ${ErrorTicket.location} / ${ErrorTicket.name} - ${ErrorTicket.error}`);
+			console.error(`ErrorManager: Processing ${ErrorTicket.location} / ${ErrorTicket.name} - ${ErrorTicket.error}`);
 
 			errors_per_minute.push(ErrorTicket);
 			setTimeout(() => {
@@ -91,11 +91,11 @@ module.exports.mark = async (ErrorTicket) => {
 			}
 		}
 		catch (error) {
-			console.error(`ErrorManager Failed: ${error}`);
+			console.error(`ErrorManager: Failed with error ${error}`);
 		}
 	}
 	else {
-		console.error(`ErrorManager Error before App Init: ${ErrorTicket.location} / ${ErrorTicket.name} - ${ErrorTicket.error}`);
+		console.error(`ErrorManager: App not initialized with error ${ErrorTicket.location} / ${ErrorTicket.name} - ${ErrorTicket.error}`);
 	}
 	MarkManager.finish();
 };

@@ -58,9 +58,8 @@ module.exports.addReaction = (message, emoji) => {
  * @param {Discord.GuildMember} reactor The guild member object that reacted to this message.
  */
 module.exports.onReactionAdd = async (message, embed, emoji, reactor) => {
-	console.log(`IncomingReaction: Queueing ${IncomingReactionManager.processID}`);
+	console.log(`IncomingReactionAdd: Queueing ${IncomingReactionManager.processID} (${reactor.displayName})`);
 	await IncomingReactionManager.queue();
-	console.log(`IncomingReaction: Started ${IncomingReactionManager.currentID}`);
 	try {
 		switch (embed.author.name) {
 		case 'Quarantine Gaming: NSFW Content':
@@ -281,7 +280,7 @@ module.exports.onReactionAdd = async (message, embed, emoji, reactor) => {
 	catch (error) {
 		error_manager.mark(ErrorTicketManager.create('onReactionAdd', error));
 	}
-	console.log(`IncomingReaction: Finished ${IncomingReactionManager.currentID}`);
+	console.log(`IncomingReactionAdd: Finished ${IncomingReactionManager.currentID} (${reactor.displayName})`);
 	IncomingReactionManager.finish();
 };
 
@@ -293,9 +292,8 @@ module.exports.onReactionAdd = async (message, embed, emoji, reactor) => {
  * @param {Discord.GuildMember} reactor The guild member object that reacted to this message.
  */
 module.exports.onReactionRemove = async (message, embed, emoji, reactor) => {
-	console.log(`IncomingReaction: Queueing ${IncomingReactionManager.processID}`);
+	console.log(`IncomingReactionRemove: Queueing ${IncomingReactionManager.processID} (${reactor.displayName})`);
 	await IncomingReactionManager.queue();
-	console.log(`IncomingReaction: Started ${IncomingReactionManager.currentID}`);
 	try {
 		switch (embed.author.name) {
 		case 'Quarantine Gaming: NSFW Content':
@@ -382,6 +380,6 @@ module.exports.onReactionRemove = async (message, embed, emoji, reactor) => {
 	catch (error) {
 		error_manager.mark(ErrorTicketManager.create('onReactionRemove', error));
 	}
-	console.log(`IncomingReaction: Finished ${IncomingReactionManager.currentID}`);
+	console.log(`IncomingReactionRemove: Finished ${IncomingReactionManager.currentID} (${reactor.displayName})`);
 	IncomingReactionManager.finish();
 };

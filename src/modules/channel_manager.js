@@ -23,9 +23,8 @@ module.exports.initialize = (ClientInstance) => {
  */
 module.exports.create = (options) => {
 	return new Promise((resolve, reject) => {
-		console.log(`ChannelCreate: Queueing ${ChannelQueueManager.processID}`);
+		console.log(`ChannelCreate: Queueing ${ChannelQueueManager.processID} (${options.name})`);
 		ChannelQueueManager.queue().then(async () => {
-			console.log(`ChannelCreate: Started ${ChannelQueueManager.currentID}`);
 			let output, error;
 			try {
 				output = await app.guild().channels.create(options.name, {
@@ -44,7 +43,7 @@ module.exports.create = (options) => {
 			catch (err) {
 				error = err;
 			}
-			console.log(`ChannelCreate: Finished ${ChannelQueueManager.currentID}`);
+			console.log(`ChannelCreate: Finished ${ChannelQueueManager.currentID} (${options.name})`);
 			ChannelQueueManager.finish();
 			error ? reject(error) : resolve(output);
 		});
@@ -59,17 +58,17 @@ module.exports.create = (options) => {
  */
 module.exports.delete = (GuildChannelResolvable, reason = '') => {
 	return new Promise((resolve, reject) => {
-		console.log(`ChannelDelete: Queueing ${ChannelQueueManager.processID}`);
+		const channel = app.channel(GuildChannelResolvable);
+		console.log(`ChannelDelete: Queueing ${ChannelQueueManager.processID} (${channel ? channel.name : GuildChannelResolvable})`);
 		ChannelQueueManager.queue().then(async () => {
-			console.log(`ChannelDelete: Started ${ChannelQueueManager.currentID}`);
 			let output, error = '';
 			try {
-				output = await app.channel(GuildChannelResolvable).delete(reason);
+				output = await channel.delete(reason);
 			}
 			catch (err) {
 				error = err;
 			}
-			console.log(`ChannelDelete: Finished ${ChannelQueueManager.currentID}`);
+			console.log(`ChannelDelete: Finished ${ChannelQueueManager.currentID} (${channel ? channel.name : GuildChannelResolvable})`);
 			ChannelQueueManager.finish();
 			error ? reject(error) : resolve(output);
 		});
