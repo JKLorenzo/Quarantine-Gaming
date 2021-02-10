@@ -19,7 +19,7 @@
   "dependencies": {
     "axios": "^0.21.1",
     "discord.js": "^12.5.1",
-    "discord.js-commando": "git+https://github.com/discordjs/Commando.git",
+    "discord.js-commando": "^0.12.2",
     "firebase-admin": "^9.4.2",
     "g-i-s": "^2.1.6",
     "google-tts-api": "^2.0.1",
