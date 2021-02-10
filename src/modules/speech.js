@@ -26,7 +26,7 @@ const format_words = [
 
 /**
  * Initializes the module.
- * @param {CommandoClient} ClientInstance The Commando Client instance used to login.
+ * @param {import('discord.js-commando').CommandoClient} ClientInstance The Commando Client instance used to login.
  */
 module.exports.initialize = (ClientInstance) => {
 	// Link

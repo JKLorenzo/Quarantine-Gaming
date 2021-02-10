@@ -96,7 +96,7 @@ module.exports.member = (UserResolvable) => {
  * Sets the activity of this client.
  * @param {String} name The name of the activity.
  * @param {Discord.ActivityType} type The type of this activity.
- * @returns {Promise<Discord.Presence} A Presence Object Promise
+ * @returns {Promise<Discord.Presence>} A Presence Object Promise
  */
 module.exports.setActivity = (name, type = 'LISTENING') => {
 	return this.client().user.setActivity(name, {
