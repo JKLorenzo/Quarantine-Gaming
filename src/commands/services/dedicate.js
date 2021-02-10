@@ -76,8 +76,7 @@ module.exports = class DedicateCommand extends Command {
 					message.reply('You must be on a dedicated channel to lock or unlock a voice channel.').catch(e => void e);
 				}
 			}
-			else if (voice_channel.parentID == constants.channels.category.voice || voice_channel.parentID == constants.channels.category.dedicated) {
-				// Only allow on voice channels and dedicated channels category
+			else {
 				name = name.trim();
 				if (name.startsWith('<') && name.endsWith('>')) {
 					// Role
@@ -99,9 +98,6 @@ module.exports = class DedicateCommand extends Command {
 					message.reply(`Got it! Please wait while I'm preparing **${name}** voice and text channels.`).catch(e => void e);
 					await general.dedicateChannel(voice_channel, name);
 				}
-			}
-			else {
-				message.reply('You can\'t create a dedicated channel from your current voice channel. Join one of the Voice Room channels to create a dedicated channel.').catch(e => void e);
 			}
 		}
 		else {
