@@ -18,15 +18,15 @@ module.exports = class CleanUp extends Command {
 					key: 'count',
 					prompt: 'Enter the number of messages to delete.',
 					type: 'integer',
-					validate: arg => arg > 0
+					validate: arg => arg > 0,
 				},
-			]
+			],
 		});
 	}
 
 	/**
-	 * @param {Discord.Message} message 
-	 * @param {{count: Number}} 
+	 * @param {Discord.Message} message
+	 * @param {{count: Number}}
 	 */
 	async run(message, { count }) {
 		// Link
@@ -34,11 +34,11 @@ module.exports = class CleanUp extends Command {
 
 		// Check user permissions
 		if (!app.hasRole(message.author, [constants.roles.staff, constants.roles.moderator])) {
-			return message.reply("You don't have permissions to use this command.");
+			return message.reply('You don\'t have permissions to use this command.');
 		}
 
 		await functions.sleep(1000);
-		await message.delete().catch(() => { });
+		await message.delete().catch(e => void e);
 		await functions.sleep(1000);
 		let deleted_messages_count = 0;
 		const deleted_messages = new Array();
@@ -51,11 +51,12 @@ module.exports = class CleanUp extends Command {
 					for (const this_message of messages) {
 						if (deleted_messages[`${this_message.author.id}`]) {
 							deleted_messages[`${this_message.author.id}`] += 1;
-						} else {
+						}
+						else {
 							deleted_messages[`${this_message.author.id}`] = 1;
 						}
 					}
-				}).catch(() => { });
+				}).catch(e => void e);
 			}
 			while (count > 0 && number_of_messages > 0) {
 				await message.channel.messages.fetch({ limit: count }).then(messages => messages.array()).then(async messages => {
@@ -66,25 +67,27 @@ module.exports = class CleanUp extends Command {
 								deleted_messages_count++;
 								if (deleted_messages[`${this_message.author.id}`]) {
 									deleted_messages[`${this_message.author.id}`] += 1;
-								} else {
+								}
+								else {
 									deleted_messages[`${this_message.author.id}`] = 1;
 								}
-								await functions.sleep(2000); // Rate Limit
-							}).catch(() => { });
+								await functions.sleep(2000);
+							}).catch(e => void e);
 						}
-					} else {
+					}
+					else {
 						count = 0;
 					}
 				}).catch(() => {
 					count = 0;
 				});
-				await functions.sleep(6500); // Rate Limit
+				await functions.sleep(6500);
 			}
 		}
 
 		while (count > 100) {
 			await removeMessages(100);
-			await functions.sleep(5000); // Rate Limit
+			await functions.sleep(5000);
 		}
 		await removeMessages(count);
 
@@ -98,7 +101,7 @@ module.exports = class CleanUp extends Command {
 		embed.setColor('#ffff00');
 
 		message.say(embed).then(this_message => {
-			this_message.delete({ timeout: 60000 }).catch(() => { });
+			this_message.delete({ timeout: 60000 }).catch(e => void e);
 		});
 	}
 };

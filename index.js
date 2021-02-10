@@ -18,397 +18,419 @@ const speech = require('./modules/speech.js');
 const ErrorTicketManager = new classes.ErrorTicketManager('index.js');
 
 const client = new CommandoClient({
-    commandPrefix: '!',
-    owner: '393013053488103435',
-    partials: [
-        'MESSAGE', 'CHANNEL', 'REACTION'
-    ]
+	commandPrefix: '!',
+	owner: '393013053488103435',
+	partials: [
+		'MESSAGE', 'CHANNEL', 'REACTION',
+	],
 });
 
 client.registry
-    .registerDefaultTypes()
-    .registerGroups([
-        ['management', 'Server Management'],
-        ['services', 'Server Services'],
-        ['experience', 'Game Experience Extensions']
-    ])
-    .registerDefaultGroups()
-    .registerDefaultCommands({
-        eval: false,
-        prefix: false,
-        commandState: false
-    })
-    .registerCommandsIn(path.join(__dirname, 'commands'));
+	.registerDefaultTypes()
+	.registerGroups([
+		['management', 'Server Management'],
+		['services', 'Server Services'],
+		['experience', 'Game Experience Extensions'],
+	])
+	.registerDefaultGroups()
+	.registerDefaultCommands({
+		eval: false,
+		prefix: false,
+		commandState: false,
+	})
+	.registerCommandsIn(path.join(__dirname, 'commands'));
 
 client.modules = {
-    app: app,
-    channel_manager: channel_manager,
-    database: database,
-    error_manager: error_manager,
-    general: general,
-    message_manager: message_manager,
-    reaction_manager: reaction_manager,
-    role_manager: role_manager,
-    speech: speech
-}
+	app: app,
+	channel_manager: channel_manager,
+	database: database,
+	error_manager: error_manager,
+	general: general,
+	message_manager: message_manager,
+	reaction_manager: reaction_manager,
+	role_manager: role_manager,
+	speech: speech,
+};
 
 async function uploadLocalEmojis() {
-    try {
-        const emojis_dir = path.join(__dirname, 'emojis');
-        if (fs.existsSync(emojis_dir)) {
-            const emojis = fs.readdirSync(emojis_dir);
-            for (const emoji of emojis) {
-                const emoji_path = path.join(emojis_dir, emoji);
-                const emoji_name = path.parse(emoji_path).name;
-                if (emoji_name && emoji_path) {
-                    try {
-                        console.log(`Uploading: ${emoji_name}`);
-                        const response = await app.guild().emojis.create(emoji_path, emoji_name, {
-                            reason: 'Local Emoji Upload'
-                        });
-                        if (response) {
-                            console.log(`Finished uploading: ${emoji_name}`);
-                        } else {
-                            console.error(`Failed to upload: ${emoji_name}`);
-                        }
-                    } catch (error) {
-                        console.error(`Failed to upload: ${emoji_name}`);
-                    }
-                    await functions.sleep(5000);
-                }
-            }
-        }
-    } catch (error) {
-        console.error(error);
-    }
+	try {
+		const emojis_dir = path.join(__dirname, 'emojis');
+		if (fs.existsSync(emojis_dir)) {
+			const emojis = fs.readdirSync(emojis_dir);
+			for (const emoji of emojis) {
+				const emoji_path = path.join(emojis_dir, emoji);
+				const emoji_name = path.parse(emoji_path).name;
+				if (emoji_name && emoji_path) {
+					try {
+						console.log(`Uploading: ${emoji_name}`);
+						const response = await app.guild().emojis.create(emoji_path, emoji_name, {
+							reason: 'Local Emoji Upload',
+						});
+						if (response) {
+							console.log(`Finished uploading: ${emoji_name}`);
+						}
+						else {
+							console.error(`Failed to upload: ${emoji_name}`);
+						}
+					}
+					catch (error) {
+						console.error(`Failed to upload: ${emoji_name}`);
+					}
+					await functions.sleep(5000);
+				}
+			}
+		}
+	}
+	catch (error) {
+		console.error(error);
+	}
 }
 
 client.once('ready', async () => {
-    console.log('Startup');
-    try {
-        await client.user.setActivity('Startup', {
-            type: 'WATCHING'
-        });
+	console.log('Startup');
+	try {
+		await client.user.setActivity('Startup', {
+			type: 'WATCHING',
+		});
 
-        // Initialize Modules
-        channel_manager.initialize(client);
-        await database.initialize(client);
-        general.initialize(client);
-        message_manager.initialize(client);
-        reaction_manager.initialize(client);
-        role_manager.initialize(client);
-        speech.initialize(client);
-        error_manager.initialize(client);
-        await app.initialize(client);
-        uploadLocalEmojis();
-    } catch (error) {
-        console.error(`Error during Startup: ${error}`);
-        await client.user.setActivity('Startup Failed', {
-            type: 'WATCHING'
-        });
-    }
+		// Initialize Modules
+		channel_manager.initialize(client);
+		await database.initialize(client);
+		general.initialize(client);
+		message_manager.initialize(client);
+		reaction_manager.initialize(client);
+		role_manager.initialize(client);
+		speech.initialize(client);
+		error_manager.initialize(client);
+		await app.initialize(client);
+		uploadLocalEmojis();
+	}
+	catch (error) {
+		console.error(`Error during Startup: ${error}`);
+		await client.user.setActivity('Startup Failed', {
+			type: 'WATCHING',
+		});
+	}
 });
 
 client.on('message', (incoming_message) => {
-    if (app.isInitialized()) {
-        message_manager.process(incoming_message);
-    }
+	if (app.isInitialized()) {
+		message_manager.process(incoming_message);
+	}
 });
 
 client.on('userUpdate', async (oldUser, newUser) => {
-    if (app.isInitialized()) {
-        try {
-            const embed = new Discord.MessageEmbed();
-            const member = app.member(newUser);
-            embed.setAuthor(member.displayName, oldUser.displayAvatarURL());
-            embed.setTitle('User Update');
+	if (app.isInitialized()) {
+		try {
+			const embed = new Discord.MessageEmbed();
+			const member = app.member(newUser);
+			embed.setAuthor(member.displayName, oldUser.displayAvatarURL());
+			embed.setTitle('User Update');
 
-            const description = new Array();
-            // Avatar
-            if (oldUser.displayAvatarURL() != newUser.displayAvatarURL()) {
-                description.push(`**Avatar**`);
-                description.push(`New: [Avatar Link](${newUser.displayAvatarURL()})`);
-                embed.setThumbnail(newUser.displayAvatarURL());
-            }
+			const description = new Array();
+			// Avatar
+			if (oldUser.displayAvatarURL() != newUser.displayAvatarURL()) {
+				description.push('**Avatar**');
+				description.push(`New: [Avatar Link](${newUser.displayAvatarURL()})`);
+				embed.setThumbnail(newUser.displayAvatarURL());
+			}
 
-            // Username
-            if (oldUser.username != newUser.username) {
-                if (description.length > 0) description.push(' ');
-                description.push(`**Username**`);
-                description.push(`Old: ${oldUser.username}`);
-                description.push(`New: ${newUser.username}`);
-            }
+			// Username
+			if (oldUser.username != newUser.username) {
+				if (description.length > 0) description.push(' ');
+				description.push('**Username**');
+				description.push(`Old: ${oldUser.username}`);
+				description.push(`New: ${newUser.username}`);
+			}
 
-            embed.setDescription(description.join('\n'));
-            embed.setFooter(`${newUser.tag} (${newUser.id})`);
-            embed.setTimestamp();
-            embed.setColor('#6464ff');
-            if (description.length > 0) await message_manager.sendToChannel(constants.channels.qg.logs, embed);
-        } catch (error) {
-            error_manager.mark(ErrorTicketManager.create('userUpdate', error));
-        }
-    }
+			embed.setDescription(description.join('\n'));
+			embed.setFooter(`${newUser.tag} (${newUser.id})`);
+			embed.setTimestamp();
+			embed.setColor('#6464ff');
+			if (description.length > 0) await message_manager.sendToChannel(constants.channels.qg.logs, embed);
+		}
+		catch (error) {
+			error_manager.mark(ErrorTicketManager.create('userUpdate', error));
+		}
+	}
 });
 
 client.on('guildMemberUpdate', async (oldMember, newMember) => {
-    if (app.isInitialized()) {
-        try {
-            const embed = new Discord.MessageEmbed();
-            embed.setAuthor(newMember.displayName, newMember.user.displayAvatarURL());
-            embed.setTitle('Guild Member Update');
+	if (app.isInitialized()) {
+		try {
+			const embed = new Discord.MessageEmbed();
+			embed.setAuthor(newMember.displayName, newMember.user.displayAvatarURL());
+			embed.setTitle('Guild Member Update');
 
-            const description = new Array();
-            // Display Name
-            if (newMember.displayName != oldMember.displayName) {
-                if (description.length > 0) description.push(' ');
-                description.push(`**Display Name**`);
-                description.push(`Old: ${oldMember.displayName}`);
-                description.push(`New: ${newMember.displayName}`);
-            }
+			const description = new Array();
+			// Display Name
+			if (newMember.displayName != oldMember.displayName) {
+				if (description.length > 0) description.push(' ');
+				description.push('**Display Name**');
+				description.push(`Old: ${oldMember.displayName}`);
+				description.push(`New: ${newMember.displayName}`);
+			}
 
-            // Role
-            if (newMember.roles.cache.size != oldMember.roles.cache.size) {
-                const added = new Array(), removed = new Array();
-                for (const this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
-                    if (!this_role.name.startsWith('Play') && !this_role.name.startsWith('Text') && !this_role.name.startsWith('Team') && this_role.id != constants.roles.dedicated && this_role.id != constants.roles.streaming) {
-                        if (newMember.roles.cache.has(this_role.id)) {
-                            added.push(this_role);
-                        } else {
-                            removed.push(this_role);
-                        }
-                    }
-                }
-                if (added.length > 0 || removed.length > 0) {
-                    if (description.length > 0) description.push(' ');
-                    description.push(`**Role**`);
-                }
-                if (added.length > 0) description.push(`Added: ${added.join(', ')}`);
-                if (removed.length > 0) description.push(`Removed: ${removed.join(', ')}`);
-            }
+			// Role
+			if (newMember.roles.cache.size != oldMember.roles.cache.size) {
+				const added = new Array(), removed = new Array();
+				for (const this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
+					if (!this_role.name.startsWith('Play') && !this_role.name.startsWith('Text') && !this_role.name.startsWith('Team') && this_role.id != constants.roles.dedicated && this_role.id != constants.roles.streaming) {
+						if (newMember.roles.cache.has(this_role.id)) {
+							added.push(this_role);
+						}
+						else {
+							removed.push(this_role);
+						}
+					}
+				}
+				if (added.length > 0 || removed.length > 0) {
+					if (description.length > 0) description.push(' ');
+					description.push('**Role**');
+				}
+				if (added.length > 0) description.push(`Added: ${added.join(', ')}`);
+				if (removed.length > 0) description.push(`Removed: ${removed.join(', ')}`);
+			}
 
-            embed.setDescription(description.join('\n'));
-            embed.setFooter(`${newMember.user.tag} (${newMember.user.id})`);
-            embed.setTimestamp();
-            embed.setColor('#6464ff');
-            if (description.length > 0) await message_manager.sendToChannel(constants.channels.qg.logs, embed);
-        } catch (error) {
-            error_manager.mark(ErrorTicketManager.create('guildMemberUpdate', error));
-        }
-    }
+			embed.setDescription(description.join('\n'));
+			embed.setFooter(`${newMember.user.tag} (${newMember.user.id})`);
+			embed.setTimestamp();
+			embed.setColor('#6464ff');
+			if (description.length > 0) await message_manager.sendToChannel(constants.channels.qg.logs, embed);
+		}
+		catch (error) {
+			error_manager.mark(ErrorTicketManager.create('guildMemberUpdate', error));
+		}
+	}
 });
 
 client.on('inviteCreate', invite => {
-    if (app.isInitialized()) {
-        try {
-            app.addInvite(invite);
+	if (app.isInitialized()) {
+		try {
+			app.addInvite(invite);
 
-            const embed = new Discord.MessageEmbed();
-            embed.setAuthor('Quarantine Gaming: Invites Submanager');
-            embed.setTitle('New Invite Created');
-            if (invite.inviter) {
-                embed.addField('Inviter:', invite.inviter, true);
-                embed.setThumbnail(invite.inviter.displayAvatarURL());
-            }
-            if (invite.targetUser) embed.addField('Target User:', invite.targetUser, true);
-            embed.addFields([
-                { name: 'Channel:', value: invite.channel, inline: true },
-                { name: 'Code:', value: invite.code, inline: true }
-            ]);
-            if (invite.maxUses) {
-                embed.addField('Max Uses:', invite.maxUses, true);
-            } else {
-                embed.addField('Max Uses:', 'Infinite', true);
-            }
-            if (invite.expiresTimestamp) {
-                embed.setTimestamp(invite.expiresTimestamp);
-                embed.setFooter('Expires ');
-            } else {
-                embed.setFooter('NO EXPIRATION DATE ⚠');
-            }
-            embed.setColor('#25c081');
-            message_manager.sendToChannel(constants.channels.server.management, embed);
-        } catch (error) {
-            error_manager.mark(ErrorTicketManager.create('inviteCreate', error));
-        }
-    }
-})
+			const embed = new Discord.MessageEmbed();
+			embed.setAuthor('Quarantine Gaming: Invites Submanager');
+			embed.setTitle('New Invite Created');
+			if (invite.inviter) {
+				embed.addField('Inviter:', invite.inviter, true);
+				embed.setThumbnail(invite.inviter.displayAvatarURL());
+			}
+			if (invite.targetUser) embed.addField('Target User:', invite.targetUser, true);
+			embed.addFields([
+				{ name: 'Channel:', value: invite.channel, inline: true },
+				{ name: 'Code:', value: invite.code, inline: true },
+			]);
+			if (invite.maxUses) {
+				embed.addField('Max Uses:', invite.maxUses, true);
+			}
+			else {
+				embed.addField('Max Uses:', 'Infinite', true);
+			}
+			if (invite.expiresTimestamp) {
+				embed.setTimestamp(invite.expiresTimestamp);
+				embed.setFooter('Expires ');
+			}
+			else {
+				embed.setFooter('NO EXPIRATION DATE ⚠');
+			}
+			embed.setColor('#25c081');
+			message_manager.sendToChannel(constants.channels.server.management, embed);
+		}
+		catch (error) {
+			error_manager.mark(ErrorTicketManager.create('inviteCreate', error));
+		}
+	}
+});
 
 client.on('guildMemberAdd', async (this_member) => {
-    if (app.isInitialized()) {
-        try {
-            if (this_member && !this_member.user.bot && !app.hasRole(this_member, [constants.roles.member])) {
-                await general.memberScreening(this_member);
-            }
-        } catch (error) {
-            error_manager.mark(ErrorTicketManager.create('guildMemberAdd', error));
-        }
-    }
+	if (app.isInitialized()) {
+		try {
+			if (this_member && !this_member.user.bot && !app.hasRole(this_member, [constants.roles.member])) {
+				await general.memberScreening(this_member);
+			}
+		}
+		catch (error) {
+			error_manager.mark(ErrorTicketManager.create('guildMemberAdd', error));
+		}
+	}
 });
 
 client.on('presenceUpdate', (oldPresence, newPresence) => {
-    if (app.isInitialized()) {
-        try {
-            const member = newPresence.member ? newPresence.member : oldPresence.member;
-            if (!member.user.bot) {
-                if (newPresence.status == 'offline') {
-                    general.memberOffline(member);
-                }
+	if (app.isInitialized()) {
+		try {
+			const member = newPresence.member ? newPresence.member : oldPresence.member;
+			if (!member.user.bot) {
+				if (newPresence.status == 'offline') {
+					general.memberOffline(member);
+				}
 
-                // Sort Changed Activities
-                let oldActivities = new Array(), newActivities = new Array();
-                if (oldPresence) oldActivities = oldPresence.activities.map(activity => activity.name.trim());
-                if (newPresence) newActivities = newPresence.activities.map(activity => activity.name.trim());
-                const acitivityDifference = functions.compareArray(oldActivities, newActivities).map(activity_name => {
-                    if (newActivities.includes(activity_name)) {
-                        return {
-                            activity: newPresence.activities.find(activity => activity.name.trim() == activity_name),
-                            new: true
-                        }
-                    } else {
-                        return {
-                            activity: oldPresence.activities.find(activity => activity.name.trim() == activity_name),
-                            new: false
-                        }
-                    }
-                });
-                for (const data of acitivityDifference) {
-                    general.memberActivityUpdate(member, data);
-                }
-            }
-        } catch (error) {
-            error_manager.mark(ErrorTicketManager.create('presenceUpdate', error));
-        }
-    }
+				// Sort Changed Activities
+				let oldActivities = new Array(), newActivities = new Array();
+				if (oldPresence) oldActivities = oldPresence.activities.map(activity => activity.name.trim());
+				if (newPresence) newActivities = newPresence.activities.map(activity => activity.name.trim());
+				const acitivityDifference = functions.compareArray(oldActivities, newActivities).map(activity_name => {
+					if (newActivities.includes(activity_name)) {
+						return {
+							activity: newPresence.activities.find(activity => activity.name.trim() == activity_name),
+							new: true,
+						};
+					}
+					else {
+						return {
+							activity: oldPresence.activities.find(activity => activity.name.trim() == activity_name),
+							new: false,
+						};
+					}
+				});
+				for (const data of acitivityDifference) {
+					general.memberActivityUpdate(member, data);
+				}
+			}
+		}
+		catch (error) {
+			error_manager.mark(ErrorTicketManager.create('presenceUpdate', error));
+		}
+	}
 });
 
 client.on('voiceStateUpdate', (oldState, newState) => {
-    if (app.isInitialized()) {
-        try {
-            const member = newState.member ? newState.member : oldState.member;
-            if (!member.user.bot && oldState.channel != newState.channel) {
-                general.memberVoiceUpdate(member, oldState, newState);
-            }
-        } catch (error) {
-            error_manager.mark(ErrorTicketManager.create('voiceStateUpdate', error));
-        }
-    }
+	if (app.isInitialized()) {
+		try {
+			const member = newState.member ? newState.member : oldState.member;
+			if (!member.user.bot && oldState.channel != newState.channel) {
+				general.memberVoiceUpdate(member, oldState, newState);
+			}
+		}
+		catch (error) {
+			error_manager.mark(ErrorTicketManager.create('voiceStateUpdate', error));
+		}
+	}
 });
 
 client.on('messageReactionAdd', async (reaction, user) => {
-    if (app.isInitialized()) {
-        try {
-            if (reaction.partial) await reaction.fetch();
-            if (reaction.message.partial) await reaction.message.fetch();
-            const this_message = reaction.message;
-            const this_member = app.member(user.id);
+	if (app.isInitialized()) {
+		try {
+			if (reaction.partial) await reaction.fetch();
+			if (reaction.message.partial) await reaction.message.fetch();
+			const this_message = reaction.message;
+			const this_member = app.member(user.id);
 
-            if (this_member && !this_member.user.bot && this_message && this_message.embeds.length > 0 && this_message.author.id == constants.me) {
-                reaction_manager.onReactionAdd(this_message, this_message.embeds[0], reaction.emoji, this_member);
-            }
-        } catch (error) {
-            error_manager.mark(ErrorTicketManager.create('messageReactionAdd', error));
-        }
-    }
+			if (this_member && !this_member.user.bot && this_message && this_message.embeds.length > 0 && this_message.author.id == constants.me) {
+				reaction_manager.onReactionAdd(this_message, this_message.embeds[0], reaction.emoji, this_member);
+			}
+		}
+		catch (error) {
+			error_manager.mark(ErrorTicketManager.create('messageReactionAdd', error));
+		}
+	}
 });
 
 client.on('messageReactionRemove', async (reaction, user) => {
-    if (app.isInitialized()) {
-        try {
-            if (reaction.partial) await reaction.fetch();
-            if (reaction.message.partial) await reaction.message.fetch();
-            const this_message = reaction.message;
-            const this_member = app.member(user.id);
+	if (app.isInitialized()) {
+		try {
+			if (reaction.partial) await reaction.fetch();
+			if (reaction.message.partial) await reaction.message.fetch();
+			const this_message = reaction.message;
+			const this_member = app.member(user.id);
 
-            if (this_member && !this_member.user.bot && this_message && this_message.embeds.length > 0 && this_message.author.id == constants.me) {
-                reaction_manager.onReactionRemove(this_message, this_message.embeds[0], reaction.emoji, this_member);
-            }
-        } catch (error) {
-            error_manager.mark(ErrorTicketManager.create('messageReactionRemove', error));
-        }
-    }
+			if (this_member && !this_member.user.bot && this_message && this_message.embeds.length > 0 && this_message.author.id == constants.me) {
+				reaction_manager.onReactionRemove(this_message, this_message.embeds[0], reaction.emoji, this_member);
+			}
+		}
+		catch (error) {
+			error_manager.mark(ErrorTicketManager.create('messageReactionRemove', error));
+		}
+	}
 });
 
 client.on('emojiCreate', emoji => {
-    if (app.isInitialized()) {
-        try {
-            const embed = new Discord.MessageEmbed();
-            embed.setAuthor('Quarantine Gaming: Guild Emoji Manager');
-            embed.setTitle('Emoji Created');
-            embed.addField('Name:', emoji.name);
-            embed.setThumbnail(emoji.url);
-            embed.setColor('#6464ff');
-            embed.setTimestamp();
-            message_manager.sendToChannel(constants.channels.qg.logs, embed);
-        } catch (error) {
-            error_manager.mark(ErrorTicketManager.create('emojiCreate', error));
-        }
-    }
+	if (app.isInitialized()) {
+		try {
+			const embed = new Discord.MessageEmbed();
+			embed.setAuthor('Quarantine Gaming: Guild Emoji Manager');
+			embed.setTitle('Emoji Created');
+			embed.addField('Name:', emoji.name);
+			embed.setThumbnail(emoji.url);
+			embed.setColor('#6464ff');
+			embed.setTimestamp();
+			message_manager.sendToChannel(constants.channels.qg.logs, embed);
+		}
+		catch (error) {
+			error_manager.mark(ErrorTicketManager.create('emojiCreate', error));
+		}
+	}
 });
 
 client.on('emojiUpdate', (oldEmoji, newEmoji) => {
-    if (app.isInitialized()) {
-        try {
-            const embed = new Discord.MessageEmbed();
-            embed.setAuthor('Quarantine Gaming: Guild Emoji Manager');
-            embed.setTitle('Emoji Updated');
-            if (oldEmoji.name != newEmoji.name) {
-                embed.addField('Old Name:', oldEmoji.name);
-                embed.addField('Updated Name:', newEmoji.name);
-                embed.setThumbnail(newEmoji.url);
-                embed.setColor('#6464ff');
-                embed.setTimestamp();
-                message_manager.sendToChannel(constants.channels.qg.logs, embed);
-            }
-        } catch (error) {
-            error_manager.mark(ErrorTicketManager.create('emojiCreate', error));
-        }
-    }
+	if (app.isInitialized()) {
+		try {
+			const embed = new Discord.MessageEmbed();
+			embed.setAuthor('Quarantine Gaming: Guild Emoji Manager');
+			embed.setTitle('Emoji Updated');
+			if (oldEmoji.name != newEmoji.name) {
+				embed.addField('Old Name:', oldEmoji.name);
+				embed.addField('Updated Name:', newEmoji.name);
+				embed.setThumbnail(newEmoji.url);
+				embed.setColor('#6464ff');
+				embed.setTimestamp();
+				message_manager.sendToChannel(constants.channels.qg.logs, embed);
+			}
+		}
+		catch (error) {
+			error_manager.mark(ErrorTicketManager.create('emojiCreate', error));
+		}
+	}
 });
 
 client.on('emojiDelete', emoji => {
-    if (app.isInitialized()) {
-        try {
-            const embed = new Discord.MessageEmbed();
-            embed.setAuthor('Quarantine Gaming: Guild Emoji Manager');
-            embed.setTitle('Emoji Deleted');
-            embed.addField('Name:', emoji.name);
-            embed.addField('ID:', emoji.id);
-            embed.setColor('#6464ff');
-            embed.setTimestamp();
-            message_manager.sendToChannel(constants.channels.qg.logs, embed);
-        } catch (error) {
-            error_manager.mark(ErrorTicketManager.create('emojiCreate', error));
-        }
-    }
+	if (app.isInitialized()) {
+		try {
+			const embed = new Discord.MessageEmbed();
+			embed.setAuthor('Quarantine Gaming: Guild Emoji Manager');
+			embed.setTitle('Emoji Deleted');
+			embed.addField('Name:', emoji.name);
+			embed.addField('ID:', emoji.id);
+			embed.setColor('#6464ff');
+			embed.setTimestamp();
+			message_manager.sendToChannel(constants.channels.qg.logs, embed);
+		}
+		catch (error) {
+			error_manager.mark(ErrorTicketManager.create('emojiCreate', error));
+		}
+	}
 });
 
 client.on('rateLimit', async (rateLimitInfo) => {
-    if (app.isInitialized()) {
-        try {
-            const embed = new Discord.MessageEmbed();
-            embed.setColor('#ffff00');
-            embed.setAuthor('Quarantine Gaming: Telemetry');
-            embed.setTitle('The client hits a rate limit while making a request.');
-            embed.addField('Timeout', rateLimitInfo.timeout);
-            embed.addField('Limit', rateLimitInfo.limit);
-            embed.addField('Method', rateLimitInfo.method);
-            embed.addField('Path', rateLimitInfo.path);
-            embed.addField('Route', rateLimitInfo.route);
-            await message_manager.sendToChannel(constants.channels.qg.logs, embed);
-        } catch (error) {
-            error_manager.mark(ErrorTicketManager.create('rateLimit', error));
-        }
-    } else {
-        console.error(error);
-    }
+	if (app.isInitialized()) {
+		try {
+			const embed = new Discord.MessageEmbed();
+			embed.setColor('#ffff00');
+			embed.setAuthor('Quarantine Gaming: Telemetry');
+			embed.setTitle('The client hits a rate limit while making a request.');
+			embed.addField('Timeout', rateLimitInfo.timeout);
+			embed.addField('Limit', rateLimitInfo.limit);
+			embed.addField('Method', rateLimitInfo.method);
+			embed.addField('Path', rateLimitInfo.path);
+			embed.addField('Route', rateLimitInfo.route);
+			await message_manager.sendToChannel(constants.channels.qg.logs, embed);
+		}
+		catch (error) {
+			error_manager.mark(ErrorTicketManager.create('rateLimit', error));
+		}
+	}
+	else {
+		console.error(rateLimitInfo);
+	}
 });
 
 client.on('error', (error) => {
-    if (app.isInitialized()) {
-        error_manager.mark(ErrorTicketManager.create('Client Error', error));
-    } else {
-        console.error(error);
-    }
+	if (app.isInitialized()) {
+		error_manager.mark(ErrorTicketManager.create('Client Error', error));
+	}
+	else {
+		console.error(error);
+	}
 });
 
 client.login(process.env.BOT_TOKEN);

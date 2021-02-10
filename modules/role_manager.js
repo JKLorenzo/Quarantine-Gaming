@@ -1,5 +1,5 @@
+// eslint-disable-next-line no-unused-vars
 const Discord = require('discord.js');
-const functions = require('./functions.js');
 const classes = require('./classes.js');
 /** @type {import('./app.js')} */
 let app;
@@ -11,41 +11,43 @@ const RoleManager = new classes.ProcessQueue(2500);
  * @param {CommandoClient} ClientInstance The Commando Client instance used to login.
  */
 module.exports.initialize = (ClientInstance) => {
-    // Link
-    app = ClientInstance.modules.app;
-}
+	// Link
+	app = ClientInstance.modules.app;
+};
 
 /**
  * Creates a new role in the guild.
- * @param {{name: String, color?: Discord.ColorResolvable, hoist?: Boolean, position?: number, permissions?: Discord.PermissionResolvable, mentionable?: Boolean, reason?: String}} options 
+ * @param {{name: String, color?: Discord.ColorResolvable, hoist?: Boolean, position?: number, permissions?: Discord.PermissionResolvable, mentionable?: Boolean, reason?: String}} options
  * @returns {Promise<Discord.Role>} A role object
  */
 module.exports.create = (options) => {
-    return new Promise(async (resolve, reject) => {
-        console.log(`RoleCreate: Queueing ${RoleManager.processID}`);
-        await RoleManager.queue();
-        console.log(`RoleCreate: Started ${RoleManager.currentID}`);
-        let output, error;
-        try {
-            output = await app.guild().roles.create({
-                data: {
-                    name: options.name,
-                    color: options.color,
-                    hoist: options.hoist,
-                    mentionable: options.mentionable,
-                    permissions: options.permissions,
-                    position: options.position,
-                },
-                reason: options.reason
-            });
-        } catch (err) {
-            error = err;
-        }
-        console.log(`RoleCreate: Finished ${RoleManager.currentID}`);
-        RoleManager.finish();
-        error ? reject(error) : resolve(output)
-    });
-}
+	return new Promise((resolve, reject) => {
+		console.log(`RoleCreate: Queueing ${RoleManager.processID}`);
+		RoleManager.queue().then(async () => {
+			console.log(`RoleCreate: Started ${RoleManager.currentID}`);
+			let output, error;
+			try {
+				output = await app.guild().roles.create({
+					data: {
+						name: options.name,
+						color: options.color,
+						hoist: options.hoist,
+						mentionable: options.mentionable,
+						permissions: options.permissions,
+						position: options.position,
+					},
+					reason: options.reason,
+				});
+			}
+			catch (err) {
+				error = err;
+			}
+			console.log(`RoleCreate: Finished ${RoleManager.currentID}`);
+			RoleManager.finish();
+			error ? reject(error) : resolve(output);
+		});
+	});
+};
 
 /**
  * Deletes a role from the guild.
@@ -54,21 +56,23 @@ module.exports.create = (options) => {
  * @returns {Promise<Discord.Role>} A role object
  */
 module.exports.delete = (RoleResolvable, reason = '') => {
-    return new Promise(async (resolve, reject) => {
-        console.log(`RoleDelete: Queueing ${RoleManager.processID}`);
-        await RoleManager.queue();
-        console.log(`RoleDelete: Started ${RoleManager.currentID}`);
-        let output, error = '';
-        try {
-            output = await app.role(RoleResolvable).delete(reason);
-        } catch (err) {
-            error = err;
-        }
-        console.log(`RoleDelete: Finished ${RoleManager.currentID}`);
-        RoleManager.finish();
-        error ? reject(error) : resolve(output)
-    });
-}
+	return new Promise((resolve, reject) => {
+		console.log(`RoleDelete: Queueing ${RoleManager.processID}`);
+		RoleManager.queue().then(async () => {
+			console.log(`RoleDelete: Started ${RoleManager.currentID}`);
+			let output, error = '';
+			try {
+				output = await app.role(RoleResolvable).delete(reason);
+			}
+			catch (err) {
+				error = err;
+			}
+			console.log(`RoleDelete: Finished ${RoleManager.currentID}`);
+			RoleManager.finish();
+			error ? reject(error) : resolve(output);
+		});
+	});
+};
 
 /**
  * Adds the role to the target user.
@@ -77,21 +81,23 @@ module.exports.delete = (RoleResolvable, reason = '') => {
  * @returns {Promise<Discord.Role>} A role object
  */
 module.exports.add = (UserResolvable, RoleResolvable) => {
-    return new Promise(async (resolve, reject) => {
-        console.log(`RoleAdd: Queueing ${RoleManager.processID} => ${UserResolvable} | ${RoleResolvable}`);
-        await RoleManager.queue();
-        console.log(`RoleAdd: Started ${RoleManager.currentID} => ${UserResolvable} | ${RoleResolvable}`);
-        let output, error;
-        try {
-            output = await app.member(UserResolvable).roles.add(app.role(RoleResolvable));
-        } catch (err) {
-            error = err;
-        }
-        console.log(`RoleAdd: Finished ${RoleManager.currentID} => ${UserResolvable} | ${RoleResolvable}`);
-        RoleManager.finish();
-        error ? reject(error) : resolve(output)
-    });
-}
+	return new Promise((resolve, reject) => {
+		console.log(`RoleAdd: Queueing ${RoleManager.processID} => ${UserResolvable} | ${RoleResolvable}`);
+		RoleManager.queue().then(async () => {
+			console.log(`RoleAdd: Started ${RoleManager.currentID} => ${UserResolvable} | ${RoleResolvable}`);
+			let output, error;
+			try {
+				output = await app.member(UserResolvable).roles.add(app.role(RoleResolvable));
+			}
+			catch (err) {
+				error = err;
+			}
+			console.log(`RoleAdd: Finished ${RoleManager.currentID} => ${UserResolvable} | ${RoleResolvable}`);
+			RoleManager.finish();
+			error ? reject(error) : resolve(output);
+		});
+	});
+};
 
 /**
  * Removes the role from the target user.
@@ -100,18 +106,20 @@ module.exports.add = (UserResolvable, RoleResolvable) => {
  * @returns {Promise<Discord.Role>} A role object
  */
 module.exports.remove = (UserResolvable, RoleResolvable) => {
-    return new Promise(async (resolve, reject) => {
-        console.log(`RoleRemove: Queueing ${RoleManager.processID} => ${UserResolvable} | ${RoleResolvable}`);
-        await RoleManager.queue();
-        console.log(`RoleRemove: Started ${RoleManager.currentID} => ${UserResolvable} | ${RoleResolvable}`);
-        let output, error;
-        try {
-            output = await app.member(UserResolvable).roles.remove(app.role(RoleResolvable));
-        } catch (err) {
-            error = err;
-        }
-        console.log(`RoleRemove: Finished ${RoleManager.currentID} => ${UserResolvable} | ${RoleResolvable}`);
-        RoleManager.finish();
-        error ? reject(error) : resolve(output)
-    });
-}
+	return new Promise((resolve, reject) => {
+		console.log(`RoleRemove: Queueing ${RoleManager.processID} => ${UserResolvable} | ${RoleResolvable}`);
+		RoleManager.queue().then(async () => {
+			console.log(`RoleRemove: Started ${RoleManager.currentID} => ${UserResolvable} | ${RoleResolvable}`);
+			let output, error;
+			try {
+				output = await app.member(UserResolvable).roles.remove(app.role(RoleResolvable));
+			}
+			catch (err) {
+				error = err;
+			}
+			console.log(`RoleRemove: Finished ${RoleManager.currentID} => ${UserResolvable} | ${RoleResolvable}`);
+			RoleManager.finish();
+			error ? reject(error) : resolve(output);
+		});
+	});
+};

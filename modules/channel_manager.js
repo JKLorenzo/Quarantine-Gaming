@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 const Discord = require('discord.js');
 const functions = require('./functions.js');
 const classes = require('./classes.js');
@@ -11,9 +12,9 @@ const ChannelQueueManager = new classes.ProcessQueue(2500);
  * @param {CommandoClient} ClientInstance The Commando Client instance used to login.
  */
 module.exports.initialize = (ClientInstance) => {
-    // Link
-    app = ClientInstance.modules.app;
-}
+	// Link
+	app = ClientInstance.modules.app;
+};
 
 /**
  * Creates a new channel in the guild.
@@ -21,32 +22,34 @@ module.exports.initialize = (ClientInstance) => {
  * @returns {Promise<Discord.GuildChannel>} A Text Channel, a Voice Channel, or a Category Channel Object
  */
 module.exports.create = (options) => {
-    return new Promise(async (resolve, reject) => {
-        console.log(`ChannelCreate: Queueing ${ChannelQueueManager.processID}`);
-        await ChannelQueueManager.queue();
-        console.log(`ChannelCreate: Started ${ChannelQueueManager.currentID}`);
-        let output, error;
-        try {
-            output = await app.guild().channels.create(options.name, {
-                bitrate: options.bitrate,
-                nsfw: options.nsfw,
-                parent: options.parent,
-                permissionOverwrites: options.permissionOverwrites,
-                position: options.position,
-                rateLimitPerUser: options.rateLimitPerUser,
-                reason: options.reason,
-                topic: options.topic,
-                type: options.type,
-                userLimit: options.userLimit
-            });
-        } catch (err) {
-            error = err;
-        }
-        console.log(`ChannelCreate: Finished ${ChannelQueueManager.currentID}`);
-        ChannelQueueManager.finish();
-        error ? reject(error) : resolve(output)
-    });
-}
+	return new Promise((resolve, reject) => {
+		console.log(`ChannelCreate: Queueing ${ChannelQueueManager.processID}`);
+		ChannelQueueManager.queue().then(async () => {
+			console.log(`ChannelCreate: Started ${ChannelQueueManager.currentID}`);
+			let output, error;
+			try {
+				output = await app.guild().channels.create(options.name, {
+					bitrate: options.bitrate,
+					nsfw: options.nsfw,
+					parent: options.parent,
+					permissionOverwrites: options.permissionOverwrites,
+					position: options.position,
+					rateLimitPerUser: options.rateLimitPerUser,
+					reason: options.reason,
+					topic: options.topic,
+					type: options.type,
+					userLimit: options.userLimit,
+				});
+			}
+			catch (err) {
+				error = err;
+			}
+			console.log(`ChannelCreate: Finished ${ChannelQueueManager.currentID}`);
+			ChannelQueueManager.finish();
+			error ? reject(error) : resolve(output);
+		});
+	});
+};
 
 /**
  * Deletes a Guild Channel.
@@ -55,37 +58,39 @@ module.exports.create = (options) => {
  * @returns {Promise<Discord.Channel>} A Channel Object
  */
 module.exports.delete = (GuildChannelResolvable, reason = '') => {
-    return new Promise(async (resolve, reject) => {
-        console.log(`ChannelDelete: Queueing ${ChannelQueueManager.processID}`);
-        await ChannelQueueManager.queue();
-        console.log(`ChannelDelete: Started ${ChannelQueueManager.currentID}`);
-        let output, error = '';
-        try {
-            output = await app.channel(GuildChannelResolvable).delete(reason);
-        } catch (err) {
-            error = err;
-        }
-        console.log(`ChannelDelete: Finished ${ChannelQueueManager.currentID}`);
-        ChannelQueueManager.finish();
-        error ? reject(error) : resolve(output)
-    });
-}
+	return new Promise((resolve, reject) => {
+		console.log(`ChannelDelete: Queueing ${ChannelQueueManager.processID}`);
+		ChannelQueueManager.queue().then(async () => {
+			console.log(`ChannelDelete: Started ${ChannelQueueManager.currentID}`);
+			let output, error = '';
+			try {
+				output = await app.channel(GuildChannelResolvable).delete(reason);
+			}
+			catch (err) {
+				error = err;
+			}
+			console.log(`ChannelDelete: Finished ${ChannelQueueManager.currentID}`);
+			ChannelQueueManager.finish();
+			error ? reject(error) : resolve(output);
+		});
+	});
+};
 
 /**
  * Deletes the messages from these channels.
  * @param {Array<Discord.GuildChannelResolvable>} GuildChannelResolvables An array of GuildChannelResolvable
  */
 module.exports.clearTempChannels = async (GuildChannelResolvables) => {
-    for (const channel of GuildChannelResolvables) {
-        /** @type {Discord.TextChannel} */
-        const this_channel = app.channel(channel);
-        if (!this_channel) continue;
-        await this_channel.messages.fetch().then(async messages => {
-            for (const message of messages) {
-                await message[1].delete({ timeout: 900000 }).catch(() => { }); // Delete after 15 mins
-                await functions.sleep(5000); // Rate Limit
-            }
-        });
-        await functions.sleep(5000); // Rate Limit
-    }
-}
+	for (const channel of GuildChannelResolvables) {
+		/** @type {Discord.TextChannel} */
+		const this_channel = app.channel(channel);
+		if (!this_channel) continue;
+		await this_channel.messages.fetch().then(async messages => {
+			for (const message of messages) {
+				message[1].delete({ timeout: 900000 }).catch(e => void e);
+				await functions.sleep(5000);
+			}
+		});
+		await functions.sleep(5000);
+	}
+};
