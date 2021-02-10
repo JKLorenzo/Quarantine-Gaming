@@ -87,7 +87,7 @@ async function uploadLocalEmojis() {
 }
 
 client.once('ready', async () => {
-	console.log('Startup: Ready');
+	console.log('Startup: Initializing');
 	try {
 		await client.user.setActivity('Startup', {
 			type: 'WATCHING',
@@ -434,4 +434,5 @@ client.on('error', (error) => {
 	}
 });
 
+console.log('Startup: Logging in');
 client.login(process.env.BOT_TOKEN);
