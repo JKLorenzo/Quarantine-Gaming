@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const { Command } = require('discord.js-commando');
+const constants = require('../../modules/constants.js');
 /** @type {import('../../modules/app.js')} */
 let app;
 /** @type {import('../../modules/speech.js')} */
