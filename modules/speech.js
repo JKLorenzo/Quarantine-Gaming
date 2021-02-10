@@ -1,7 +1,6 @@
 const Discord = require('discord.js');
 const OpusScript = require('opusscript'); // for TTS
-const fs = require('fs');
-const tts = require('google-translate-tts');
+const googleTTS = require('google-tts-api');
 const functions = require('./functions.js');
 const classes = require('./classes.js');
 /** @type {import('./error_manager.js')} */
@@ -48,16 +47,13 @@ module.exports.say = (message, channel) => {
             // Join channel
             connection = await channel.join();
             // TTS
-            const buffer = await tts.synthesize({
-                text: message,
-                voice: 'en',
-                slow: true
+            const url = googleTTS.getAudioUrl(message, {
+                lang: 'en-US',
+                slow: false,
+                host: 'https://translate.google.com',
             });
-            // Write TTS to file
-            fs.writeFileSync('tts.mp3', buffer);
-            await functions.sleep(1000);
             // Speak to channel
-            const dispatcher = connection.play('tts.mp3');
+            const dispatcher = connection.play(url);
             dispatcher.on('speaking', async speaking => {
                 if (!speaking) {
                     await functions.sleep(2500);
@@ -67,8 +63,9 @@ module.exports.say = (message, channel) => {
                 }
             });
         } catch (error) {
-            if (connection) channel.leave();
             error_manager.mark(ErrorTicketManager.create('say', error));
+            await functions.sleep(1000);
+            if (connection) channel.leave();
             SpeechManager.finish();
             resolve();
         }
