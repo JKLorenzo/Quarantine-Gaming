@@ -202,7 +202,7 @@ module.exports.memberActivityUpdate = async (member, data) => {
 			const game_role = app.guild().roles.cache.find(role => role.name == activity_name) || await role_manager.create({ name: activity_name, color: '0x00ffff' });
 			let play_role = app.guild().roles.cache.find(role => role.name == 'Play ' + activity_name);
 
-			if (!app.guild().roles.cache.find(role => role.name == activity_name + ' ⭐')) await role_manager.create({ name: activity_name + ' ⭐', color: '0x00fffe' });
+			if (!app.guild().roles.cache.find(role => role.name == activity_name + ' ⭐')) await role_manager.create({ name: activity_name + ' ⭐', color: '0x00fffe', mentionable: true });
 
 			if (data.new) {
 				// Update database

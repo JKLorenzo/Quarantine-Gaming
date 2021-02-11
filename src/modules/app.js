@@ -290,7 +290,7 @@ module.exports.initialize = async (ClientInstance) => {
 
 							if (!this.guild().roles.cache.find(role => role.name == activity_name + ' ⭐')) {
 								// Create Game Role Mentionable
-								await role_manager.create({ name: activity_name + ' ⭐', color: '0x00fffe' });
+								await role_manager.create({ name: activity_name + ' ⭐', color: '0x00fffe', mentionable: true });
 							}
 						}
 
