@@ -145,7 +145,7 @@ client.on('userUpdate', (oldUser, newUser) => {
 
 			embed.setFooter(`Reference ID: ${newUser.id}`);
 			embed.setTimestamp();
-			embed.setColor('#64ffd4');
+			embed.setColor('#7bff64');
 			if (embed.fields.length > 1) message_manager.sendToChannel(constants.channels.qg.logs, embed);
 		}
 		catch (error) {
@@ -187,7 +187,7 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
 
 			embed.setFooter(`Reference ID: ${newMember.id}`);
 			embed.setTimestamp();
-			embed.setColor('#64ffd4');
+			embed.setColor('#7bff64');
 			if (embed.fields.length > 1) message_manager.sendToChannel(constants.channels.qg.logs, embed);
 		}
 		catch (error) {
@@ -222,7 +222,7 @@ client.on('guildMemberAdd', (this_member) => {
 			embed.addField('Account Created:', `${created_day.toUTCString().replace('GMT', 'UTC')} (${estimated_difference})`);
 			embed.setFooter(`Reference ID: ${this_member.id}`);
 			embed.setTimestamp();
-			embed.setColor('#64ffd4');
+			embed.setColor('#7bff64');
 			message_manager.sendToChannel(constants.channels.qg.logs, embed);
 		}
 		catch (error) {
