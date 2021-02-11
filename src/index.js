@@ -160,7 +160,7 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
 			const embed = new Discord.MessageEmbed();
 			embed.setAuthor('Quarantine Gaming: Member Submanager');
 			embed.setTitle('Member Update');
-			embed.setThumbnail(newMember.displayAvatarURL());
+			embed.setThumbnail(newMember.user.displayAvatarURL());
 			embed.addField('User:', newMember);
 
 			// Display Name
@@ -217,7 +217,7 @@ client.on('guildMemberAdd', (this_member) => {
 			const embed = new Discord.MessageEmbed();
 			embed.setAuthor('Quarantine Gaming: Member Submanager');
 			embed.setTitle('New Member');
-			embed.setThumbnail(this_member.displayAvatarURL());
+			embed.setThumbnail(this_member.user.displayAvatarURL());
 			embed.addField('User:', this_member);
 			embed.addField('Account Created:', `${created_day.toUTCString().replace('GMT', 'UTC')} (${estimated_difference})`);
 			embed.setFooter(`Reference ID: ${this_member.id}`);
