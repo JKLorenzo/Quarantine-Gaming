@@ -19,7 +19,7 @@ const ErrorTicketManager = new classes.ErrorTicketManager('index.js');
 
 const client = new CommandoClient({
 	commandPrefix: '!',
-	owner: '393013053488103435',
+	owner: constants.owner,
 	partials: [
 		'MESSAGE', 'CHANNEL', 'REACTION',
 	],
