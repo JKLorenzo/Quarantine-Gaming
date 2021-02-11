@@ -130,18 +130,21 @@ module.exports.updateExpiredGameRoles = async () => {
 		for (const data of expiredGameRoles) {
 			const member = app.member(data.memberID);
 			const game_role = app.role(data.roleID);
+			console.log(`ExpiredGameRole: ${game_role.name} | ${member.displayName}`);
 			if (member && game_role) {
 				// Update database
 				await database.memberGameRoleDelete(member, game_role);
 
-				// Update member
-				await role_manager.remove(member, game_role);
-
 				// Check if role is still in use
-				if (app.guild().members.cache.array().filter(this_member => app.hasRole(this_member, [game_role])).length == 0) {
+				if (game_role.members.array().length > 1) {
+					// Update member
+					role_manager.remove(member, game_role);
+				}
+				else {
+					// Delete role
 					await role_manager.delete(game_role, 'Game Role is no longer in use by anyone.');
 					const game_role_mentionable = app.guild().roles.cache.find(role => role.name.startsWith(game_role.name) && role.hexColor == '#00fffe' && functions.contains(role.name, ' ⭐'));
-					if (game_role_mentionable) await role_manager.delete(game_role_mentionable, 'Game Role Mentionable is no longer in use by anyone.');
+					await role_manager.delete(game_role_mentionable, 'Game Role Mentionable is no longer in use by anyone.');
 				}
 			}
 		}
