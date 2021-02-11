@@ -305,7 +305,7 @@ client.on('roleCreate', (this_role) => {
 			embed.setTitle('Role Created');
 			embed.addField('Name:', this_role.name, true);
 			embed.addField('ID:', this_role.id, true);
-			embed.addField('Color:', this_role.hexColor);
+			embed.addField('Color:', this_role.hexColor, true);
 			embed.addField('Mentionable:', this_role.mentionable, true);
 			embed.addField('Hoisted:', this_role.hoist, true);
 			embed.addField('BitField Permissions:', this_role.permissions.bitfield, true);
@@ -325,12 +325,12 @@ client.on('roleUpdate', (oldRole, newRole) => {
 			const embed = new Discord.MessageEmbed();
 			embed.setAuthor('Quarantine Gaming: Role Submanager');
 			embed.setTitle('Role Updated');
-			embed.addField('Role:', newRole);
-			if (oldRole.name != newRole.name) embed.addField('Name:', `Old: ${oldRole.name}\nNew: ${newRole.name}`);
-			if (oldRole.hexColor != newRole.hexColor) embed.addField('Color:', `Old: ${oldRole.hexColor}\nNew: ${newRole.hexColor}`);
-			if (oldRole.mentionable != newRole.mentionable) embed.addField('Mentionable:', newRole.mentionable);
-			if (oldRole.hoist != newRole.hoist) embed.addField('Hoisted:', newRole.hoist);
-			if (oldRole.permissions.bitfield != newRole.permissions.bitfield) embed.addField('BitField Permissions:', `Old: ${oldRole.permissions.bitfield}\nNew: ${newRole.permissions.bitfield}`);
+			embed.addField('Role:', newRole, true);
+			if (oldRole.name != newRole.name) embed.addField('Name:', `Old: ${oldRole.name}\nNew: ${newRole.name}`, true);
+			if (oldRole.hexColor != newRole.hexColor) embed.addField('Color:', `Old: ${oldRole.hexColor}\nNew: ${newRole.hexColor}`, true);
+			if (oldRole.mentionable != newRole.mentionable) embed.addField('Mentionable:', newRole.mentionable, true);
+			if (oldRole.hoist != newRole.hoist) embed.addField('Hoisted:', newRole.hoist, true);
+			if (oldRole.permissions.bitfield != newRole.permissions.bitfield) embed.addField('BitField Permissions:', `Old: ${oldRole.permissions.bitfield}\nNew: ${newRole.permissions.bitfield}`, true);
 			embed.setFooter(`Reference ID: ${newRole.id}`);
 			embed.setTimestamp();
 			embed.setColor(newRole.color);
