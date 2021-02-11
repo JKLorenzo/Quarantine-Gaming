@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const Commando = require('discord.js-commando');
+const constants = require('../../modules/constants.js');
 const functions = require('../../modules/functions.js');
 /** @type {import('../../modules/app.js')} */
 let app;
@@ -63,53 +64,41 @@ module.exports = class PlayersCommand extends Commando.Command {
 					}
 				}
 
-				if (players.length > 0) {
-					// sort players
-					alphabetical.sort();
-					for (const name of alphabetical) {
-						for (const player of players) {
-							const this_player = app.member(player);
-							if (this_player.displayName == name) {
-								if (this_player.roles.cache.find(this_role => this_role.name == `Play ${game_role.name}`)) {
-									in_game.push(this_player);
-								}
-								else if (this_player.presence.status == 'online') {
-									online.push(this_player);
-								}
-								else {
-									unavailable.push(this_player);
-								}
+				const embed = new Discord.MessageEmbed();
+				embed.setAuthor('Quarantine Gaming: List of Players');
+				embed.setTitle(game_role.name);
+				embed.setDescription('All members who have played this game recently are as follows:');
+
+				const emoji = app.guild().emojis.cache.find(this_role => this_role.name == game_role.name.trim().split(' ').join('').split(':').join('').split('-').join(''));
+				const qg_emoji = app.guild().emojis.cache.find(this_role => this_role.name == 'quarantinegaming');
+				emoji ? embed.setThumbnail(emoji.url) : embed.setThumbnail(qg_emoji.url);
+
+				alphabetical.sort();
+				for (const name of alphabetical) {
+					for (const player of players) {
+						const this_player = app.member(player);
+						if (this_player.displayName == name) {
+							if (this_player.roles.cache.find(this_role => this_role.name == `Play ${game_role.name}`)) {
+								in_game.push(this_player);
+							}
+							else if (this_player.presence.status == 'online') {
+								online.push(this_player);
+							}
+							else {
+								unavailable.push(this_player);
 							}
 						}
 					}
-
-					const embed = new Discord.MessageEmbed();
-					embed.setAuthor('Quarantine Gaming: List of Players');
-					embed.setTitle(game_role.name);
-					embed.setDescription('All members who have played this game before are as follows:');
-					if (in_game.length > 0) {
-						embed.addField(`In Game: ${in_game.length}`, in_game.join(', '));
-					}
-					if (online.length > 0) {
-						embed.addField(`Online: ${online.length}`, online.join(', '));
-					}
-					if (unavailable.length > 0) {
-						embed.addField(`Away / Busy / Offline : ${unavailable.length}`, unavailable.join(', '));
-					}
-					embed.setFooter(`${players.length} players total.`);
-					embed.setColor('#25ff00');
-
-					const emoji = app.guild().emojis.cache.find(this_role => this_role.name == game_role.name.trim().split(' ').join('').split(':').join('').split('-').join(''));
-					const qg_emoji = app.guild().emojis.cache.find(this_role => this_role.name == 'quarantinegaming');
-					if (emoji) {
-						embed.setThumbnail(emoji.url);
-					}
-					else {
-						embed.setThumbnail(qg_emoji.url);
-					}
-
-					message_manager.sendToChannel(message.channel, embed);
 				}
+				embed.addField(`In Game: ${in_game.length}`, in_game.length > 0 ? in_game.join(', ') : 'No players found.');
+				embed.addField(`Online: ${online.length}`, online.length > 0 ? online.join(', ') : 'No players found.');
+				embed.addField(`Away / Busy / Offline : ${unavailable.length}`, unavailable.length > 0 ? unavailable.join(', ') : 'No players found.');
+				embed.setFooter(`${players.length} players total.`);
+				embed.setColor('#25ff00');
+				message_manager.sendToChannel(message.channel, embed);
+			}
+			else {
+				message.reply(`No game role found matching this game role mentionable (${game_role_mentionable}). Please contact ${app.member(constants.owner)} for troubleshooting.`);
 			}
 		}
 		else {
