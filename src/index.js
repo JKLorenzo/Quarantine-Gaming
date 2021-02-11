@@ -119,35 +119,34 @@ client.on('message', (incoming_message) => {
 	}
 });
 
-client.on('userUpdate', async (oldUser, newUser) => {
+client.on('userUpdate', (oldUser, newUser) => {
 	if (app.isInitialized()) {
 		try {
 			const embed = new Discord.MessageEmbed();
-			const member = app.member(newUser);
-			embed.setAuthor(member.displayName, oldUser.displayAvatarURL());
+			embed.setAuthor('Quarantine Gaming: Member Submanager');
 			embed.setTitle('User Update');
+			embed.setThumbnail(newUser.displayAvatarURL());
+			embed.addField('User:', newUser);
 
-			const description = new Array();
 			// Avatar
 			if (oldUser.displayAvatarURL() != newUser.displayAvatarURL()) {
-				description.push('**Avatar**');
-				description.push(`New: [Avatar Link](${newUser.displayAvatarURL()})`);
-				embed.setThumbnail(newUser.displayAvatarURL());
+				embed.addField('Avatar:', `New [Avatar](${newUser.displayAvatarURL()})`);
 			}
 
 			// Username
 			if (oldUser.username != newUser.username) {
-				if (description.length > 0) description.push(' ');
-				description.push('**Username**');
-				description.push(`Old: ${oldUser.username}`);
-				description.push(`New: ${newUser.username}`);
+				embed.addField('Username:', `Old: ${oldUser.username}\nNew: ${newUser.username}`);
 			}
 
-			embed.setDescription(description.join('\n'));
-			embed.setFooter(`${newUser.tag} (${newUser.id})`);
+			// Tag
+			if (oldUser.tag != newUser.tag) {
+				embed.addField('Tag:', `Old: ${oldUser.tag}\nNew: ${newUser.tag}`);
+			}
+
+			embed.setFooter(`Reference ID: ${newUser.id}`);
 			embed.setTimestamp();
-			embed.setColor('#6464ff');
-			if (description.length > 0) await message_manager.sendToChannel(constants.channels.qg.logs, embed);
+			embed.setColor('#64ffd4');
+			if (embed.fields.length > 1) message_manager.sendToChannel(constants.channels.qg.logs, embed);
 		}
 		catch (error) {
 			error_manager.mark(ErrorTicketManager.create('userUpdate', error));
@@ -155,48 +154,41 @@ client.on('userUpdate', async (oldUser, newUser) => {
 	}
 });
 
-client.on('guildMemberUpdate', async (oldMember, newMember) => {
+client.on('guildMemberUpdate', (oldMember, newMember) => {
 	if (app.isInitialized()) {
 		try {
 			const embed = new Discord.MessageEmbed();
-			embed.setAuthor(newMember.displayName, newMember.user.displayAvatarURL());
-			embed.setTitle('Guild Member Update');
+			embed.setAuthor('Quarantine Gaming: Member Submanager');
+			embed.setTitle('Member Update');
+			embed.setThumbnail(newMember.displayAvatarURL());
+			embed.addField('User:', newMember);
 
-			const description = new Array();
 			// Display Name
 			if (newMember.displayName != oldMember.displayName) {
-				if (description.length > 0) description.push(' ');
-				description.push('**Display Name**');
-				description.push(`Old: ${oldMember.displayName}`);
-				description.push(`New: ${newMember.displayName}`);
+				embed.addField('Display Name', `Old: ${oldMember.displayName}\nNew: ${newMember.displayName}`);
 			}
 
 			// Role
 			if (newMember.roles.cache.size != oldMember.roles.cache.size) {
 				const added = new Array(), removed = new Array();
 				for (const this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
-					if (!this_role.name.startsWith('Play') && !this_role.name.startsWith('Text') && !this_role.name.startsWith('Team') && this_role.id != constants.roles.dedicated && this_role.id != constants.roles.streaming) {
-						if (newMember.roles.cache.has(this_role.id)) {
-							added.push(this_role);
-						}
-						else {
-							removed.push(this_role);
-						}
+					if (functions.contains(this_role.name, ['Play', 'Text', 'Team']) || functions.contains(this_role.id, [constants.roles.dedicated, constants.roles.streaming])) {
+						continue;
 					}
+					newMember.roles.cache.has(this_role.id) ? added.push(this_role.name) : removed.push(this_role.name);
 				}
-				if (added.length > 0 || removed.length > 0) {
-					if (description.length > 0) description.push(' ');
-					description.push('**Role**');
+				if (added.length > 0) {
+					embed.addField('Role Added:', added.join(', '));
 				}
-				if (added.length > 0) description.push(`Added: ${added.join(', ')}`);
-				if (removed.length > 0) description.push(`Removed: ${removed.join(', ')}`);
+				if (removed.length > 0) {
+					embed.addField('Role Removed:', removed.join(', '));
+				}
 			}
 
-			embed.setDescription(description.join('\n'));
-			embed.setFooter(`${newMember.user.tag} (${newMember.user.id})`);
+			embed.setFooter(`Reference ID: ${newMember.id}`);
 			embed.setTimestamp();
-			embed.setColor('#6464ff');
-			if (description.length > 0) await message_manager.sendToChannel(constants.channels.qg.logs, embed);
+			embed.setColor('#64ffd4');
+			if (embed.fields.length > 1) message_manager.sendToChannel(constants.channels.qg.logs, embed);
 		}
 		catch (error) {
 			error_manager.mark(ErrorTicketManager.create('guildMemberUpdate', error));
@@ -204,13 +196,91 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
 	}
 });
 
-client.on('inviteCreate', invite => {
+client.on('guildMemberAdd', (this_member) => {
+	if (app.isInitialized()) {
+		try {
+			if (!this_member.user.bot) general.memberScreening(this_member);
+
+			const created_day = this_member.user.createdAt;
+			const created_day_difference = functions.compareDate(created_day);
+			let estimated_difference = 'a few seconds ago';
+			if (created_day_difference.days > 0) {
+				estimated_difference = created_day_difference.days + ' days ago';
+			}
+			else if (created_day_difference.hours > 0) {
+				estimated_difference = created_day_difference.hours + ' hours ago';
+			}
+			else if (created_day_difference.minutes > 0) {
+				estimated_difference = created_day_difference.minutes + ' minutes ago';
+			}
+
+			const embed = new Discord.MessageEmbed();
+			embed.setAuthor('Quarantine Gaming: Member Submanager');
+			embed.setTitle('New Member');
+			embed.setThumbnail(this_member.displayAvatarURL());
+			embed.addField('User:', this_member);
+			embed.addField('Account Created:', `${created_day.toUTCString().replace('GMT', 'UTC')} (${estimated_difference})`);
+			embed.setFooter(`Reference ID: ${this_member.id}`);
+			embed.setTimestamp();
+			embed.setColor('#64ffd4');
+			message_manager.sendToChannel(constants.channels.qg.logs, embed);
+		}
+		catch (error) {
+			error_manager.mark(ErrorTicketManager.create('guildMemberAdd', error));
+		}
+	}
+});
+
+client.on('roleCreate', (this_role) => {
+	if (app.isInitialized()) {
+		try {
+			if (functions.contains(this_role.name, ['Play', 'Text', 'Team']) || functions.contains(this_role.id, [constants.roles.dedicated, constants.roles.streaming])) {
+				return;
+			}
+			const embed = new Discord.MessageEmbed();
+			embed.setAuthor('Quarantine Gaming: Role Submanager');
+			embed.setTitle('Role Created');
+			embed.addField('Name:', this_role.name, true);
+			embed.addField('Mentionable:', this_role.mentionable, true);
+			embed.addField('Hoisted:', this_role.hoist, true);
+			embed.setFooter(`Reference ID: ${this_role.id}`);
+			embed.setTimestamp();
+			embed.setColor(this_role.color);
+			message_manager.sendToChannel(constants.channels.qg.logs, embed);
+		}
+		catch (error) {
+			error_manager.mark(ErrorTicketManager.create('roleCreate', error));
+		}
+	}
+});
+
+client.on('roleDelete', (this_role) => {
+	if (app.isInitialized()) {
+		try {
+			if (functions.contains(this_role.name, ['Play', 'Text', 'Team']) || functions.contains(this_role.id, [constants.roles.dedicated, constants.roles.streaming])) {
+				return;
+			}
+			const embed = new Discord.MessageEmbed();
+			embed.setAuthor('Quarantine Gaming: Role Submanager');
+			embed.setTitle('Role Deleted');
+			embed.addField('Name:', this_role.name, true);
+			embed.setTimestamp();
+			embed.setColor(this_role.color);
+			message_manager.sendToChannel(constants.channels.qg.logs, embed);
+		}
+		catch (error) {
+			error_manager.mark(ErrorTicketManager.create('roleDelete', error));
+		}
+	}
+});
+
+client.on('inviteCreate', (invite) => {
 	if (app.isInitialized()) {
 		try {
 			app.addInvite(invite);
 
 			const embed = new Discord.MessageEmbed();
-			embed.setAuthor('Quarantine Gaming: Invites Submanager');
+			embed.setAuthor('Quarantine Gaming: Invite Submanager');
 			embed.setTitle('New Invite Created');
 			if (invite.inviter) {
 				embed.addField('Inviter:', invite.inviter, true);
@@ -239,19 +309,6 @@ client.on('inviteCreate', invite => {
 		}
 		catch (error) {
 			error_manager.mark(ErrorTicketManager.create('inviteCreate', error));
-		}
-	}
-});
-
-client.on('guildMemberAdd', async (this_member) => {
-	if (app.isInitialized()) {
-		try {
-			if (this_member && !this_member.user.bot && !app.hasRole(this_member, [constants.roles.member])) {
-				await general.memberScreening(this_member);
-			}
-		}
-		catch (error) {
-			error_manager.mark(ErrorTicketManager.create('guildMemberAdd', error));
 		}
 	}
 });
@@ -344,11 +401,11 @@ client.on('messageReactionRemove', async (reaction, user) => {
 	}
 });
 
-client.on('emojiCreate', emoji => {
+client.on('emojiCreate', (emoji) => {
 	if (app.isInitialized()) {
 		try {
 			const embed = new Discord.MessageEmbed();
-			embed.setAuthor('Quarantine Gaming: Guild Emoji Manager');
+			embed.setAuthor('Quarantine Gaming: Emoji Submanager');
 			embed.setTitle('Emoji Created');
 			embed.addField('Name:', emoji.name);
 			embed.setThumbnail(emoji.url);
@@ -366,7 +423,7 @@ client.on('emojiUpdate', (oldEmoji, newEmoji) => {
 	if (app.isInitialized()) {
 		try {
 			const embed = new Discord.MessageEmbed();
-			embed.setAuthor('Quarantine Gaming: Guild Emoji Manager');
+			embed.setAuthor('Quarantine Gaming: Emoji Submanager');
 			embed.setTitle('Emoji Updated');
 			if (oldEmoji.name != newEmoji.name) {
 				embed.addField('Old Name:', oldEmoji.name);
@@ -383,11 +440,11 @@ client.on('emojiUpdate', (oldEmoji, newEmoji) => {
 	}
 });
 
-client.on('emojiDelete', emoji => {
+client.on('emojiDelete', (emoji) => {
 	if (app.isInitialized()) {
 		try {
 			const embed = new Discord.MessageEmbed();
-			embed.setAuthor('Quarantine Gaming: Guild Emoji Manager');
+			embed.setAuthor('Quarantine Gaming: Emoji Submanager');
 			embed.setTitle('Emoji Deleted');
 			embed.addField('Name:', emoji.name);
 			embed.addField('ID:', emoji.id);
@@ -401,13 +458,13 @@ client.on('emojiDelete', emoji => {
 	}
 });
 
-client.on('rateLimit', async (rateLimitInfo) => {
+client.on('rateLimit', (rateLimitInfo) => {
 	console.error('Client RateLimit:');
 	console.error(rateLimitInfo);
 	if (app.isInitialized()) {
 		try {
 			const embed = new Discord.MessageEmbed();
-			embed.setColor('#ffff00');
+
 			embed.setAuthor('Quarantine Gaming: Telemetry');
 			embed.setTitle('The client hits a rate limit while making a request.');
 			embed.addField('Timeout', rateLimitInfo.timeout);
@@ -415,7 +472,9 @@ client.on('rateLimit', async (rateLimitInfo) => {
 			embed.addField('Method', rateLimitInfo.method);
 			embed.addField('Path', rateLimitInfo.path);
 			embed.addField('Route', rateLimitInfo.route);
-			await message_manager.sendToChannel(constants.channels.qg.logs, embed);
+			embed.setColor('#ffff00');
+			embed.setTimestamp();
+			message_manager.sendToChannel(constants.channels.qg.logs, embed);
 		}
 		catch (error) {
 			error_manager.mark(ErrorTicketManager.create('rateLimit', error));
