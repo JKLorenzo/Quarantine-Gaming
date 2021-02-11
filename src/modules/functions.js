@@ -33,11 +33,25 @@ module.exports.createStructure = (properties) => {
 module.exports.compareDate = (date) => {
 	const today = new Date();
 	const diffMs = (today - date);
+	const days = Math.floor(diffMs / 86400000);
+	const hours = Math.floor((diffMs % 86400000) / 3600000);
+	const minutes = Math.round(((diffMs % 86400000) % 3600000) / 60000);
+	let estimated = 'a few seconds ago';
+	if (days > 0) {
+		estimated = days + `day${days > 1 ? 's' : ''} ago`;
+	}
+	else if (hours > 0) {
+		estimated = hours + `hour${hours > 1 ? 's' : ''} ago`;
+	}
+	else if (minutes > 0) {
+		estimated = minutes + `minute${minutes > 1 ? 's' : ''} ago`;
+	}
 	return {
-		days: Math.floor(diffMs / 86400000),
-		hours: Math.floor((diffMs % 86400000) / 3600000),
-		minutes: Math.round(((diffMs % 86400000) % 3600000) / 60000),
+		days: days,
+		hours: hours,
+		minutes: minutes,
 		totalMinutes: Math.round(diffMs / 60000),
+		estimate: estimated,
 	};
 };
 
