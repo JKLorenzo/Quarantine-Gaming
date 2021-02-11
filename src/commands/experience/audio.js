@@ -40,5 +40,7 @@ module.exports = class Audio extends Commando.Command {
 		for (const reaction of reactions) {
 			reaction_manager.addReaction(SentMessage, reaction);
 		}
+		// Delete after 30 mins
+		SentMessage.delete({ timeout: 1800000 }).catch(e => void e);
 	}
 };

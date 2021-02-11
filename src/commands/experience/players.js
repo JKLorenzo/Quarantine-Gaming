@@ -95,7 +95,9 @@ module.exports = class PlayersCommand extends Commando.Command {
 				embed.addField(`Away / Busy / Offline : ${unavailable.length}`, unavailable.length > 0 ? unavailable.join(', ') : 'No players found.');
 				embed.setFooter(`${players.length} players total.`);
 				embed.setColor('#25ff00');
-				message_manager.sendToChannel(message.channel, embed);
+				message_manager.sendToChannel(message.channel, embed).then(this_message => {
+					this_message.delete({ timeout: 30000 }).catch(e => void e);
+				}).catch(e => void e);
 			}
 			else {
 				message.reply(`No game role found matching this game role mentionable (${game_role_mentionable}). Please contact ${app.member(constants.owner)} for troubleshooting.`);
