@@ -128,7 +128,7 @@ module.exports.updateExpiredGameRoles = async () => {
 				await database.memberGameRoleDelete(member, game_role);
 
 				// Update member
-				role_manager.remove(member, game_role);
+				await role_manager.remove(member, game_role);
 
 				// Check if role is still in use
 				if (app.guild().members.cache.array().filter(this_member => app.hasRole(this_member, [game_role])).length == 0) {
