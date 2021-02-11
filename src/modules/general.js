@@ -77,12 +77,19 @@ module.exports.memberScreening = (this_member) => {
 			MessageToSend.push('Please wait while we are processing your membership approval.');
 			message_manager.sendToUser(this_member, MessageToSend.join('\n'));
 
-			const today = new Date();
-			const diffMs = (today - this_member.user.createdAt);
-			const diffDays = Math.floor(diffMs / 86400000);
-			const diffHrs = Math.floor((diffMs % 86400000) / 3600000);
-			const diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000);
-			const created_on = diffDays + ' days ' + diffHrs + ' hours ' + diffMins + ' minutes';
+			const created_day = this_member.user.createdAt;
+			const created_day_difference = functions.compareDate(created_day);
+			let estimated_difference = 'a few seconds ago';
+			if (created_day_difference.days > 0) {
+				estimated_difference = created_day_difference.days + ' days ago';
+			}
+			else if (created_day_difference.hours > 0) {
+				estimated_difference = created_day_difference.hours + ' hours ago';
+			}
+			else if (created_day_difference.minutes > 0) {
+				estimated_difference = created_day_difference.minutes + ' minutes ago';
+			}
+
 			app.getInvites().then(async inviters => {
 				const embed = new Discord.MessageEmbed();
 				embed.setAuthor('Quarantine Gaming: Member Approval');
@@ -90,7 +97,7 @@ module.exports.memberScreening = (this_member) => {
 				embed.setThumbnail(this_member.user.displayAvatarURL());
 				embed.addFields([
 					{ name: 'User:', value: this_member },
-					{ name: 'Account Created:', value: created_on },
+					{ name: 'Account Created:', value: `${created_day.toUTCString().replace('GMT', 'UTC')} (${estimated_difference})` },
 					{ name: 'Inviter:', value: inviters.length > 0 ? inviters.map(this_invite => this_invite.inviter).join(' or ') : 'Information is not available.' },
 					{ name: 'Actions:', value: '✅ - Approve     ❌ - Kick     ⛔ - Ban' },
 				]);
