@@ -79,16 +79,6 @@ module.exports.memberScreening = (this_member) => {
 
 			const created_day = this_member.user.createdAt;
 			const created_day_difference = functions.compareDate(created_day);
-			let estimated_difference = 'a few seconds ago';
-			if (created_day_difference.days > 0) {
-				estimated_difference = created_day_difference.days + ' days ago';
-			}
-			else if (created_day_difference.hours > 0) {
-				estimated_difference = created_day_difference.hours + ' hours ago';
-			}
-			else if (created_day_difference.minutes > 0) {
-				estimated_difference = created_day_difference.minutes + ' minutes ago';
-			}
 
 			app.getInvites().then(async inviters => {
 				const embed = new Discord.MessageEmbed();
@@ -97,7 +87,7 @@ module.exports.memberScreening = (this_member) => {
 				embed.setThumbnail(this_member.user.displayAvatarURL());
 				embed.addFields([
 					{ name: 'User:', value: this_member },
-					{ name: 'Account Created:', value: `${created_day.toUTCString().replace('GMT', 'UTC')} (${estimated_difference})` },
+					{ name: 'Account Created:', value: `${created_day.toUTCString().replace('GMT', 'UTC')} (${created_day_difference.estimate})` },
 					{ name: 'Inviter:', value: inviters.length > 0 ? inviters.map(this_invite => this_invite.inviter).join(' or ') : 'Information is not available.' },
 					{ name: 'Actions:', value: '✅ - Approve     ❌ - Kick     ⛔ - Ban' },
 				]);
