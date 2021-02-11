@@ -24,7 +24,7 @@ module.exports.initialize = (ClientInstance) => {
  * Sends a message to a channel with respect to the messaging queue.
  * @param {Discord.GuildChannelResolvable} GuildChannelResolvable A GuildChannel object or a Snowflake.
  * @param {any} content The content of the message.
- * @returns {Promise<Discord.Message | Array<Discord.Message>>} A message object or an array of message objects
+ * @returns {Promise<Discord.Message>} A message object
  */
 module.exports.sendToChannel = (GuildChannelResolvable, content) => {
 	return new Promise((resolve, reject) => {
@@ -50,7 +50,7 @@ module.exports.sendToChannel = (GuildChannelResolvable, content) => {
  * Sends a message to a user with respect to the messaging queue.
  * @param {Discord.UserResolvable} UserResolvable A message object, a guild member object, a user object, or a Snowflake.
  * @param {any} content The content of the message.
- * @returns {Promise<Discord.Message> | Array<Discord.Message>>} A message object or an array of message objects
+ * @returns {Promise<Discord.Message>} A message object
  */
 module.exports.sendToUser = (UserResolvable, content) => {
 	return new Promise((resolve, reject) => {
