@@ -331,9 +331,16 @@ module.exports.memberVoiceUpdate = async (member, oldState, newState) => {
 					role_manager.add(member, constants.roles.dedicated);
 				}
 			}
-			else if (member.roles.cache.has(constants.roles.dedicated)) {
-				// Remove Text Role
-				role_manager.remove(member, constants.roles.dedicated);
+			else {
+				if (member.roles.cache.has(constants.roles.dedicated)) {
+					// Remove Text Role
+					role_manager.remove(member, constants.roles.dedicated);
+				}
+
+				if (newState.channel.parent.id == constants.channels.category.voice && newState.channel.members.array().length >= 5) {
+					// Dedicate this channel
+					await this.dedicateChannel(newState.channel, newState.channel.members.array()[0].displayName);
+				}
 			}
 		}
 		else {
