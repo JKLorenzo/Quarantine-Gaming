@@ -9,8 +9,9 @@ let reaction_manager;
 module.exports = class Emoji extends Commando.Command {
 	constructor(client) {
 		super(client, {
-			name: 'e',
+			name: 'emoji',
 			group: 'experience',
+			aliases: ['e'],
 			memberName: 'emoji',
 			description: 'Adds a reaction emoji to any message using all the available Guild Emojis (including Animated Emojis).',
 			guildOnly: true,
