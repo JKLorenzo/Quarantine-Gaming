@@ -15,6 +15,7 @@ module.exports = class DedicateCommand extends Commando.Command {
 			name: 'dedicate',
 			group: 'services',
 			memberName: 'dedicate',
+			aliases: ['d'],
 			description: 'Manually create a dedicated voice and text channel.',
 			args: [
 				{
