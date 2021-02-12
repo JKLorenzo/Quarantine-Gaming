@@ -297,18 +297,19 @@ client.on('guildBanRemove', (this_guild, this_user) => {
 client.on('roleCreate', (this_role) => {
 	if (app.isInitialized()) {
 		try {
-			if (functions.contains(this_role.name, ['Play', 'Text', 'Team']) || functions.contains(this_role.id, [constants.roles.dedicated, constants.roles.streaming])) {
+			if (functions.contains(this_role.name, ['Play', 'Text', 'Team', '⭐']) || functions.contains(this_role.id, [constants.roles.dedicated, constants.roles.streaming])) {
 				return;
 			}
 			const embed = new Discord.MessageEmbed();
 			embed.setAuthor('Quarantine Gaming: Role Submanager');
 			embed.setTitle('Role Created');
 			embed.addField('Name:', this_role.name, true);
-			embed.addField('ID:', this_role.id, true);
-			embed.addField('Color:', this_role.hexColor, true);
-			embed.addField('Mentionable:', this_role.mentionable, true);
-			embed.addField('Hoisted:', this_role.hoist, true);
-			embed.addField('BitField Permissions:', this_role.permissions.bitfield, true);
+			const properties = new Array();
+			if (this_role.mentionable) properties.push('Mentionable');
+			if (this_role.hoist) properties.push('Hoisted');
+			if (this_role.permissions.bitfield) properties.push(this_role.permissions.bitfield);
+			embed.addField('Properties:', properties.join(', '), true);
+			embed.setFooter(`Reference ID: ${this_role.id}`);
 			embed.setTimestamp();
 			embed.setColor(this_role.color);
 			message_manager.sendToChannel(constants.channels.qg.logs, embed);
@@ -345,14 +346,14 @@ client.on('roleUpdate', (oldRole, newRole) => {
 client.on('roleDelete', (this_role) => {
 	if (app.isInitialized()) {
 		try {
-			if (functions.contains(this_role.name, ['Play', 'Text', 'Team']) || functions.contains(this_role.id, [constants.roles.dedicated, constants.roles.streaming])) {
+			if (functions.contains(this_role.name, ['Play', 'Text', 'Team', '⭐']) || functions.contains(this_role.id, [constants.roles.dedicated, constants.roles.streaming])) {
 				return;
 			}
 			const embed = new Discord.MessageEmbed();
 			embed.setAuthor('Quarantine Gaming: Role Submanager');
 			embed.setTitle('Role Deleted');
-			embed.addField('Name:', this_role.name, true);
-			embed.addField('ID:', this_role.id, true);
+			embed.addField('Name:', this_role.name);
+			embed.setFooter(`Reference ID: ${this_role.id}`);
 			embed.setTimestamp();
 			embed.setColor(this_role.color);
 			message_manager.sendToChannel(constants.channels.qg.logs, embed);
