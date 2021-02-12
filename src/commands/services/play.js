@@ -14,6 +14,7 @@ module.exports = class PlayCommand extends Commando.Command {
 			name: 'play',
 			group: 'services',
 			memberName: 'play',
+			aliases: ['p', 'g'],
 			description: 'Invite members to play a game.',
 			guildOnly: true,
 			args: [
