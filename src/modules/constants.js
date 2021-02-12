@@ -104,4 +104,9 @@ module.exports = {
 		nsfw_banner: 'https://s3.amazonaws.com/sofontsy-files-us/wp-content/uploads/2019/02/07163845/NSFW-Bundle_banner.jpg',
 		multiplayer_banner: 'https://playbingerepeat.files.wordpress.com/2018/05/fortnite-banner.png?w=1332&h=666&crop=1',
 	},
+	colors: {
+		play_role: '0x7b00ff',
+		game_role: '0x00ffff',
+		game_role_mentionable: '0x00fffe',
+	},
 };
