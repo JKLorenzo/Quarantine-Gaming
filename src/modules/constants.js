@@ -105,8 +105,8 @@ module.exports = {
 		multiplayer_banner: 'https://playbingerepeat.files.wordpress.com/2018/05/fortnite-banner.png?w=1332&h=666&crop=1',
 	},
 	colors: {
-		play_role: '0x7b00ff',
-		game_role: '0x00ffff',
-		game_role_mentionable: '0x00fffe',
+		play_role: '#7b00ff',
+		game_role: '#00ffff',
+		game_role_mentionable: '#00fffe',
 	},
 };
