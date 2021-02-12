@@ -38,13 +38,13 @@ module.exports.compareDate = (date) => {
 	const minutes = Math.round(((diffMs % 86400000) % 3600000) / 60000);
 	let estimated = 'a few seconds ago';
 	if (days > 0) {
-		estimated = days + `day${days > 1 ? 's' : ''} ago`;
+		estimated = days + ` day${days > 1 ? 's' : ''} ago`;
 	}
 	else if (hours > 0) {
-		estimated = hours + `hour${hours > 1 ? 's' : ''} ago`;
+		estimated = hours + ` hour${hours > 1 ? 's' : ''} ago`;
 	}
 	else if (minutes > 0) {
-		estimated = minutes + `minute${minutes > 1 ? 's' : ''} ago`;
+		estimated = minutes + ` minute${minutes > 1 ? 's' : ''} ago`;
 	}
 	return {
 		days: days,
