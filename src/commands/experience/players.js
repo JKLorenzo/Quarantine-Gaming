@@ -26,7 +26,7 @@ module.exports = class PlayersCommand extends Commando.Command {
 
 						const game_role_mentionable = app.role(role);
 						if (game_role_mentionable) {
-							return game_role_mentionable.hexColor == '#00fffe' && functions.contains(game_role_mentionable.name, ' ⭐');
+							return game_role_mentionable.hexColor == constants.colors.game_role_mentionable && functions.contains(game_role_mentionable.name, ' ⭐');
 						}
 						else {
 							return false;
@@ -56,7 +56,7 @@ module.exports = class PlayersCommand extends Commando.Command {
 		const offline = new Array();
 
 		if (game_role_mentionable) {
-			const game_role = app.guild().roles.cache.find(this_role => game_role_mentionable.name.startsWith(this_role.name) && this_role.hexColor == '#00ffff');
+			const game_role = app.guild().roles.cache.find(this_role => game_role_mentionable.name.startsWith(this_role.name) && this_role.hexColor == constants.colors.game_role);
 			if (game_role) {
 				for (const member of game_role.members.array()) {
 					players.push(member);

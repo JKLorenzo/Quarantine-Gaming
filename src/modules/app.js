@@ -276,7 +276,7 @@ module.exports.initialize = async (ClientInstance) => {
 				for (const this_activity of this_member.presence.activities) {
 					const activity_name = this_activity.name.trim();
 					if (this_activity.type == 'PLAYING' && !database.gameBlacklisted(activity_name) && (this_activity.applicationID || database.gameWhitelisted(activity_name))) {
-						const game_role = this.guild().roles.cache.find(role => role.name == activity_name) || await role_manager.create({ name: activity_name, color: '0x00ffff' });
+						const game_role = this.guild().roles.cache.find(role => role.name == activity_name) || await role_manager.create({ name: activity_name, color: constants.colors.game_role });
 
 						// Update database
 						database.memberGameRoleSet(this_member, game_role);
@@ -287,7 +287,7 @@ module.exports.initialize = async (ClientInstance) => {
 
 							if (!this.guild().roles.cache.find(role => role.name == activity_name + ' ⭐')) {
 								// Create Game Role Mentionable
-								await role_manager.create({ name: activity_name + ' ⭐', color: '0x00fffe', mentionable: true });
+								await role_manager.create({ name: activity_name + ' ⭐', color: constants.colors.game_role_mentionable, mentionable: true });
 							}
 						}
 
@@ -295,7 +295,7 @@ module.exports.initialize = async (ClientInstance) => {
 						let play_role = this.guild().roles.cache.find(role => role.name == 'Play ' + activity_name);
 						if (!play_role) {
 							// Create Play Role
-							play_role = await role_manager.create({ name: 'Play ' + activity_name, color: '0x7b00ff', position: streaming_role.position, hoist: true });
+							play_role = await role_manager.create({ name: 'Play ' + activity_name, color: constants.colors.play_role, position: streaming_role.position, hoist: true });
 						}
 
 						if (!this_member.roles.cache.has(play_role.id)) {
@@ -311,7 +311,7 @@ module.exports.initialize = async (ClientInstance) => {
 
 		// Manage Inactive Play Roles
 		for (const this_role of this.guild().roles.cache.array()) {
-			if (this_role.hexColor == '#7b00ff' && this_role.name.startsWith('Play')) {
+			if (this_role.hexColor == constants.colors.play_role && this_role.name.startsWith('Play')) {
 				// Check if Play Role is still in use
 				let role_in_use = false;
 				for (const this_member of this.guild().members.cache.array()) {
@@ -332,11 +332,11 @@ module.exports.initialize = async (ClientInstance) => {
 					await role_manager.delete(this_role);
 				}
 			}
-			else if (this_role.hexColor == '#00ffff' && database.gameBlacklisted(this_role.name)) {
+			else if (this_role.hexColor == constants.colors.game_role && database.gameBlacklisted(this_role.name)) {
 				// Delete Game Role
 				await role_manager.delete(this_role);
 			}
-			else if (this_role.hexColor == '#00fffe' && database.gameBlacklisted(this_role.name)) {
+			else if (this_role.hexColor == constants.colors.game_role_mentionable && database.gameBlacklisted(this_role.name)) {
 				// Delete Game Role Mentionable
 				await role_manager.delete(this_role);
 			}

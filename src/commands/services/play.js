@@ -26,9 +26,9 @@ module.exports = class PlayCommand extends Commando.Command {
 						// Link
 						app = this.client.modules.app;
 
-						const game_role = app.role(role);
-						if (game_role) {
-							return game_role.hexColor == '#00fffe' && functions.contains(game_role.name, ' ⭐');
+						const game_role_mentionable = app.role(role);
+						if (game_role_mentionable) {
+							return game_role_mentionable.hexColor == constants.colors.game_role_mentionable && functions.contains(game_role_mentionable.name, ' ⭐');
 						}
 						else {
 							return false;
@@ -59,7 +59,7 @@ module.exports = class PlayCommand extends Commando.Command {
 		general = this.client.modules.general;
 
 		message.delete({ timeout: 10000 }).catch(e => void e);
-		const game_role = app.role(role);
+		const game_role_mentionable = app.role(role);
 		const inviter = app.member(message.author);
 
 		let count = 0;
@@ -76,7 +76,7 @@ module.exports = class PlayCommand extends Commando.Command {
 			}
 		}
 
-		general.gameInvite(game_role, inviter, count, reserved);
+		general.gameInvite(game_role_mentionable, inviter, count, reserved);
 		message.say(`Got it! This bracket will be available on the ${app.channel(constants.channels.integrations.game_invites)} channel.`).then(this_message => {
 			this_message.delete({ timeout: 10000 }).catch(e => void e);
 		}).catch(e => void e);

@@ -133,7 +133,7 @@ module.exports.updateExpiredGameRoles = async () => {
 				else {
 					// Delete role
 					await role_manager.delete(game_role, 'Game Role is no longer in use by anyone.');
-					const game_role_mentionable = app.guild().roles.cache.find(role => role.name.startsWith(game_role.name) && role.hexColor == '#00fffe' && functions.contains(role.name, ' ⭐'));
+					const game_role_mentionable = app.guild().roles.cache.find(role => role.name.startsWith(game_role.name) && role.hexColor == constants.colors.game_role_mentionable && functions.contains(role.name, ' ⭐'));
 					await role_manager.delete(game_role_mentionable, 'Game Role Mentionable is no longer in use by anyone.');
 				}
 			}
@@ -189,10 +189,10 @@ module.exports.memberActivityUpdate = async (member, data) => {
 		const activity_name = activity.name.trim();
 		if (activity.type == 'PLAYING' && !database.gameBlacklisted(activity_name) && (activity.applicationID || database.gameWhitelisted(activity_name))) {
 			const streaming_role = app.role(constants.roles.streaming);
-			const game_role = app.guild().roles.cache.find(role => role.name == activity_name) || await role_manager.create({ name: activity_name, color: '0x00ffff' });
+			const game_role = app.guild().roles.cache.find(role => role.name == activity_name) || await role_manager.create({ name: activity_name, color: constants.colors.game_role });
 			let play_role = app.guild().roles.cache.find(role => role.name == 'Play ' + activity_name);
 
-			if (!app.guild().roles.cache.find(role => role.name == activity_name + ' ⭐')) await role_manager.create({ name: activity_name + ' ⭐', color: '0x00fffe', mentionable: true });
+			if (!app.guild().roles.cache.find(role => role.name == activity_name + ' ⭐')) await role_manager.create({ name: activity_name + ' ⭐', color: constants.colors.game_role_mentionable, mentionable: true });
 
 			if (data.new) {
 				// Update database
@@ -204,7 +204,7 @@ module.exports.memberActivityUpdate = async (member, data) => {
 				}
 				else {
 					// Create Play Role
-					play_role = await role_manager.create({ name: 'Play ' + activity_name, color: '0x7b00ff', position: streaming_role.position, hoist: true });
+					play_role = await role_manager.create({ name: 'Play ' + activity_name, color: constants.colors.play_role, position: streaming_role.position, hoist: true });
 				}
 				role_manager.add(member, game_role);
 				role_manager.add(member, play_role);
@@ -362,11 +362,11 @@ module.exports.memberVoiceUpdate = async (member, oldState, newState) => {
  */
 module.exports.gameInvite = async (role, inviter, count, reserved_members) => {
 	try {
-		const mention_role = app.guild().roles.cache.find(this_role => this_role.hexColor == '#00ffff' && role.name.startsWith(this_role.name));
-		if (mention_role) {
+		const game_role = app.guild().roles.cache.find(this_role => this_role.hexColor == constants.colors.game_role && role.name.startsWith(this_role.name));
+		if (game_role) {
 			const embed = new Discord.MessageEmbed();
 			embed.setAuthor('Quarantine Gaming: Game Coordinator');
-			embed.setTitle(mention_role.name);
+			embed.setTitle(game_role.name);
 			embed.addField('Player 1:', inviter);
 
 			let reserved_count = 2;
@@ -382,10 +382,10 @@ module.exports.gameInvite = async (role, inviter, count, reserved_members) => {
 				}
 			}
 			if (count == 0) {
-				embed.setDescription(`${inviter.displayName} wants to play ${mention_role}.`);
+				embed.setDescription(`${inviter.displayName} wants to play ${game_role}.`);
 			}
 			else {
-				embed.setDescription(`${inviter.displayName} is looking for **${count - 1}** other ${mention_role} player${count == 2 ? '' : 's'}.`);
+				embed.setDescription(`${inviter.displayName} is looking for **${count - 1}** other ${game_role} player${count == 2 ? '' : 's'}.`);
 				for (let i = reserved_count; i <= count; i++) {
 					embed.addField(`Player ${i}:`, '\u200B');
 				}
@@ -400,7 +400,7 @@ module.exports.gameInvite = async (role, inviter, count, reserved_members) => {
 			}
 			embed.setColor('#7b00ff');
 
-			const emoji = app.guild().emojis.cache.find(this_emoji => this_emoji.name == functions.toAlphanumericString(mention_role.name));
+			const emoji = app.guild().emojis.cache.find(this_emoji => this_emoji.name == functions.toAlphanumericString(game_role.name));
 			const qg_emoji = app.guild().emojis.cache.find(this_emoji => this_emoji.name == 'quarantinegaming');
 			if (emoji) {
 				embed.setThumbnail(emoji.url);
@@ -409,7 +409,7 @@ module.exports.gameInvite = async (role, inviter, count, reserved_members) => {
 				embed.setThumbnail(qg_emoji.url);
 			}
 
-			const this_message = await message_manager.sendToChannel(constants.channels.integrations.game_invites, { content: `${inviter.displayName} is inviting you to play ${mention_role}!`, embed: embed });
+			const this_message = await message_manager.sendToChannel(constants.channels.integrations.game_invites, { content: `${inviter.displayName} is inviting you to play ${game_role}!`, embed: embed });
 			this_message.delete({ timeout: 3600000 }).catch(e => void e);
 			if (!is_full) {
 				await reaction_manager.addReaction(this_message, emoji ? emoji : qg_emoji).catch(error => error_manager.mark(ErrorTicketManager.create('addReaction', error, 'gameInvite')));
