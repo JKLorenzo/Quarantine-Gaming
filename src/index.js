@@ -297,7 +297,7 @@ client.on('guildBanRemove', (this_guild, this_user) => {
 client.on('roleCreate', (this_role) => {
 	if (app.isInitialized()) {
 		try {
-			if (functions.contains(this_role.name, ['Play', 'Text', 'Team', '⭐']) || functions.contains(this_role.id, [constants.roles.dedicated, constants.roles.streaming])) {
+			if (functions.contains(this_role.name, ['Play', 'Text', 'Team'])) {
 				return;
 			}
 			const embed = new Discord.MessageEmbed();
@@ -308,7 +308,7 @@ client.on('roleCreate', (this_role) => {
 			if (this_role.mentionable) properties.push('Mentionable');
 			if (this_role.hoist) properties.push('Hoisted');
 			if (this_role.permissions.bitfield) properties.push(this_role.permissions.bitfield);
-			embed.addField('Properties:', properties.join(', '), true);
+			if (properties.length > 0) embed.addField('Properties:', properties.join(', '), true);
 			embed.setFooter(`Reference ID: ${this_role.id}`);
 			embed.setTimestamp();
 			embed.setColor(this_role.color);
@@ -346,7 +346,7 @@ client.on('roleUpdate', (oldRole, newRole) => {
 client.on('roleDelete', (this_role) => {
 	if (app.isInitialized()) {
 		try {
-			if (functions.contains(this_role.name, ['Play', 'Text', 'Team', '⭐']) || functions.contains(this_role.id, [constants.roles.dedicated, constants.roles.streaming])) {
+			if (functions.contains(this_role.name, ['Play', 'Text', 'Team'])) {
 				return;
 			}
 			const embed = new Discord.MessageEmbed();
