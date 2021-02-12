@@ -146,7 +146,7 @@ client.on('userUpdate', (oldUser, newUser) => {
 			embed.setFooter(`Reference ID: ${newUser.id}`);
 			embed.setTimestamp();
 			embed.setColor('#7bff64');
-			if (embed.fields.length > 1) message_manager.sendToChannel(constants.channels.qg.logs, embed);
+			if (embed.fields.length > 1) message_manager.sendToChannel(constants.channels.server.logs, embed);
 		}
 		catch (error) {
 			error_manager.mark(ErrorTicketManager.create('userUpdate', error));
@@ -188,7 +188,7 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
 			embed.setFooter(`Reference ID: ${newMember.id}`);
 			embed.setTimestamp();
 			embed.setColor('#7bff64');
-			if (embed.fields.length > 1) message_manager.sendToChannel(constants.channels.qg.logs, embed);
+			if (embed.fields.length > 1) message_manager.sendToChannel(constants.channels.server.logs, embed);
 		}
 		catch (error) {
 			error_manager.mark(ErrorTicketManager.create('guildMemberUpdate', error));
@@ -213,7 +213,7 @@ client.on('guildMemberAdd', (this_member) => {
 			embed.setFooter(`Reference ID: ${this_member.id}`);
 			embed.setTimestamp();
 			embed.setColor('#7bff64');
-			message_manager.sendToChannel(constants.channels.qg.logs, embed);
+			message_manager.sendToChannel(constants.channels.server.logs, embed);
 		}
 		catch (error) {
 			error_manager.mark(ErrorTicketManager.create('guildMemberAdd', error));
@@ -236,7 +236,7 @@ client.on('guildMemberRemove', (this_member) => {
 			embed.setFooter(`Reference ID: ${this_member.id}`);
 			embed.setTimestamp();
 			embed.setColor('#7bff64');
-			message_manager.sendToChannel(constants.channels.qg.logs, embed);
+			message_manager.sendToChannel(constants.channels.server.logs, embed);
 		}
 		catch (error) {
 			error_manager.mark(ErrorTicketManager.create('guildMemberRemove', error));
@@ -261,7 +261,7 @@ client.on('guildBanAdd', (this_guild, this_user) => {
 			embed.setFooter(`Reference ID: ${this_user.id}`);
 			embed.setTimestamp();
 			embed.setColor('#7bff64');
-			message_manager.sendToChannel(constants.channels.qg.logs, embed);
+			message_manager.sendToChannel(constants.channels.server.logs, embed);
 		}
 		catch (error) {
 			error_manager.mark(ErrorTicketManager.create('guildBanAdd', error));
@@ -286,7 +286,7 @@ client.on('guildBanRemove', (this_guild, this_user) => {
 			embed.setFooter(`Reference ID: ${this_user.id}`);
 			embed.setTimestamp();
 			embed.setColor('#7bff64');
-			message_manager.sendToChannel(constants.channels.qg.logs, embed);
+			message_manager.sendToChannel(constants.channels.server.logs, embed);
 		}
 		catch (error) {
 			error_manager.mark(ErrorTicketManager.create('guildBanRemove', error));
@@ -312,7 +312,7 @@ client.on('roleCreate', (this_role) => {
 			embed.setFooter(`Reference ID: ${this_role.id}`);
 			embed.setTimestamp();
 			embed.setColor(this_role.color);
-			message_manager.sendToChannel(constants.channels.qg.logs, embed);
+			message_manager.sendToChannel(constants.channels.server.logs, embed);
 		}
 		catch (error) {
 			error_manager.mark(ErrorTicketManager.create('roleCreate', error));
@@ -338,7 +338,7 @@ client.on('roleUpdate', (oldRole, newRole) => {
 			embed.setFooter(`Reference ID: ${newRole.id}`);
 			embed.setTimestamp();
 			embed.setColor(newRole.color);
-			if (embed.fields.length > 0) message_manager.sendToChannel(constants.channels.qg.logs, embed);
+			if (embed.fields.length > 0) message_manager.sendToChannel(constants.channels.server.logs, embed);
 		}
 		catch (error) {
 			error_manager.mark(ErrorTicketManager.create('roleUpdate', error));
@@ -359,7 +359,7 @@ client.on('roleDelete', (this_role) => {
 			embed.setFooter(`Reference ID: ${this_role.id}`);
 			embed.setTimestamp();
 			embed.setColor(this_role.color);
-			message_manager.sendToChannel(constants.channels.qg.logs, embed);
+			message_manager.sendToChannel(constants.channels.server.logs, embed);
 		}
 		catch (error) {
 			error_manager.mark(ErrorTicketManager.create('roleDelete', error));
@@ -504,7 +504,7 @@ client.on('emojiCreate', (emoji) => {
 			embed.setThumbnail(emoji.url);
 			embed.setColor('#6464ff');
 			embed.setTimestamp();
-			message_manager.sendToChannel(constants.channels.qg.logs, embed);
+			message_manager.sendToChannel(constants.channels.server.logs, embed);
 		}
 		catch (error) {
 			error_manager.mark(ErrorTicketManager.create('emojiCreate', error));
@@ -524,7 +524,7 @@ client.on('emojiUpdate', (oldEmoji, newEmoji) => {
 				embed.setThumbnail(newEmoji.url);
 				embed.setColor('#6464ff');
 				embed.setTimestamp();
-				message_manager.sendToChannel(constants.channels.qg.logs, embed);
+				message_manager.sendToChannel(constants.channels.server.logs, embed);
 			}
 		}
 		catch (error) {
@@ -543,7 +543,7 @@ client.on('emojiDelete', (emoji) => {
 			embed.addField('ID:', emoji.id);
 			embed.setColor('#6464ff');
 			embed.setTimestamp();
-			message_manager.sendToChannel(constants.channels.qg.logs, embed);
+			message_manager.sendToChannel(constants.channels.server.logs, embed);
 		}
 		catch (error) {
 			error_manager.mark(ErrorTicketManager.create('emojiCreate', error));
