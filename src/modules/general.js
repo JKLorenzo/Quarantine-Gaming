@@ -641,12 +641,14 @@ module.exports.dedicateChannel = async (channel_origin, name) => {
 
 			// Transfer streamers
 			for (const this_member of streamers) {
+				if (!this_member.voice) continue;
 				await this_member.voice.setChannel(dedicated_voice_channel);
 				await functions.sleep(2000);
 			}
 			// Transfer members
 			for (const this_member of members) {
 				if (this_member.user.id != constants.me) {
+					if (!this_member.voice) continue;
 					await this_member.voice.setChannel(dedicated_voice_channel);
 					await functions.sleep(2000);
 				}
