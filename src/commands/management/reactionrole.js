@@ -35,9 +35,9 @@ module.exports = class ReactionRole extends Commando.Command {
 				},
 				{
 					key: 'type',
-					prompt: 'NSFW, FGU, or Multiplayer?',
+					prompt: 'NSFW or FGU?',
 					type: 'string',
-					oneOf: ['nsfw', 'fgu', 'multiplayer'],
+					oneOf: ['nsfw', 'fgu'],
 				},
 				{
 					key: 'msgID',
@@ -59,7 +59,7 @@ module.exports = class ReactionRole extends Commando.Command {
 
 	/**
      * @param {Commando.CommandoMessage} message
-     * @param {{mode: 'create' | 'update', type: 'nsfw' | 'fgu' | 'multiplayer', msgID: String}}
+     * @param {{mode: 'create' | 'update', type: 'nsfw' | 'fgu', msgID: String}}
      */
 	async run(message, { mode, type, msgID }) {
 		// Link
@@ -82,9 +82,6 @@ module.exports = class ReactionRole extends Commando.Command {
 			break;
 		case 'fgu':
 			ReactionRoleType = FreeGameUpdates;
-			break;
-		case 'multiplayer':
-			ReactionRoleType = Multiplayer;
 			break;
 		}
 
@@ -166,24 +163,5 @@ function FreeGameUpdates() {
 	return {
 		message: embed,
 		reactions: ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'],
-	};
-}
-
-function Multiplayer() {
-	const description = new Array();
-	description.push(`The ${app.channel(constants.channels.integrations.game_invites)} channel will be unlocked after getting the role.`);
-	description.push(' ');
-	description.push(`⚔ - ${app.role(constants.roles.multiplayer)}`);
-	description.push('Receive game invites from other members through Game Roles. Do `!play` to get started.');
-	const embed = new Discord.MessageEmbed();
-	embed.setColor('#ffff00');
-	embed.setAuthor('Quarantine Gaming: Multiplayer');
-	embed.setTitle('Receive Game Invites from Members');
-	embed.setDescription(description.join('\n'));
-	embed.setImage(constants.images.multiplayer_banner);
-	embed.setFooter('Update your role by reacting below.');
-	return {
-		message: embed,
-		reactions: ['⚔'],
 	};
 }

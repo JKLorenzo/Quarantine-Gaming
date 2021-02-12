@@ -10,7 +10,6 @@ module.exports = {
 		everyone: '351178660725915649',
 		booster: '757461486934163517',
 		// integrations
-		multiplayer: '806794690035712001',
 		nsfw: '700481554132107414',
 		dedicated: '767344383418433547',
 		streaming: '757128062276993115',
