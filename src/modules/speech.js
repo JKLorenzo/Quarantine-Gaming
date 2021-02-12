@@ -39,41 +39,38 @@ module.exports.initialize = (ClientInstance) => {
  * @param {Discord.VoiceChannel} channel The target voice channel.
  * @returns {Promise<null>} A null promise.
  */
-module.exports.say = (message, channel) => {
-	return new Promise(resolve => {
-		SpeechManager.queue().then(async () => {
-			let connection;
-			try {
-				// Format words
-				for (const word of format_words) {
-					message = message.split(word.original).join(word.formatted);
-				}
-				// Join channel
-				connection = await channel.join();
-				// TTS
-				const url = googleTTS.getAudioUrl(message, {
-					lang: 'en-US',
-					slow: false,
-					host: 'https://translate.google.com',
-				});
-				// Speak to channel
-				const dispatcher = connection.play(url);
-				dispatcher.on('speaking', async speaking => {
-					if (!speaking) {
-						await functions.sleep(2500);
-						await channel.leave();
-						SpeechManager.finish();
-						resolve();
-					}
-				});
-			}
-			catch (error) {
-				error_manager.mark(ErrorTicketManager.create('say', error));
-				await functions.sleep(1000);
-				if (connection) channel.leave();
+module.exports.say = async (message, channel) => {
+	await SpeechManager.queue();
+	let connection;
+	try {
+		// Format words
+		for (const word of format_words) {
+			message = message.split(word.original).join(word.formatted);
+		}
+		// Join channel
+		connection = await channel.join();
+		// TTS
+		const url = googleTTS.getAudioUrl(message, {
+			lang: 'en-US',
+			slow: false,
+			host: 'https://translate.google.com',
+		});
+		// Speak to channel
+		const dispatcher = connection.play(url);
+		dispatcher.on('speaking', async (speaking) => {
+			if (!speaking) {
+				await functions.sleep(2500);
+				await channel.leave();
 				SpeechManager.finish();
-				resolve();
+				return;
 			}
 		});
-	});
+	}
+	catch (error) {
+		error_manager.mark(ErrorTicketManager.create('say', error));
+		await functions.sleep(1000);
+		if (connection) channel.leave();
+		SpeechManager.finish();
+		return;
+	}
 };

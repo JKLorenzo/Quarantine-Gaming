@@ -34,20 +34,13 @@ module.exports.initialize = (ClientInstance) => {
  * @param {Discord.EmojiIdentifierResolvable} emoji The emoji to use.
  * @returns {Promise<Discord.MessageReaction>} A message reaction promise object
  */
-module.exports.addReaction = (message, emoji) => {
-	return new Promise((resolve, reject) => {
-		ReactionAddManager.queue().then(async () => {
-			let output, error;
-			try {
-				output = await message.react(emoji);
-			}
-			catch (err) {
-				error = err;
-			}
-			ReactionAddManager.finish();
-			error ? reject(error) : resolve(output);
-		});
-	});
+module.exports.addReaction = async (message, emoji) => {
+	console.log(`ReactionAdd: Queueing ${ReactionAddManager.processID} (${message.channel.id} | ${emoji.name})`);
+	await ReactionAddManager.queue();
+	const result = await message.react(emoji);
+	console.log(`ReactionAdd: Finished ${ReactionAddManager.processID} (${message.channel.id} | ${emoji.name})`);
+	ReactionAddManager.finish();
+	return result;
 };
 
 /**
