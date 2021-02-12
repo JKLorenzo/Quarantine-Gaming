@@ -762,7 +762,7 @@ module.exports.freeGameNotify = async (notification) => {
 	await FreeGameNotifyManager.queue();
 	try {
 		const title = notification.title;
-		const url = notification.url;
+		const url = notification.url.startsWith('/r/') ? `https://www.reddit.com/${notification.url}` : notification.url;
 		const author = notification.author;
 		const description = notification.description;
 		const validity = notification.validity;
