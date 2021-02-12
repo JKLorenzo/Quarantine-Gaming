@@ -323,19 +323,22 @@ client.on('roleCreate', (this_role) => {
 client.on('roleUpdate', (oldRole, newRole) => {
 	if (app.isInitialized()) {
 		try {
+			if (functions.contains(newRole.name, ['Play', 'Text', 'Team'])) {
+				return;
+			}
 			const embed = new Discord.MessageEmbed();
 			embed.setAuthor('Quarantine Gaming: Role Submanager');
 			embed.setTitle('Role Updated');
-			embed.addField('Role:', newRole, true);
-			if (oldRole.name != newRole.name) embed.addField('Name:', `Old: ${oldRole.name}\nNew: ${newRole.name}`, true);
-			if (oldRole.hexColor != newRole.hexColor) embed.addField('Color:', `Old: ${oldRole.hexColor}\nNew: ${newRole.hexColor}`, true);
-			if (oldRole.mentionable != newRole.mentionable) embed.addField('Mentionable:', newRole.mentionable, true);
-			if (oldRole.hoist != newRole.hoist) embed.addField('Hoisted:', newRole.hoist, true);
-			if (oldRole.permissions.bitfield != newRole.permissions.bitfield) embed.addField('BitField Permissions:', `Old: ${oldRole.permissions.bitfield}\nNew: ${newRole.permissions.bitfield}`, true);
+			embed.setDescription(newRole);
+			if (oldRole.name != newRole.name) embed.addField('Name:', `Old: ${oldRole.name}\nNew: ${newRole.name}`);
+			if (oldRole.hexColor != newRole.hexColor) embed.addField('Color:', `Old: ${oldRole.hexColor}\nNew: ${newRole.hexColor}`);
+			if (oldRole.mentionable != newRole.mentionable) embed.addField('Mentionable:', newRole.mentionable);
+			if (oldRole.hoist != newRole.hoist) embed.addField('Hoisted:', newRole.hoist);
+			if (oldRole.permissions.bitfield != newRole.permissions.bitfield) embed.addField('BitField Permissions:', `Old: ${oldRole.permissions.bitfield}\nNew: ${newRole.permissions.bitfield}`);
 			embed.setFooter(`Reference ID: ${newRole.id}`);
 			embed.setTimestamp();
 			embed.setColor(newRole.color);
-			if (embed.fields.length > 1) message_manager.sendToChannel(constants.channels.qg.logs, embed);
+			if (embed.fields.length > 0) message_manager.sendToChannel(constants.channels.qg.logs, embed);
 		}
 		catch (error) {
 			error_manager.mark(ErrorTicketManager.create('roleUpdate', error));
