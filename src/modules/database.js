@@ -153,13 +153,13 @@ module.exports.memberGameRoleSet = async (member, role) => {
 
 /**
  * Deletes the game role from this member.
- * @param {Discord.GuildMember} member The member object.
- * @param {Discord.Role} role Th game role object.
+ * @param {String} memberID The member id.
+ * @param {String} roleID Th game role id.
  */
-module.exports.memberGameRoleDelete = async (member, role) => {
+module.exports.memberGameRoleDelete = async (memberID, roleID) => {
 	await GameRoleDeleteManager.queue();
 	try {
-		await DB.Members.doc(member.id).collection('GameRoles').doc(role.id).delete();
+		await DB.Members.doc(memberID).collection('GameRoles').doc(roleID).delete();
 	}
 	catch (error) {
 		error_manager.mark(ErrorTicketManager.create('memberGameRoleDelete', error));
