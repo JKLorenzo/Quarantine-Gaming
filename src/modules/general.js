@@ -120,11 +120,10 @@ module.exports.updateExpiredGameRoles = async () => {
 		for (const data of expiredGameRoles) {
 			const member = app.member(data.memberID);
 			const game_role = app.role(data.roleID);
-			console.log(`ExpiredGameRole: ${game_role.name} | ${member.displayName}`);
+			console.log(`ExpiredGameRole: ${game_role ? game_role.name : data.roleID} | ${member ? member.displayName : data.memberID}`);
+			// Update database
+			await database.memberGameRoleDelete(data.memberID, data.roleID);
 			if (member && game_role) {
-				// Update database
-				await database.memberGameRoleDelete(member, game_role);
-
 				// Check if role is still in use
 				if (game_role.members.array().length > 1) {
 					// Update member
