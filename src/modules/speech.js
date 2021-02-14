@@ -57,13 +57,11 @@ module.exports.say = async (message, channel) => {
 		});
 		// Speak to channel
 		const dispatcher = connection.play(url);
-		dispatcher.on('speaking', async (speaking) => {
-			if (!speaking) {
-				await functions.sleep(2500);
-				await channel.leave();
-				SpeechManager.finish();
-				return;
-			}
+		dispatcher.on('finish', async () => {
+			await functions.sleep(2500);
+			await channel.leave();
+			SpeechManager.finish();
+			return;
 		});
 	}
 	catch (error) {
