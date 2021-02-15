@@ -625,27 +625,19 @@ module.exports.dedicateChannel = async (channel_origin, name) => {
 			await message_manager.sendToChannel(dedicated_text_channel, embed);
 
 			// Sort members
-			const streamers = [], members = [];
-			for (const this_member of channel_origin.members.array()) {
-				if (this_member.roles.cache.has(constants.roles.streaming)) {
-					streamers.push(this_member);
-				}
-				else {
-					members.push(this_member);
-				}
-			}
+			const [streamers, others] = channel_origin.members.partition(this_member => this_member.roles.cache.has(constants.roles.streaming));
 
 			// Delay for 10 seconds
 			await functions.sleep(10000);
 
 			// Transfer streamers
-			for (const this_member of streamers) {
+			for (const this_member of streamers.array()) {
 				if (!this_member.voice) continue;
 				await this_member.voice.setChannel(dedicated_voice_channel);
 				await functions.sleep(2000);
 			}
 			// Transfer members
-			for (const this_member of members) {
+			for (const this_member of others.array()) {
 				if (this_member.user.id != constants.me) {
 					if (!this_member.voice) continue;
 					await this_member.voice.setChannel(dedicated_voice_channel);
