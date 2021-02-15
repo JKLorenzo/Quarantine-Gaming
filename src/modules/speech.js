@@ -1,7 +1,5 @@
 // eslint-disable-next-line no-unused-vars
 const Discord = require('discord.js');
-// eslint-disable-next-line no-unused-vars
-const OpusScript = require('opusscript');
 const googleTTS = require('google-tts-api');
 const functions = require('./functions.js');
 const classes = require('./classes.js');
@@ -41,14 +39,13 @@ module.exports.initialize = (ClientInstance) => {
  */
 module.exports.say = async (message, channel) => {
 	await SpeechManager.queue();
-	let connection;
 	try {
 		// Format words
 		for (const word of format_words) {
 			message = message.split(word.original).join(word.formatted);
 		}
 		// Join channel
-		connection = await channel.join();
+		const connection = await channel.join();
 		// TTS
 		const url = googleTTS.getAudioUrl(message, {
 			lang: 'en-US',
@@ -67,7 +64,7 @@ module.exports.say = async (message, channel) => {
 	catch (error) {
 		error_manager.mark(ErrorTicketManager.create('say', error));
 		await functions.sleep(1000);
-		if (connection) channel.leave();
+		channel.leave();
 		SpeechManager.finish();
 		return;
 	}

@@ -17,16 +17,18 @@
   },
   "homepage": "https://github.com/JKLorenzo/Quarantine-Gaming#readme",
   "dependencies": {
+    "@discordjs/opus": "^0.4.0",
     "axios": "^0.21.1",
     "discord.js": "^12.5.1",
     "discord.js-commando": "^0.12.2",
     "eslint": "^7.19.0",
+    "ffmpeg-static": "^4.2.7",
     "firebase-admin": "^9.4.2",
     "g-i-s": "^2.1.6",
     "google-tts-api": "^2.0.1",
     "jsdom": "^16.4.0",
+    "libsodium-wrappers": "^0.7.9",
     "node-fetch": "^2.6.1",
-    "opusscript": "0.0.7",
     "probe-image-size": "^6.0.0"
   }
 }
