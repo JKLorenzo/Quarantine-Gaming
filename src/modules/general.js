@@ -469,7 +469,7 @@ module.exports.dedicateChannel = async (channel_origin, name) => {
 		}
 		else {
 			// Notify
-			speech.say(`You will be transferred to ${name} dedicated channel. Please wait.`, channel_origin);
+			const this_speech = speech.say(`You will be transferred to ${name} dedicated channel. Please wait.`, channel_origin);
 
 			const p = constants.permissions;
 			const dedicated_voice_channel = await channel_manager.create({
@@ -624,25 +624,25 @@ module.exports.dedicateChannel = async (channel_origin, name) => {
 
 			await message_manager.sendToChannel(dedicated_text_channel, embed);
 
-			// Sort members
-			const [streamers, others] = channel_origin.members.partition(this_member => this_member.roles.cache.has(constants.roles.streaming));
-
-			// Delay for 10 seconds
+			// Delay for ~10 seconds
+			await this_speech;
 			await functions.sleep(10000);
+
+			// Sort streamers from members
+			const [streamers, members] = channel_origin.members.partition(this_member => this_member.roles.cache.has(constants.roles.streaming));
 
 			// Transfer streamers
 			for (const this_member of streamers.array()) {
-				if (!this_member.voice) continue;
+				if (!this_member.voice || this_member.user.id == constants.me) continue;
 				await this_member.voice.setChannel(dedicated_voice_channel);
 				await functions.sleep(2000);
 			}
+
 			// Transfer members
-			for (const this_member of others.array()) {
-				if (this_member.user.id != constants.me) {
-					if (!this_member.voice) continue;
-					await this_member.voice.setChannel(dedicated_voice_channel);
-					await functions.sleep(2000);
-				}
+			for (const this_member of members.array()) {
+				if (!this_member.voice || this_member.user.id == constants.me) continue;
+				await this_member.voice.setChannel(dedicated_voice_channel);
+				await functions.sleep(2000);
 			}
 		}
 	}
