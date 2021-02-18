@@ -14,6 +14,7 @@ module.exports = class Health extends Commando.Command {
 
 	/** @param {Commando.CommandoMessage} message */
 	async run(message) {
+		const now = Date.now();
 		const dummy_message = await message.channel.send('Pinging...');
 		await dummy_message.delete({ timeout: 2500 }).catch(e => void e);
 
@@ -41,11 +42,11 @@ module.exports = class Health extends Commando.Command {
 
 		let buffer = new Array();
 		let ping = this.client.ws.ping;
-		buffer.push(`${getPingStatus(ping)} **Heartbeat Ping:** ${ping} ms`);
-		ping = Date.now() - message.createdTimestamp;
+		buffer.push(`${getPingStatus(ping)} **API Latency:** ${ping} ms`);
+		ping = now - message.createdTimestamp;
 		buffer.push(`${getPingStatus(ping)} **Response Time:** ${ping} ms`);
 		ping = dummy_message.createdTimestamp - message.createdTimestamp;
-		buffer.push(`${getPingStatus(ping)} **Round-trip Time:** ${ping} ms`);
+		buffer.push(`${getPingStatus(ping)} **Message Round-trip Time:** ${ping} ms`);
 		embed.addField('Connection', buffer.join('\n'));
 
 		buffer = new Array();
@@ -82,7 +83,7 @@ module.exports = class Health extends Commando.Command {
 		embed.addField('Process', buffer.join('\n'));
 
 		const startup_date = new Date(Date.now() - this.client.uptime);
-		embed.setFooter(`Bot Startup Time: ${functions.compareDate(startup_date).estimate}`);
+		embed.setFooter(`Startup Time: ${functions.compareDate(startup_date).estimate}`);
 		embed.setTimestamp(startup_date);
 
 		return message.channel.send(embed).then(this_message => {
