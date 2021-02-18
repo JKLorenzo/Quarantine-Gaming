@@ -69,3 +69,5 @@ module.exports.say = async (message, channel) => {
 		return;
 	}
 };
+
+module.exports.SpeechManager = SpeechManager;

@@ -75,3 +75,5 @@ module.exports.clearTempChannels = async (GuildChannelResolvables) => {
 		await functions.sleep(5000);
 	}
 };
+
+module.exports.ChannelQueueManager = ChannelQueueManager;

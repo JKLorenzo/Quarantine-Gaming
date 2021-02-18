@@ -88,3 +88,5 @@ module.exports.remove = async (UserResolvable, RoleResolvable) => {
 	RoleManager.finish();
 	return result;
 };
+
+module.exports.RoleManager = RoleManager;

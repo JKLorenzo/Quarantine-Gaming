@@ -94,3 +94,5 @@ module.exports.process = async (message) => {
 		error_manager.mark(ErrorTicketManager.create('incoming', error));
 	}
 };
+
+module.exports.OutgoingMessageManager = OutgoingMessageManager;

@@ -288,3 +288,7 @@ module.exports.gameWhitelist = async (title) => {
 		error_manager.mark(ErrorTicketManager.create('gameWhitelist', error));
 	}
 };
+
+module.exports.ExpiredGameRoleManager = ExpiredGameRoleManager;
+module.exports.GameRoleSetManager = GameRoleSetManager;
+module.exports.GameRoleDeleteManager = GameRoleDeleteManager;

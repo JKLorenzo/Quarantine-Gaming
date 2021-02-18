@@ -99,3 +99,5 @@ module.exports.mark = async (ErrorTicket) => {
 	}
 	MarkManager.finish();
 };
+
+module.exports.MarkManager = MarkManager;

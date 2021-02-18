@@ -362,3 +362,5 @@ module.exports.onReactionRemove = async (message, embed, emoji, reactor) => {
 	console.log(`IncomingReactionRemove: Finished ${IncomingReactionManager.currentID} (${reactor.displayName})`);
 	IncomingReactionManager.finish();
 };
+
+module.exports.ReactionAddManager = ReactionAddManager;
