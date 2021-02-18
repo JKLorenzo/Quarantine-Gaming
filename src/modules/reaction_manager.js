@@ -35,12 +35,23 @@ module.exports.initialize = (ClientInstance) => {
  * @returns {Promise<Discord.MessageReaction>} A message reaction promise object
  */
 module.exports.addReaction = async (message, emoji) => {
-	console.log(`ReactionAdd: Queueing ${ReactionAddManager.processID} (${message.channel.id} | ${emoji.name})`);
-	await ReactionAddManager.queue();
-	const result = await message.react(emoji);
-	console.log(`ReactionAdd: Finished ${ReactionAddManager.processID} (${message.channel.id} | ${emoji.name})`);
-	ReactionAddManager.finish();
-	return result;
+	// eslint-disable-next-line no-async-promise-executor
+	return new Promise(async (resolve, reject) => {
+		console.log(`ReactionAdd: Queueing ${ReactionAddManager.processID} (${message.channel.id} | ${emoji.name})`);
+		await ReactionAddManager.queue();
+		let result, error;
+		try {
+			result = await message.react(emoji);
+		}
+		catch (this_error) {
+			error = this_error;
+		}
+		finally {
+			console.log(`ReactionAdd: Finished ${ReactionAddManager.processID} (${message.channel.id} | ${emoji.name})`);
+			ReactionAddManager.finish();
+			error ? reject(error) : resolve(result);
+		}
+	});
 };
 
 /**

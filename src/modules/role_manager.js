@@ -21,22 +21,33 @@ module.exports.initialize = (ClientInstance) => {
  * @returns {Promise<Discord.Role>} A role object
  */
 module.exports.create = async (options) => {
-	console.log(`RoleCreate: Queueing ${RoleManager.processID} (${options.name})`);
-	await RoleManager.queue();
-	const result = await app.guild().roles.create({
-		data: {
-			name: options.name,
-			color: options.color,
-			hoist: options.hoist,
-			mentionable: options.mentionable,
-			permissions: options.permissions,
-			position: options.position,
-		},
-		reason: options.reason,
+	// eslint-disable-next-line no-async-promise-executor
+	return new Promise(async (resolve, reject) => {
+		console.log(`RoleCreate: Queueing ${RoleManager.processID} (${options.name})`);
+		await RoleManager.queue();
+		let result, error;
+		try {
+			result = await app.guild().roles.create({
+				data: {
+					name: options.name,
+					color: options.color,
+					hoist: options.hoist,
+					mentionable: options.mentionable,
+					permissions: options.permissions,
+					position: options.position,
+				},
+				reason: options.reason,
+			});
+		}
+		catch (this_error) {
+			error = this_error;
+		}
+		finally {
+			console.log(`RoleCreate: Finished ${RoleManager.currentID} (${options.name})`);
+			RoleManager.finish();
+			error ? reject(error) : resolve(result);
+		}
 	});
-	console.log(`RoleCreate: Finished ${RoleManager.currentID} (${options.name})`);
-	RoleManager.finish();
-	return result;
 };
 
 /**
@@ -46,13 +57,24 @@ module.exports.create = async (options) => {
  * @returns {Promise<Discord.Role>} A role object
  */
 module.exports.delete = async (RoleResolvable, reason = '') => {
-	const role = app.role(RoleResolvable);
-	console.log(`RoleDelete: Queueing ${RoleManager.processID} (${role ? role.name : RoleResolvable})`);
-	await RoleManager.queue();
-	const result = await role.delete(reason);
-	console.log(`RoleDelete: Finished ${RoleManager.currentID} (${role ? role.name : RoleResolvable})`);
-	RoleManager.finish();
-	return result;
+	// eslint-disable-next-line no-async-promise-executor
+	return new Promise(async (resolve, reject) => {
+		const role = app.role(RoleResolvable);
+		console.log(`RoleDelete: Queueing ${RoleManager.processID} (${role ? role.name : RoleResolvable})`);
+		await RoleManager.queue();
+		let result, error;
+		try {
+			result = await role.delete(reason);
+		}
+		catch (this_error) {
+			error = this_error;
+		}
+		finally {
+			console.log(`RoleDelete: Finished ${RoleManager.currentID} (${role ? role.name : RoleResolvable})`);
+			RoleManager.finish();
+			error ? reject(error) : resolve(result);
+		}
+	});
 };
 
 /**
@@ -62,14 +84,25 @@ module.exports.delete = async (RoleResolvable, reason = '') => {
  * @returns {Promise<Discord.Role>} A role object
  */
 module.exports.add = async (UserResolvable, RoleResolvable) => {
-	const member = app.member(UserResolvable);
-	const role = app.role(RoleResolvable);
-	console.log(`RoleAdd: Queueing ${RoleManager.processID} (${member ? member.displayName : UserResolvable} | ${role ? role.name : RoleResolvable})`);
-	await RoleManager.queue();
-	const result = await member.roles.add(role);
-	console.log(`RoleAdd: Finished ${RoleManager.currentID} (${member ? member.displayName : UserResolvable} | ${role ? role.name : RoleResolvable})`);
-	RoleManager.finish();
-	return result;
+	// eslint-disable-next-line no-async-promise-executor
+	return new Promise(async (resolve, reject) => {
+		const member = app.member(UserResolvable);
+		const role = app.role(RoleResolvable);
+		console.log(`RoleAdd: Queueing ${RoleManager.processID} (${member ? member.displayName : UserResolvable} | ${role ? role.name : RoleResolvable})`);
+		await RoleManager.queue();
+		let result, error;
+		try {
+			result = await member.roles.add(role);
+		}
+		catch (this_error) {
+			error = this_error;
+		}
+		finally {
+			console.log(`RoleAdd: Finished ${RoleManager.currentID} (${member ? member.displayName : UserResolvable} | ${role ? role.name : RoleResolvable})`);
+			RoleManager.finish();
+			error ? reject(error) : resolve(result);
+		}
+	});
 };
 
 /**
@@ -79,14 +112,25 @@ module.exports.add = async (UserResolvable, RoleResolvable) => {
  * @returns {Promise<Discord.Role>} A role object
  */
 module.exports.remove = async (UserResolvable, RoleResolvable) => {
-	const member = app.member(UserResolvable);
-	const role = app.role(RoleResolvable);
-	console.log(`RoleRemove: Queueing ${RoleManager.processID} (${member ? member.displayName : UserResolvable} | ${role ? role.name : RoleResolvable})`);
-	await RoleManager.queue();
-	const result = await member.roles.remove(role);
-	console.log(`RoleRemove: Finished ${RoleManager.currentID} (${member ? member.displayName : UserResolvable} | ${role ? role.name : RoleResolvable})`);
-	RoleManager.finish();
-	return result;
+	// eslint-disable-next-line no-async-promise-executor
+	return new Promise(async (resolve, reject) => {
+		const member = app.member(UserResolvable);
+		const role = app.role(RoleResolvable);
+		console.log(`RoleRemove: Queueing ${RoleManager.processID} (${member ? member.displayName : UserResolvable} | ${role ? role.name : RoleResolvable})`);
+		await RoleManager.queue();
+		let result, error;
+		try {
+			result = await member.roles.remove(role);
+		}
+		catch (this_error) {
+			error = this_error;
+		}
+		finally {
+			console.log(`RoleRemove: Finished ${RoleManager.currentID} (${member ? member.displayName : UserResolvable} | ${role ? role.name : RoleResolvable})`);
+			RoleManager.finish();
+			error ? reject(error) : resolve(result);
+		}
+	});
 };
 
 module.exports.RoleManager = RoleManager;

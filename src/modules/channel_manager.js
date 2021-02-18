@@ -21,24 +21,35 @@ module.exports.initialize = (ClientInstance) => {
  * @param {{name: String, bitrate?: Number, nsfw?: Boolean, parent?: Discord.ChannelResolvable, permissionOverwrites?: Array<Discord.OverwriteResolvable> | Discord.Collection<String, Discord.OverwriteResolvable>, position?: Number, rateLimitPerUser?: Number, reason?: String, topic?: String, type: "text" | "voice" | "category", userLimit?: Number}} options
  * @returns {Promise<Discord.GuildChannel>} A Text Channel, a Voice Channel, or a Category Channel Object
  */
-module.exports.create = async (options) => {
-	console.log(`ChannelCreate: Queueing ${ChannelQueueManager.processID} (${options.name})`);
-	await ChannelQueueManager.queue();
-	const result = await app.guild().channels.create(options.name, {
-		bitrate: options.bitrate,
-		nsfw: options.nsfw,
-		parent: options.parent,
-		permissionOverwrites: options.permissionOverwrites,
-		position: options.position,
-		rateLimitPerUser: options.rateLimitPerUser,
-		reason: options.reason,
-		topic: options.topic,
-		type: options.type,
-		userLimit: options.userLimit,
+module.exports.create = (options) => {
+	// eslint-disable-next-line no-async-promise-executor
+	return new Promise(async (resolve, reject) => {
+		console.log(`ChannelCreate: Queueing ${ChannelQueueManager.processID} (${options.name})`);
+		await ChannelQueueManager.queue();
+		let result, error;
+		try {
+			result = await app.guild().channels.create(options.name, {
+				bitrate: options.bitrate,
+				nsfw: options.nsfw,
+				parent: options.parent,
+				permissionOverwrites: options.permissionOverwrites,
+				position: options.position,
+				rateLimitPerUser: options.rateLimitPerUser,
+				reason: options.reason,
+				topic: options.topic,
+				type: options.type,
+				userLimit: options.userLimit,
+			});
+		}
+		catch (this_error) {
+			error = this_error;
+		}
+		finally {
+			console.log(`ChannelCreate: Finished ${ChannelQueueManager.currentID} (${options.name})`);
+			ChannelQueueManager.finish();
+			error ? reject(error) : resolve(result);
+		}
 	});
-	console.log(`ChannelCreate: Finished ${ChannelQueueManager.currentID} (${options.name})`);
-	ChannelQueueManager.finish();
-	return result;
 };
 
 /**
@@ -47,14 +58,25 @@ module.exports.create = async (options) => {
  * @param {String} reason Reason for deleting this channel.
  * @returns {Promise<Discord.Channel>} A Channel Object
  */
-module.exports.delete = async (GuildChannelResolvable, reason = '') => {
-	const channel = app.channel(GuildChannelResolvable);
-	console.log(`ChannelDelete: Queueing ${ChannelQueueManager.processID} (${channel ? channel.name : GuildChannelResolvable})`);
-	await ChannelQueueManager.queue();
-	const result = await channel.delete(reason);
-	console.log(`ChannelDelete: Finished ${ChannelQueueManager.currentID} (${channel ? channel.name : GuildChannelResolvable})`);
-	ChannelQueueManager.finish();
-	return result;
+module.exports.delete = (GuildChannelResolvable, reason = '') => {
+	// eslint-disable-next-line no-async-promise-executor
+	return new Promise(async (resolve, reject) => {
+		const channel = app.channel(GuildChannelResolvable);
+		console.log(`ChannelDelete: Queueing ${ChannelQueueManager.processID} (${channel ? channel.name : GuildChannelResolvable})`);
+		await ChannelQueueManager.queue();
+		let result, error;
+		try {
+			result = await channel.delete(reason);
+		}
+		catch (this_error) {
+			error = this_error;
+		}
+		finally {
+			console.log(`ChannelDelete: Finished ${ChannelQueueManager.currentID} (${channel ? channel.name : GuildChannelResolvable})`);
+			ChannelQueueManager.finish();
+			error ? reject(error) : resolve(result);
+		}
+	});
 };
 
 /**
