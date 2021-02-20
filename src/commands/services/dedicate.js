@@ -47,7 +47,7 @@ module.exports = class DedicateCommand extends Commando.Command {
 		if (voice_channel) {
 			if (name.toLowerCase() == 'lock' || name.toLowerCase() == 'unlock') {
 				if (voice_channel.parentID == constants.channels.category.dedicated) {
-					const text_channel = app.guild().channels.cache.find(channel => channel.type == 'text' && channel.topic && channel.topic.split(' ')[0] == voice_channel.id);
+					const text_channel = app.guild().channels.cache.find(channel => channel.type == 'text' && channel.topic && functions.parseMention(channel.topic.split(' ')[0]) == voice_channel.id);
 					const embed = new Discord.MessageEmbed();
 					embed.setAuthor('Quarantine Gaming: Dedicated Channels');
 					embed.setThumbnail(message.author.displayAvatarURL());
