@@ -383,7 +383,7 @@ client.on('inviteCreate', (invite) => {
 });
 
 client.on('presenceUpdate', (oldPresence, newPresence) => {
-	if (!app.isInitialized() || newPresence.guild !== constants.guild) return null;
+	if (!app.isInitialized() || newPresence.guild.id !== constants.guild) return;
 	try {
 		const member = newPresence.member ? newPresence.member : oldPresence.member;
 		if (!member.user.bot) {
