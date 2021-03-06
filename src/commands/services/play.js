@@ -77,7 +77,7 @@ module.exports = class PlayCommand extends Commando.Command {
 		}
 
 		general.gameInvite(game_role_mentionable, inviter, count, reserved);
-		message.say(`Got it! This bracket will be available on the ${app.channel(constants.channels.integrations.game_invites)} channel.`).then(this_message => {
+		message.reply(`Got it! This bracket will be available on the ${app.channel(constants.channels.integrations.game_invites)} channel.`).then(this_message => {
 			setTimeout(() => this_message.delete().catch(e => void e), 10000);
 		}).catch(e => void e);
 	}

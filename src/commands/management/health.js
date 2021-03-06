@@ -34,8 +34,6 @@ module.exports = class Health extends Commando.Command {
 		/** @type {import('../../modules/database.js')} */
 		const database = this.client.modules.database;
 
-		setTimeout(() => message.delete().catch(e => void e), 10000);
-
 		const embed = new Discord.MessageEmbed();
 		embed.setAuthor('Quarantine Gaming: Health Monitor');
 		embed.setTitle('Health Report');
@@ -87,7 +85,7 @@ module.exports = class Health extends Commando.Command {
 		embed.setFooter(`Startup Time: ${functions.compareDate(startup_date).estimate}`);
 		embed.setTimestamp(startup_date);
 
-		return message.channel.send(embed).then(this_message => {
+		return message.reply(embed).then(this_message => {
 			setTimeout(() => this_message.delete().catch(e => void e), 60000);
 		});
 	}

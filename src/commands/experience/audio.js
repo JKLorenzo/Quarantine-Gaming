@@ -1,7 +1,5 @@
 const Discord = require('discord.js');
 const Commando = require('discord.js-commando');
-/** @type {import('../../modules/message_manager.js')} */
-let message_manager;
 /** @type {import('../../modules/reaction_manager.js')} */
 let reaction_manager;
 
@@ -19,10 +17,8 @@ module.exports = class Audio extends Commando.Command {
 	/** @param {Commando.CommandoMessage} message */
 	async run(message) {
 		// Link
-		message_manager = this.client.modules.message_manager;
 		reaction_manager = this.client.modules.reaction_manager;
 
-		setTimeout(() => message.delete().catch(e => void e), 10000);
 		const embed = new Discord.MessageEmbed();
 		embed.setColor('#ffff00');
 		embed.setAuthor('Quarantine Gaming: Experience');
@@ -35,12 +31,12 @@ module.exports = class Audio extends Commando.Command {
 		);
 		embed.setFooter('Apply selected actions by reacting below.');
 
-		const SentMessage = await message_manager.sendToChannel(message.channel, embed);
+		const reply = await message.reply(embed);
 		const reactions = ['🟠', '🟢'];
 		for (const reaction of reactions) {
-			reaction_manager.addReaction(SentMessage, reaction);
+			reaction_manager.addReaction(reply, reaction);
 		}
 		// Delete after 30 mins
-		setTimeout(() => SentMessage.delete().catch(e => void e), 1800000);
+		setTimeout(() => reply.delete().catch(e => void e), 1800000);
 	}
 };

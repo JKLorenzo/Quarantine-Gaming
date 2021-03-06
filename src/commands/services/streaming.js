@@ -32,13 +32,10 @@ module.exports = class StreamingCommand extends Commando.Command {
 		message_manager = this.client.modules.message_manager;
 		speech = this.client.modules.speech;
 
-		setTimeout(() => message.delete().catch(e => void e), 10000);
 		const member = app.member(message.author);
 		const streaming_role = app.role(constants.roles.streaming);
 		if (!member.roles.cache.has(streaming_role)) {
-			message.reply('Got it! Your streaming status will be removed once you\'re disconnected to a voice channel or when you go offline.').then(this_message => {
-				setTimeout(() => this_message.delete().catch(e => void e), 10000);
-			}).catch(e => void e);
+			message.reply('Got it! Your streaming status will be removed once you\'re disconnected to a voice channel or when you go offline.').catch(e => void e);
 
 			// Add streaming role
 			await role_manager.add(member, streaming_role);

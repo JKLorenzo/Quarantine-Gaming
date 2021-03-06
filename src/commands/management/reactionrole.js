@@ -69,9 +69,7 @@ module.exports = class ReactionRole extends Commando.Command {
 
 		// Check user permissions
 		if (!app.hasRole(message.author, [constants.roles.staff])) {
-			return message.reply('You don\'t have permissions to use this command.').then(this_message => {
-				setTimeout(() => this_message.delete().catch(e => void e), 10000);
-			}).catch(e => void e);
+			return message.reply('You don\'t have permissions to use this command.').catch(e => void e);
 		}
 
 		/** @type {NSFW | FreeGameUpdates} */

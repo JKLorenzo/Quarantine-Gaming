@@ -4,8 +4,6 @@ const constants = require('../../modules/constants.js');
 const functions = require('../../modules/functions.js');
 /** @type {import('../../modules/app.js')} */
 let app;
-/** @type {import('../../modules/message_manager.js')} */
-let message_manager;
 
 module.exports = class PlayersCommand extends Commando.Command {
 	constructor(client) {
@@ -44,9 +42,7 @@ module.exports = class PlayersCommand extends Commando.Command {
 	run(message, { role }) {
 		// Link
 		app = this.client.modules.app;
-		message_manager = this.client.modules.message_manager;
 
-		setTimeout(() => message.delete().catch(e => void e), 10000);
 		const game_role_mentionable = app.role(role);
 		const players = new Array();
 		const alphabetical = new Array();
@@ -54,6 +50,8 @@ module.exports = class PlayersCommand extends Commando.Command {
 		const online = new Array();
 		const unavailable = new Array();
 		const offline = new Array();
+
+		setTimeout(() => message.delete().catch(e => void e), 10000);
 
 		if (game_role_mentionable) {
 			const game_role = app.guild().roles.cache.find(this_role => game_role_mentionable.name.startsWith(this_role.name) && this_role.hexColor == constants.colors.game_role);
@@ -101,18 +99,15 @@ module.exports = class PlayersCommand extends Commando.Command {
 				if (offline.length > 0)	embed.addField(`Offline: ${offline.length}`, offline.join(', '));
 				embed.setFooter(`A total of ${players.length} player${players.length > 1 ? 's were' : ' was'} found.`);
 				embed.setColor('#25ff00');
-				message_manager.sendToChannel(message.channel, embed).then(this_message => {
-					setTimeout(() => this_message.delete().catch(e => void e), 30000);
-				}).catch(e => void e);
+				const reply = message.reply(embed);
+				setTimeout(() => reply.delete().catch(e => void e), 30000);
 			}
 			else {
 				message.reply(`No game role found matching this game role mentionable (${game_role_mentionable}). Please contact ${app.member(constants.owner)} for troubleshooting.`);
 			}
 		}
 		else {
-			message.reply('No information is available right now. Please try again later.').then(this_message => {
-				setTimeout(() => this_message.delete().catch(e => void e), 10000);
-			}).catch(e => void e);
+			message.reply('No information is available right now. Please try again later.').catch(e => void e);
 		}
 	}
 };

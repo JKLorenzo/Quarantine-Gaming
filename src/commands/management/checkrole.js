@@ -57,9 +57,7 @@ module.exports = class CheckRole extends Commando.Command {
 
 		// Check user permissions
 		if (!app.hasRole(message.author, [constants.roles.staff, constants.roles.moderator])) {
-			return message.reply('You don\'t have permissions to use this command.').then(this_message => {
-				setTimeout(() => this_message.delete().catch(e => void e), 10000);
-			}).catch(e => void e);
+			return message.reply('You don\'t have permissions to use this command.').catch(e => void e);
 		}
 
 		const this_channel = app.channel(Channel);
@@ -105,7 +103,7 @@ module.exports = class CheckRole extends Commando.Command {
 			embed.setFooter(`Channel ID: ${this_object.id}`);
 			embed.setTimestamp();
 			embed.setColor('#ffff00');
-			message.say(embed);
+			message.reply(embed);
 		}
 	}
 };
