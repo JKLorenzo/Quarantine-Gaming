@@ -19,7 +19,7 @@
   "dependencies": {
     "@discordjs/opus": "^0.4.0",
     "axios": "^0.21.1",
-    "discord.js": "github:discordjs/discord.js#master",
+    "discord.js": "github:discordjs/discord.js",
     "discord.js-commando": "^0.12.2",
     "eslint": "^7.19.0",
     "ffmpeg-static": "^4.2.7",
