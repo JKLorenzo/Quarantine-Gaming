@@ -62,8 +62,7 @@ module.exports.sendToUser = async (UserResolvable, content) => {
 		await OutgoingMessageManager.queue();
 		let result, error;
 		try {
-			const channel = await member.createDM();
-			result = await channel.send(content);
+			result = await member.send(content);
 			setTimeout(() => result.delete().catch(e => void e), 3600000);
 		}
 		catch (this_error) {
