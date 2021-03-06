@@ -22,7 +22,7 @@ module.exports = class Audio extends Commando.Command {
 		message_manager = this.client.modules.message_manager;
 		reaction_manager = this.client.modules.reaction_manager;
 
-		message.delete({ timeout: 10000 }).catch(e => void e);
+		setTimeout(() => message.delete().catch(e => void e), 10000);
 		const embed = new Discord.MessageEmbed();
 		embed.setColor('#ffff00');
 		embed.setAuthor('Quarantine Gaming: Experience');
@@ -41,6 +41,6 @@ module.exports = class Audio extends Commando.Command {
 			reaction_manager.addReaction(SentMessage, reaction);
 		}
 		// Delete after 30 mins
-		SentMessage.delete({ timeout: 1800000 }).catch(e => void e);
+		setTimeout(() => SentMessage.delete().catch(e => void e), 1800000);
 	}
 };

@@ -16,7 +16,8 @@ module.exports = class Health extends Commando.Command {
 	async run(message) {
 		const now = Date.now();
 		const dummy_message = await message.channel.send('Pinging...');
-		await dummy_message.delete({ timeout: 2500 }).catch(e => void e);
+		await functions.sleep(2500);
+		await dummy_message.delete().catch(e => void e);
 
 		/** @type {import('../../modules/message_manager.js');} */
 		const message_manager = this.client.modules.message_manager;
@@ -33,7 +34,7 @@ module.exports = class Health extends Commando.Command {
 		/** @type {import('../../modules/database.js')} */
 		const database = this.client.modules.database;
 
-		message.delete({ timeout: 1000 }).catch(e => void e);
+		setTimeout(() => message.delete().catch(e => void e), 10000);
 
 		const embed = new Discord.MessageEmbed();
 		embed.setAuthor('Quarantine Gaming: Health Monitor');
@@ -87,7 +88,7 @@ module.exports = class Health extends Commando.Command {
 		embed.setTimestamp(startup_date);
 
 		return message.channel.send(embed).then(this_message => {
-			this_message.delete({ timeout: 60000 }).catch(e => void e);
+			setTimeout(() => this_message.delete().catch(e => void e), 60000);
 		});
 	}
 };

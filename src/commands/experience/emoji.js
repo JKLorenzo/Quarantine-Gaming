@@ -48,7 +48,7 @@ module.exports = class Emoji extends Commando.Command {
 		app = this.client.modules.app;
 		reaction_manager = this.client.modules.reaction_manager;
 
-		message.delete({ timeout: 2000 }).catch(e => void e);
+		setTimeout(() => message.delete().catch(e => void e), 2000);
 		const reference = message.reference;
 		if (reference) {
 			let message_reference = app.message(reference.channelID, reference.messageID);
@@ -67,13 +67,13 @@ module.exports = class Emoji extends Commando.Command {
 			}
 			else {
 				message.reply('The message you\'re replying to no longer exists.').then(this_message => {
-					this_message.delete({ timeout: 10000 }).catch(e => void e);
+					setTimeout(() => this_message.delete().catch(e => void e), 10000);
 				}).catch(e => void e);
 			}
 		}
 		else {
 			message.reply('You must reply to a message when using this command.').then(this_message => {
-				this_message.delete({ timeout: 10000 }).catch(e => void e);
+				setTimeout(() => this_message.delete().catch(e => void e), 10000);
 			}).catch(e => void e);
 		}
 	}

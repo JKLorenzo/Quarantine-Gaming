@@ -89,8 +89,8 @@ module.exports.clearTempChannels = async (GuildChannelResolvables) => {
 		const this_channel = app.channel(channel);
 		if (!this_channel) continue;
 		await this_channel.messages.fetch().then(async messages => {
-			for (const message of messages) {
-				message[1].delete({ timeout: 900000 }).catch(e => void e);
+			for (const message of messages.array()) {
+				setTimeout(() => message.delete().catch(e => void e), 900000);
 				await functions.sleep(5000);
 			}
 		});

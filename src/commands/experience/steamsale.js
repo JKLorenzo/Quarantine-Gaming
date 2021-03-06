@@ -17,7 +17,7 @@ module.exports = class SteamSale extends Commando.Command {
 
 	/** @type {Commando.CommandoMessage} */
 	async run(message) {
-		message.delete({ timeout: 10000 }).catch(e => void e);
+		setTimeout(() => message.delete().catch(e => void e), 10000);
 		const reply = await message.say('Getting information...');
 		const response = await axios.get('https://www.whenisthenextsteamsale.com/').then(resp => {
 			const { document } = (new JSDOM(resp.data)).window;
@@ -40,7 +40,7 @@ module.exports = class SteamSale extends Commando.Command {
 		}
 		else {
 			reply.edit(`${message.author}, There's a Steam sale happening now or within a few hours from now!`).then(this_message => {
-				this_message.delete({ timeout: 10000 }).catch(e => void e);
+				setTimeout(() => this_message.delete().catch(e => void e), 10000);
 			}).catch(e => void e);
 		}
 	}

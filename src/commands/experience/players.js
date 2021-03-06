@@ -46,7 +46,7 @@ module.exports = class PlayersCommand extends Commando.Command {
 		app = this.client.modules.app;
 		message_manager = this.client.modules.message_manager;
 
-		message.delete({ timeout: 10000 }).catch(e => void e);
+		setTimeout(() => message.delete().catch(e => void e), 10000);
 		const game_role_mentionable = app.role(role);
 		const players = new Array();
 		const alphabetical = new Array();
@@ -102,7 +102,7 @@ module.exports = class PlayersCommand extends Commando.Command {
 				embed.setFooter(`A total of ${players.length} player${players.length > 1 ? 's were' : ' was'} found.`);
 				embed.setColor('#25ff00');
 				message_manager.sendToChannel(message.channel, embed).then(this_message => {
-					this_message.delete({ timeout: 30000 }).catch(e => void e);
+					setTimeout(() => this_message.delete().catch(e => void e), 30000);
 				}).catch(e => void e);
 			}
 			else {
@@ -111,7 +111,7 @@ module.exports = class PlayersCommand extends Commando.Command {
 		}
 		else {
 			message.reply('No information is available right now. Please try again later.').then(this_message => {
-				this_message.delete({ timeout: 10000 }).catch(e => void e);
+				setTimeout(() => this_message.delete().catch(e => void e), 10000);
 			}).catch(e => void e);
 		}
 	}

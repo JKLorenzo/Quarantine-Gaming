@@ -39,7 +39,7 @@ module.exports = class TransferCommand extends Commando.Command {
 		app = this.client.modules.app;
 		message_manager = this.client.modules.message_manager;
 
-		message.delete({ timeout: 10000 }).catch(e => void e);
+		setTimeout(() => message.delete().catch(e => void e), 10000);
 		const voice_channel = app.member(message.author).voice.channel;
 		if (voice_channel) {
 			for (const user of users.split(' ')) {
@@ -51,20 +51,20 @@ module.exports = class TransferCommand extends Commando.Command {
 					}
 					else {
 						message.reply(`${this_member} must be connected to a voice channel.`).then(this_message => {
-							this_message.delete({ timeout: 10000 }).catch(e => void e);
+							setTimeout(() => this_message.delete().catch(e => void e), 10000);
 						}).catch(e => void e);
 					}
 				}
 				else {
 					message.reply(`I can't find user ${user}, please try again.`).then(this_message => {
-						this_message.delete({ timeout: 10000 }).catch(e => void e);
+						setTimeout(() => this_message.delete().catch(e => void e), 10000);
 					}).catch(e => void e);
 				}
 			}
 		}
 		else {
 			message.reply('You must be connected to a voice channel before you can trasfer other members.').then(this_message => {
-				this_message.delete({ timeout: 10000 }).catch(e => void e);
+				setTimeout(() => this_message.delete().catch(e => void e), 10000);
 			}).catch(e => void e);
 		}
 	}

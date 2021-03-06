@@ -113,7 +113,7 @@ module.exports = class StatsVALORANT extends Commando.Command {
 		// Link
 		message_manager = this.client.modules.message_manager;
 
-		message.delete({ timeout: 10000 }).catch(e => void e);
+		setTimeout(() => message.delete().catch(e => void e), 10000);
 		const reply = await message.say('Getting information...');
 		const stats = await valorant(player.split('#')[0], player.split('#')[1]);
 
@@ -203,16 +203,16 @@ module.exports = class StatsVALORANT extends Commando.Command {
 
 			if (target == 'here') {
 				await message.say(embed1).then(the_message => {
-					the_message.delete({ timeout: 300000 }).catch(e => void e);
+					setTimeout(() => the_message.delete().catch(e => void e), 300000);
 				}).catch(e => void e);
 				await message.say(embed2).then(the_message => {
-					the_message.delete({ timeout: 300000 }).catch(e => void e);
+					setTimeout(() => the_message.delete().catch(e => void e), 300000);
 				}).catch(e => void e);
 				await message.say(embed3).then(the_message => {
-					the_message.delete({ timeout: 300000 }).catch(e => void e);
+					setTimeout(() => the_message.delete().catch(e => void e), 300000);
 				}).catch(e => void e);
 				await message.say(embed4).then(the_message => {
-					the_message.delete({ timeout: 300000 }).catch(e => void e);
+					setTimeout(() => the_message.delete().catch(e => void e), 300000);
 				}).catch(e => void e);
 			}
 			else {
@@ -221,13 +221,13 @@ module.exports = class StatsVALORANT extends Commando.Command {
 				await message_manager.sendToUser(message.author, embed3);
 				await message_manager.sendToUser(message.author, embed4);
 				reply.edit('Sent you a DM with information.').then(this_message => {
-					this_message.delete({ timeout: 10000 }).catch(e => void e);
+					setTimeout(() => this_message.delete().catch(e => void e), 10000);
 				}).catch(e => void e);
 			}
 		}
 		else {
 			reply.edit('Failed to get information from this account. The account may be private or the account does not exist.\nTo make your account public, you must sign up your riot account here: <https://tracker.gg/valorant>.').then(this_message => {
-				this_message.delete({ timeout: 10000 }).catch(e => void e);
+				setTimeout(() => this_message.delete().catch(e => void e), 10000);
 			}).catch(e => void e);
 		}
 	}

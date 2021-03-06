@@ -64,7 +64,7 @@ module.exports.sendToUser = async (UserResolvable, content) => {
 		try {
 			const channel = await member.createDM();
 			result = await channel.send(content);
-			result.delete({ timeout: 3600000 }).catch(e => void e);
+			setTimeout(() => result.delete().catch(e => void e), 3600000);
 		}
 		catch (this_error) {
 			error = this_error;
@@ -92,7 +92,7 @@ module.exports.process = async (message) => {
 		// Game Invites Channel Blocking
 		if (message.channel && message.channel.id == constants.channels.integrations.game_invites && (message.embeds.length == 0 || (message.embeds.length > 0 && message.embeds[0].author.name != 'Quarantine Gaming: Game Coordinator'))) {
 			await this.sendToUser(message.author, 'Hello there! You can\'t send any messages in ' + message.channel + ' channel.');
-			await message.delete({ timeout: 2500 }).catch(e => void e);
+			setTimeout(() => message.delete().catch(e => void e), 2500);
 		}
 
 		// DM

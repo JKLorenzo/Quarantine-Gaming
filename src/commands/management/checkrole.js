@@ -58,7 +58,7 @@ module.exports = class CheckRole extends Commando.Command {
 		// Check user permissions
 		if (!app.hasRole(message.author, [constants.roles.staff, constants.roles.moderator])) {
 			return message.reply('You don\'t have permissions to use this command.').then(this_message => {
-				this_message.delete({ timeout: 10000 }).catch(e => void e);
+				setTimeout(() => this_message.delete().catch(e => void e), 10000);
 			}).catch(e => void e);
 		}
 

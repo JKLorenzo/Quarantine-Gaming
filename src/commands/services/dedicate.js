@@ -42,7 +42,7 @@ module.exports = class DedicateCommand extends Commando.Command {
 		general = this.client.modules.general;
 		message_manager = this.client.modules.message_manager;
 
-		message.delete({ timeout: 10000 }).catch(e => void e);
+		setTimeout(() => message.delete().catch(e => void e), 10000);
 		const voice_channel = app.member(message.author).voice.channel;
 		if (voice_channel) {
 			if (name.toLowerCase() == 'lock' || name.toLowerCase() == 'unlock') {
@@ -75,7 +75,7 @@ module.exports = class DedicateCommand extends Commando.Command {
 				}
 				else {
 					message.reply('You must be on a dedicated channel to lock or unlock a voice channel.').then(this_message => {
-						this_message.delete({ timeout: 10000 }).catch(e => void e);
+						setTimeout(() => this_message.delete().catch(e => void e), 10000);
 					}).catch(e => void e);
 				}
 			}
@@ -91,7 +91,7 @@ module.exports = class DedicateCommand extends Commando.Command {
 					if (member) name = member.displayName;
 
 					message.reply(`Got it! Please wait while I'm preparing **${name}** voice and text channels.`).then(this_message => {
-						this_message.delete({ timeout: 10000 }).catch(e => void e);
+						setTimeout(() => this_message.delete().catch(e => void e), 10000);
 					}).catch(e => void e);
 					await general.dedicateChannel(voice_channel, name);
 				}
@@ -101,7 +101,7 @@ module.exports = class DedicateCommand extends Commando.Command {
 						return functions.toAlphanumericString(word);
 					}).join(' ');
 					message.reply(`Got it! Please wait while I'm preparing **${name}** voice and text channels.`).then(this_message => {
-						this_message.delete({ timeout: 10000 }).catch(e => void e);
+						setTimeout(() => this_message.delete().catch(e => void e), 10000);
 					}).catch(e => void e);
 					await general.dedicateChannel(voice_channel, name);
 				}
@@ -109,7 +109,7 @@ module.exports = class DedicateCommand extends Commando.Command {
 		}
 		else {
 			message.reply('You must be connected to any Voice Room channels to create a dedicated channel.').then(this_message => {
-				this_message.delete({ timeout: 10000 }).catch(e => void e);
+				setTimeout(() => this_message.delete().catch(e => void e), 10000);
 			}).catch(e => void e);
 		}
 	}

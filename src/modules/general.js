@@ -409,7 +409,7 @@ module.exports.gameInvite = async (role, inviter, count, reserved_members) => {
 			}
 
 			const this_message = await message_manager.sendToChannel(constants.channels.integrations.game_invites, { content: `${inviter.displayName} is inviting you to play ${game_role}!`, embed: embed });
-			this_message.delete({ timeout: 3600000 }).catch(e => void e);
+			setTimeout(() => this_message.delete().catch(e => void e), 3600000);
 			if (!is_full) {
 				await reaction_manager.addReaction(this_message, emoji ? emoji : qg_emoji).catch(error => error_manager.mark(ErrorTicketManager.create('addReaction', error, 'gameInvite')));
 			}

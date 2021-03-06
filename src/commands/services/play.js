@@ -58,7 +58,7 @@ module.exports = class PlayCommand extends Commando.Command {
 		app = this.client.modules.app;
 		general = this.client.modules.general;
 
-		message.delete({ timeout: 10000 }).catch(e => void e);
+		setTimeout(() => message.delete().catch(e => void e), 10000);
 		const game_role_mentionable = app.role(role);
 		const inviter = app.member(message.author);
 
@@ -78,7 +78,7 @@ module.exports = class PlayCommand extends Commando.Command {
 
 		general.gameInvite(game_role_mentionable, inviter, count, reserved);
 		message.say(`Got it! This bracket will be available on the ${app.channel(constants.channels.integrations.game_invites)} channel.`).then(this_message => {
-			this_message.delete({ timeout: 10000 }).catch(e => void e);
+			setTimeout(() => this_message.delete().catch(e => void e), 10000);
 		}).catch(e => void e);
 	}
 };
