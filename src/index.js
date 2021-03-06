@@ -23,6 +23,24 @@ const client = new CommandoClient({
 	partials: [
 		'MESSAGE', 'CHANNEL', 'REACTION',
 	],
+	intents: [
+		'DIRECT_MESSAGES',
+		'GUILDS',
+		'GUILD_BANS',
+		'GUILD_EMOJIS',
+		'GUILD_INVITES',
+		'GUILD_MEMBERS',
+		'GUILD_MESSAGES',
+		'GUILD_MESSAGE_REACTIONS',
+		'GUILD_PRESENCES',
+		'GUILD_VOICE_STATES',
+	],
+	allowedMentions: {
+		parse: [
+			'roles', 'users',
+		],
+		repliedUser: true,
+	},
 });
 
 client.registry
