@@ -27,17 +27,7 @@ module.exports.create = async (options) => {
 		await RoleManager.queue();
 		let result, error;
 		try {
-			result = await app.guild().roles.create({
-				data: {
-					name: options.name,
-					color: options.color,
-					hoist: options.hoist,
-					mentionable: options.mentionable,
-					permissions: options.permissions,
-					position: options.position,
-				},
-				reason: options.reason,
-			});
+			result = await app.guild().roles.create(options);
 		}
 		catch (this_error) {
 			error = this_error;
