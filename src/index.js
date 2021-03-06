@@ -172,6 +172,14 @@ client.on('userUpdate', (oldUser, newUser) => {
 
 client.on('guildMemberUpdate', (oldMember, newMember) => {
 	if (!app.isInitialized() || newMember.guild.id !== constants.guild) return;
+
+	// Member Screening
+	if (!newMember.user.bot && oldMember.pending != newMember.pending && newMember.pending == false) {
+		general.memberScreening(newMember);
+	}
+
+	if (!app.hasRole(newMember, [constants.roles.member])) return;
+
 	try {
 		const embed = new Discord.MessageEmbed();
 		embed.setAuthor('Quarantine Gaming: Member Submanager');
@@ -214,8 +222,6 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
 client.on('guildMemberAdd', (this_member) => {
 	if (!app.isInitialized() || this_member.guild.id !== constants.guild) return;
 	try {
-		if (!this_member.user.bot) general.memberScreening(this_member);
-
 		const created_day = this_member.user.createdAt;
 		const created_day_difference = functions.compareDate(created_day);
 
