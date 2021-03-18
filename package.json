@@ -22,7 +22,7 @@
     "discord.js": "^12.5.1",
     "discord.js-commando": "^0.12.2",
     "eslint": "^7.22.0",
-    "ffmpeg-static": "^4.2.7",
+    "ffmpeg-static": "^4.2.8",
     "firebase-admin": "^9.5.0",
     "g-i-s": "^2.1.6",
     "google-tts-api": "^2.0.1",
