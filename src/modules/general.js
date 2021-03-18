@@ -155,11 +155,6 @@ module.exports.memberOffline = async (member) => {
 			role_manager.remove(member, constants.roles.streaming);
 		}
 
-		// Remove Dedicated Channel Role
-		if (app.hasRole(member, [constants.roles.dedicated])) {
-			role_manager.remove(member, constants.roles.dedicated);
-		}
-
 		// Remove all Dedicated Channel's Text Channel Roles
 		for (const text_channel_role of member.roles.cache.array().filter(role => role.name.startsWith('Text'))) {
 			role_manager.remove(member, text_channel_role);
@@ -246,14 +241,12 @@ module.exports.memberActivityUpdate = async (member, data) => {
 module.exports.memberVoiceUpdate = async (member, oldState, newState) => {
 	await VoiceManager.queue();
 	try {
-		if (oldState.channel && oldState.channel.parent.id == constants.channels.category.dedicated) {
+		if (oldState.channel && oldState.channel.parent.id == constants.channels.category.dedicated_voice) {
 			const text_channel = app.channel(constants.channels.category.dedicated).children.find(channel => channel.type == 'text' && channel.topic && functions.parseMention(channel.topic.split(' ')[0]) == oldState.channelID);
 			const linked_data = text_channel.topic.split(' ');
-			const text_role = app.role(linked_data[1]);
-			const team_role = app.role(linked_data[2]);
+			const team_role = app.role(linked_data[1]);
 
 			if (oldState.channel.members.size > 0 && !(oldState.channel.members.size == 1 && oldState.channel.members.first().user.bot)) {
-				role_manager.remove(member, text_role);
 				role_manager.remove(member, team_role);
 				const embed = new Discord.MessageEmbed();
 				embed.setAuthor('Quarantine Gaming: Dedicated Channels');
@@ -266,11 +259,9 @@ module.exports.memberVoiceUpdate = async (member, oldState, newState) => {
 				message_manager.sendToChannel(text_channel, embed);
 			}
 			else {
-				await functions.sleep(2500);
+				await role_manager.delete(team_role);
 				await channel_manager.delete(oldState.channel);
 				await channel_manager.delete(text_channel);
-				await role_manager.delete(text_role);
-				await role_manager.delete(team_role);
 			}
 		}
 
@@ -293,14 +284,13 @@ module.exports.memberVoiceUpdate = async (member, oldState, newState) => {
 				message_manager.sendToUser(member, embed);
 			}
 
-			if (newState.channel.parent.id == constants.channels.category.dedicated) {
-				const text_channel = app.channel(constants.channels.category.dedicated).children.find(channel => channel.type == 'text' && channel.topic && functions.parseMention(channel.topic.split(' ')[0]) == newState.channelID);
+			if (newState.channel.parent.id == constants.channels.category.dedicated_voice) {
+				const text_channel = app.channel(constants.channels.category.dedicated).children.find(channel => channel.topic && functions.parseMention(channel.topic.split(' ')[0]) == newState.channelID);
 				const linked_data = text_channel.topic.split(' ');
-				const text_role = app.role(linked_data[1]);
-				const team_role = app.role(linked_data[2]);
+				const team_role = app.role(linked_data[1]);
 
 				// Add Text Role
-				if (!member.roles.cache.has(text_role.id)) {
+				if (!member.roles.cache.has(team_role.id)) {
 					const embed = new Discord.MessageEmbed();
 					embed.setAuthor('Quarantine Gaming: Dedicated Channels');
 					embed.setTitle(newState.channel.name);
@@ -310,40 +300,17 @@ module.exports.memberVoiceUpdate = async (member, oldState, newState) => {
 					embed.setTimestamp();
 					embed.setColor('#7b00ff');
 					message_manager.sendToChannel(text_channel, embed);
-					role_manager.add(member, text_role);
-				}
-
-				// Add Team Role
-				if (!member.roles.cache.has(team_role.id)) {
 					role_manager.add(member, team_role);
 				}
-
-				// Add Dedicated Role
-				if (!member.roles.cache.has(constants.roles.dedicated)) {
-					role_manager.add(member, constants.roles.dedicated);
-				}
 			}
-			else {
-				if (member.roles.cache.has(constants.roles.dedicated)) {
-					// Remove Text Role
-					role_manager.remove(member, constants.roles.dedicated);
-				}
-
-				if (newState.channel.parent.id == constants.channels.category.voice && newState.channel.members.array().length >= 5) {
-					// Dedicate this channel
-					await this.dedicateChannel(newState.channel, newState.channel.members.array()[0].displayName);
-				}
+			else if (newState.channel.parent.id == constants.channels.category.voice && newState.channel.members.array().length >= 5) {
+				// Dedicate this channel
+				await functions.sleep(5000);
+				await this.dedicateChannel(newState.channel, newState.channel.members.array()[0].displayName);
 			}
 		}
-		else {
-			// Remove Streaming Role
-			if (member.roles.cache.has(constants.roles.streaming)) {
-				role_manager.remove(member, constants.roles.streaming);
-			}
-			// Remove Text Role
-			if (member.roles.cache.has(constants.roles.dedicated)) {
-				role_manager.remove(member, constants.roles.dedicated);
-			}
+		else if (member.roles.cache.has(constants.roles.streaming)) {
+			role_manager.remove(member, constants.roles.streaming);
 		}
 	}
 	catch (error) {
@@ -429,13 +396,17 @@ module.exports.dedicateChannel = async (channel_origin, name) => {
 	await DedicateManager.queue();
 	try {
 		const channel_name = '🔰' + name;
-		if (channel_origin.parentID == constants.channels.category.dedicated) {
+		if (channel_origin.parentID == constants.channels.category.dedicated_voice) {
 			// Rename
 			await channel_origin.setName(channel_name);
-			const text_channel = app.guild().channels.cache.find(channel => channel.type == 'text' && channel.topic && functions.parseMention(channel.topic.split(' ')[0]) == channel_origin.id);
+			/** @type {Discord.CategoryChannel} */
+			const dedicated_text_channels_category = app.channel(constants.channels.category.dedicated);
+			/** @type {Array<Discord.TextChannel>} */
+			const dedicated_text_channels = dedicated_text_channels_category.children.array();
+			const text_channel = dedicated_text_channels.find(channel => channel.topic && functions.parseMention(channel.topic.split(' ')[0]) == channel_origin.id);
 			await text_channel.setName(channel_name);
-			const hoisted_role = app.role(text_channel.topic.split(' ')[2]);
-			await hoisted_role.setName(`Team ${channel_name}`);
+			const team_role = app.role(text_channel.topic.split(' ')[1]);
+			await team_role.setName(`Team ${channel_name}`);
 
 			// Set info
 			const channel_desc = new Array();
@@ -475,12 +446,12 @@ module.exports.dedicateChannel = async (channel_origin, name) => {
 			const dedicated_voice_channel = await channel_manager.create({
 				name: channel_name,
 				type: 'voice',
-				parent: constants.channels.category.dedicated,
-				position: 1,
+				parent: constants.channels.category.dedicated_voice,
 				permissionOverwrites: [
 					{
 						id: constants.roles.everyone,
 						deny: [
+							p.general.VIEW_CHANNEL,
 							p.general.CREATE_INVITE,
 							p.general.MANAGE_CHANNELS,
 							p.general.MANAGE_PERMISSIONS,
@@ -493,14 +464,9 @@ module.exports.dedicateChannel = async (channel_origin, name) => {
 						],
 					},
 					{
-						id: constants.roles.dedicated,
-						deny: [
-							p.general.VIEW_CHANNEL,
-						],
-					},
-					{
 						id: constants.roles.member,
 						allow: [
+							p.general.VIEW_CHANNEL,
 							p.voice.CONNECT,
 							p.voice.SPEAK,
 							p.voice.VIDEO,
@@ -509,6 +475,7 @@ module.exports.dedicateChannel = async (channel_origin, name) => {
 					{
 						id: constants.roles.moderator,
 						allow: [
+							p.general.VIEW_CHANNEL,
 							p.general.CREATE_INVITE,
 							p.general.MANAGE_CHANNELS,
 							p.voice.CONNECT,
@@ -521,6 +488,7 @@ module.exports.dedicateChannel = async (channel_origin, name) => {
 					{
 						id: constants.roles.music_bot,
 						allow: [
+							p.general.VIEW_CHANNEL,
 							p.voice.CONNECT,
 							p.voice.SPEAK,
 							p.voice.USE_VOICE_ACTIVITY,
@@ -530,13 +498,9 @@ module.exports.dedicateChannel = async (channel_origin, name) => {
 				bitrate: 128000,
 			});
 
-			const dedicated_text_role = await role_manager.create({
-				name: `Text ${dedicated_voice_channel.id}`,
-			});
-
 			const team_role = await role_manager.create({
 				name: `Team ${channel_name}`,
-				position: app.role(constants.roles.dedicated).position,
+				position: app.role(constants.roles.streaming).position + 1,
 				hoist: true,
 			});
 
@@ -544,7 +508,6 @@ module.exports.dedicateChannel = async (channel_origin, name) => {
 				name: channel_name,
 				type: 'text',
 				parent: constants.channels.category.dedicated,
-				position: 1,
 				permissionOverwrites: [
 					{
 						id: constants.roles.everyone,
@@ -568,7 +531,7 @@ module.exports.dedicateChannel = async (channel_origin, name) => {
 						],
 					},
 					{
-						id: dedicated_text_role.id,
+						id: team_role.id,
 						allow: [
 							p.general.VIEW_CHANNEL,
 							p.text.SEND_TTS_MESSAGES,
@@ -587,11 +550,7 @@ module.exports.dedicateChannel = async (channel_origin, name) => {
 						],
 					},
 				],
-				topic: `${dedicated_voice_channel} ${dedicated_text_role} ${team_role}`,
-			});
-
-			await dedicated_voice_channel.updateOverwrite(dedicated_text_role, {
-				VIEW_CHANNEL: true,
+				topic: `${dedicated_voice_channel} ${team_role}`,
 			});
 
 			// Set info

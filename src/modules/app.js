@@ -1,11 +1,10 @@
+// eslint-disable-next-line no-unused-vars
 const Discord = require('discord.js');
 // eslint-disable-next-line no-unused-vars
 const { CommandoClient } = require('discord.js-commando');
 const constants = require('./constants.js');
 const functions = require('./functions.js');
 const classes = require('./classes.js');
-/** @type {import('./message_manager.js')} */
-let message_manager;
 /** @type {import('./error_manager.js')} */
 let error_manager;
 /** @type {import('./role_manager.js')} */
@@ -176,7 +175,6 @@ module.exports.addInvite = (new_invite) => {
 module.exports.initialize = async (ClientInstance) => {
 	// Link
 	client = ClientInstance;
-	message_manager = client.modules.message_manager;
 	error_manager = client.modules.error_manager;
 	role_manager = client.modules.role_manager;
 	database = client.modules.database;
@@ -185,42 +183,27 @@ module.exports.initialize = async (ClientInstance) => {
 
 	try {
 		// Manage Active Dedicated Channels
-		for (const dedicated_channel of this.channel(constants.channels.category.dedicated).children.array()) {
+		/** @type {Discord.CategoryChannel} */
+		const dedicated_text_channels_category = this.channel(constants.channels.category.dedicated);
+		for (const dedicated_channel of dedicated_text_channels_category.children.array()) {
 			if (dedicated_channel.type == 'text') {
 				const linked_data = dedicated_channel.topic.split(' ');
 				const voice_channel = this.channel(linked_data[0]);
-				const text_role = this.role(linked_data[1]);
-				const team_role = this.role(linked_data[2]);
+				const team_role = this.role(linked_data[1]);
 
 				for (const this_member of voice_channel.members.array()) {
-					// Give text role
-					if (!this_member.user.bot && !this_member.roles.cache.has(text_role.id)) {
-						await role_manager.add(this_member, text_role).catch(error => error_manager.mark(ErrorTicketManager.create(`add text_role to ${this_member}`, error, 'initialize')));
-					}
 					// Give team role
 					if (!this_member.user.bot && !this_member.roles.cache.has(team_role.id)) {
 						await role_manager.add(this_member, team_role).catch(error => error_manager.mark(ErrorTicketManager.create(`add team_role to ${this_member}`, error, 'initialize')));
-					}
-					// Hide other dedicated channels
-					if (!this_member.user.bot && !this_member.roles.cache.has(constants.roles.dedicated)) {
-						await role_manager.add(this_member, constants.roles.dedicated).catch(error => error_manager.mark(ErrorTicketManager.create(`add dedicated_role to ${this_member}`, error, 'initialize')));
 					}
 				}
 
 				for (const this_member of this.guild().members.cache.array()) {
 					if (!this_member.user.bot) {
-						if (this_member.roles.cache.has(text_role.id)) {
-							// Remove roles related to dedicated channels
+						if (this_member.roles.cache.has(team_role.id)) {
+							// Remove team role
 							if (!this_member.voice || this_member.voice.channelID != voice_channel.id) {
-								await role_manager.remove(this_member, text_role).catch(error => error_manager.mark(ErrorTicketManager.create(`remove text_role from ${this_member}`, error, 'initialize')));
 								await role_manager.remove(this_member, team_role).catch(error => error_manager.mark(ErrorTicketManager.create(`remove team_role from ${this_member}`, error, 'initialize')));
-							}
-						}
-
-						if (this_member.roles.cache.has(constants.roles.dedicated)) {
-							// Show all active dedicated channels
-							if (!this_member.voice || !this_member.voice.channel || this_member.voice.channel.parent != constants.channels.category.dedicated) {
-								await role_manager.remove(this_member, constants.roles.dedicated).catch(error => error_manager.mark(ErrorTicketManager.create(`remove dedicated_role from ${this_member}`, error, 'initialize')));
 							}
 						}
 					}
@@ -231,15 +214,15 @@ module.exports.initialize = async (ClientInstance) => {
 		// Manage Inactive Dedicated Channel Related Roles
 		for (const this_member of this.guild().members.cache.array()) {
 			for (const this_role of this_member.roles.cache.array()) {
-				if (this_role.id == constants.roles.dedicated) {
-					// Remove Dedicated Channel Role
-					if ((this_member.voice && this_member.voice.channel && this_member.voice.channel.parent && this_member.voice.channel.parent.id != constants.channels.category.dedicated) || !(this_member.voice && this_member.voice.channel)) {
-						await role_manager.remove(this_member, this_role);
-					}
-				}
-				else if (this_role.name.startsWith('Text')) {
+				if (this_role.name.startsWith('Team')) {
 					// Remove Text Role
-					const text_channel = this.channel(this_role.name.split(' ')[1]);
+					/** @type {Discord.CategoryChannel} */
+					const dedicated_text_channels = this.guild().channels.cache.get(constants.channels.category.dedicated);
+					const text_channel = dedicated_text_channels.children.array().find(channel => {
+						/** @type {Discord.TextChannel} */
+						const this_channel = channel;
+						return this_channel.topic && functions.parseMention(this_channel.topic.split(' ')[1]) == this_role.id;
+					});
 					if (!text_channel || (text_channel && !text_channel.members.find(member => member.user.id == this_member.user.id))) {
 						await role_manager.remove(this_member, this_role);
 					}
@@ -249,9 +232,9 @@ module.exports.initialize = async (ClientInstance) => {
 
 		// Manage Inactive Dedicated Channel Related Channels
 		/** @type {Discord.CategoryChannel} */
-		const dedicated_category_channel = this.channel(constants.channels.category.dedicated);
-		for (const dedicated_channel of dedicated_category_channel.children.array()) {
-			if (dedicated_channel.type == 'voice' && dedicated_channel.parent && dedicated_channel.parentID == constants.channels.category.dedicated) {
+		const dedicated_voice_channels_category = this.channel(constants.channels.category.dedicated_voice);
+		for (const dedicated_channel of dedicated_voice_channels_category.children.array()) {
+			if (dedicated_channel.parent && dedicated_channel.parentID == constants.channels.category.dedicated_voice) {
 				let empty = true;
 				for (const this_member of dedicated_channel.members.array()) {
 					if (!this_member.user.bot) empty = false;
@@ -259,12 +242,9 @@ module.exports.initialize = async (ClientInstance) => {
 				if (empty) {
 					const text_channel = this.guild().channels.cache.find(channel => channel.type == 'text' && channel.topic && functions.parseMention(channel.topic.split(' ')[0]) == dedicated_channel.id);
 					const linked_data = text_channel.topic.split(' ');
-					const text_role = this.role(linked_data[1]);
-					const team_role = this.role(linked_data[2]);
+					const team_role = this.role(linked_data[1]);
 
-					await channel_manager.delete(dedicated_channel);
 					await channel_manager.delete(text_channel);
-					await role_manager.delete(text_role);
 					await role_manager.delete(team_role);
 				}
 			}
@@ -359,7 +339,7 @@ module.exports.initialize = async (ClientInstance) => {
 				for (const this_channel of this.channel(constants.channels.category.voice).children.array()) {
 					if (this_channel.type == 'voice') channels_for_dedication.push(this_channel);
 				}
-				for (const this_channel of this.channel(constants.channels.category.dedicated).children.array()) {
+				for (const this_channel of this.channel(constants.channels.category.dedicated_voice).children.array()) {
 					if (this_channel.type == 'voice') channels_for_dedication.push(this_channel);
 				}
 				for (const this_channel of channels_for_dedication) {
