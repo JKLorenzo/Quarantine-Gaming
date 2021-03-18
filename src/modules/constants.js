@@ -63,7 +63,6 @@ module.exports = {
 		qg: {
 			dm: '773425152750125106',
 			logs: '791826134765142086',
-			api_update: '790819483379433492',
 			testing_ground_text: '822020064043466802',
 			testing_ground_voice: '822020338102829057',
 		},
