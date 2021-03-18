@@ -89,10 +89,6 @@ async function uploadLocalEmojis() {
 client.once('ready', async () => {
 	console.log('Startup: Initializing');
 	try {
-		await client.user.setActivity('Startup', {
-			type: 'WATCHING',
-		});
-
 		// Initialize Modules
 		channel_manager.initialize(client);
 		await database.initialize(client);

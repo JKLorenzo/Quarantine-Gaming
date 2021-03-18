@@ -430,16 +430,6 @@ module.exports.initialize = async (ClientInstance) => {
 
 		await this.setActivity(process.env.STATUS_TEXT, process.env.STATUS_TYPE);
 
-		if (process.env.STARTUP_REASON) {
-			const embed = new Discord.MessageEmbed();
-			embed.setColor('#ffff00');
-			embed.setAuthor('Quarantine Gaming: Startup');
-			embed.setTitle('Initialized');
-			embed.setDescription(process.env.STARTUP_REASON);
-
-			await message_manager.sendToChannel(constants.channels.qg.logs, embed);
-		}
-
 		console.log('Startup: Initialized');
 		initialized = true;
 	}
