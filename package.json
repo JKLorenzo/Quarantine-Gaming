@@ -27,7 +27,6 @@
     "g-i-s": "^2.1.6",
     "google-tts-api": "^2.0.1",
     "jsdom": "^16.5.1",
-    "libsodium-wrappers": "^0.7.9",
     "node-fetch": "^2.6.1",
     "probe-image-size": "^7.0.0"
   }
