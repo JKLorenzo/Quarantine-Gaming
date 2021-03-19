@@ -47,6 +47,7 @@ module.exports = class CleanUp extends Commando.Command {
 		/** @type {Discord.TextChannel} */
 		const channel = message.channel;
 		const deleted_messages = new Array();
+
 		async function removeMessages(number_of_messages) {
 			if (number_of_messages > 0) {
 				await channel.bulkDelete(number_of_messages).then(messages => messages.array()).then(messages => {
@@ -63,8 +64,9 @@ module.exports = class CleanUp extends Commando.Command {
 					}
 				}).catch(e => void e);
 			}
-			while (count > 0 && number_of_messages > 0) {
-				await channel.messages.fetch({ limit: count }).then(messages => messages.array()).then(async messages => {
+			let tries = 2;
+			while (count > 0 && number_of_messages > 0 && tries > 0) {
+				await channel.messages.fetch({ limit: 1 }).then(messages => messages.array()).then(async messages => {
 					if (messages.length > 0) {
 						for (const this_message of messages) {
 							await this_message.delete().then(async () => {
@@ -79,12 +81,13 @@ module.exports = class CleanUp extends Commando.Command {
 								await functions.sleep(2000);
 							}).catch(e => void e);
 						}
+						tries = 2;
 					}
 					else {
-						count = 0;
+						tries > 0 ? tries-- : count = 0;
 					}
 				}).catch(() => {
-					count = 0;
+					tries > 0 ? tries-- : count = 0;
 				});
 				await functions.sleep(6500);
 			}
