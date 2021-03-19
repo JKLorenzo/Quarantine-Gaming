@@ -7,7 +7,7 @@ const classes = require('./classes.js');
 let error_manager;
 
 const ErrorTicketManager = new classes.ErrorTicketManager('speech.js');
-const SpeechManager = new classes.ProcessQueue(5000);
+const SpeechManager = new classes.Manager;
 
 const format_words = [
 	{ original: 'VALORANT', formatted: 'Valorant' },
@@ -38,36 +38,38 @@ module.exports.initialize = (ClientInstance) => {
  * @returns {Promise<null>} A null promise.
  */
 module.exports.say = async (message, channel) => {
-	await SpeechManager.queue();
-	try {
-		// Format words
-		for (const word of format_words) {
-			message = message.split(word.original).join(word.formatted);
+	let res, rej;
+	const promise = new Promise((resolve, reject) => {
+		res = resolve;
+		rej = reject;
+	});
+	console.log(`Speech: Queueing ${SpeechManager.totalID} (${channel.name})`);
+	SpeechManager.queue(async function() {
+		try {
+			// Format words
+			for (const word of format_words) {
+				message = message.split(word.original).join(word.formatted);
+			}
+			// Join channel
+			const connection = await channel.join();
+			// TTS
+			const url = googleTTS.getAudioUrl(message);
+			// Speak to channel
+			const dispatcher = connection.play(url);
+			dispatcher.on('finish', async () => {
+				await functions.sleep(2500);
+				await channel.leave();
+				console.log(`Speech: Finished ${SpeechManager.currentID} (${channel.name})`);
+				res();
+			});
 		}
-		// Join channel
-		const connection = await channel.join();
-		// TTS
-		const url = googleTTS.getAudioUrl(message, {
-			lang: 'en-US',
-			slow: false,
-			host: 'https://translate.google.com',
-		});
-		// Speak to channel
-		const dispatcher = connection.play(url);
-		dispatcher.on('finish', async () => {
-			await functions.sleep(2500);
-			await channel.leave();
-			SpeechManager.finish();
-			return;
-		});
-	}
-	catch (error) {
-		error_manager.mark(ErrorTicketManager.create('say', error));
-		await functions.sleep(1000);
-		channel.leave();
-		SpeechManager.finish();
-		return;
-	}
+		catch (this_error) {
+			console.log(`Speech: Finished ${SpeechManager.currentID} (${channel.name})`);
+			error_manager.mark(ErrorTicketManager.create('say', this_error));
+			rej(this_error);
+		}
+	});
+	return promise;
 };
 
 module.exports.SpeechManager = SpeechManager;

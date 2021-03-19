@@ -5,7 +5,7 @@ const classes = require('./classes.js');
 /** @type {import('./app.js')} */
 let app;
 
-const ChannelQueueManager = new classes.ProcessQueue(2500);
+const ChannelQueueManager = new classes.Manager();
 
 /**
  * Initializes the module.
@@ -22,10 +22,13 @@ module.exports.initialize = (ClientInstance) => {
  * @returns {Promise<Discord.GuildChannel>} A Text Channel, a Voice Channel, or a Category Channel Object
  */
 module.exports.create = (options) => {
-	// eslint-disable-next-line no-async-promise-executor
-	return new Promise(async (resolve, reject) => {
-		console.log(`ChannelCreate: Queueing ${ChannelQueueManager.processID} (${options.name})`);
-		await ChannelQueueManager.queue();
+	let res, rej;
+	const promise = new Promise((resolve, reject) => {
+		res = resolve;
+		rej = reject;
+	});
+	console.log(`ChannelCreate: Queueing ${ChannelQueueManager.totalID} (${options.name})`);
+	ChannelQueueManager.queue(async function() {
 		let result, error;
 		try {
 			result = await app.guild().channels.create(options.name, {
@@ -46,10 +49,10 @@ module.exports.create = (options) => {
 		}
 		finally {
 			console.log(`ChannelCreate: Finished ${ChannelQueueManager.currentID} (${options.name})`);
-			ChannelQueueManager.finish();
-			error ? reject(error) : resolve(result);
+			error ? rej(error) : res(result);
 		}
 	});
+	return promise;
 };
 
 /**
@@ -59,11 +62,14 @@ module.exports.create = (options) => {
  * @returns {Promise<Discord.Channel>} A Channel Object
  */
 module.exports.delete = (GuildChannelResolvable, reason = '') => {
-	// eslint-disable-next-line no-async-promise-executor
-	return new Promise(async (resolve, reject) => {
-		const channel = app.channel(GuildChannelResolvable);
-		console.log(`ChannelDelete: Queueing ${ChannelQueueManager.processID} (${channel ? channel.name : GuildChannelResolvable})`);
-		await ChannelQueueManager.queue();
+	let res, rej;
+	const promise = new Promise((resolve, reject) => {
+		res = resolve;
+		rej = reject;
+	});
+	const channel = app.channel(GuildChannelResolvable);
+	console.log(`ChannelDelete: Queueing ${ChannelQueueManager.totalID} (${channel ? channel.name : GuildChannelResolvable})`);
+	ChannelQueueManager.queue(async function() {
 		let result, error;
 		try {
 			result = await channel.delete(reason);
@@ -73,10 +79,10 @@ module.exports.delete = (GuildChannelResolvable, reason = '') => {
 		}
 		finally {
 			console.log(`ChannelDelete: Finished ${ChannelQueueManager.currentID} (${channel ? channel.name : GuildChannelResolvable})`);
-			ChannelQueueManager.finish();
-			error ? reject(error) : resolve(result);
+			error ? rej(error) : res(result);
 		}
 	});
+	return promise;
 };
 
 /**

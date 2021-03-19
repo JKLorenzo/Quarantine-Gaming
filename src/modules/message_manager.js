@@ -8,7 +8,7 @@ let app;
 let error_manager;
 
 const ErrorTicketManager = new classes.ErrorTicketManager('message_manager.js');
-const OutgoingMessageManager = new classes.ProcessQueue(2500);
+const OutgoingMessageManager = new classes.Manager();
 
 /**
  * Initializes the module.
@@ -27,12 +27,15 @@ module.exports.initialize = (ClientInstance) => {
  * @returns {Promise<Discord.Message>} A message object
  */
 module.exports.sendToChannel = (GuildChannelResolvable, content) => {
-	// eslint-disable-next-line no-async-promise-executor
-	return new Promise(async (resolve, reject) => {
-		/** @type {Discord.TextChannel} */
-		const channel = app.channel(GuildChannelResolvable);
-		console.log(`MessageChannelSend: Queueing ${OutgoingMessageManager.processID} (${channel ? channel.name : GuildChannelResolvable})`);
-		await OutgoingMessageManager.queue();
+	let res, rej;
+	const promise = new Promise((resolve, reject) => {
+		res = resolve;
+		rej = reject;
+	});
+	/** @type {Discord.TextChannel} */
+	const channel = app.channel(GuildChannelResolvable);
+	console.log(`MessageChannelSend: Queueing ${OutgoingMessageManager.totalID} (${channel ? channel.name : GuildChannelResolvable})`);
+	OutgoingMessageManager.queue(async function() {
 		let result, error;
 		try {
 			result = await channel.send(content);
@@ -42,10 +45,10 @@ module.exports.sendToChannel = (GuildChannelResolvable, content) => {
 		}
 		finally {
 			console.log(`MessageChannelSend: Finished ${OutgoingMessageManager.currentID} (${channel ? channel.name : GuildChannelResolvable})`);
-			OutgoingMessageManager.finish();
-			error ? reject(error) : resolve(result);
+			error ? rej(error) : res(result);
 		}
 	});
+	return promise;
 };
 
 /**
@@ -55,26 +58,28 @@ module.exports.sendToChannel = (GuildChannelResolvable, content) => {
  * @returns {Promise<Discord.Message>} A message object
  */
 module.exports.sendToUser = async (UserResolvable, content) => {
-	// eslint-disable-next-line no-async-promise-executor
-	return new Promise(async (resolve, reject) => {
-		const member = app.member(UserResolvable);
-		console.log(`MessageUserSend: Queueing ${OutgoingMessageManager.processID} (${member ? member.displayName : UserResolvable})`);
-		await OutgoingMessageManager.queue();
+	let res, rej;
+	const promise = new Promise((resolve, reject) => {
+		res = resolve;
+		rej = reject;
+	});
+	const member = app.member(UserResolvable);
+	console.log(`MessageUserSend: Queueing ${OutgoingMessageManager.totalID} (${member ? member.displayName : UserResolvable})`);
+	OutgoingMessageManager.queue(async function() {
 		let result, error;
 		try {
-			const channel = await member.createDM();
-			result = await channel.send(content);
-			result.delete({ timeout: 3600000 }).catch(e => void e);
+			result = await member.send(content);
+			result.delete({ timeout:3600000 }).catch(e => void e);
 		}
 		catch (this_error) {
 			error = this_error;
 		}
 		finally {
 			console.log(`MessageUserSend: Finished ${OutgoingMessageManager.currentID} (${member ? member.displayName : UserResolvable})`);
-			OutgoingMessageManager.finish();
-			error ? reject(error) : resolve(result);
+			error ? rej(error) : res(result);
 		}
 	});
+	return promise;
 };
 
 /**
