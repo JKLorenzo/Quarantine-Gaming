@@ -106,7 +106,16 @@ module.exports.ProcessQueue = class {
 };
 
 module.exports.Manager = class {
-	constructor() {
+	/**
+	 * Creates a Manager class.
+	 * @param {Number} timeout Timeout between function execution in ms.
+	 */
+	constructor(timeout = 0) {
+		/**
+		 * @readonly
+		 * The timeout between function execution in ms.
+		 */
+		this.timeout = timeout;
 		/**
 		 * @readonly
 		 * The total number of IDs this manager used.
@@ -151,6 +160,7 @@ module.exports.Manager = class {
 			const this_function = this.array.shift();
 			await this_function();
 			this.currentID++;
+			if (this.timeout > 0) await functions.sleep(this.timeout);
 		}
 		this.running = false;
 	}
