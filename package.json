@@ -25,9 +25,9 @@
     "ffmpeg-static": "^4.2.8",
     "firebase-admin": "^9.5.0",
     "g-i-s": "^2.1.6",
-    "google-tts-api": "^2.0.1",
     "jsdom": "^16.5.1",
     "node-fetch": "^2.6.1",
+    "node-google-tts-api": "^1.1.1",
     "probe-image-size": "^7.0.0"
   }
 }

@@ -1,6 +1,8 @@
 // eslint-disable-next-line no-unused-vars
 const Discord = require('discord.js');
-const googleTTS = require('google-tts-api');
+const gtts = require('node-google-tts-api');
+const tts = new gtts();
+const fs = require('fs');
 const functions = require('./functions.js');
 const classes = require('./classes.js');
 /** @type {import('./error_manager.js')} */
@@ -53,9 +55,13 @@ module.exports.say = async (message, channel) => {
 			// Join channel
 			const connection = await channel.join();
 			// TTS
-			const url = googleTTS.getAudioUrl(message);
+			const data = await tts.get({
+				text: message,
+				lang: 'en',
+			});
+			fs.writeFileSync('tts.mp3', data);
 			// Speak to channel
-			const dispatcher = connection.play(url);
+			const dispatcher = connection.play('tts.mp3');
 			dispatcher.on('finish', async () => {
 				await functions.sleep(2500);
 				await channel.leave();
