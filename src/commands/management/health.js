@@ -51,35 +51,35 @@ module.exports = class Health extends Commando.Command {
 
 		buffer = new Array();
 		let currentID = database.ExpiredGameRoleManager.currentID;
-		let processID = database.ExpiredGameRoleManager.processID;
-		buffer.push(`${getStatus(currentID, processID)} **Expired Game Role Manager:** ${getPercent(currentID, processID)} of ${processID + 1}`);
+		let totalID = database.ExpiredGameRoleManager.totalID;
+		buffer.push(`${getStatus(currentID, totalID)} **Expired Game Role Manager:** ${getPercent(currentID, totalID)} of ${totalID + 1}`);
 		currentID = database.GameRoleSetManager.currentID;
-		processID = database.GameRoleSetManager.processID;
-		buffer.push(`${getStatus(currentID, processID)} **Game Role Update Manager:** ${getPercent(currentID, processID)} of ${processID + 1}`);
+		totalID = database.GameRoleSetManager.totalID;
+		buffer.push(`${getStatus(currentID, totalID)} **Game Role Update Manager:** ${getPercent(currentID, totalID)} of ${totalID + 1}`);
 		currentID = database.GameRoleDeleteManager.currentID;
-		processID = database.GameRoleDeleteManager.processID;
-		buffer.push(`${getStatus(currentID, processID)} **Game Role Delete Manager:** ${getPercent(currentID, processID)} of ${processID + 1}`);
+		totalID = database.GameRoleDeleteManager.totalID;
+		buffer.push(`${getStatus(currentID, totalID)} **Game Role Delete Manager:** ${getPercent(currentID, totalID)} of ${totalID + 1}`);
 		embed.addField('Database', buffer.join('\n'));
 
 		buffer = new Array();
 		currentID = message_manager.OutgoingMessageManager.currentID;
-		processID = message_manager.OutgoingMessageManager.processID;
-		buffer.push(`${getStatus(currentID, processID)} **Message Manager:** ${getPercent(currentID, processID)} of ${processID + 1}`);
+		totalID = message_manager.OutgoingMessageManager.totalID;
+		buffer.push(`${getStatus(currentID, totalID)} **Message Manager:** ${getPercent(currentID, totalID)} of ${totalID + 1}`);
 		currentID = reaction_manager.ReactionAddManager.currentID;
-		processID = reaction_manager.ReactionAddManager.processID;
-		buffer.push(`${getStatus(currentID, processID)} **Reaction Manager:** ${getPercent(currentID, processID)} of ${processID + 1}`);
+		totalID = reaction_manager.ReactionAddManager.totalID;
+		buffer.push(`${getStatus(currentID, totalID)} **Reaction Manager:** ${getPercent(currentID, totalID)} of ${totalID + 1}`);
 		currentID = channel_manager.ChannelQueueManager.currentID;
-		processID = channel_manager.ChannelQueueManager.processID;
-		buffer.push(`${getStatus(currentID, processID)} **Channel Manager:** ${getPercent(currentID, processID)} of ${processID + 1}`);
+		totalID = channel_manager.ChannelQueueManager.totalID;
+		buffer.push(`${getStatus(currentID, totalID)} **Channel Manager:** ${getPercent(currentID, totalID)} of ${totalID + 1}`);
 		currentID = role_manager.RoleManager.currentID;
-		processID = role_manager.RoleManager.processID;
-		buffer.push(`${getStatus(currentID, processID)} **Role Manager:** ${getPercent(currentID, processID)} of ${processID + 1}`);
+		totalID = role_manager.RoleManager.totalID;
+		buffer.push(`${getStatus(currentID, totalID)} **Role Manager:** ${getPercent(currentID, totalID)} of ${totalID + 1}`);
 		currentID = speech.SpeechManager.currentID;
-		processID = speech.SpeechManager.processID;
-		buffer.push(`${getStatus(currentID, processID)} **Speech Manager:** ${getPercent(currentID, processID)} of ${processID + 1}`);
+		totalID = speech.SpeechManager.totalID;
+		buffer.push(`${getStatus(currentID, totalID)} **Speech Manager:** ${getPercent(currentID, totalID)} of ${totalID + 1}`);
 		currentID = error_manager.MarkManager.currentID;
-		processID = error_manager.MarkManager.processID;
-		buffer.push(`${getStatus(currentID, processID)} **Error Manager:** ${getPercent(currentID, processID)} of ${processID + 1}`);
+		totalID = error_manager.MarkManager.totalID;
+		buffer.push(`${getStatus(currentID, totalID)} **Error Manager:** ${getPercent(currentID, totalID)} of ${totalID + 1}`);
 		embed.addField('Process', buffer.join('\n'));
 
 		const startup_date = new Date(Date.now() - this.client.uptime);
@@ -107,10 +107,10 @@ function getPingStatus(ping) {
 
 /**
  * @param {Number} currentID
- * @param {Number} processID
+ * @param {Number} totalID
  */
-function getStatus(currentID, processID) {
-	const difference = processID - currentID;
+function getStatus(currentID, totalID) {
+	const difference = totalID - currentID;
 	if (difference >= 10) {
 		return '🔴';
 	}
@@ -124,8 +124,8 @@ function getStatus(currentID, processID) {
 
 /**
  * @param {Number} currentID
- * @param {Number} processID
+ * @param {Number} totalID
  */
-function getPercent(currentID, processID) {
-	return `${Math.floor((currentID + 1) / (processID + 1) * 100)}%`;
+function getPercent(currentID, totalID) {
+	return `${Math.floor((currentID + 1) / (totalID + 1) * 100)}%`;
 }
