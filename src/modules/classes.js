@@ -105,6 +105,57 @@ module.exports.ProcessQueue = class {
 	}
 };
 
+module.exports.Manager = class {
+	constructor() {
+		/**
+		 * @readonly
+		 * The total number of IDs this manager used.
+		 */
+		this.totalID = 0;
+		/**
+		 * @readonly
+		 * The ID that is currently being executed.
+		 */
+		this.currentID = 0;
+		/**
+		 * @readonly
+		 * The state of this manager.
+		 */
+		this.running = false;
+		/**
+		 * @private
+		 * The array containing the functions to be executed by this manager.
+		 * @type {Array<Function>}
+		 */
+		this.array = new Array();
+	}
+
+	/**
+	 * @public
+	 * Adds the function to the queue.
+	 * @param {Function} the_function
+	 */
+	queue(the_function) {
+		this.totalID++;
+		this.array.push(the_function);
+		if (!this.running) this.run();
+	}
+
+	/**
+	 * @private
+	 * Executes all the items in the array. Handled internally.
+	 */
+	async run() {
+		this.running = true;
+		while (this.array.length > 0) {
+			const this_function = this.array.shift();
+			await this_function();
+			this.currentID++;
+		}
+		this.running = false;
+	}
+};
+
 /**
  * A Color Object.
  */
