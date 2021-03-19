@@ -78,7 +78,7 @@ module.exports.ErrorTicketManager = class {
 module.exports.ProcessQueue = class {
 	constructor(timeout = 0) {
 		this.timeout = timeout;
-		this.processID = 0;
+		this.totalID = 0;
 		this.currentID = 0;
 	}
 
@@ -87,7 +87,7 @@ module.exports.ProcessQueue = class {
      * @returns {Promise<null>}
      */
 	queue() {
-		const ID = this.processID++;
+		const ID = this.totalID++;
 		// eslint-disable-next-line no-async-promise-executor
 		return new Promise(async resolve => {
 			while (ID != this.currentID) await functions.sleep(2500);
