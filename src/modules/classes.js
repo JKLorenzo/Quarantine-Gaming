@@ -134,7 +134,7 @@ module.exports.Manager = class {
 		/**
 		 * @private
 		 * The array containing the functions to be executed by this manager.
-		 * @type {Array<Function>}
+		 * @type {Array<{function: Function, promise: {resolve: Function, reject: Function}}>}
 		 */
 		this.array = new Array();
 	}
@@ -142,23 +142,41 @@ module.exports.Manager = class {
 	/**
 	 * @public
 	 * Adds the function to the queue.
-	 * @param {Function} the_function
+	 * @param {Function} the_function The function to be queued.
+	 * @returns {Promise} The return object of the queued function.
 	 */
 	queue(the_function) {
 		this.totalID++;
-		this.array.push(the_function);
+		let res, rej;
+		const promise = new Promise((resolve, reject) => {
+			res = resolve;
+			rej = reject;
+		});
+		this.array.push({
+			function: the_function,
+			promise: {
+				resolve: res,
+				reject: rej,
+			},
+		});
 		if (!this.running) this.run();
+		return promise;
 	}
 
 	/**
 	 * @private
-	 * Executes all the items in the array. Handled internally.
+	 * Executes all the items in the array.
 	 */
 	async run() {
 		this.running = true;
 		while (this.array.length > 0) {
-			const this_function = this.array.shift();
-			await this_function();
+			const data = this.array.shift();
+			try {
+				data.promise.resolve(await data.function());
+			}
+			catch(error) {
+				data.promise.reject(error);
+			}
 			this.currentID++;
 			if (this.timeout > 0) await functions.sleep(this.timeout);
 		}
