@@ -27,15 +27,10 @@ module.exports.initialize = (ClientInstance) => {
  * @returns {Promise<Discord.Message>} A message object
  */
 module.exports.sendToChannel = (GuildChannelResolvable, content) => {
-	let res, rej;
-	const promise = new Promise((resolve, reject) => {
-		res = resolve;
-		rej = reject;
-	});
 	/** @type {Discord.TextChannel} */
 	const channel = app.channel(GuildChannelResolvable);
 	console.log(`MessageChannelSend: Queueing ${OutgoingMessageManager.totalID} (${channel ? channel.name : GuildChannelResolvable})`);
-	OutgoingMessageManager.queue(async function() {
+	return OutgoingMessageManager.queue(async function() {
 		let result, error;
 		try {
 			result = await channel.send(content);
@@ -45,10 +40,10 @@ module.exports.sendToChannel = (GuildChannelResolvable, content) => {
 		}
 		finally {
 			console.log(`MessageChannelSend: Finished ${OutgoingMessageManager.currentID} (${channel ? channel.name : GuildChannelResolvable})`);
-			error ? rej(error) : res(result);
 		}
+		if (error) throw error;
+		return result;
 	});
-	return promise;
 };
 
 /**
@@ -57,15 +52,10 @@ module.exports.sendToChannel = (GuildChannelResolvable, content) => {
  * @param {any} content The content of the message.
  * @returns {Promise<Discord.Message>} A message object
  */
-module.exports.sendToUser = async (UserResolvable, content) => {
-	let res, rej;
-	const promise = new Promise((resolve, reject) => {
-		res = resolve;
-		rej = reject;
-	});
+module.exports.sendToUser = (UserResolvable, content) => {
 	const member = app.member(UserResolvable);
 	console.log(`MessageUserSend: Queueing ${OutgoingMessageManager.totalID} (${member ? member.displayName : UserResolvable})`);
-	OutgoingMessageManager.queue(async function() {
+	return OutgoingMessageManager.queue(async function() {
 		let result, error;
 		try {
 			result = await member.send(content);
@@ -76,10 +66,10 @@ module.exports.sendToUser = async (UserResolvable, content) => {
 		}
 		finally {
 			console.log(`MessageUserSend: Finished ${OutgoingMessageManager.currentID} (${member ? member.displayName : UserResolvable})`);
-			error ? rej(error) : res(result);
 		}
+		if (error) throw error;
+		return result;
 	});
-	return promise;
 };
 
 /**

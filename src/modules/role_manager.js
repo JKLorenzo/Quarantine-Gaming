@@ -4,7 +4,7 @@ const classes = require('./classes.js');
 /** @type {import('./app.js')} */
 let app;
 
-const RoleManager = new classes.Manager;
+const RoleManager = new classes.Manager();
 
 /**
  * Initializes the module.
@@ -20,14 +20,9 @@ module.exports.initialize = (ClientInstance) => {
  * @param {{name: String, color?: Discord.ColorResolvable, hoist?: Boolean, position?: number, permissions?: Discord.PermissionResolvable, mentionable?: Boolean, reason?: String}} options
  * @returns {Promise<Discord.Role>} A role object
  */
-module.exports.create = async (options) => {
-	let res, rej;
-	const promise = new Promise((resolve, reject) => {
-		res = resolve;
-		rej = reject;
-	});
+module.exports.create = (options) => {
 	console.log(`RoleCreate: Queueing ${RoleManager.totalID} (${options.name})`);
-	RoleManager.queue(async function() {
+	return RoleManager.queue(async function() {
 		let result, error;
 		try {
 			result = await app.guild().roles.create({
@@ -47,27 +42,22 @@ module.exports.create = async (options) => {
 		}
 		finally {
 			console.log(`RoleCreate: Finished ${RoleManager.currentID} (${options.name})`);
-			error ? rej(error) : res(result);
 		}
+		if (error) throw error;
+		return result;
 	});
-	return promise;
 };
 
 /**
  * Deletes a role from the guild.
- * @param {Discord.Role} role The role object to delete.
+ * @param {Discord.RoleResolvable} RoleResolvable The role object to delete.
  * @param {String} reason The reason for the deletion.
  * @returns {Promise<Discord.Role>} A role object
  */
-module.exports.delete = async (RoleResolvable, reason = '') => {
-	let res, rej;
-	const promise = new Promise((resolve, reject) => {
-		res = resolve;
-		rej = reject;
-	});
+module.exports.delete = (RoleResolvable, reason = '') => {
 	const role = app.role(RoleResolvable);
 	console.log(`RoleDelete: Queueing ${RoleManager.totalID} (${role ? role.name : RoleResolvable})`);
-	RoleManager.queue(async function() {
+	return RoleManager.queue(async function() {
 		let result, error;
 		try {
 			result = await role.delete(reason);
@@ -77,10 +67,10 @@ module.exports.delete = async (RoleResolvable, reason = '') => {
 		}
 		finally {
 			console.log(`RoleDelete: Finished ${RoleManager.currentID} (${role ? role.name : RoleResolvable})`);
-			error ? rej(error) : res(result);
 		}
+		if (error) throw error;
+		return result;
 	});
-	return promise;
 };
 
 /**
@@ -89,29 +79,24 @@ module.exports.delete = async (RoleResolvable, reason = '') => {
  * @param {Discord.RoleResolvable} RoleResolvable A Role object or a Snowflake.
  * @returns {Promise<Discord.Role>} A role object
  */
-module.exports.add = async (UserResolvable, RoleResolvable) => {
-	let res, rej;
-	const promise = new Promise((resolve, reject) => {
-		res = resolve;
-		rej = reject;
-	});
+module.exports.add = (UserResolvable, RoleResolvable) => {
 	const member = app.member(UserResolvable);
 	const role = app.role(RoleResolvable);
 	console.log(`RoleAdd: Queueing ${RoleManager.totalID} (${member ? member.displayName : UserResolvable} | ${role ? role.name : RoleResolvable})`);
-	RoleManager.queue(async function() {
+	return RoleManager.queue(async function() {
 		let result, error;
 		try {
-			result = await member.roles.add(role);
+			return await member.roles.add(role);
 		}
 		catch (this_error) {
 			error = this_error;
 		}
 		finally {
 			console.log(`RoleAdd: Finished ${RoleManager.currentID} (${member ? member.displayName : UserResolvable} | ${role ? role.name : RoleResolvable})`);
-			error ? rej(error) : res(result);
 		}
+		if (error) throw error;
+		return result;
 	});
-	return promise;
 };
 
 /**
@@ -120,29 +105,24 @@ module.exports.add = async (UserResolvable, RoleResolvable) => {
  * @param {Discord.RoleResolvable} RoleResolvable A Role object or a Snowflake.
  * @returns {Promise<Discord.Role>} A role object
  */
-module.exports.remove = async (UserResolvable, RoleResolvable) => {
-	let res, rej;
-	const promise = new Promise((resolve, reject) => {
-		res = resolve;
-		rej = reject;
-	});
+module.exports.remove = (UserResolvable, RoleResolvable) => {
 	const member = app.member(UserResolvable);
 	const role = app.role(RoleResolvable);
-	console.log(`RoleRemove: Queueing ${RoleManager.totalID} (${member ? member.displayName : UserResolvable} | ${role ? role.name : RoleResolvable})`);
-	RoleManager.queue(async function() {
+	console.log(`RoleAdd: Queueing ${RoleManager.totalID} (${member ? member.displayName : UserResolvable} | ${role ? role.name : RoleResolvable})`);
+	return RoleManager.queue(async function() {
 		let result, error;
 		try {
-			result = await member.roles.remove(role);
+			return await member.roles.remove(role);
 		}
 		catch (this_error) {
 			error = this_error;
 		}
 		finally {
 			console.log(`RoleRemove: Finished ${RoleManager.currentID} (${member ? member.displayName : UserResolvable} | ${role ? role.name : RoleResolvable})`);
-			error ? rej(error) : res(result);
 		}
+		if (error) throw error;
+		return result;
 	});
-	return promise;
 };
 
 module.exports.RoleManager = RoleManager;

@@ -22,12 +22,12 @@ let database;
 let speech;
 
 const ErrorTicketManager = new classes.ErrorTicketManager('general.js');
-const OfflineManager = new classes.ProcessQueue(1000);
-const ActivityManager = new classes.ProcessQueue(500);
-const VoiceManager = new classes.ProcessQueue(500);
-const DedicateManager = new classes.ProcessQueue(5000);
-const FreeGameUpdateManager = new classes.ProcessQueue(1500000);
-const FreeGameNotifyManager = new classes.ProcessQueue(1000);
+const OfflineManager = new classes.Manager(1000);
+const ActivityManager = new classes.Manager(500);
+const VoiceManager = new classes.Manager(500);
+const DedicateManager = new classes.Manager(5000);
+const FreeGameUpdateManager = new classes.Manager(1500000);
+const FreeGameNotifyManager = new classes.Manager(1000);
 /** @type {Array<classes.Notification>} */
 let freeGameCollection = new Array();
 
@@ -69,44 +69,36 @@ module.exports.memberUnlisted = async () => {
  * @param {Discord.GuildMember} this_member The GuildMember object to undergo screening.
  * @returns {Promise<Discord.Message>} The Message object of the screening process.
  */
-module.exports.memberScreening = (this_member) => {
-	return new Promise((resolve, reject) => {
-		try {
-			const MessageToSend = new Array();
-			MessageToSend.push(`Hi ${this_member.user.username}, and welcome to **Quarantine Gaming**!`);
-			MessageToSend.push('Please wait while we are processing your membership approval.');
-			message_manager.sendToUser(this_member, MessageToSend.join('\n'));
+module.exports.memberScreening = async (this_member) => {
+	const MessageToSend = new Array();
+	MessageToSend.push(`Hi ${this_member.user.username}, and welcome to **Quarantine Gaming**!`);
+	MessageToSend.push('Please wait while we are processing your membership approval.');
+	message_manager.sendToUser(this_member, MessageToSend.join('\n'));
 
-			const created_day = this_member.user.createdAt;
-			const created_day_difference = functions.compareDate(created_day);
+	const created_day = this_member.user.createdAt;
+	const created_day_difference = functions.compareDate(created_day);
 
-			app.getInvites().then(async inviters => {
-				const embed = new Discord.MessageEmbed();
-				embed.setAuthor('Quarantine Gaming: Member Approval');
-				embed.setTitle('Member Details');
-				embed.setThumbnail(this_member.user.displayAvatarURL());
-				embed.addFields([
-					{ name: 'User:', value: this_member },
-					{ name: 'Account Created:', value: `${created_day.toUTCString().replace('GMT', 'UTC')} (${created_day_difference.estimate})` },
-					{ name: 'Inviter:', value: inviters.length > 0 ? inviters.map(this_invite => this_invite.inviter).join(' or ') : 'Information is not available.' },
-					{ name: 'Actions:', value: '✅ - Approve     ❌ - Kick     ⛔ - Ban' },
-				]);
-				embed.setColor('#25c059');
-				const Message = await message_manager.sendToChannel(constants.channels.server.management, {
-					content: `${this_member} wants to join this server. ${app.role(constants.roles.staff)} or ${app.role(constants.roles.moderator)} action is required.`,
-					embed: embed,
-				});
-				const reactions = ['✅', '❌', '⛔'];
-				for (const emoji of reactions) {
-					await reaction_manager.addReaction(Message, emoji);
-				}
-				resolve(Message);
-			});
-		}
-		catch (error) {
-			reject(error);
-		}
+	const inviters = await app.getInvites();
+	const embed = new Discord.MessageEmbed();
+	embed.setAuthor('Quarantine Gaming: Member Approval');
+	embed.setTitle('Member Details');
+	embed.setThumbnail(this_member.user.displayAvatarURL());
+	embed.addFields([
+		{ name: 'User:', value: this_member },
+		{ name: 'Account Created:', value: `${created_day.toUTCString().replace('GMT', 'UTC')} (${created_day_difference.estimate})` },
+		{ name: 'Inviter:', value: inviters.length > 0 ? inviters.map(this_invite => this_invite.inviter).join(' or ') : 'Information is not available.' },
+		{ name: 'Actions:', value: '✅ - Approve     ❌ - Kick     ⛔ - Ban' },
+	]);
+	embed.setColor('#25c059');
+	const Message = await message_manager.sendToChannel(constants.channels.server.management, {
+		content: `${this_member} wants to join this server. ${app.role(constants.roles.staff)} or ${app.role(constants.roles.moderator)} action is required.`,
+		embed: embed,
 	});
+	const reactions = ['✅', '❌', '⛔'];
+	for (const emoji of reactions) {
+		await reaction_manager.addReaction(Message, emoji);
+	}
+	return Message;
 };
 
 /**
@@ -147,28 +139,28 @@ module.exports.updateExpiredGameRoles = async () => {
  * Performs processes that clears the status of this member on this server.
  * @param {Discord.GuildMember} member The guild member object.
  */
-module.exports.memberOffline = async (member) => {
-	await OfflineManager.queue();
-	try {
-		// Remove Streaming Role
-		if (app.hasRole(member, [constants.roles.streaming])) {
-			role_manager.remove(member, constants.roles.streaming);
-		}
+module.exports.memberOffline = (member) => {
+	return OfflineManager.queue(async function() {
+		try {
+			// Remove Streaming Role
+			if (app.hasRole(member, [constants.roles.streaming])) {
+				role_manager.remove(member, constants.roles.streaming);
+			}
 
-		// Remove all Dedicated Channel's Text Channel Roles
-		for (const text_channel_role of member.roles.cache.array().filter(role => role.name.startsWith('Text'))) {
-			role_manager.remove(member, text_channel_role);
-		}
+			// Remove all Dedicated Channel's Text Channel Roles
+			for (const text_channel_role of member.roles.cache.array().filter(role => role.name.startsWith('Text'))) {
+				role_manager.remove(member, text_channel_role);
+			}
 
-		// Remove all Team Roles
-		for (const team_role of member.roles.cache.array().filter(role => role.name.startsWith('Team'))) {
-			role_manager.remove(member, team_role);
+			// Remove all Team Roles
+			for (const team_role of member.roles.cache.array().filter(role => role.name.startsWith('Team'))) {
+				role_manager.remove(member, team_role);
+			}
 		}
-	}
-	catch (error) {
-		error_manager.mark(ErrorTicketManager.create('memberOffline', error));
-	}
-	OfflineManager.finish();
+		catch (error) {
+			error_manager.mark(ErrorTicketManager.create('memberOffline', error));
+		}
+	});
 };
 
 /**
@@ -176,60 +168,60 @@ module.exports.memberOffline = async (member) => {
  * @param {Discord.GuildMember} member The guild member object.
  * @param {{activity: Discord.Activity, new: Boolean}} data The activity and state of this change.
  */
-module.exports.memberActivityUpdate = async (member, data) => {
-	await ActivityManager.queue();
-	try {
-		const activity = data.activity;
-		const activity_name = activity.name.trim();
-		if (activity.type == 'PLAYING' && !database.gameBlacklisted(activity_name) && (activity.applicationID || database.gameWhitelisted(activity_name))) {
-			const streaming_role = app.role(constants.roles.streaming);
-			const game_role = app.guild().roles.cache.find(role => role.name == activity_name) || await role_manager.create({ name: activity_name, color: constants.colors.game_role });
-			let play_role = app.guild().roles.cache.find(role => role.name == 'Play ' + activity_name);
+module.exports.memberActivityUpdate = (member, data) => {
+	return ActivityManager.queue(async function() {
+		try {
+			const activity = data.activity;
+			const activity_name = activity.name.trim();
+			if (activity.type == 'PLAYING' && !database.gameBlacklisted(activity_name) && (activity.applicationID || database.gameWhitelisted(activity_name))) {
+				const streaming_role = app.role(constants.roles.streaming);
+				const game_role = app.guild().roles.cache.find(role => role.name == activity_name) || await role_manager.create({ name: activity_name, color: constants.colors.game_role });
+				let play_role = app.guild().roles.cache.find(role => role.name == 'Play ' + activity_name);
 
-			if (!app.guild().roles.cache.find(role => role.name == activity_name + ' ⭐')) await role_manager.create({ name: activity_name + ' ⭐', color: constants.colors.game_role_mentionable, mentionable: true });
+				if (!app.guild().roles.cache.find(role => role.name == activity_name + ' ⭐')) await role_manager.create({ name: activity_name + ' ⭐', color: constants.colors.game_role_mentionable, mentionable: true });
 
-			if (data.new) {
-				// Update database
-				database.memberGameRoleSet(member, game_role);
+				if (data.new) {
+					// Update database
+					database.memberGameRoleSet(member, game_role);
 
-				if (play_role) {
-					// Bring Play Role to Top
-					play_role.setPosition(streaming_role.position - 1);
+					if (play_role) {
+						// Bring Play Role to Top
+						play_role.setPosition(streaming_role.position - 1);
+					}
+					else {
+						// Create Play Role
+						play_role = await role_manager.create({ name: 'Play ' + activity_name, color: constants.colors.play_role, position: streaming_role.position, hoist: true });
+					}
+					role_manager.add(member, game_role);
+					role_manager.add(member, play_role);
 				}
-				else {
-					// Create Play Role
-					play_role = await role_manager.create({ name: 'Play ' + activity_name, color: constants.colors.play_role, position: streaming_role.position, hoist: true });
-				}
-				role_manager.add(member, game_role);
-				role_manager.add(member, play_role);
-			}
-			else if (play_role) {
-				// Remove Play Role from this member
-				if (member.roles.cache.has(play_role.id)) {
-					role_manager.remove(member, play_role);
-				}
-				// Check if Play Role is still in use
-				let role_in_use = false;
-				for (const this_member of app.guild().members.cache.array()) {
-					if (this_member.roles.cache.find(role => role == play_role)) {
-						// Check if this member is still playing
-						if (this_member.presence.activities.map(this_activity => this_activity.name.trim()).includes(play_role.name.substring(5))) {
-							role_in_use = true;
+				else if (play_role) {
+					// Remove Play Role from this member
+					if (member.roles.cache.has(play_role.id)) {
+						role_manager.remove(member, play_role);
+					}
+					// Check if Play Role is still in use
+					let role_in_use = false;
+					for (const this_member of app.guild().members.cache.array()) {
+						if (this_member.roles.cache.find(role => role == play_role)) {
+							// Check if this member is still playing
+							if (this_member.presence.activities.map(this_activity => this_activity.name.trim()).includes(play_role.name.substring(5))) {
+								role_in_use = true;
+							}
 						}
 					}
-				}
-				// Delete inactive Play Roles
-				if (!role_in_use) {
-					// Delete Play Role
-					await role_manager.delete(play_role);
+					// Delete inactive Play Roles
+					if (!role_in_use) {
+						// Delete Play Role
+						await role_manager.delete(play_role);
+					}
 				}
 			}
 		}
-	}
-	catch (error) {
-		error_manager.mark(ErrorTicketManager.create('memberActivityUpdate', error));
-	}
-	ActivityManager.finish();
+		catch (error) {
+			error_manager.mark(ErrorTicketManager.create('memberActivityUpdate', error));
+		}
+	});
 };
 
 /**
@@ -238,85 +230,85 @@ module.exports.memberActivityUpdate = async (member, data) => {
  * @param {Discord.VoiceState} oldState The old voice state object.
  * @param {Discord.VoiceState} newState The new voice state object.
  */
-module.exports.memberVoiceUpdate = async (member, oldState, newState) => {
-	await VoiceManager.queue();
-	try {
-		if (oldState.channel && oldState.channel.parent.id == constants.channels.category.dedicated_voice) {
-			const text_channel = app.channel(constants.channels.category.dedicated).children.find(channel => channel.type == 'text' && channel.topic && functions.parseMention(channel.topic.split(' ')[0]) == oldState.channelID);
-			const linked_data = text_channel.topic.split(' ');
-			const team_role = app.role(linked_data[1]);
-
-			if (oldState.channel.members.size > 0 && !(oldState.channel.members.size == 1 && oldState.channel.members.first().user.bot)) {
-				role_manager.remove(member, team_role);
-				const embed = new Discord.MessageEmbed();
-				embed.setAuthor('Quarantine Gaming: Dedicated Channels');
-				embed.setTitle(oldState.channel.name);
-				embed.setDescription(`${oldState.member} left this channel.`);
-				embed.setThumbnail(member.user.displayAvatarURL());
-				embed.setFooter(`${member.user.tag} (${member.user.id})`);
-				embed.setTimestamp();
-				embed.setColor('#7b00ff');
-				message_manager.sendToChannel(text_channel, embed);
-			}
-			else {
-				await role_manager.delete(team_role);
-				await channel_manager.delete(oldState.channel);
-				await channel_manager.delete(text_channel);
-			}
-		}
-
-		if (newState.channel) {
-			// Check if members are streaming
-			const streamers = new Array();
-			for (const this_member of newState.channel.members.array()) {
-				if (member.user.id != this_member.user.id && this_member.roles.cache.has(constants.roles.streaming)) {
-					streamers.push(this_member);
-				}
-			}
-			// Notify member
-			if (streamers.length > 0) {
-				const embed = new Discord.MessageEmbed();
-				embed.setAuthor('Quarantine Gaming: Information');
-				embed.setTitle(`${streamers.length > 1 ? `${streamers.map(this_member => this_member.displayName).join(' and ')} are` : `${streamers.map(this_member => this_member.displayName)} is`} currently Streaming`);
-				embed.setDescription('Please observe proper behavior on your current voice channel.');
-				embed.setImage('https://pa1.narvii.com/6771/d33918fa87ad0d84b7dc854dcbf6a8545c73f94d_hq.gif');
-				embed.setColor('#5dff00');
-				message_manager.sendToUser(member, embed);
-			}
-
-			if (newState.channel.parent.id == constants.channels.category.dedicated_voice) {
-				const text_channel = app.channel(constants.channels.category.dedicated).children.find(channel => channel.topic && functions.parseMention(channel.topic.split(' ')[0]) == newState.channelID);
+module.exports.memberVoiceUpdate = (member, oldState, newState) => {
+	return VoiceManager.queue(async function() {
+		try {
+			if (oldState.channel && oldState.channel.parent.id == constants.channels.category.dedicated_voice) {
+				const text_channel = app.channel(constants.channels.category.dedicated).children.find(channel => channel.type == 'text' && channel.topic && functions.parseMention(channel.topic.split(' ')[0]) == oldState.channelID);
 				const linked_data = text_channel.topic.split(' ');
 				const team_role = app.role(linked_data[1]);
 
-				// Add Text Role
-				if (!member.roles.cache.has(team_role.id)) {
+				if (oldState.channel.members.size > 0 && !(oldState.channel.members.size == 1 && oldState.channel.members.first().user.bot)) {
+					role_manager.remove(member, team_role);
 					const embed = new Discord.MessageEmbed();
 					embed.setAuthor('Quarantine Gaming: Dedicated Channels');
-					embed.setTitle(newState.channel.name);
-					embed.setDescription(`${newState.member} joined this channel.`);
-					embed.setThumbnail(newState.member.user.displayAvatarURL());
-					embed.setFooter(`${newState.member.user.tag} (${newState.member.user.id})`);
+					embed.setTitle(oldState.channel.name);
+					embed.setDescription(`${oldState.member} left this channel.`);
+					embed.setThumbnail(member.user.displayAvatarURL());
+					embed.setFooter(`${member.user.tag} (${member.user.id})`);
 					embed.setTimestamp();
 					embed.setColor('#7b00ff');
 					message_manager.sendToChannel(text_channel, embed);
-					role_manager.add(member, team_role);
+				}
+				else {
+					await role_manager.delete(team_role);
+					await channel_manager.delete(oldState.channel);
+					await channel_manager.delete(text_channel);
 				}
 			}
-			else if (newState.channel.parent.id == constants.channels.category.voice && newState.channel.members.array().length >= 5) {
-				// Dedicate this channel
-				await functions.sleep(5000);
-				await this.dedicateChannel(newState.channel, newState.channel.members.array()[0].displayName);
+
+			if (newState.channel) {
+				// Check if members are streaming
+				const streamers = new Array();
+				for (const this_member of newState.channel.members.array()) {
+					if (member.user.id != this_member.user.id && this_member.roles.cache.has(constants.roles.streaming)) {
+						streamers.push(this_member);
+					}
+				}
+				// Notify member
+				if (streamers.length > 0) {
+					const embed = new Discord.MessageEmbed();
+					embed.setAuthor('Quarantine Gaming: Information');
+					embed.setTitle(`${streamers.length > 1 ? `${streamers.map(this_member => this_member.displayName).join(' and ')} are` : `${streamers.map(this_member => this_member.displayName)} is`} currently Streaming`);
+					embed.setDescription('Please observe proper behavior on your current voice channel.');
+					embed.setImage('https://pa1.narvii.com/6771/d33918fa87ad0d84b7dc854dcbf6a8545c73f94d_hq.gif');
+					embed.setColor('#5dff00');
+					message_manager.sendToUser(member, embed);
+				}
+
+				if (newState.channel.parent.id == constants.channels.category.dedicated_voice) {
+					const text_channel = app.channel(constants.channels.category.dedicated).children.find(channel => channel.topic && functions.parseMention(channel.topic.split(' ')[0]) == newState.channelID);
+					const linked_data = text_channel.topic.split(' ');
+					const team_role = app.role(linked_data[1]);
+
+					// Add Text Role
+					if (!member.roles.cache.has(team_role.id)) {
+						const embed = new Discord.MessageEmbed();
+						embed.setAuthor('Quarantine Gaming: Dedicated Channels');
+						embed.setTitle(newState.channel.name);
+						embed.setDescription(`${newState.member} joined this channel.`);
+						embed.setThumbnail(newState.member.user.displayAvatarURL());
+						embed.setFooter(`${newState.member.user.tag} (${newState.member.user.id})`);
+						embed.setTimestamp();
+						embed.setColor('#7b00ff');
+						message_manager.sendToChannel(text_channel, embed);
+						role_manager.add(member, team_role);
+					}
+				}
+				else if (newState.channel.parent.id == constants.channels.category.voice && newState.channel.members.array().length >= 5) {
+					// Dedicate this channel
+					await functions.sleep(5000);
+					await this.dedicateChannel(newState.channel, newState.channel.members.array()[0].displayName);
+				}
+			}
+			else if (member.roles.cache.has(constants.roles.streaming)) {
+				role_manager.remove(member, constants.roles.streaming);
 			}
 		}
-		else if (member.roles.cache.has(constants.roles.streaming)) {
-			role_manager.remove(member, constants.roles.streaming);
+		catch (error) {
+			error_manager.mark(ErrorTicketManager.create('memberVoiceUpdate', error));
 		}
-	}
-	catch (error) {
-		error_manager.mark(ErrorTicketManager.create('memberVoiceUpdate', error));
-	}
-	VoiceManager.finish();
+	});
 };
 
 /**
@@ -392,223 +384,223 @@ module.exports.gameInvite = async (role, inviter, count, reserved_members) => {
  * @param {Discord.VoiceChannel} channel_origin The voice room to transfer to the dedicated channel.
  * @param {String} name The name of the dedicated channel.
  */
-module.exports.dedicateChannel = async (channel_origin, name) => {
-	await DedicateManager.queue();
-	try {
-		const channel_name = '🔰' + name;
-		if (channel_origin.parentID == constants.channels.category.dedicated_voice) {
-			// Rename
-			await channel_origin.setName(channel_name);
-			/** @type {Discord.CategoryChannel} */
-			const dedicated_text_channels_category = app.channel(constants.channels.category.dedicated);
-			/** @type {Array<Discord.TextChannel>} */
-			const dedicated_text_channels = dedicated_text_channels_category.children.array();
-			const text_channel = dedicated_text_channels.find(channel => channel.topic && functions.parseMention(channel.topic.split(' ')[0]) == channel_origin.id);
-			await text_channel.setName(channel_name);
-			const team_role = app.role(text_channel.topic.split(' ')[1]);
-			await team_role.setName(`Team ${channel_name}`);
+module.exports.dedicateChannel = (channel_origin, name) => {
+	return DedicateManager.queue(async function() {
+		try {
+			const channel_name = '🔰' + name;
+			if (channel_origin.parentID == constants.channels.category.dedicated_voice) {
+				// Rename
+				await channel_origin.setName(channel_name);
+				/** @type {Discord.CategoryChannel} */
+				const dedicated_text_channels_category = app.channel(constants.channels.category.dedicated);
+				/** @type {Array<Discord.TextChannel>} */
+				const dedicated_text_channels = dedicated_text_channels_category.children.array();
+				const text_channel = dedicated_text_channels.find(channel => channel.topic && functions.parseMention(channel.topic.split(' ')[0]) == channel_origin.id);
+				await text_channel.setName(channel_name);
+				const team_role = app.role(text_channel.topic.split(' ')[1]);
+				await team_role.setName(`Team ${channel_name}`);
 
-			// Set info
-			const channel_desc = new Array();
-			channel_desc.push('• Only members who are in this voice channel can view this text channel.');
-			channel_desc.push('• You can\'t view other dedicated channels once you\'re connected to one.');
-			channel_desc.push(`• ${text_channel} voice and text channels will automatically be deleted once everyone is disconnected from these channels.`);
-			channel_desc.push('• You can lock this channel by doing **!dedicate lock**, and you can do **!dedicate unlock** to unlock it.');
-			channel_desc.push(`• You can transfer anyone from another voice channel to this voice channel by doing **!transfer <@member>**.\n\u200b\u200bEx: "!transfer ${app.client().user}"`);
-			channel_desc.push(`• You can also transfer multiple users at once.\n\u200b\u200bEx: "!transfer ${app.client().user} ${app.client().user}"`);
-			channel_desc.push(`Note: ${app.role(constants.roles.staff)}, ${app.role(constants.roles.moderator)}, and ${app.role(constants.roles.music_bot)} can interact with these channels.`);
-			const embed = new Discord.MessageEmbed();
-			embed.setAuthor('Quarantine Gaming: Dedicated Channels');
-			embed.setTitle(`Voice and Text Channels for ${channel_name}`);
-			embed.setDescription(channel_desc.join('\n\n'));
-			embed.setColor('#7b00ff');
+				// Set info
+				const channel_desc = new Array();
+				channel_desc.push('• Only members who are in this voice channel can view this text channel.');
+				channel_desc.push('• You can\'t view other dedicated channels once you\'re connected to one.');
+				channel_desc.push(`• ${text_channel} voice and text channels will automatically be deleted once everyone is disconnected from these channels.`);
+				channel_desc.push('• You can lock this channel by doing **!dedicate lock**, and you can do **!dedicate unlock** to unlock it.');
+				channel_desc.push(`• You can transfer anyone from another voice channel to this voice channel by doing **!transfer <@member>**.\n\u200b\u200bEx: "!transfer ${app.client().user}"`);
+				channel_desc.push(`• You can also transfer multiple users at once.\n\u200b\u200bEx: "!transfer ${app.client().user} ${app.client().user}"`);
+				channel_desc.push(`Note: ${app.role(constants.roles.staff)}, ${app.role(constants.roles.moderator)}, and ${app.role(constants.roles.music_bot)} can interact with these channels.`);
+				const embed = new Discord.MessageEmbed();
+				embed.setAuthor('Quarantine Gaming: Dedicated Channels');
+				embed.setTitle(`Voice and Text Channels for ${channel_name}`);
+				embed.setDescription(channel_desc.join('\n\n'));
+				embed.setColor('#7b00ff');
 
-			const profile = app.guild().members.cache.find(member => member.displayName == name);
-			const emoji = app.guild().emojis.cache.find(this_emoji => this_emoji.name == name.split(' ').join('').split(':').join('').split('-').join(''));
-			const qg_emoji = app.guild().emojis.cache.find(this_emoji => this_emoji.name == 'quarantinegaming');
-			if (profile) {
-				embed.setThumbnail(profile.user.displayAvatarURL());
-			}
-			else if (emoji) {
-				embed.setThumbnail(emoji.url);
-			}
-			else {
-				embed.setThumbnail(qg_emoji.url);
-			}
+				const profile = app.guild().members.cache.find(member => member.displayName == name);
+				const emoji = app.guild().emojis.cache.find(this_emoji => this_emoji.name == name.split(' ').join('').split(':').join('').split('-').join(''));
+				const qg_emoji = app.guild().emojis.cache.find(this_emoji => this_emoji.name == 'quarantinegaming');
+				if (profile) {
+					embed.setThumbnail(profile.user.displayAvatarURL());
+				}
+				else if (emoji) {
+					embed.setThumbnail(emoji.url);
+				}
+				else {
+					embed.setThumbnail(qg_emoji.url);
+				}
 
-			message_manager.sendToChannel(text_channel, embed);
-		}
-		else {
-			// Notify
-			const this_speech = speech.say(`You will be transferred to ${name} dedicated channel. Please wait.`, channel_origin);
-
-			const p = constants.permissions;
-			const dedicated_voice_channel = await channel_manager.create({
-				name: channel_name,
-				type: 'voice',
-				parent: constants.channels.category.dedicated_voice,
-				permissionOverwrites: [
-					{
-						id: constants.roles.everyone,
-						deny: [
-							p.general.VIEW_CHANNEL,
-							p.general.CREATE_INVITE,
-							p.general.MANAGE_CHANNELS,
-							p.general.MANAGE_PERMISSIONS,
-							p.general.MANAGE_WEBHOOKS,
-							p.voice.CONNECT,
-							p.voice.MUTE_MEMBERS,
-							p.voice.DEAFEN_MEMBERS,
-							p.voice.MOVE_MEMBERS,
-							p.voice.PRIORITY_SPEAKER,
-						],
-					},
-					{
-						id: constants.roles.member,
-						allow: [
-							p.general.VIEW_CHANNEL,
-							p.voice.CONNECT,
-							p.voice.SPEAK,
-							p.voice.VIDEO,
-						],
-					},
-					{
-						id: constants.roles.moderator,
-						allow: [
-							p.general.VIEW_CHANNEL,
-							p.general.CREATE_INVITE,
-							p.general.MANAGE_CHANNELS,
-							p.voice.CONNECT,
-							p.voice.MUTE_MEMBERS,
-							p.voice.DEAFEN_MEMBERS,
-							p.voice.MOVE_MEMBERS,
-							p.voice.PRIORITY_SPEAKER,
-						],
-					},
-					{
-						id: constants.roles.music_bot,
-						allow: [
-							p.general.VIEW_CHANNEL,
-							p.voice.CONNECT,
-							p.voice.SPEAK,
-							p.voice.USE_VOICE_ACTIVITY,
-						],
-					},
-				],
-				bitrate: 128000,
-			});
-
-			const team_role = await role_manager.create({
-				name: `Team ${channel_name}`,
-				position: app.role(constants.roles.streaming).position + 1,
-				hoist: true,
-			});
-
-			const dedicated_text_channel = await channel_manager.create({
-				name: channel_name,
-				type: 'text',
-				parent: constants.channels.category.dedicated,
-				permissionOverwrites: [
-					{
-						id: constants.roles.everyone,
-						deny: [
-							p.general.VIEW_CHANNEL,
-							p.general.CREATE_INVITE,
-							p.general.MANAGE_CHANNELS,
-							p.general.MANAGE_PERMISSIONS,
-							p.general.MANAGE_WEBHOOKS,
-							p.text.MENTION_EVERYONE,
-							p.text.MANAGE_MESSAGES,
-						],
-					},
-					{
-						id: constants.roles.music_bot,
-						allow: [
-							p.general.VIEW_CHANNEL,
-							p.text.ADD_REACTIONS,
-							p.text.EMBED_LINKS,
-							p.text.SEND_MESSAGES,
-						],
-					},
-					{
-						id: team_role.id,
-						allow: [
-							p.general.VIEW_CHANNEL,
-							p.text.SEND_TTS_MESSAGES,
-							p.text.EMBED_LINKS,
-							p.text.ATTACH_FILES,
-						],
-					},
-					{
-						id: constants.roles.moderator,
-						allow: [
-							p.general.VIEW_CHANNEL,
-							p.general.CREATE_INVITE,
-							p.general.MANAGE_CHANNELS,
-							p.text.MENTION_EVERYONE,
-							p.text.MANAGE_MESSAGES,
-						],
-					},
-				],
-				topic: `${dedicated_voice_channel} ${team_role}`,
-			});
-
-			// Set info
-			const channel_desc = new Array();
-			channel_desc.push('• Only members who are in this voice channel can view this text channel.');
-			channel_desc.push('• You can\'t view other dedicated channels once you\'re connected to one.');
-			channel_desc.push(`• ${dedicated_text_channel} voice and text channels will automatically be deleted once everyone is disconnected from these channels.`);
-			channel_desc.push('• You can lock this channel by doing **!dedicate lock**, and you can do **!dedicate unlock** to unlock it.');
-			channel_desc.push(`• You can transfer anyone from another voice channel to this voice channel by doing **!transfer <@member>**.\n\u200b\u200bEx: "!transfer ${app.client().user}"`);
-			channel_desc.push(`• You can also transfer multiple users at once.\n\u200b\u200bEx: "!transfer ${app.client().user} ${app.client().user}"`);
-			channel_desc.push(`Note: ${app.role(constants.roles.staff)}, ${app.role(constants.roles.moderator)}, and ${app.role(constants.roles.music_bot)} can interact with these channels.`);
-			const embed = new Discord.MessageEmbed();
-			embed.setAuthor('Quarantine Gaming: Dedicated Channels');
-			embed.setTitle(`Voice and Text Channels for ${channel_name}`);
-			embed.setDescription(channel_desc.join('\n\n'));
-			embed.setColor('#7b00ff');
-
-			const profile = app.guild().members.cache.find(member => member.displayName == name);
-			const emoji = app.guild().emojis.cache.find(this_emoji => this_emoji.name == name.split(' ').join('').split(':').join('').split('-').join(''));
-			const qg_emoji = app.guild().emojis.cache.find(this_emoji => this_emoji.name == 'quarantinegaming');
-			if (profile) {
-				embed.setThumbnail(profile.user.displayAvatarURL());
-			}
-			else if (emoji) {
-				embed.setThumbnail(emoji.url);
+				message_manager.sendToChannel(text_channel, embed);
 			}
 			else {
-				embed.setThumbnail(qg_emoji.url);
-			}
+				// Notify
+				const this_speech = speech.say(`You will be transferred to ${name} dedicated channel. Please wait.`, channel_origin);
 
-			await message_manager.sendToChannel(dedicated_text_channel, embed);
+				const p = constants.permissions;
+				const dedicated_voice_channel = await channel_manager.create({
+					name: channel_name,
+					type: 'voice',
+					parent: constants.channels.category.dedicated_voice,
+					permissionOverwrites: [
+						{
+							id: constants.roles.everyone,
+							deny: [
+								p.general.VIEW_CHANNEL,
+								p.general.CREATE_INVITE,
+								p.general.MANAGE_CHANNELS,
+								p.general.MANAGE_PERMISSIONS,
+								p.general.MANAGE_WEBHOOKS,
+								p.voice.CONNECT,
+								p.voice.MUTE_MEMBERS,
+								p.voice.DEAFEN_MEMBERS,
+								p.voice.MOVE_MEMBERS,
+								p.voice.PRIORITY_SPEAKER,
+							],
+						},
+						{
+							id: constants.roles.member,
+							allow: [
+								p.general.VIEW_CHANNEL,
+								p.voice.CONNECT,
+								p.voice.SPEAK,
+								p.voice.VIDEO,
+							],
+						},
+						{
+							id: constants.roles.moderator,
+							allow: [
+								p.general.VIEW_CHANNEL,
+								p.general.CREATE_INVITE,
+								p.general.MANAGE_CHANNELS,
+								p.voice.CONNECT,
+								p.voice.MUTE_MEMBERS,
+								p.voice.DEAFEN_MEMBERS,
+								p.voice.MOVE_MEMBERS,
+								p.voice.PRIORITY_SPEAKER,
+							],
+						},
+						{
+							id: constants.roles.music_bot,
+							allow: [
+								p.general.VIEW_CHANNEL,
+								p.voice.CONNECT,
+								p.voice.SPEAK,
+								p.voice.USE_VOICE_ACTIVITY,
+							],
+						},
+					],
+					bitrate: 128000,
+				});
 
-			// Delay for ~10 seconds
-			await this_speech;
-			await functions.sleep(10000);
+				const team_role = await role_manager.create({
+					name: `Team ${channel_name}`,
+					position: app.role(constants.roles.streaming).position + 1,
+					hoist: true,
+				});
 
-			// Sort streamers from members
-			const [streamers, members] = channel_origin.members.partition(this_member => this_member.roles.cache.has(constants.roles.streaming));
+				const dedicated_text_channel = await channel_manager.create({
+					name: channel_name,
+					type: 'text',
+					parent: constants.channels.category.dedicated,
+					permissionOverwrites: [
+						{
+							id: constants.roles.everyone,
+							deny: [
+								p.general.VIEW_CHANNEL,
+								p.general.CREATE_INVITE,
+								p.general.MANAGE_CHANNELS,
+								p.general.MANAGE_PERMISSIONS,
+								p.general.MANAGE_WEBHOOKS,
+								p.text.MENTION_EVERYONE,
+								p.text.MANAGE_MESSAGES,
+							],
+						},
+						{
+							id: constants.roles.music_bot,
+							allow: [
+								p.general.VIEW_CHANNEL,
+								p.text.ADD_REACTIONS,
+								p.text.EMBED_LINKS,
+								p.text.SEND_MESSAGES,
+							],
+						},
+						{
+							id: team_role.id,
+							allow: [
+								p.general.VIEW_CHANNEL,
+								p.text.SEND_TTS_MESSAGES,
+								p.text.EMBED_LINKS,
+								p.text.ATTACH_FILES,
+							],
+						},
+						{
+							id: constants.roles.moderator,
+							allow: [
+								p.general.VIEW_CHANNEL,
+								p.general.CREATE_INVITE,
+								p.general.MANAGE_CHANNELS,
+								p.text.MENTION_EVERYONE,
+								p.text.MANAGE_MESSAGES,
+							],
+						},
+					],
+					topic: `${dedicated_voice_channel} ${team_role}`,
+				});
 
-			// Transfer streamers
-			for (const this_member of streamers.array()) {
-				if (!this_member.voice || this_member.user.id == constants.me) continue;
-				await this_member.voice.setChannel(dedicated_voice_channel);
-				await functions.sleep(2000);
-			}
+				// Set info
+				const channel_desc = new Array();
+				channel_desc.push('• Only members who are in this voice channel can view this text channel.');
+				channel_desc.push('• You can\'t view other dedicated channels once you\'re connected to one.');
+				channel_desc.push(`• ${dedicated_text_channel} voice and text channels will automatically be deleted once everyone is disconnected from these channels.`);
+				channel_desc.push('• You can lock this channel by doing **!dedicate lock**, and you can do **!dedicate unlock** to unlock it.');
+				channel_desc.push(`• You can transfer anyone from another voice channel to this voice channel by doing **!transfer <@member>**.\n\u200b\u200bEx: "!transfer ${app.client().user}"`);
+				channel_desc.push(`• You can also transfer multiple users at once.\n\u200b\u200bEx: "!transfer ${app.client().user} ${app.client().user}"`);
+				channel_desc.push(`Note: ${app.role(constants.roles.staff)}, ${app.role(constants.roles.moderator)}, and ${app.role(constants.roles.music_bot)} can interact with these channels.`);
+				const embed = new Discord.MessageEmbed();
+				embed.setAuthor('Quarantine Gaming: Dedicated Channels');
+				embed.setTitle(`Voice and Text Channels for ${channel_name}`);
+				embed.setDescription(channel_desc.join('\n\n'));
+				embed.setColor('#7b00ff');
 
-			// Transfer members
-			for (const this_member of members.array()) {
-				if (!this_member.voice || this_member.user.id == constants.me) continue;
-				await this_member.voice.setChannel(dedicated_voice_channel);
-				await functions.sleep(2000);
+				const profile = app.guild().members.cache.find(member => member.displayName == name);
+				const emoji = app.guild().emojis.cache.find(this_emoji => this_emoji.name == name.split(' ').join('').split(':').join('').split('-').join(''));
+				const qg_emoji = app.guild().emojis.cache.find(this_emoji => this_emoji.name == 'quarantinegaming');
+				if (profile) {
+					embed.setThumbnail(profile.user.displayAvatarURL());
+				}
+				else if (emoji) {
+					embed.setThumbnail(emoji.url);
+				}
+				else {
+					embed.setThumbnail(qg_emoji.url);
+				}
+
+				await message_manager.sendToChannel(dedicated_text_channel, embed);
+
+				// Delay for ~10 seconds
+				await this_speech;
+				await functions.sleep(10000);
+
+				// Sort streamers from members
+				const [streamers, members] = channel_origin.members.partition(this_member => this_member.roles.cache.has(constants.roles.streaming));
+
+				// Transfer streamers
+				for (const this_member of streamers.array()) {
+					if (!this_member.voice || this_member.user.id == constants.me) continue;
+					await this_member.voice.setChannel(dedicated_voice_channel);
+					await functions.sleep(2000);
+				}
+
+				// Transfer members
+				for (const this_member of members.array()) {
+					if (!this_member.voice || this_member.user.id == constants.me) continue;
+					await this_member.voice.setChannel(dedicated_voice_channel);
+					await functions.sleep(2000);
+				}
 			}
 		}
-	}
-	catch (error) {
-		error_manager.mark(ErrorTicketManager.create('dedicateChannel', error));
-	}
-	DedicateManager.finish();
+		catch (error) {
+			error_manager.mark(ErrorTicketManager.create('dedicateChannel', error));
+		}
+	});
 };
 
 /**
@@ -663,8 +655,8 @@ module.exports.freeGameFetch = async (url = '') => {
  * Updates all active notifications.
  */
 module.exports.freeGameUpdate = async () => {
-	try {
-		for (const notification of freeGameCollection) {
+	for (const notification of freeGameCollection) {
+		try {
 			const this_notification = database.notificationRecords(notification);
 			if (this_notification) {
 				const message = await app.channel(constants.channels.integrations.free_games).messages.fetch(this_notification.id);
@@ -698,9 +690,9 @@ module.exports.freeGameUpdate = async () => {
 				}
 			}
 		}
-	}
-	catch (error) {
-		error_manager.mark(ErrorTicketManager.create('freeGameUpdate', error));
+		catch (error) {
+			error_manager.mark(ErrorTicketManager.create('freeGameUpdate', error));
+		}
 	}
 };
 
@@ -709,117 +701,117 @@ module.exports.freeGameUpdate = async () => {
  * @param {classes.Notification} notification The notification object to send.
  */
 module.exports.freeGameNotify = async (notification) => {
-	await FreeGameNotifyManager.queue();
-	try {
-		const title = notification.title;
-		const url = notification.url.startsWith('/r/') ? `https://www.reddit.com/${notification.url}` : notification.url;
-		const author = notification.author;
-		const description = notification.description;
-		const validity = notification.validity;
-		const score = notification.score;
-		const flair = notification.flair;
-		const permalink = notification.permalink;
+	await FreeGameNotifyManager.queue(async function() {
+		try {
+			const title = notification.title;
+			const url = notification.url.startsWith('/r/') ? `https://www.reddit.com/${notification.url}` : notification.url;
+			const author = notification.author;
+			const description = notification.description;
+			const validity = notification.validity;
+			const score = notification.score;
+			const flair = notification.flair;
+			const permalink = notification.permalink;
 
-		const embed = new Discord.MessageEmbed().setTimestamp();
-		embed.setAuthor('Quarantine Gaming: Free Game/DLC Notification');
-		if (flair) {
-			if (flair.toLowerCase().indexOf('comment') !== -1 || flair.toLowerCase().indexOf('issue') !== -1) {
-				embed.setDescription(`[${flair}](${permalink})`);
-			}
-			else {
-				embed.setDescription(flair);
-			}
-		}
-		embed.addFields([
-			{ name: 'Author', value: author, inline: true },
-			{ name: 'Trust Factor', value: `${validity} %`, inline: true },
-			{ name: 'Margin', value: `${score}`, inline: true },
-		]);
-		if (description) {
-			embed.addField('Details', description);
-		}
-
-		// Title
-		const safe_title = [], exclude_title = [], filtered_content = [];
-		if (title) {
-			const words = title.split(' ');
-			const filters = ['other', 'alpha', 'beta', 'psa'];
-			for (const word of words) {
-				// Check if the word is not one of the classifiers
-				if (!word.startsWith('[') && !word.startsWith('(') && !word.endsWith(']') && !word.endsWith(')')) {
-					safe_title.push(word);
+			const embed = new Discord.MessageEmbed().setTimestamp();
+			embed.setAuthor('Quarantine Gaming: Free Game/DLC Notification');
+			if (flair) {
+				if (flair.toLowerCase().indexOf('comment') !== -1 || flair.toLowerCase().indexOf('issue') !== -1) {
+					embed.setDescription(`[${flair}](${permalink})`);
 				}
 				else {
-					exclude_title.push(word);
-					for (const filter of filters) {
-						if (functions.contains(word, filter)) {
-							filtered_content.push(word);
+					embed.setDescription(flair);
+				}
+			}
+			embed.addFields([
+				{ name: 'Author', value: author, inline: true },
+				{ name: 'Trust Factor', value: `${validity} %`, inline: true },
+				{ name: 'Margin', value: `${score}`, inline: true },
+			]);
+			if (description) {
+				embed.addField('Details', description);
+			}
+
+			// Title
+			const safe_title = [], exclude_title = [], filtered_content = [];
+			if (title) {
+				const words = title.split(' ');
+				const filters = ['other', 'alpha', 'beta', 'psa'];
+				for (const word of words) {
+					// Check if the word is not one of the classifiers
+					if (!word.startsWith('[') && !word.startsWith('(') && !word.endsWith(']') && !word.endsWith(')')) {
+						safe_title.push(word);
+					}
+					else {
+						exclude_title.push(word);
+						for (const filter of filters) {
+							if (functions.contains(word, filter)) {
+								filtered_content.push(word);
+							}
 						}
 					}
 				}
+				embed.setTitle(`**${safe_title.length > 0 ? safe_title.join(' ') : title}**`);
 			}
-			embed.setTitle(`**${safe_title.length > 0 ? safe_title.join(' ') : title}**`);
-		}
 
-		// URL
-		embed.setURL(url);
-		const hostname = (new URL(url)).hostname;
-		embed.setFooter(`${hostname} | Updated as of `, functions.fetchIcon(hostname));
+			// URL
+			embed.setURL(url);
+			const hostname = (new URL(url)).hostname;
+			embed.setFooter(`${hostname} | Updated as of `, functions.fetchIcon(hostname));
 
-		const color = new classes.Color();
-		const mentionables = new Array();
-		const searchables = (description ? description.toLowerCase() : '*') + ' ' + (url ? url.toLowerCase() : '*');
+			const color = new classes.Color();
+			const mentionables = new Array();
+			const searchables = (description ? description.toLowerCase() : '*') + ' ' + (url ? url.toLowerCase() : '*');
 
-		if (functions.contains(searchables, 'steampowered.com')) {
-			mentionables.push(constants.roles.steam);
-			color.add(0, 157, 255);
-		}
-		if (functions.contains(searchables, 'epicgames.com')) {
-			mentionables.push(constants.roles.epic);
-			color.add(157, 255, 0);
-		}
-		if (functions.contains(searchables, 'gog.com')) {
-			mentionables.push(constants.roles.gog);
-			color.add(157, 0, 255);
-		}
-		if (functions.contains(searchables, 'ubisoft.com')) {
-			mentionables.push(constants.roles.ubisoft);
-			color.add(200, 120, 255);
-		}
-		if (functions.contains(searchables, ['playstation.com', 'wii.com', 'xbox.com', 'microsoft.com'])) {
-			mentionables.push(constants.roles.console);
-			color.add(200, 80, 200);
-		}
+			if (functions.contains(searchables, 'steampowered.com')) {
+				mentionables.push(constants.roles.steam);
+				color.add(0, 157, 255);
+			}
+			if (functions.contains(searchables, 'epicgames.com')) {
+				mentionables.push(constants.roles.epic);
+				color.add(157, 255, 0);
+			}
+			if (functions.contains(searchables, 'gog.com')) {
+				mentionables.push(constants.roles.gog);
+				color.add(157, 0, 255);
+			}
+			if (functions.contains(searchables, 'ubisoft.com')) {
+				mentionables.push(constants.roles.ubisoft);
+				color.add(200, 120, 255);
+			}
+			if (functions.contains(searchables, ['playstation.com', 'wii.com', 'xbox.com', 'microsoft.com'])) {
+				mentionables.push(constants.roles.console);
+				color.add(200, 80, 200);
+			}
 
-		embed.setColor(color.toHex());
-		if (filtered_content.length == 0 && mentionables.length > 0) {
-			// Image
-			const images = await functions.fetchImage(title).catch(e => void e);
-			for (const image of images) {
-				const response = await fetch(image.url).catch(e => void e);
-				if (response && response.ok) {
-					const probe_result = await probe(image.url, { timeout: 10000 }).catch(e => void e);
-					if (probe_result) {
-						const width = parseInt(probe_result.width);
-						const height = parseInt(probe_result.height);
-						const ratio = width / height;
-						if (width >= 200 && height >= 200 && ratio >= 1.7) {
-							embed.setImage(probe_result.url);
-							break;
+			embed.setColor(color.toHex());
+			if (filtered_content.length == 0 && mentionables.length > 0) {
+				// Image
+				const images = await functions.fetchImage(title).catch(e => void e);
+				for (const image of images) {
+					const response = await fetch(image.url).catch(e => void e);
+					if (response && response.ok) {
+						const probe_result = await probe(image.url, { timeout: 10000 }).catch(e => void e);
+						if (probe_result) {
+							const width = parseInt(probe_result.width);
+							const height = parseInt(probe_result.height);
+							const ratio = width / height;
+							if (width >= 200 && height >= 200 && ratio >= 1.7) {
+								embed.setImage(probe_result.url);
+								break;
+							}
 						}
 					}
 				}
-			}
-			if (!embed.image.url) embed.setImage(constants.images.free_games_banner);
+				if (!embed.image.url) embed.setImage(constants.images.free_games_banner);
 
-			const sent_mesage = await message_manager.sendToChannel(constants.channels.integrations.free_games, { content: embed.title + ' is now available on ' + mentionables.map(mentionable => app.role(mentionable)).join(' and ') + '.', embed: embed });
-			notification.title = embed.title;
-			notification.id = sent_mesage.id;
-			await database.notificationPush(notification);
+				const sent_mesage = await message_manager.sendToChannel(constants.channels.integrations.free_games, { content: embed.title + ' is now available on ' + mentionables.map(mentionable => app.role(mentionable)).join(' and ') + '.', embed: embed });
+				notification.title = embed.title;
+				notification.id = sent_mesage.id;
+				await database.notificationPush(notification);
+			}
 		}
-	}
-	catch (error) {
-		error_manager.mark(ErrorTicketManager.create('freeGameNotify', error));
-	}
-	FreeGameNotifyManager.finish();
+		catch (error) {
+			error_manager.mark(ErrorTicketManager.create('freeGameNotify', error));
+		}
+	});
 };

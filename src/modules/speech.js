@@ -9,7 +9,7 @@ const classes = require('./classes.js');
 let error_manager;
 
 const ErrorTicketManager = new classes.ErrorTicketManager('speech.js');
-const SpeechManager = new classes.Manager;
+const SpeechManager = new classes.Manager();
 
 const format_words = [
 	{ original: 'VALORANT', formatted: 'Valorant' },
@@ -39,14 +39,9 @@ module.exports.initialize = (ClientInstance) => {
  * @param {Discord.VoiceChannel} channel The target voice channel.
  * @returns {Promise<null>} A null promise.
  */
-module.exports.say = async (message, channel) => {
-	let res, rej;
-	const promise = new Promise((resolve, reject) => {
-		res = resolve;
-		rej = reject;
-	});
+module.exports.say = (message, channel) => {
 	console.log(`Speech: Queueing ${SpeechManager.totalID} (${channel.name})`);
-	SpeechManager.queue(async function() {
+	return SpeechManager.queue(async function() {
 		try {
 			// Format words
 			for (const word of format_words) {
@@ -61,21 +56,25 @@ module.exports.say = async (message, channel) => {
 			});
 			fs.writeFileSync('tts.mp3', data);
 			// Speak to channel
-			const dispatcher = connection.play('tts.mp3');
-			dispatcher.on('finish', async () => {
-				await functions.sleep(2500);
-				await channel.leave();
-				console.log(`Speech: Finished ${SpeechManager.currentID} (${channel.name})`);
-				res();
+			const speak = new Promise((resolve, reject) => {
+				const dispatcher = connection.play('tts.mp3');
+				dispatcher.on('finish', async () => {
+					await functions.sleep(2500);
+					await channel.leave();
+					console.log(`Speech: Finished ${SpeechManager.currentID} (${channel.name})`);
+					resolve();
+				});
+				dispatcher.on('error', error => {
+					reject(error);
+				});
 			});
+			await speak;
 		}
 		catch (this_error) {
 			console.log(`Speech: Finished ${SpeechManager.currentID} (${channel.name})`);
 			error_manager.mark(ErrorTicketManager.create('say', this_error));
-			rej(this_error);
 		}
 	});
-	return promise;
 };
 
 module.exports.SpeechManager = SpeechManager;

@@ -70,41 +70,6 @@ module.exports.ErrorTicketManager = class {
 	}
 };
 
-/**
- * Creates a Process Queue.
- * @param {number} timeout Time in miliseconds.
- *  @returns Process Queue
- */
-module.exports.ProcessQueue = class {
-	constructor(timeout = 0) {
-		this.timeout = timeout;
-		this.totalID = 0;
-		this.currentID = 0;
-	}
-
-	/**
-     * Start queueing.
-     * @returns {Promise<null>}
-     */
-	queue() {
-		const ID = this.totalID++;
-		// eslint-disable-next-line no-async-promise-executor
-		return new Promise(async resolve => {
-			while (ID != this.currentID) await functions.sleep(2500);
-			resolve();
-		});
-	}
-
-	/**
-     * Finish queue turn.
-     */
-	finish() {
-		setTimeout(() => {
-			this.currentID++;
-		}, this.timeout);
-	}
-};
-
 module.exports.Manager = class {
 	/**
 	 * Creates a Manager class.

@@ -22,13 +22,8 @@ module.exports.initialize = (ClientInstance) => {
  * @returns {Promise<Discord.GuildChannel>} A Text Channel, a Voice Channel, or a Category Channel Object
  */
 module.exports.create = (options) => {
-	let res, rej;
-	const promise = new Promise((resolve, reject) => {
-		res = resolve;
-		rej = reject;
-	});
 	console.log(`ChannelCreate: Queueing ${ChannelQueueManager.totalID} (${options.name})`);
-	ChannelQueueManager.queue(async function() {
+	return ChannelQueueManager.queue(async function() {
 		let result, error;
 		try {
 			result = await app.guild().channels.create(options.name, {
@@ -49,10 +44,10 @@ module.exports.create = (options) => {
 		}
 		finally {
 			console.log(`ChannelCreate: Finished ${ChannelQueueManager.currentID} (${options.name})`);
-			error ? rej(error) : res(result);
 		}
+		if (error) throw error;
+		return result;
 	});
-	return promise;
 };
 
 /**
@@ -62,14 +57,9 @@ module.exports.create = (options) => {
  * @returns {Promise<Discord.Channel>} A Channel Object
  */
 module.exports.delete = (GuildChannelResolvable, reason = '') => {
-	let res, rej;
-	const promise = new Promise((resolve, reject) => {
-		res = resolve;
-		rej = reject;
-	});
 	const channel = app.channel(GuildChannelResolvable);
 	console.log(`ChannelDelete: Queueing ${ChannelQueueManager.totalID} (${channel ? channel.name : GuildChannelResolvable})`);
-	ChannelQueueManager.queue(async function() {
+	return ChannelQueueManager.queue(async function() {
 		let result, error;
 		try {
 			result = await channel.delete(reason);
@@ -78,11 +68,11 @@ module.exports.delete = (GuildChannelResolvable, reason = '') => {
 			error = this_error;
 		}
 		finally {
-			console.log(`ChannelDelete: Finished ${ChannelQueueManager.currentID} (${channel ? channel.name : GuildChannelResolvable})`);
-			error ? rej(error) : res(result);
+			console.log(`ChannelDelete: Finished ${ChannelQueueManager.totalID} (${channel ? channel.name : GuildChannelResolvable})`);
 		}
+		if (error) throw error;
+		return result;
 	});
-	return promise;
 };
 
 /**

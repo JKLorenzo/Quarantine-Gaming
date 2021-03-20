@@ -13,8 +13,8 @@ let error_manager;
 let message_manager;
 
 const ErrorTicketManager = new classes.ErrorTicketManager('reaction_manager.js');
-const ReactionAddManager = new classes.Manager;
-const IncomingReactionManager = new classes.Manager;
+const ReactionAddManager = new classes.Manager();
+const IncomingReactionManager = new classes.Manager();
 
 /**
  * Initializes the module.
@@ -34,14 +34,9 @@ module.exports.initialize = (ClientInstance) => {
  * @param {Discord.EmojiIdentifierResolvable} emoji The emoji to use.
  * @returns {Promise<Discord.MessageReaction>} A message reaction promise object
  */
-module.exports.addReaction = async (message, emoji) => {
-	let res, rej;
-	const promise = new Promise((resolve, reject) => {
-		res = resolve;
-		rej = reject;
-	});
+module.exports.addReaction = (message, emoji) => {
 	console.log(`ReactionAdd: Queueing ${ReactionAddManager.totalID} (${message.channel.id} | ${emoji.name}})`);
-	ReactionAddManager.queue(async function() {
+	return ReactionAddManager.queue(async function() {
 		let result, error;
 		try {
 			result = await message.react(emoji);
@@ -51,10 +46,10 @@ module.exports.addReaction = async (message, emoji) => {
 		}
 		finally {
 			console.log(`ReactionAdd: Finished ${ReactionAddManager.currentID} (${message.channel.id} | ${emoji.name}})`);
-			error ? rej(error) : res(result);
 		}
+		if (error) throw error;
+		return result;
 	});
-	return promise;
 };
 
 /**
@@ -65,8 +60,8 @@ module.exports.addReaction = async (message, emoji) => {
  * @param {Discord.GuildMember} reactor The guild member object that reacted to this message.
  */
 module.exports.onReactionAdd = (message, embed, emoji, reactor) => {
-	console.log(`IncomingReactionAdd: Queueing ${IncomingReactionManager.totalID} (${reactor.displayName})`);
-	IncomingReactionManager.queue(async function() {
+	console.log(`ReactionAdd: Queueing ${IncomingReactionManager.totalID} (${message.channel.id} | ${emoji.name}})`);
+	return IncomingReactionManager.queue(async function() {
 		try {
 			switch (embed.author.name) {
 			case 'Quarantine Gaming: NSFW Content':
@@ -277,10 +272,12 @@ module.exports.onReactionAdd = (message, embed, emoji, reactor) => {
 				break;
 			}
 		}
-		catch (error) {
-			error_manager.mark(ErrorTicketManager.create('onReactionAdd', error));
+		catch (this_error) {
+			error_manager.mark(ErrorTicketManager.create('onReactionAdd', this_error));
 		}
-		console.log(`IncomingReactionAdd: Finished ${IncomingReactionManager.currentID} (${reactor.displayName})`);
+		finally {
+			console.log(`IncomingReactionAdd: Finished ${IncomingReactionManager.currentID} (${reactor.displayName})`);
+		}
 	});
 };
 
@@ -293,7 +290,7 @@ module.exports.onReactionAdd = (message, embed, emoji, reactor) => {
  */
 module.exports.onReactionRemove = (message, embed, emoji, reactor) => {
 	console.log(`IncomingReactionRemove: Queueing ${IncomingReactionManager.totalID} (${reactor.displayName})`);
-	IncomingReactionManager.queue(async function() {
+	return IncomingReactionManager.queue(async function() {
 		try {
 			switch (embed.author.name) {
 			case 'Quarantine Gaming: NSFW Content':
@@ -370,10 +367,12 @@ module.exports.onReactionRemove = (message, embed, emoji, reactor) => {
 				break;
 			}
 		}
-		catch (error) {
-			error_manager.mark(ErrorTicketManager.create('onReactionRemove', error));
+		catch (this_error) {
+			error_manager.mark(ErrorTicketManager.create('onReactionRemove', this_error));
 		}
-		console.log(`IncomingReactionRemove: Finished ${IncomingReactionManager.currentID} (${reactor.displayName})`);
+		finally {
+			console.log(`IncomingReactionRemove: Finished ${IncomingReactionManager.currentID} (${reactor.displayName})`);
+		}
 	});
 };
 
