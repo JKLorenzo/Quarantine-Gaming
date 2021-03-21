@@ -138,7 +138,7 @@ client.on('userUpdate', (oldUser, newUser) => {
 			embed.addField('Tag:', `Old: ${oldUser.tag}\nNew: ${newUser.tag}`);
 		}
 
-		embed.setFooter(`Reference ID: ${newUser.id}`);
+		embed.setFooter(`${newUser.tag} (${newUser.id})`);
 		embed.setTimestamp();
 		embed.setColor('#7bff64');
 		if (embed.fields.length > 1) message_manager.sendToChannel(constants.channels.server.logs, embed);
@@ -179,7 +179,7 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
 			}
 		}
 
-		embed.setFooter(`Reference ID: ${newMember.id}`);
+		embed.setFooter(`${newMember.user.tag} (${newMember.user.id})`);
 		embed.setTimestamp();
 		embed.setColor('#7bff64');
 		if (embed.fields.length > 1) message_manager.sendToChannel(constants.channels.server.logs, embed);
@@ -203,7 +203,7 @@ client.on('guildMemberAdd', (this_member) => {
 		embed.setThumbnail(this_member.user.displayAvatarURL());
 		embed.addField('User:', this_member);
 		embed.addField('Account Created:', `${created_day.toUTCString().replace('GMT', 'UTC')} (${created_day_difference.estimate})`);
-		embed.setFooter(`Reference ID: ${this_member.id}`);
+		embed.setFooter(`${this_member.user.tag} (${this_member.user.id})`);
 		embed.setTimestamp();
 		embed.setColor('#7bff64');
 		message_manager.sendToChannel(constants.channels.server.logs, embed);
@@ -225,7 +225,7 @@ client.on('guildMemberRemove', (this_member) => {
 		embed.setThumbnail(this_member.user.displayAvatarURL());
 		embed.addField('User:', this_member);
 		embed.addField('Account Created:', `${created_day.toUTCString().replace('GMT', 'UTC')} (${created_day_difference.estimate})`);
-		embed.setFooter(`Reference ID: ${this_member.id}`);
+		embed.setFooter(`${this_member.user.tag} (${this_member.user.id})`);
 		embed.setTimestamp();
 		embed.setColor('#7bff64');
 		message_manager.sendToChannel(constants.channels.server.logs, embed);
@@ -247,7 +247,7 @@ client.on('guildBanAdd', (this_guild, this_user) => {
 		embed.setThumbnail(this_user.displayAvatarURL());
 		embed.addField('User:', this_user);
 		embed.addField('Account Created:', `${created_day.toUTCString().replace('GMT', 'UTC')} (${created_day_difference.estimate})`);
-		embed.setFooter(`Reference ID: ${this_user.id}`);
+		embed.setFooter(`${this_user.tag} (${this_user.id})`);
 		embed.setTimestamp();
 		embed.setColor('#7bff64');
 		message_manager.sendToChannel(constants.channels.server.logs, embed);
@@ -269,7 +269,7 @@ client.on('guildBanRemove', (this_guild, this_user) => {
 		embed.setThumbnail(this_user.displayAvatarURL());
 		embed.addField('User:', this_user);
 		embed.addField('Account Created:', `${created_day.toUTCString().replace('GMT', 'UTC')} (${created_day_difference.estimate})`);
-		embed.setFooter(`Reference ID: ${this_user.id}`);
+		embed.setFooter(`${this_user.tag} (${this_user.id})`);
 		embed.setTimestamp();
 		embed.setColor('#7bff64');
 		message_manager.sendToChannel(constants.channels.server.logs, embed);
@@ -285,13 +285,13 @@ client.on('roleCreate', (this_role) => {
 		const embed = new Discord.MessageEmbed();
 		embed.setAuthor('Quarantine Gaming: Role Submanager');
 		embed.setTitle('Role Created');
-		embed.addField('Name:', this_role.name, true);
+		embed.setDescription(this_role);
 		const properties = new Array();
 		if (this_role.mentionable) properties.push('Mentionable');
 		if (this_role.hoist) properties.push('Hoisted');
 		if (this_role.permissions.bitfield) properties.push(this_role.permissions.bitfield);
 		if (properties.length > 0) embed.addField('Properties:', properties.join(', '), true);
-		embed.setFooter(`Reference ID: ${this_role.id}`);
+		embed.setFooter(`${this_role.name} (${this_role.id})`);
 		embed.setTimestamp();
 		embed.setColor(this_role.color);
 		message_manager.sendToChannel(constants.channels.server.logs, embed);
@@ -313,7 +313,7 @@ client.on('roleUpdate', (oldRole, newRole) => {
 		if (oldRole.mentionable != newRole.mentionable) embed.addField('Mentionable:', newRole.mentionable);
 		if (oldRole.hoist != newRole.hoist) embed.addField('Hoisted:', newRole.hoist);
 		if (oldRole.permissions.bitfield != newRole.permissions.bitfield) embed.addField('BitField Permissions:', `Old: ${oldRole.permissions.bitfield}\nNew: ${newRole.permissions.bitfield}`);
-		embed.setFooter(`Reference ID: ${newRole.id}`);
+		embed.setFooter(`${newRole.name} (${newRole.id})`);
 		embed.setTimestamp();
 		embed.setColor(newRole.color);
 		if (embed.fields.length > 0) message_manager.sendToChannel(constants.channels.server.logs, embed);
@@ -329,8 +329,8 @@ client.on('roleDelete', (this_role) => {
 		const embed = new Discord.MessageEmbed();
 		embed.setAuthor('Quarantine Gaming: Role Submanager');
 		embed.setTitle('Role Deleted');
-		embed.addField('Name:', this_role.name);
-		embed.setFooter(`Reference ID: ${this_role.id}`);
+		embed.setDescription(this_role);
+		embed.setFooter(`${this_role.name} (${this_role.id})`);
 		embed.setTimestamp();
 		embed.setColor(this_role.color);
 		message_manager.sendToChannel(constants.channels.server.logs, embed);
