@@ -357,12 +357,6 @@ client.on('inviteCreate', (invite) => {
 			{ name: 'Channel:', value: invite.channel, inline: true },
 			{ name: 'Code:', value: invite.code, inline: true },
 		]);
-		if (invite.maxUses) {
-			embed.addField('Max Uses:', invite.maxUses, true);
-		}
-		else {
-			embed.addField('Max Uses:', 'Infinite', true);
-		}
 		if (invite.expiresTimestamp) {
 			embed.setTimestamp(invite.expiresTimestamp);
 			embed.setFooter('Expires ');
