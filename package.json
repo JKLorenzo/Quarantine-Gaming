@@ -1,6 +1,6 @@
 {
   "name": "quarantine-gaming",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "A Discord Bot for Quarantine Gaming Server.",
   "main": "./src/index.js",
   "engines": {
@@ -19,7 +19,7 @@
   "dependencies": {
     "@discordjs/opus": "^0.5.0",
     "axios": "^0.21.1",
-    "discord.js": "^12.5.1",
+    "discord.js": "github:discordjs/discord.js",
     "discord.js-commando": "^0.12.2",
     "eslint": "^7.22.0",
     "ffmpeg-static": "^4.2.8",
