@@ -34,7 +34,6 @@ client.registry
 	])
 	.registerDefaultGroups()
 	.registerDefaultCommands({
-		eval: false,
 		prefix: false,
 		commandState: false,
 	})
