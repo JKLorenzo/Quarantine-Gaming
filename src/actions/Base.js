@@ -1,9 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 const Discord = require('discord.js');
 const loadMembers = require('./LoadMembers.js');
-const loadDedicatedChannels = require('./LoadDedicatedChannels.js');
 const loadGameRoles = require('./LoadGameRoles.js');
-const createDedicatedChannel = require('./CreateDedicatedChannel.js');
 const memberScreening = require('./MemberScreening');
 
 module.exports = class BaseActions {
@@ -16,21 +14,8 @@ module.exports = class BaseActions {
 		return loadMembers(this.app);
 	}
 
-	loadDedicatedChannels() {
-		return loadDedicatedChannels(this.app);
-	}
-
 	loadGameRoles() {
 		return loadGameRoles(this.app);
-	}
-
-	/**
-	 * Dedicates a voice channel.
-	 * @param {Discord.VoiceChannel} channel
-	 * @param {String} name
-	 */
-	createDedicatedChannel(channel, name) {
-		return createDedicatedChannel(this.app, channel, name);
 	}
 
 	/**
@@ -43,7 +28,7 @@ module.exports = class BaseActions {
 
 	async startup() {
 		await this.loadMembers();
-		await this.loadDedicatedChannels();
 		await this.loadGameRoles();
+		await this.app.dedicated_channel_manager.autoDedicate();
 	}
 };
