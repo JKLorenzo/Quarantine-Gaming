@@ -24,6 +24,7 @@ module.exports = class App {
 		this.role_manager = new BaseManagers.RoleManager(this);
 		this.speech_manager = new BaseManagers.SpeechManager(this);
 		this.free_game_manager = new BaseManagers.FreeGameManager(this);
+		this.dedicated_channel_manager = new BaseManagers.DedicatedChannelManager(this);
 
 		this.actions = new BaseActions(this);
 		this.events = new BaseEvents(this);
