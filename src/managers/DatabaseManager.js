@@ -73,7 +73,6 @@ class DatabaseManager {
 					const data = free_game.data();
 					if (data.index > this.data.free_games.index) this.data.free_games.index = data.index;
 					this.data.free_games.list.push(new FreeGame({
-						id: free_game.id,
 						...data,
 					}));
 				}
@@ -314,10 +313,7 @@ class DatabaseManager {
 	async pushFreeGame(free_game) {
 		this.data.free_games.list.push(free_game);
 		await this.collections.free_games.doc(free_game.id).set({
-			title: free_game.title,
-			url: free_game.url,
-			author: free_game.author,
-			permalink: free_game.permalink,
+			...free_game,
 			index: ++this.data.free_games.index,
 		});
 		await this.trimFreeGames();
