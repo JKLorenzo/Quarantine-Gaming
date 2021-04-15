@@ -1,3 +1,4 @@
+const gis = require('g-i-s');
 const ProcessQueue = require('./ProcessQueue.js');
 const ErrorTicketManager = require('./ErrorTicketManager.js');
 const constants = require('./Constants.js');
@@ -9,6 +10,14 @@ const constants = require('./Constants.js');
  */
 function sleep(timeout) {
 	return new Promise(resolve => setTimeout(resolve, timeout));
+}
+
+/**
+ * Parses html character symbols to their string variant.
+ * @param {String} html
+ */
+function parseHTML(html) {
+	return String(html).replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"');
 }
 
 /**
@@ -125,14 +134,33 @@ function contains(base, part) {
 	return false;
 }
 
+/**
+ * Search for images using Google Image Search.
+ * @param {String} title
+ * @returns {Promise<{url: String, width: Number, height: Number}[]>}
+ */
+function fetchImage(title) {
+	return new Promise(resolve => {
+		gis(title, (error, results) => {
+			if (error) {
+				console.error(`BaseUtil(fetchImage): ${error}`);
+				resolve(new Array());
+			}
+			resolve(results);
+		});
+	});
+}
+
 module.exports = {
 	ProcessQueue,
 	ErrorTicketManager,
 	constants,
 	sleep,
+	parseHTML,
 	parseMention,
 	getPercentSimilarity,
 	compareDate,
 	compareArray,
 	contains,
+	fetchImage,
 };
