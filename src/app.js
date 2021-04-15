@@ -23,6 +23,7 @@ module.exports = class App {
 		this.reaction_manager = new BaseManagers.ReactionManager(this);
 		this.role_manager = new BaseManagers.RoleManager(this);
 		this.speech_manager = new BaseManagers.SpeechManager(this);
+		this.free_game_manager = new BaseManagers.FreeGameManager(this);
 
 		this.actions = new BaseActions(this);
 		this.events = new BaseEvents(this);
