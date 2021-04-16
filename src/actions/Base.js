@@ -1,6 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 const Discord = require('discord.js');
 const loadMembers = require('./LoadMembers.js');
+const flushExpiredGameRoles = require('./FlushExpiredGameRoles.js');
 const loadGameRoles = require('./LoadGameRoles.js');
 const memberScreening = require('./MemberScreening');
 
@@ -12,6 +13,10 @@ module.exports = class BaseActions {
 
 	loadMembers() {
 		return loadMembers(this.app);
+	}
+
+	flushExpiredGameRoles() {
+		return flushExpiredGameRoles(this.app);
 	}
 
 	loadGameRoles() {
@@ -29,6 +34,7 @@ module.exports = class BaseActions {
 	async startup() {
 		await this.loadMembers();
 		await this.loadGameRoles();
+		await this.flushExpiredGameRoles();
 		await this.app.dedicated_channel_manager.autoDedicate();
 	}
 };
