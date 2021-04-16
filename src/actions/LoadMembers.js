@@ -11,15 +11,12 @@ module.exports = async function LoadMembers(app) {
 			await member.init(app.database_manager);
 		}
 
-		// Check members
-		const [ humans, bots ] = app.guild.members.cache.partition(user => !user.user.bot);
-		for (const human of humans.array()) {
-			if (human.roles.cache.has(app.utils.constants.roles.member)) continue;
-			// HUMAN NO ACCESS
-		}
-		for (const bot of bots.array()) {
-			if (bot.roles.cache.has(app.utils.constants.roles.bot)) continue;
-			// BOT NO ACCESS
+		// Check for users who doesn't have a member or bot role
+		for (const member of members) {
+			if (member.user.bot && member.roles.cache.has(app.utils.constants.roles.bot)) continue;
+			if (!member.user.bot && member.roles.cache.has(app.utils.constants.roles.member)) continue;
+			if (member.pending) continue;
+			await app.actions.screenMember(member);
 		}
 
 		// Check for streaming members
