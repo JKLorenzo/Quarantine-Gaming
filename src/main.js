@@ -1,11 +1,12 @@
 const Discord = require('discord.js');
 const { CommandoClient } = require('discord.js-commando');
 const App = require('./app.js');
-const { ExtendedMember } = require('./structures/Base.js');
+const { ExtendedMember, ExtendedMessage } = require('./structures/Base.js');
 const path = require('path');
 const constants = require('./utils/Constants.js');
 
 Discord.Structures.extend('GuildMember', () => ExtendedMember);
+Discord.Structures.extend('Message', () => ExtendedMessage);
 
 const client = new CommandoClient({
 	commandPrefix: '!',
