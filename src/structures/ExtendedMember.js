@@ -92,7 +92,7 @@ class ExtendedMember extends Discord.GuildMember {
 	 * Gets the expired game roles of this member.
 	 * @returns {Promise<PartialRole[]>}
 	 */
-	async getExpiredGameRole() {
+	async getExpiredGameRoles() {
 		if (super.roles.cache.array().filter(role => role.hexColor = this.app.utils.constants.colors.game_role).length > 0) return new Array();
 		return await this.app.database_manager.getMemberExpiredGameRoles(super.id);
 	}
