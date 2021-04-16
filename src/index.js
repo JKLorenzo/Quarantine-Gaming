@@ -48,7 +48,13 @@ client.registry
 	})
 	.registerCommandsIn(path.join(__dirname, 'commands'));
 
-client.app = new App(client);
+client.once('ready', async () => {
+	console.log('Ready!');
+	const app = new App(client);
+	client.app = app;
+	await app.actions.startup();
+	console.log('Initialized!');
+});
 
 console.log('Logging in');
 client.login(process.env.BOT_TOKEN);

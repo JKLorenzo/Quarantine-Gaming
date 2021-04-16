@@ -1,4 +1,3 @@
-const onceReady = require('./Ready.js');
 const onMessage = require('./Message.js');
 const onUserUpdate = require('./UserUpdate.js');
 const onGuildMemberAdd = require('./GuildMemberAdd.js');
@@ -20,14 +19,6 @@ module.exports = class BaseEvents {
 	constructor(app) {
 		this.app = app;
 		this.ErrorTicketManager = new app.utils.ErrorTicketManager('Base Events');
-
-		this.onceReady = {
-			triggered: false,
-			event: app.client.once('ready', () => {
-				if (!this.onceReady.triggered) onceReady(app);
-				this.onceReady.triggered = true;
-			}),
-		};
 
 		this.onMessage = {
 			queuer: new app.utils.ProcessQueue(1000),
