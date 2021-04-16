@@ -4,7 +4,7 @@ const Discord = require('discord.js');
  * @param {import('../app.js')} app
  * @param {Discord.GuildMember} member
  */
-module.exports = async function memberScreening(app, member) {
+module.exports = async function ScreenMember(app, member) {
 	const created_day = member.user.createdAt;
 	const created_day_difference = app.utils.compareDate(created_day);
 
