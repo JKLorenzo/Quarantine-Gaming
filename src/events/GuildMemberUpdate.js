@@ -1,9 +1,11 @@
 const Discord = require('discord.js');
+// eslint-disable-next-line no-unused-vars
+const { ExtendedMember } = require('../structures/Base.js');
 
 /**
  * @param {import('../app.js')} app
- * @param {Discord.GuildMember} oldMember
- * @param {Discord.GuildMember} newMember
+ * @param {ExtendedMember} oldMember
+ * @param {ExtendedMember} newMember
  */
 module.exports = async function onGuildMemberUpdate(app, oldMember, newMember) {
 	if (newMember.pending == false && oldMember.pending != newMember.pending) {
@@ -25,10 +27,16 @@ module.exports = async function onGuildMemberUpdate(app, oldMember, newMember) {
 	if (newMember.roles.cache.size != oldMember.roles.cache.size) {
 		const added = new Array(), removed = new Array();
 		for (const this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
-			if (app.utils.contains(this_role.name, ['Play', 'Text', 'Team']) || app.utils.contains(this_role.id, [app.utils.constants.roles.streaming])) {
-				continue;
+			if (app.utils.contains(this_role.name, ['Play', 'Text', 'Team'])) continue;
+			if (app.utils.contains(this_role.id, app.utils.constants.roles.streaming)) continue;
+			if (newMember.roles.cache.has(this_role.id)) {
+				added.push(this_role.name);
+				if (this_role.hexColor == app.utils.constants.colors.game_role) await newMember.updateGameRole(this_role);
 			}
-			newMember.roles.cache.has(this_role.id) ? added.push(this_role.name) : removed.push(this_role.name);
+			else {
+				removed.push(this_role.name);
+				if (this_role.hexColor == app.utils.constants.colors.game_role) await newMember.deleteGameRole(this_role.id);
+			}
 		}
 		if (added.length > 0) {
 			embed.addField('Role Added:', added.join(', '));
