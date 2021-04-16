@@ -3,7 +3,7 @@ const Discord = require('discord.js');
 const loadMembers = require('./LoadMembers.js');
 const flushExpiredGameRoles = require('./FlushExpiredGameRoles.js');
 const loadGameRoles = require('./LoadGameRoles.js');
-const memberScreening = require('./MemberScreening');
+const screenMember = require('./ScreenMember');
 
 module.exports = class BaseActions {
 	/** @param {import('../app.js')} app */
@@ -27,8 +27,8 @@ module.exports = class BaseActions {
 	 * Allow staff and moderator to screen this member.
 	 * @param {Discord.GuildMember} member
 	 */
-	memberScreening(member) {
-		return memberScreening(this.app, member);
+	screenMember(member) {
+		return screenMember(this.app, member);
 	}
 
 	async startup() {
