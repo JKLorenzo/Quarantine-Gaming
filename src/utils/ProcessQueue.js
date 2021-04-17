@@ -1,4 +1,6 @@
-const { sleep } = require('./Base.js');
+function sleep(timeout = 0) {
+	return new Promise(resolve => setTimeout(resolve, timeout));
+}
 
 module.exports = class ProcessQueue {
 	/**

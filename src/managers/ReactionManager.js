@@ -5,7 +5,7 @@ module.exports = class ReactionManager {
 	/** @param {import('../app.js')} app */
 	constructor(app) {
 		this.app = app;
-		this.queuer = app.utils.ProcessQueue(1000);
+		this.queuer = new app.utils.ProcessQueue(1000);
 	}
 
 	/**

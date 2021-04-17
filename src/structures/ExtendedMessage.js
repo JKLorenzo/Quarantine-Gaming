@@ -1,5 +1,6 @@
-const Discord = require('discord.js');
-module.exports = class ExtendedMessage extends Discord.Message {
+const Commando = require('discord.js-commando');
+
+module.exports = class ExtendedMessage extends Commando.CommandoMessage {
 	/**
      * @param {Discord.Client} client
      * @param {Object} data

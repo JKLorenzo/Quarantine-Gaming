@@ -18,17 +18,7 @@ module.exports = class RoleManager {
 		return this.queuer.queue(async () => {
 			let result, error;
 			try {
-				result = await this.app.guild.roles.create({
-					data: {
-						name: options.name,
-						color: options.color,
-						hoist: options.hoist,
-						mentionable: options.mentionable,
-						permissions: options.permissions,
-						position: options.position,
-					},
-					reason: options.reason,
-				});
+				result = await this.app.guild.roles.create(options);
 			}
 			catch (this_error) {
 				error = this_error;
@@ -50,7 +40,7 @@ module.exports = class RoleManager {
 	delete(role, reason = '') {
 		const this_role = this.app.role(role);
 		console.log(`RoleDelete: Queueing ${this.queuer.totalID} (${this_role ? this_role.name : role})`);
-		return this.queuer.queue(async function() {
+		return this.queuer.queue(async () => {
 			let result, error;
 			try {
 				result = await this_role.delete(reason);
@@ -104,7 +94,7 @@ module.exports = class RoleManager {
 		const this_member = this.app.member(user);
 		const this_role = this.app.role(role);
 		console.log(`RoleAdd: Queueing ${this.queuer.totalID} (${this_member ? this_member.displayName : user} | ${this_role ? this_role.name : role})`);
-		return this.queuer.queue(async function() {
+		return this.queuer.queue(async () => {
 			let result, error;
 			try {
 				return await this_member.roles.remove(this_role, reason);

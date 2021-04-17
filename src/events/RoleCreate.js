@@ -5,6 +5,8 @@ const Discord = require('discord.js');
  * @param {Discord.Role} role
  */
 module.exports = async function onRoleCreate(app, role) {
+	if (app.utils.contains(role.name, ['Play', 'Text', 'Team'])) return;
+
 	const embed = new Discord.MessageEmbed();
 	embed.setAuthor('Quarantine Gaming: Role Submanager');
 	embed.setTitle('Role Created');

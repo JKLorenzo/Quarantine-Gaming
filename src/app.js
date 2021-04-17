@@ -1,11 +1,12 @@
 // eslint-disable-next-line no-unused-vars
 const Discord = require('discord.js');
 const BaseActions = require('./actions/Base.js');
-const BaseStructures = require('./structures/Base.js');
+const BaseEvents = require('./events/Base.js');
 const BaseTypes = require('./types/Base.js');
 const BaseUtils = require('./utils/Base.js');
 const BaseManagers = require('./managers/Base.js');
-const BaseEvents = require('./events/Base.js');
+const BaseStructures = require('./structures/Base.js');
+
 
 module.exports = class App {
 	/** @param {import('discord.js-commando').CommandoClient} client */
@@ -28,10 +29,20 @@ module.exports = class App {
 
 		this.actions = new BaseActions(this);
 		this.events = new BaseEvents(this);
+
+		this.init();
+	}
+
+	async init() {
+		await this.database_manager.init();
+		await this.actions.startup();
+		this.dedicated_channel_manager.actions.start();
+		this.free_game_manager.actions.start();
+		console.log('Initialized');
 	}
 
 	get guild() {
-		return this.client.guilds.cache.get(BaseUtils.Constants.guild);
+		return this.client.guilds.cache.get(BaseUtils.constants.guild);
 	}
 
 	/**

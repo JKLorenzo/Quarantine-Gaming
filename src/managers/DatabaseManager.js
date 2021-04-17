@@ -1,15 +1,13 @@
-// eslint-disable-next-line no-unused-vars
-const Discord = require('discord.js');
 const Firebase = require('firebase-admin');
 const { FreeGame, PartialMember, PartialRole } = require('../types/Base.js');
 
-class DatabaseManager {
+module.exports = class DatabaseManager {
 	/** @param {import('../app.js')} app */
 	constructor(app) {
 		this.app = app;
-		this.ErrorTicketManager = new app.utils.ErrorTicketManager('Database Manager');
+		this.ErrorTicketManager = new this.app.utils.ErrorTicketManager('Database Manager');
 		this.queuers = {
-			expired_gameroles: new app.utils.ProcessQueue(1000),
+			expired_gameroles: new this.app.utils.ProcessQueue(1000),
 		};
 		Firebase.initializeApp({
 			credential: Firebase.credential.cert(JSON.parse(process.env.FIREBASE_CREDENTIALS.replace(/'/g, '"').replace(/\n/g, '\\n'))),
@@ -56,10 +54,10 @@ class DatabaseManager {
 				const game_overrides_QueSnap = await this.collections.game_overrides.get();
 				for (const game_override_QueDocSnap of game_overrides_QueSnap.docs) {
 					switch(game_override_QueDocSnap.data().category) {
-					case 'whitelisted':
+					case 'whitelist':
 						this.data.game_overrides.whitelisted.push(game_override_QueDocSnap.id);
 						break;
-					case 'blacklisted':
+					case 'blacklist':
 						this.data.game_overrides.blacklisted.push(game_override_QueDocSnap.id);
 						break;
 					}
@@ -84,25 +82,26 @@ class DatabaseManager {
 			game_overrides: {
 				start: () => {
 					this.collections.game_overrides.onSnapshot(snapshot => {
+						if (snapshot.docChanges().length == 0 || snapshot.docChanges()[0].oldIndex == -1) return;
 						for (const change of snapshot.docChanges()) {
 							switch (change.type) {
 							case 'added':
 								switch (change.doc.data().category) {
-								case 'whitelisted':
+								case 'whitelist':
 									this.data.game_overrides.whitelisted.push(change.doc.id);
 									break;
-								case 'blacklisted':
+								case 'blacklist':
 									this.data.game_overrides.blacklisted.push(change.doc.id);
 									break;
 								}
 								break;
 							case 'modified':
 								switch (change.doc.data().category) {
-								case 'whitelisted':
+								case 'whitelist':
 									this.data.game_overrides.blacklisted.splice(this.data.game_overrides.blacklisted.indexOf(change.doc.id), 1);
 									this.data.game_overrides.whitelisted.push(change.doc.id);
 									break;
-								case 'blacklisted':
+								case 'blacklist':
 									this.data.game_overrides.whitelisted.splice(this.data.game_overrides.whitelisted.indexOf(change.doc.id), 1);
 									this.data.game_overrides.blacklisted.push(change.doc.id);
 									break;
@@ -110,10 +109,10 @@ class DatabaseManager {
 								break;
 							case 'removed':
 								switch (change.doc.data().category) {
-								case 'whitelisted':
+								case 'whitelist':
 									this.data.game_overrides.whitelisted.splice(this.data.game_overrides.whitelisted.indexOf(change.doc.id), 1);
 									break;
-								case 'blacklisted':
+								case 'blacklist':
 									this.data.game_overrides.blacklisted.splice(this.data.game_overrides.blacklisted.indexOf(change.doc.id), 1);
 									break;
 								}
@@ -130,10 +129,12 @@ class DatabaseManager {
 				},
 			},
 		};
+	}
 
-		this.actions.loadMembers();
-		this.actions.loadGameOverrides();
-		this.actions.loadFreeGames();
+	async init() {
+		await this.actions.loadMembers();
+		await this.actions.loadGameOverrides();
+		await this.actions.loadFreeGames();
 		this.listeners.game_overrides.start();
 	}
 
@@ -142,7 +143,7 @@ class DatabaseManager {
      * @param {String} id
      * @returns {PartialMember}
      */
-	async getMemberData(id) {
+	getMemberData(id) {
 		return this.data.members[id];
 	}
 
@@ -167,11 +168,10 @@ class DatabaseManager {
 	async updateMemberData(id, data) {
 		if (!this.getMemberData(id)) throw new RangeError(`Failed to update data with ID: ${id}.`);
 		await this.collections.members.doc(id).update(data);
-		if (data.name) this.data.members[data.id].name = data.name;
-		if (data.tagname) this.data.members[data.id].tagname = data.tagname;
-		if (data.inviter) this.data.members[data.id].inviter = data.inviter;
-		if (data.moderator) this.data.members[data.id].moderator = data.moderator;
-		return this.data.members[data.id].moderator;
+		if (data.name) this.data.members[id].name = data.name;
+		if (data.tagname) this.data.members[id].tagname = data.tagname;
+		if (data.inviter) this.data.members[id].inviter = data.inviter;
+		if (data.moderator) this.data.members[id].moderator = data.moderator;
 	}
 
 	/**
@@ -237,14 +237,14 @@ class DatabaseManager {
 	 */
 	async gameWhitelist(game_name) {
 		try {
-			const reference = this.collections.game_overrides.doc(game_name);
+			const reference = this.collections.game_overrides.doc(game_name.toLowerCase());
 			const snapshot = await reference.get();
 			if (snapshot.exists) {
-				await reference.update({
+				return await reference.update({
 					category: 'whitelist',
 				});
 			}
-			await reference.set({
+			return await reference.set({
 				category: 'whitelist',
 			});
 		}
@@ -259,14 +259,14 @@ class DatabaseManager {
 	 */
 	async gameBlacklist(game_name) {
 		try {
-			const reference = this.collections.game_overrides.doc(game_name);
+			const reference = this.collections.game_overrides.doc(game_name.toLowerCase());
 			const snapshot = await reference.get();
 			if (snapshot.exists) {
-				await reference.update({
+				return await reference.update({
 					category: 'blacklist',
 				});
 			}
-			await reference.set({
+			return await reference.set({
 				category: 'blacklist',
 			});
 		}
@@ -280,7 +280,7 @@ class DatabaseManager {
 	 * @param {String} game_name
 	 */
 	gameWhitelisted(game_name) {
-		return this.data.game_overrides.whitelisted.includes(game_name);
+		return this.data.game_overrides.whitelisted.includes(game_name.toLowerCase());
 	}
 
 	/**
@@ -288,7 +288,7 @@ class DatabaseManager {
 	 * @param {String} game_name
 	 */
 	gameBlacklisted(game_name) {
-		return this.data.game_overrides.blacklisted.includes(game_name);
+		return this.data.game_overrides.blacklisted.includes(game_name.toLowerCase());
 	}
 
 	/**
@@ -330,6 +330,4 @@ class DatabaseManager {
 			}
 		}
 	}
-}
-
-module.exports = DatabaseManager;
+};

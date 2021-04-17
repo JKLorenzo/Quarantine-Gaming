@@ -41,7 +41,7 @@ module.exports = async function onMessageReactionAdd(app, message, reaction, use
 			const this_user = app.member(embed.fields[0].value);
 			if (this_user) {
 				const dm_message = new Array();
-				switch (emoji.name) {
+				switch (emoji) {
 				case '✅':
 					await app.role_manager.add(this_user, app.utils.constants.roles.member);
 					await message.reactions.removeAll();
@@ -74,7 +74,7 @@ module.exports = async function onMessageReactionAdd(app, message, reaction, use
 			else {
 				await message.reactions.removeAll();
 				embed.spliceFields(3, 1, [
-					{ name: 'Action Taken:', value: `${emoji.name} attempted by ${user}. User not found ⚠` },
+					{ name: 'Action Taken:', value: `${emoji} attempted by ${user}. User not found ⚠` },
 				]).setTimestamp();
 				await message.edit(embed);
 			}
@@ -86,15 +86,9 @@ module.exports = async function onMessageReactionAdd(app, message, reaction, use
 			await message.reactions.removeAll();
 			const this_channel = app.member(user.id).voice.channel;
 			if (this_channel) {
-				// Get members
-				const channel_members = new Array();
-				for (const this_entry of this_channel.members) {
-					channel_members.push(this_entry[1]);
-				}
-
 				// Get reaction effect
 				let effect = null;
-				switch (emoji.name) {
+				switch (emoji) {
 				case '🟠':
 					effect = true;
 					break;
@@ -105,7 +99,7 @@ module.exports = async function onMessageReactionAdd(app, message, reaction, use
 
 				if (effect !== null) {
 					// Apply reaction effect
-					for (const this_channel_member of channel_members) {
+					for (const this_channel_member of this_channel.members.array()) {
 						if (!this_channel_member.user.bot) {
 							await this_channel_member.voice.setMute(effect);
 							await app.utils.sleep(1000);

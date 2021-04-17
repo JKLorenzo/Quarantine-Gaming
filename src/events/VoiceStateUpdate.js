@@ -1,6 +1,4 @@
 const Discord = require('discord.js');
-// eslint-disable-next-line no-unused-vars
-const { ExtendedMember } = require('../structures/Base.js');
 
 /**
  * @param {import('../app.js')} app
@@ -8,7 +6,6 @@ const { ExtendedMember } = require('../structures/Base.js');
  * @param {Discord.VoiceState} newState
  */
 module.exports = async function onVoiceStateUpdate(app, oldState, newState) {
-	/** @type {ExtendedMember} */
 	const member = newState.member;
 	if (oldState.channel && oldState.channel.parent.id == app.utils.constants.channels.category.dedicated_voice) {
 		const text_channel = app.channel(app.utils.constants.channels.category.dedicated).children.find(channel => channel.type == 'text' && channel.topic && app.utils.function.parseMention(channel.topic.split(' ')[0]) == oldState.channelID);

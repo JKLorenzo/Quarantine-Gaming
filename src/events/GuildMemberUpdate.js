@@ -29,14 +29,7 @@ module.exports = async function onGuildMemberUpdate(app, oldMember, newMember) {
 		for (const this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
 			if (app.utils.contains(this_role.name, ['Play', 'Text', 'Team'])) continue;
 			if (app.utils.contains(this_role.id, app.utils.constants.roles.streaming)) continue;
-			if (newMember.roles.cache.has(this_role.id)) {
-				added.push(this_role.name);
-				if (this_role.hexColor == app.utils.constants.colors.game_role) await newMember.updateGameRole(this_role);
-			}
-			else {
-				removed.push(this_role.name);
-				if (this_role.hexColor == app.utils.constants.colors.game_role) await newMember.deleteGameRole(this_role.id);
-			}
+			newMember.roles.cache.has(this_role.id) ? added.push(this_role.name) : removed.push(this_role.name);
 		}
 		if (added.length > 0) {
 			embed.addField('Role Added:', added.join(', '));

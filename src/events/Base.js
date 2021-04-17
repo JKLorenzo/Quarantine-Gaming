@@ -18,14 +18,14 @@ module.exports = class BaseEvents {
 	/** @param {import('../app.js')} app */
 	constructor(app) {
 		this.app = app;
-		this.ErrorTicketManager = new app.utils.ErrorTicketManager('Base Events');
+		this.ErrorTicketManager = new app.utils.ErrorTicketManager('BaseEvents');
 
 		this.onMessage = {
 			queuer: new app.utils.ProcessQueue(1000),
 			event: app.client.on('message', (message) => {
 				this.onMessage.queuer.queue(async () => {
 					try {
-						await onMessage(message);
+						await onMessage(this.app, message);
 					}
 					catch(error) {
 						app.error_manager.mark(this.ErrorTicketManager.create('message', error));
@@ -39,7 +39,7 @@ module.exports = class BaseEvents {
 			event:  app.client.on('userUpdate', (oldUser, newUser) => {
 				this.onUserUpdate.queuer.queue(async () => {
 					try {
-						await onUserUpdate(app, oldUser, newUser);
+						await onUserUpdate(this.app, oldUser, newUser);
 					}
 					catch(error) {
 						app.error_manager.mark(this.ErrorTicketManager.create('userUpdate', error));
@@ -53,7 +53,7 @@ module.exports = class BaseEvents {
 			event: app.client.on('guildMemberAdd', (member) => {
 				this.onGuildMemberAdd.queuer.queue(async () => {
 					try {
-						await onGuildMemberAdd(app, member);
+						await onGuildMemberAdd(this.app, member);
 					}
 					catch(error) {
 						app.error_manager.mark(this.ErrorTicketManager.create('guildMemberAdd', error));
@@ -67,7 +67,7 @@ module.exports = class BaseEvents {
 			event: app.client.on('guildMemberUpdate', (oldMember, newMember) => {
 				this.onGuildMemberUpdate.queuer.queue(async () => {
 					try {
-						await onGuildMemberUpdate(app, oldMember, newMember);
+						await onGuildMemberUpdate(this.app, oldMember, newMember);
 					}
 					catch(error) {
 						app.error_manager.mark(this.ErrorTicketManager.create('guildMemberUpdate', error));
@@ -81,7 +81,7 @@ module.exports = class BaseEvents {
 			event: app.client.on('guildMemberRemove', (member) => {
 				this.onGuildMemberRemove.queuer.queue(async () => {
 					try {
-						await onGuildMemberRemove(app, member);
+						await onGuildMemberRemove(this.app, member);
 					}
 					catch(error) {
 						app.error_manager.mark(this.ErrorTicketManager.create('guildMemberRemove', error));
@@ -96,7 +96,7 @@ module.exports = class BaseEvents {
 				if (guild.id != app.guild.id) return;
 				this.onGuildBanAdd.queuer.queue(async () => {
 					try {
-						await onGuildBanAdd(app, user);
+						await onGuildBanAdd(this.app, user);
 					}
 					catch(error) {
 						app.error_manager.mark(this.ErrorTicketManager.create('guildBanAdd', error));
@@ -111,7 +111,7 @@ module.exports = class BaseEvents {
 				if (guild.id != this.app.guild.id) return;
 				this.onGuildBanRemove.queue.queue(async () => {
 					try {
-						await onGuildBanRemove(app, user);
+						await onGuildBanRemove(this.app, user);
 					}
 					catch(error) {
 						app.error_manager.mark(this.ErrorTicketManager.create('guildBanRemove', error));
@@ -126,7 +126,7 @@ module.exports = class BaseEvents {
 				if (role.guild.id != app.guild.id) return;
 				this.onRoleCreate.queuer.queue(async () => {
 					try {
-						await onRoleCreate(app, role);
+						await onRoleCreate(this.app, role);
 					}
 					catch(error) {
 						app.error_manager.mark(this.ErrorTicketManager.create('roleCreate', error));
@@ -141,7 +141,7 @@ module.exports = class BaseEvents {
 				if (newRole.guild.id != app.guild.id) return;
 				this.onRoleUpdate.queuer.queue(async () => {
 					try {
-						await onRoleUpdate(app, oldRole, newRole);
+						await onRoleUpdate(this.app, oldRole, newRole);
 					}
 					catch(error) {
 						app.error_manager.mark(this.ErrorTicketManager.create('roleUpdate', error));
@@ -156,7 +156,7 @@ module.exports = class BaseEvents {
 				if (role.guild.id != app.guild.id) return;
 				this.onRoleDelete.queuer.queue(async () => {
 					try {
-						await onRoleDelete(app, role);
+						await onRoleDelete(this.app, role);
 					}
 					catch(error) {
 						app.error_manager.mark(this.ErrorTicketManager.create('roleDelete', error));
@@ -171,7 +171,7 @@ module.exports = class BaseEvents {
 				if (invite.guild.id != app.guild.id) return;
 				this.onInviteCreate.queuer.queue(async () => {
 					try {
-						await onInviteCreate(app, invite);
+						await onInviteCreate(this.app, invite);
 					}
 					catch(error) {
 						app.error_manager.mark(this.ErrorTicketManager.create('inviteCreate', error));
@@ -186,7 +186,7 @@ module.exports = class BaseEvents {
 				if (newPresence.member.guild.id != app.guild.id || newPresence.member.user.bot) return;
 				this.onPresenceUpdate.queuer.queue(async () => {
 					try {
-						await onPresenceUpdate(app, oldPresence, newPresence);
+						await onPresenceUpdate(this.app, oldPresence, newPresence);
 					}
 					catch(error) {
 						app.error_manager.mark(this.ErrorTicketManager.create('presenceUpdate', error));
@@ -201,7 +201,7 @@ module.exports = class BaseEvents {
 				if (newState.guild.id != app.guild.id) return;
 				this.onVoiceStateUpdate.queuer.queue(async () => {
 					try {
-						await onVoiceStateUpdate(app, oldState, newState);
+						await onVoiceStateUpdate(this.app, oldState, newState);
 					}
 					catch(error) {
 						app.error_manager.mark(this.ErrorTicketManager.create('voiceStateUpdate', error));
@@ -213,12 +213,12 @@ module.exports = class BaseEvents {
 		this.onMessageReactionAdd = {
 			queuer: new app.utils.ProcessQueue(1000),
 			event: app.client.on('messageReactionAdd', (reaction, user) => {
-				if (reaction.message.author.id != app.client.user.id || user.id == app.client.user.id) return;
 				this.onMessageReactionAdd.queuer.queue(async () => {
 					try {
 						if (reaction.partial) reaction = await reaction.fetch();
 						const message = await reaction.message.fetch();
-						await onMessageReactionAdd(app, message, reaction, user);
+						if (message.author.id != app.client.user.id || user.id == app.client.user.id) return;
+						await onMessageReactionAdd(this.app, message, reaction, user);
 					}
 					catch(error) {
 						app.error_manager.mark(this.ErrorTicketManager.create('messageReactionAdd', error));
@@ -230,12 +230,13 @@ module.exports = class BaseEvents {
 		this.onMessageReactionRemove = {
 			queuer: new app.utils.ProcessQueue(1000),
 			event: app.client.on('messageReactionRemove', (reaction, user) => {
-				if (reaction.message.author.id != app.client.user.id || user.id == app.client.user.id) return;
+
 				this.onMessageReactionRemove.queuer.queue(async () => {
 					try {
 						if (reaction.partial) reaction = await reaction.fetch();
 						const message = await reaction.message.fetch();
-						await onMessageReactionRemove(app, message, reaction, user);
+						if (message.author.id != app.client.user.id || user.id == app.client.user.id) return;
+						await onMessageReactionRemove(this.app, message, reaction, user);
 					}
 					catch(error) {
 						app.error_manager.mark(this.ErrorTicketManager.create('messageReactionRemove', error));
