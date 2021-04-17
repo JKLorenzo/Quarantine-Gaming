@@ -1,6 +1,6 @@
 /** @param {import('../app.js')} app */
 module.exports = async function LoadMembers(app) {
-	const ErrorTicketManager = new app.utils.ErrorTicketManager('Member Loading');
+	const ErrorTicketManager = new app.utils.ErrorTicketManager('LoadMembers');
 
 	/** @type {import('../structures/Base.js').ExtendedMember[]} */
 	const members = app.guild.members.cache.array();
@@ -8,7 +8,7 @@ module.exports = async function LoadMembers(app) {
 	try {
 		// Link members and the database
 		for (const member of members.filter(this_member => !this_member.user.bot)) {
-			await member.init(app.database_manager);
+			await member.init(app);
 		}
 
 		// Check for users who doesn't have a member or bot role
@@ -27,7 +27,7 @@ module.exports = async function LoadMembers(app) {
 		}
 	}
 	catch (error) {
-		app.error_manager.mark(ErrorTicketManager.create('Initialize Member', error));
+		app.error_manager.mark(ErrorTicketManager.create('InitializeMembers', error));
 		throw error;
 	}
 };

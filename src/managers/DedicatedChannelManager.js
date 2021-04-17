@@ -16,14 +16,14 @@ module.exports = class DedicatedChannelManager {
 
 		this.actions = {
 			start: () => {
-				this.data.intervalID = setInterval(this.autoDedicate, this.data.interval);
+				this.data.intervalID = setInterval(() => {
+					this.autoDedicate();
+				}, this.data.interval);
 			},
 			stop: () => {
 				if (this.data.intervalID) clearInterval(this.data.intervalID);
 			},
 		};
-
-		this.actions.start();
 	}
 
 	/**
@@ -73,7 +73,7 @@ module.exports = class DedicatedChannelManager {
 		return this.queuer.queue(async () => {
 			try {
 				const channel_name = '🔰' + name;
-				if (channel_origin.parentID == this.app.utils.app.utils.constants.channels.category.dedicated_voice) {
+				if (channel_origin.parentID == this.app.utils.constants.channels.category.dedicated_voice) {
 					// Rename
 					await channel_origin.setName(channel_name);
 					/** @type {Discord.CategoryChannel} */

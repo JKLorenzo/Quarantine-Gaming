@@ -6,6 +6,8 @@ const Discord = require('discord.js');
  * @param {Discord.Role} newRole
  */
 module.exports = async function onRoleUpdate(app, oldRole, newRole) {
+	if (app.utils.contains(newRole.name, ['Play', 'Text', 'Team'])) return;
+
 	const embed = new Discord.MessageEmbed();
 	embed.setAuthor('Quarantine Gaming: Role Submanager');
 	embed.setTitle('Role Updated');

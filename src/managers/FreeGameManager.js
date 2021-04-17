@@ -1,8 +1,8 @@
 const Discord = require('discord.js');
-const { FreeGame, Color } = require('../types/Base.js');
-const { ErrorTicketManager, fetchImage, parseHTML, compareDate, contains, constants } = require('../utils/Base.js');
 const probe = require('probe-image-size');
 const fetch = require('node-fetch');
+const { FreeGame, Color } = require('../types/Base.js');
+const { ErrorTicketManager, fetchImage, parseHTML, compareDate, contains, constants } = require('../utils/Base.js');
 
 const ETM = new ErrorTicketManager('Free Game Manager');
 
@@ -20,15 +20,15 @@ module.exports = class FreeGameManager {
 
 		this.actions = {
 			start: () => {
-				this.data.intervalID = setInterval(this.fetch, this.data.fetchInterval);
+				this.data.intervalID = setInterval(() => {
+					this.fetch();
+				}, this.data.fetchInterval);
 			},
 			stop: () => {
 				if (this.data.intervalID) clearInterval(this.data.intervalID);
 				this.data.intervalID = null;
 			},
 		};
-
-		this.actions.start();
 	}
 
 	/**

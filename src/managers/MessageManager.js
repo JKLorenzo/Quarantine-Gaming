@@ -6,7 +6,7 @@ module.exports = class MessageManager {
 	constructor(app) {
 		this.app = app;
 		this.queuer = new app.utils.ProcessQueue(1000);
-		this.ErrorTicketManager = new app.utils.ErrorTicketManager('Message Manager');
+		this.ETM = new app.utils.ErrorTicketManager('MessageManager');
 	}
 
 	/**
@@ -25,6 +25,7 @@ module.exports = class MessageManager {
 				result = await this_channel.send(content);
 			}
 			catch (this_error) {
+				this.app.error_manager.mark(this.ETM.create('sendToChannel', error));
 				error = this_error;
 			}
 			finally {
@@ -51,6 +52,7 @@ module.exports = class MessageManager {
 				result.delete({ timeout:3600000 }).catch(e => void e);
 			}
 			catch (this_error) {
+				this.app.error_manager.mark(this.ETM.create('sendToUser', error));
 				error = this_error;
 			}
 			finally {

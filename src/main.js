@@ -1,4 +1,5 @@
 const Discord = require('discord.js');
+const FLAGS = Discord.Intents.FLAGS;
 const { CommandoClient } = require('discord.js-commando');
 const App = require('./app.js');
 const { ExtendedMember, ExtendedMessage } = require('./structures/Base.js');
@@ -15,15 +16,24 @@ const client = new CommandoClient({
 		'MESSAGE', 'CHANNEL', 'REACTION',
 	],
 	intents: [
-		'DIRECT_MESSAGES', 'GUILDS', 'GUILD_BANS', 'GUILD_EMOJIS',
-		'GUILD_INVITES', 'GUILD_MEMBERS', 'GUILD_MESSAGES',
-		'GUILD_MESSAGE_REACTIONS', 'GUILD_PRESENCES', 'GUILD_VOICE_STATES',
+		FLAGS.DIRECT_MESSAGES,
+		FLAGS.GUILDS,
+		FLAGS.GUILD_BANS,
+		FLAGS.GUILD_EMOJIS,
+		FLAGS.GUILD_INVITES,
+		FLAGS.GUILD_MEMBERS,
+		FLAGS.GUILD_MESSAGES,
+		FLAGS.GUILD_MESSAGE_REACTIONS,
+		FLAGS.GUILD_PRESENCES,
+		FLAGS.GUILD_VOICE_STATES,
 	],
 	presence: {
-		activity: {
-			name: 'Gamers Play',
-			type: 'WATCHING',
-		},
+		activities: [
+			{
+				name: 'QG Arena',
+				type: 'COMPETING',
+			},
+		],
 		status: 'online',
 		afk: false,
 	},
@@ -51,10 +61,7 @@ client.registry
 
 client.once('ready', async () => {
 	console.log('Ready!');
-	const app = new App(client);
-	client.app = app;
-	await app.actions.startup();
-	console.log('Initialized!');
+	client.app = new App(client);
 });
 
 console.log('Logging in');

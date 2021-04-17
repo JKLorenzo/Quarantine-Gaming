@@ -1,4 +1,5 @@
 const { ErrorTicket } = require('../types/Base.js');
+
 module.exports = class ErrorTicketManager {
 	/**
      * Constructs an object used to create error tickets.

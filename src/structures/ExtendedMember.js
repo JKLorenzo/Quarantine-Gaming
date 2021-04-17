@@ -3,7 +3,7 @@ const Discord = require('discord.js');
 // eslint-disable-next-line no-unused-vars
 const { PartialMember, PartialRole } = require('../types/Base.js');
 
-class ExtendedMember extends Discord.GuildMember {
+module.exports = class ExtendedMember extends Discord.GuildMember {
 	/**
 	 * Extends a GuildMember Object
 	 * @param {Discord.Client} client
@@ -22,13 +22,13 @@ class ExtendedMember extends Discord.GuildMember {
 
 		/**
 		 * The inviter of this member.
-		 * @type {PartialMember}
+		 * @type {ExtendedMember | String}
 		 * @readonly
 		 */
 		this.inviter = null;
 		/**
 		 * The moderator that approved this member.
-		 * @type {PartialMember}
+		 * @type {ExtendedMember | String}
 		 * @readonly
 		 */
 		this.moderator = null;
@@ -41,16 +41,19 @@ class ExtendedMember extends Discord.GuildMember {
 	async init(app) {
 		this.app = app;
 
-		let data = app.database_manager.getMemberData(super.id);
-		if (!data) {
-			data = await app.database_manager.setMemberData({
-				id: super.id,
-				name: super.displayName,
-				tagname: super.user.tag,
-			});
+		const data = app.database_manager.getMemberData(super.id);
+		if (data) {
+			const inviter = app.member(data.inviter);
+			const moderator = app.member(data.moderator);
+			this.inviter = inviter ? inviter : data.inviter;
+			this.moderator = moderator ? moderator : data.moderator;
+			return;
 		}
-		this.inviter = data.inviter;
-		this.moderator = data.moderator;
+		await app.database_manager.setMemberData({
+			id: super.id,
+			name: super.displayName,
+			tagname: app.member(super.id).user.tag,
+		});
 	}
 
 	/**
@@ -63,8 +66,8 @@ class ExtendedMember extends Discord.GuildMember {
 			inviter: member.id,
 			moderator: moderator.id,
 		});
-		this.inviter = member.id;
-		this.moderator = moderator.id;
+		this.inviter = member;
+		this.moderator = moderator;
 	}
 
 	/**
@@ -93,7 +96,7 @@ class ExtendedMember extends Discord.GuildMember {
 	 * @returns {Promise<PartialRole[]>}
 	 */
 	async getExpiredGameRoles() {
-		if (super.roles.cache.array().filter(role => role.hexColor = this.app.utils.constants.colors.game_role).length > 0) return new Array();
+		if (super.roles.cache.array().filter(role => role.hexColor == this.app.utils.constants.colors.game_role).length > 0) return new Array();
 		return await this.app.database_manager.getMemberExpiredGameRoles(super.id);
 	}
 
@@ -102,7 +105,6 @@ class ExtendedMember extends Discord.GuildMember {
  	 * @param {Discord.RoleResolvable | Discord.RoleResolvable[]} role
  	 */
 	hasRole(role) {
-		if (!this.exists) throw new Error('Member not initialized.');
 		/** @type {String[]} */
 		const roleIDs = new Array();
 		if (role instanceof Array) {
@@ -120,6 +122,4 @@ class ExtendedMember extends Discord.GuildMember {
 		}
 		return false;
 	}
-}
-
-module.exports = ExtendedMember;
+};

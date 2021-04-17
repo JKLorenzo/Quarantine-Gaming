@@ -39,11 +39,11 @@ module.exports = async function onPresenceUpdate(app, oldPresence, newPresence) 
 		const activity = data.activity;
 		const game_name = activity.name.trim();
 		if (!app.database_manager.gameBlacklisted(game_name) && (activity.applicationID || app.database_manager.gameWhitelisted(game_name))) {
-			const streaming_role = app.role(app.utils.app.utils.constants.roles.streaming);
+			const streaming_role = app.role(app.utils.constants.roles.streaming);
 			const game_role = app.guild.roles.cache.find(role => role.name == game_name) || await app.role_manager.create({ name: game_name, color: app.utils.constants.colors.game_role });
 			let play_role = app.guild.roles.cache.find(role => role.name == 'Play ' + game_name);
 
-			if (!app.guild().roles.cache.find(role => role.name == game_name + ' ⭐')) await app.role_manager.create({ name: game_name + ' ⭐', color: app.utils.constants.colors.game_role_mentionable, mentionable: true });
+			if (!app.guild.roles.cache.find(role => role.name == game_name + ' ⭐')) await app.role_manager.create({ name: game_name + ' ⭐', color: app.utils.constants.colors.game_role_mentionable, mentionable: true });
 
 			if (data.new) {
 				// Update database

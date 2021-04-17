@@ -16,7 +16,7 @@ module.exports = class ErrorManager {
 	 * @param {import('../types/Base.js').ErrorTicket} error_ticket
 	 */
 	mark(error_ticket) {
-		console.log(`ErrorManager: Queueing ${this.queuer.totalID} (${error_ticket.location} / ${error_ticket.name} - ${error_ticket.error})`);
+		console.log(`ErrorManager: Queueing ${this.queuer.totalID} (${error_ticket.name} @${error_ticket.location}: ${error_ticket.error})`);
 		return this.queuer.queue(async () => {
 			try {
 				this.errors.push(error_ticket);
@@ -35,13 +35,13 @@ module.exports = class ErrorManager {
 					});
 
 					// Notify staffs
-					this.app.channel_manager.sendToChannel(this.app.utils.constants.channels.staff, 'I\'m currently detecting issues with Discord; some functionalities are disabled. A bot restart is recommended once the issues are resolved.').catch(async () => {
+					this.app.message_manager.sendToChannel(this.app.utils.constants.channels.staff, 'I\'m currently detecting issues with Discord; some functionalities are disabled. A bot restart is recommended once the issues are resolved.').catch(async () => {
 						const embed = new Discord.MessageEmbed();
 						embed.setAuthor('Limited Functionality');
 						embed.setTitle('Issues with Discord');
 						embed.setDescription('I\'m currently detecting issues with Discord; some functionalities are disabled. A bot restart is recommended once the issues are resolved.');
 						embed.setColor('ffe300');
-						this.app.channel_manager.sendToChannel(this.app.utils.constants.channels.server.management, embed);
+						this.app.message_manager.sendToChannel(this.app.utils.constants.channels.server.management, embed);
 					});
 					this.threshold_reached = true;
 				}
@@ -57,7 +57,7 @@ module.exports = class ErrorManager {
 				embed.setThumbnail('https://mir-s3-cdn-cf.behance.net/project_modules/disp/c9955d46715833.589222657aded.png');
 				embed.setTimestamp();
 				embed.setColor('#FF0000');
-				return this.app.channel_manager.sendToChannel(this.app.utils.constants.channels.qg.logs, embed);
+				return this.app.message_manager.sendToChannel(this.app.utils.constants.channels.qg.logs, embed);
 			}
 			catch (error) {
 				console.log(`ErrorManager: Failed with error (${error})`);

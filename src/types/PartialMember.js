@@ -1,7 +1,7 @@
 /**
  * A Member Object represented on the database.
  */
-class PartialMember {
+module.exports = class PartialMember {
 	/**
      * Initializes this member.
      * @param {{id: String, name: String, tagname: String, inviter?: String, moderator?: String}} data
@@ -33,6 +33,4 @@ class PartialMember {
 		 */
 		this.moderator = data.moderator;
 	}
-}
-
-module.exports = PartialMember;
+};

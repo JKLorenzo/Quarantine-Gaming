@@ -8,7 +8,7 @@ module.exports = class SpeechManager {
 	/** @param {import('../app.js')} app */
 	constructor(app) {
 		this.app = app;
-		this.queuer = app.utils.ProcessQueue(1000);
+		this.queuer = new app.utils.ProcessQueue(1000);
 		this.ErrorTicketManager = new app.utils.ErrorTicketManager('Speech Manager');
 	}
 

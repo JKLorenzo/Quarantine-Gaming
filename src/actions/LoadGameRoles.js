@@ -1,6 +1,6 @@
 /** @param {import('../app.js')} app */
 module.exports = async function LoadGameRoles(app) {
-	const ErrorTicketManager = new app.utils.ErrorTicketManager('Game Role Loading');
+	const ErrorTicketManager = new app.utils.ErrorTicketManager('LoadGameRoles');
 
 	/** @type {import('../structures/Base.js').ExtendedMember[]} */
 	const members = app.guild.members.cache.array();
@@ -17,7 +17,7 @@ module.exports = async function LoadGameRoles(app) {
 				const game_role = app.guild.roles.cache.find(role => role.name == game_name) || await app.role_manager.create({ name: game_name, color: app.utils.constants.colors.game_role });
 				await member.updateGameRole(game_role);
 				// Game Role Mentionable
-				if (!this.guild.roles.cache.find(role => role.name == game_name + ' ⭐')) {
+				if (!app.guild.roles.cache.find(role => role.name == game_name + ' ⭐')) {
 					await app.role_manager.create({ name: game_name + ' ⭐', color: app.utils.constants.colors.game_role_mentionable, mentionable: true });
 				}
 				// Play Role
@@ -37,7 +37,7 @@ module.exports = async function LoadGameRoles(app) {
 	try {
 		// Delete unused game roles
 		for (const game_role of app.guild.roles.cache.array().filter(role => role.hexColor == app.utils.constants.colors.game_role)) {
-			if (game_role.members.array().length > 0 || app.database_manager.gameBlacklisted(game_role.name)) continue;
+			if (game_role.members.array().length > 0 && !app.database_manager.gameBlacklisted(game_role.name)) continue;
 			await app.role_manager.delete(game_role);
 		}
 
@@ -55,7 +55,7 @@ module.exports = async function LoadGameRoles(app) {
 				if (games_playing.includes(game_name)) continue;
 				await app.role_manager.remove(member, play_role);
 			}
-			if (play_role.members.array().length > 0) continue;
+			if (play_role.members.array().length > 0 && app.guild.roles.cache.find(role => role.hexColor == app.utils.constants.colors.game_role && app.utils.contains(play_role.name, role.name))) continue;
 			await app.role_manager.delete(play_role);
 		}
 	}
