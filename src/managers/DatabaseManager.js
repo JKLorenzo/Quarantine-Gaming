@@ -140,7 +140,7 @@ module.exports = class DatabaseManager {
 								break;
 							}
 						}
-						this.client.actions.loadGameRoles();
+						this.client.methods.loadGameRoles();
 					}, error => {
 						this.client.error_manager.mark(ETM.create('game_overrides', error, 'listeners'));
 					});
@@ -290,17 +290,20 @@ module.exports = class DatabaseManager {
 			const reference = this.collections.game_overrides.doc(game_name.toLowerCase());
 			const snapshot = await reference.get();
 			if (snapshot.exists) {
-				return await reference.update({
+				await reference.update({
 					category: 'whitelist',
 				});
 			}
-			return await reference.set({
-				category: 'whitelist',
-			});
+			else {
+				await reference.set({
+					category: 'whitelist',
+				});
+			}
+			return true;
 		}
 		catch (error) {
 			this.client.error_manager.mark(new ETM.create('gameWhitelist', error));
-			throw error;
+			return false;
 		}
 	}
 
@@ -313,17 +316,20 @@ module.exports = class DatabaseManager {
 			const reference = this.collections.game_overrides.doc(game_name.toLowerCase());
 			const snapshot = await reference.get();
 			if (snapshot.exists) {
-				return await reference.update({
+				await reference.update({
 					category: 'blacklist',
 				});
 			}
-			return await reference.set({
-				category: 'blacklist',
-			});
+			else {
+				await reference.set({
+					category: 'blacklist',
+				});
+			}
+			return true;
 		}
 		catch (error) {
 			this.client.error_manager.mark(new ETM.create('gameBlacklist', error));
-			throw error;
+			return false;
 		}
 	}
 
