@@ -1,43 +1,49 @@
-// eslint-disable-next-line no-unused-vars
-const Discord = require('discord.js');
+const { constants } = require('../utils/Base.js');
 
 /**
- * @param {import('../app.js')} app
- * @param {Discord.Message} message
- * @param {Discord.MessageReaction} reaction
- * @param {Discord.User} user
+ * @typedef {import('../structures/Base.js').Client} Client
+ * @typedef {import('discord.js').Message} Message
+ * @typedef {import('discord.js').MessageReaction} MessageReaction
+ * @typedef {import('discord.js').User} User
  */
-module.exports = async function onMessageReactionRemove(app, message, reaction, user) {
+
+/**
+ * @param {Client} client
+ * @param {Message} message
+ * @param {MessageReaction} reaction
+ * @param {User} user
+ */
+module.exports = async function onMessageReactionRemove(client, message, reaction, user) {
 	const embed = message.embeds[0];
 	const header_name = embed.author.name;
 	const emoji = reaction.emoji.name;
 
 	if (header_name == 'Quarantine Gaming: NSFW Content') {
 		if (emoji == '🔴') {
-			await app.role_manager.remove(user, app.utils.constants.roles.nsfw);
+			await client.role_manager.remove(user, constants.roles.nsfw);
 		}
 	}
 	else if (header_name == 'Quarantine Gaming: Free Game Updates') {
 		switch (emoji) {
 		case '1️⃣':
-			await app.role_manager.remove(user, app.utils.constants.roles.steam);
+			await client.role_manager.remove(user, constants.roles.steam);
 			break;
 		case '2️⃣':
-			await app.role_manager.remove(user, app.utils.constants.roles.epic);
+			await client.role_manager.remove(user, constants.roles.epic);
 			break;
 		case '3️⃣':
-			await app.role_manager.remove(user, app.utils.constants.roles.gog);
+			await client.role_manager.remove(user, constants.roles.gog);
 			break;
 		case '4️⃣':
-			await app.role_manager.remove(user, app.utils.constants.roles.console);
+			await client.role_manager.remove(user, constants.roles.console);
 			break;
 		case '5️⃣':
-			await app.role_manager.remove(user, app.utils.constants.roles.ubisoft);
+			await client.role_manager.remove(user, constants.roles.ubisoft);
 			break;
 		}
 	}
 	else if (header_name == 'Quarantine Gaming: Game Coordinator') {
-		const inviter = app.member(embed.fields[0].value);
+		const inviter = client.member(embed.fields[0].value);
 		if (inviter && embed.thumbnail.url == emoji.url) {
 			if (user.id != inviter.id && embed.footer.text != 'Closed. This bracket is now full.') {
 				const players = new Array();
@@ -68,9 +74,9 @@ module.exports = async function onMessageReactionRemove(app, message, reaction, 
 				await message.edit({ content: message.content, embed: embed });
 				for (const this_field of embed.fields) {
 					if (this_field.value && this_field.value.length > 0) {
-						const player = app.member(this_field.value);
+						const player = client.member(this_field.value);
 						if (player && player.id != user.id) {
-							await app.message_manager.sendToUser(player, `${user} left your ${embed.title} bracket. ${players.length > 1 ? `${players.length} players total.` : ''}`);
+							await client.message_manager.sendToUser(player, `${user} left your ${embed.title} bracket. ${players.length > 1 ? `${players.length} players total.` : ''}`);
 						}
 					}
 				}

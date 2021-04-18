@@ -1,20 +1,25 @@
-// eslint-disable-next-line no-unused-vars
-const Discord = require('discord.js');
+const { ErrorTicketManager, ProcessQueue, sleep } = require('../utils/Base.js');
 const gtts = require('node-google-tts-api');
 const tts = new gtts();
 const fs = require('fs');
 
+const ETM = new ErrorTicketManager('SpeechManager');
+
+/**
+ * @typedef {import('../structures/Base.js').Client} Client
+ * @typedef {import('discord.js').VoiceChannel} VoiceChannel
+ */
+
 module.exports = class SpeechManager {
-	/** @param {import('../app.js')} app */
-	constructor(app) {
-		this.app = app;
-		this.queuer = new app.utils.ProcessQueue(1000);
-		this.ErrorTicketManager = new app.utils.ErrorTicketManager('Speech Manager');
+	/** @param {Client} client */
+	constructor(client) {
+		this.client = client;
+		this.queuer = new ProcessQueue(1000);
 	}
 
 	/**
 	 * Recites the supplied message on the target voice channel.
-	 * @param {Discord.VoiceChannel} channel
+	 * @param {VoiceChannel} channel
 	 * @param {String} message
 	 * @returns {Promise<null>}
 	 */
@@ -34,7 +39,7 @@ module.exports = class SpeechManager {
 				const speak = new Promise((resolve, reject) => {
 					const dispatcher = connection.play('tts.mp3');
 					dispatcher.on('finish', async () => {
-						await this.app.utils.sleep(2500);
+						await sleep(2500);
 						await channel.leave();
 						console.log(`Speech: Finished ${this.queuer.currentID} (${channel.name})`);
 						resolve();
@@ -47,7 +52,7 @@ module.exports = class SpeechManager {
 			}
 			catch (this_error) {
 				console.log(`Speech: Finished ${this.queuer.currentID} (${channel.name})`);
-				this.app.error_manager.mark(this.ErrorTicketManager.create('say', this_error));
+				this.app.error_manager.mark(ETM.create('say', this_error));
 			}
 		});
 	}

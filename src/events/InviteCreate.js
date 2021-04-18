@@ -1,11 +1,17 @@
-const Discord = require('discord.js');
+const { MessageEmbed } = require('discord.js');
+const { constants } = require('../utils/Base.js');
 
 /**
- * @param {import('../app.js')} app
- * @param {Discord.Invite} invite
+ * @typedef {import('../structures/Base.js').Client} Client
+ * @typedef {import('discord.js').Invite} Invite
  */
-module.exports = async function onInviteCreate(app, invite) {
-	const embed = new Discord.MessageEmbed();
+
+/**
+ * @param {Client} client
+ * @param {Invite} invite
+ */
+module.exports = async function onInviteCreate(client, invite) {
+	const embed = new MessageEmbed();
 	embed.setAuthor('Quarantine Gaming: Invite Submanager');
 	embed.setTitle('New Invite Created');
 	if (invite.inviter) {
@@ -25,5 +31,5 @@ module.exports = async function onInviteCreate(app, invite) {
 		embed.setFooter('NO EXPIRATION DATE ⚠');
 	}
 	embed.setColor('#25c081');
-	await app.message_manager.sendToChannel(app.utils.constants.channels.server.management, embed);
+	await client.message_manager.sendToChannel(constants.channels.server.management, embed);
 };

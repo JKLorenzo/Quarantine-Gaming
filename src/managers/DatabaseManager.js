@@ -1,13 +1,19 @@
 const Firebase = require('firebase-admin');
 const { FreeGame, PartialMember, PartialRole } = require('../types/Base.js');
+const { ErrorTicketManager, ProcessQueue, getPercentSimilarity } = require('../utils/Base.js');
+
+const ETM = new ErrorTicketManager('DatabaseManager');
+
+/**
+ * @typedef {import('../structures/Base.js').Client} Client
+ */
 
 module.exports = class DatabaseManager {
-	/** @param {import('../app.js')} app */
-	constructor(app) {
-		this.app = app;
-		this.ErrorTicketManager = new this.app.utils.ErrorTicketManager('Database Manager');
+	/** @param {Client} client */
+	constructor(client) {
+		this.client = client;
 		this.queuers = {
-			expired_gameroles: new this.app.utils.ProcessQueue(1000),
+			expired_gameroles: new ProcessQueue(1000),
 		};
 		Firebase.initializeApp({
 			credential: Firebase.credential.cert(JSON.parse(process.env.FIREBASE_CREDENTIALS.replace(/'/g, '"').replace(/\n/g, '\\n'))),
@@ -38,43 +44,58 @@ module.exports = class DatabaseManager {
 		/** @private */
 		this.actions = {
 			loadMembers: async () => {
-				this.data.members = new Array();
-				const members_QueSnap = await this.collections.members.get();
-				for (const member_QueDocSnap of members_QueSnap.docs) {
-					const id = member_QueDocSnap.id;
-					this.data.members[id] = new PartialMember({
-						id,
-						...member_QueDocSnap.data(),
-					});
+				try {
+					this.data.members = new Array();
+					const members_QueSnap = await this.collections.members.get();
+					for (const member_QueDocSnap of members_QueSnap.docs) {
+						const id = member_QueDocSnap.id;
+						this.data.members[id] = new PartialMember({
+							id,
+							...member_QueDocSnap.data(),
+						});
+					}
+				}
+				catch (error) {
+					this.client.error_manager.mark(ETM.create('loadMembers', error, 'actions'));
 				}
 			},
 			loadGameOverrides: async () => {
-				this.data.game_overrides.whitelisted = new Array();
-				this.data.game_overrides.blacklisted = new Array();
-				const game_overrides_QueSnap = await this.collections.game_overrides.get();
-				for (const game_override_QueDocSnap of game_overrides_QueSnap.docs) {
-					switch(game_override_QueDocSnap.data().category) {
-					case 'whitelist':
-						this.data.game_overrides.whitelisted.push(game_override_QueDocSnap.id);
-						break;
-					case 'blacklist':
-						this.data.game_overrides.blacklisted.push(game_override_QueDocSnap.id);
-						break;
+				try {
+					this.data.game_overrides.whitelisted = new Array();
+					this.data.game_overrides.blacklisted = new Array();
+					const game_overrides_QueSnap = await this.collections.game_overrides.get();
+					for (const game_override_QueDocSnap of game_overrides_QueSnap.docs) {
+						switch(game_override_QueDocSnap.data().category) {
+						case 'whitelist':
+							this.data.game_overrides.whitelisted.push(game_override_QueDocSnap.id);
+							break;
+						case 'blacklist':
+							this.data.game_overrides.blacklisted.push(game_override_QueDocSnap.id);
+							break;
+						}
 					}
+				}
+				catch (error) {
+					this.client.error_manager.mark(ETM.create('loadGameOverrides', error, 'actions'));
 				}
 			},
 			loadFreeGames: async () => {
-				this.data.free_games.list = new Array();
-				this.data.free_games.index = 0;
-				const free_games = await this.collections.free_games.orderBy('index').get();
-				for (const free_game of free_games.docs) {
-					const data = free_game.data();
-					if (data.index > this.data.free_games.index) this.data.free_games.index = data.index;
-					this.data.free_games.list.push(new FreeGame({
-						...data,
-					}));
+				try {
+					this.data.free_games.list = new Array();
+					this.data.free_games.index = 0;
+					const free_games = await this.collections.free_games.orderBy('index').get();
+					for (const free_game of free_games.docs) {
+						const data = free_game.data();
+						if (data.index > this.data.free_games.index) this.data.free_games.index = data.index;
+						this.data.free_games.list.push(new FreeGame({
+							...data,
+						}));
+					}
+					await this.trimFreeGames();
 				}
-				await this.trimFreeGames();
+				catch (error) {
+					this.client.error_manager.mark(ETM.create('loadFreeGames', error, 'actions'));
+				}
 			},
 		};
 		/** @private */
@@ -119,9 +140,9 @@ module.exports = class DatabaseManager {
 								break;
 							}
 						}
-						app.actions.loadGameRoles();
+						this.client.actions.loadGameRoles();
 					}, error => {
-						this.app.error_manager.mark(this.ErrorTicketManager.create('onGameOverride', error, 'listeners'));
+						this.client.error_manager.mark(ETM.create('game_overrides', error, 'listeners'));
 					});
 				},
 				stop: () => {
@@ -144,7 +165,13 @@ module.exports = class DatabaseManager {
      * @returns {PartialMember}
      */
 	getMemberData(id) {
-		return this.data.members[id];
+		try {
+			return this.data.members[id];
+		}
+		catch (error) {
+			this.client.error_manager.mark(ETM.create('getMemberData', error));
+			throw error;
+		}
 	}
 
 	/**
@@ -152,12 +179,18 @@ module.exports = class DatabaseManager {
 	 * @param {{id: String, name: String, tagname: String}} data
 	 */
 	async setMemberData(data) {
-		await this.collections.members.doc(data.id).set({
-			name: data.name,
-			tagname: data.tagname,
-		});
-		this.data.members[data.id] = new PartialMember(data);
-		return this.data.members[data.id];
+		try {
+			await this.collections.members.doc(data.id).set({
+				name: data.name,
+				tagname: data.tagname,
+			});
+			this.data.members[data.id] = new PartialMember(data);
+			return this.data.members[data.id];
+		}
+		catch (error) {
+			this.client.error_manager.mark(ETM.create('setMemberData', error));
+			throw error;
+		}
 	}
 
 	/**
@@ -166,12 +199,17 @@ module.exports = class DatabaseManager {
 	 * @param {{name?: String, tagname?: String, inviter?: String, moderator?: String}} data
 	 */
 	async updateMemberData(id, data) {
-		if (!this.getMemberData(id)) throw new RangeError(`Failed to update data with ID: ${id}.`);
-		await this.collections.members.doc(id).update(data);
-		if (data.name) this.data.members[id].name = data.name;
-		if (data.tagname) this.data.members[id].tagname = data.tagname;
-		if (data.inviter) this.data.members[id].inviter = data.inviter;
-		if (data.moderator) this.data.members[id].moderator = data.moderator;
+		try {
+			await this.collections.members.doc(id).update(data);
+			if (data.name) this.data.members[id].name = data.name;
+			if (data.tagname) this.data.members[id].tagname = data.tagname;
+			if (data.inviter) this.data.members[id].inviter = data.inviter;
+			if (data.moderator) this.data.members[id].moderator = data.moderator;
+		}
+		catch (error) {
+			this.client.error_manager.mark(ETM.create('updateMemberData', error));
+			throw error;
+		}
 	}
 
 	/**
@@ -194,7 +232,8 @@ module.exports = class DatabaseManager {
 			}
 		}
 		catch (error) {
-			this.error_manager.mark(this.ErrorTicketManager.create('getMemberExpiredGameRoles', error));
+			this.error_manager.mark(ETM.create('getMemberExpiredGameRoles', error));
+			throw error;
 		}
 		return expired;
 	}
@@ -205,20 +244,25 @@ module.exports = class DatabaseManager {
 	 * @param {{id: String, name: String}} data
 	 */
 	async updateMemberGameRole(id, data) {
-		if (!this.getMemberData(id)) throw new RangeError(`Failed to update game role data with ID: ${id}.`);
-		const reference = this.collections.members.doc(id).collection('GameRoles').doc(data.id);
-		const snapshot = await reference.get();
-		const now = new Date();
-		if (snapshot.exists) {
-			await reference.update({
-				lastUpdated: now.getTime(),
-			});
+		try {
+			const reference = this.collections.members.doc(id).collection('GameRoles').doc(data.id);
+			const snapshot = await reference.get();
+			const now = new Date();
+			if (snapshot.exists) {
+				await reference.update({
+					lastUpdated: now.getTime(),
+				});
+			}
+			else {
+				await reference.set({
+					name: data.name,
+					lastUpdated: now.getTime(),
+				});
+			}
 		}
-		else {
-			await reference.set({
-				name: data.name,
-				lastUpdated: now.getTime(),
-			});
+		catch (error) {
+			this.client.error_manager.mark(ETM.create('updateMemberGameRole', error));
+			throw error;
 		}
 	}
 
@@ -228,7 +272,13 @@ module.exports = class DatabaseManager {
 	 * @param {String} role_id
 	 */
 	async deleteMemberGameRole(id, role_id) {
-		await this.collections.members.doc(id).collection('GameRoles').doc(role_id).delete();
+		try {
+			await this.collections.members.doc(id).collection('GameRoles').doc(role_id).delete();
+		}
+		catch (error) {
+			this.client.error_manager.mark(ETM.create('deleteMemberGameRole', error));
+			throw error;
+		}
 	}
 
 	/**
@@ -249,7 +299,8 @@ module.exports = class DatabaseManager {
 			});
 		}
 		catch (error) {
-			this.app.error_manager.mark(new this.ErrorTicketManager.create('gameWhitelist', error));
+			this.client.error_manager.mark(new ETM.create('gameWhitelist', error));
+			throw error;
 		}
 	}
 
@@ -271,7 +322,8 @@ module.exports = class DatabaseManager {
 			});
 		}
 		catch (error) {
-			this.app.error_manager.mark(new this.ErrorTicketManager.create('gameBlacklist', error));
+			this.client.error_manager.mark(new ETM.create('gameBlacklist', error));
+			throw error;
 		}
 	}
 
@@ -280,7 +332,13 @@ module.exports = class DatabaseManager {
 	 * @param {String} game_name
 	 */
 	gameWhitelisted(game_name) {
-		return this.data.game_overrides.whitelisted.includes(game_name.toLowerCase());
+		try {
+			return this.data.game_overrides.whitelisted.includes(game_name.toLowerCase());
+		}
+		catch (error) {
+			this.client.error_manager.mark(ETM.create('gameWhitelisted', error));
+			throw error;
+		}
 	}
 
 	/**
@@ -288,7 +346,13 @@ module.exports = class DatabaseManager {
 	 * @param {String} game_name
 	 */
 	gameBlacklisted(game_name) {
-		return this.data.game_overrides.blacklisted.includes(game_name.toLowerCase());
+		try {
+			return this.data.game_overrides.blacklisted.includes(game_name.toLowerCase());
+		}
+		catch (error) {
+			this.client.error_manager.mark(ETM.create('gameBlacklisted', error));
+			throw error;
+		}
 	}
 
 	/**
@@ -298,7 +362,7 @@ module.exports = class DatabaseManager {
 	getFreeGame(free_game) {
 		const similarity_threshold = 70;
 		for (const this_freegame of this.data.free_games.list) {
-			const this_similarity = this.app.utils.getPercentSimilarity(this_freegame.title, free_game.title);
+			const this_similarity = getPercentSimilarity(this_freegame.title, free_game.title);
 			if (this_similarity >= similarity_threshold || free_game.url.trim().toLowerCase() == this_freegame.url.trim().toLowerCase()) {
 				return this_freegame;
 			}
@@ -311,12 +375,18 @@ module.exports = class DatabaseManager {
 	 * @param {FreeGame} free_game
 	 */
 	async pushFreeGame(free_game) {
-		this.data.free_games.list.push(free_game);
-		await this.collections.free_games.doc(free_game.id).set({
-			...free_game,
-			index: ++this.data.free_games.index,
-		});
-		await this.trimFreeGames();
+		try {
+			this.data.free_games.list.push(free_game);
+			await this.collections.free_games.doc(free_game.id).set({
+				...free_game,
+				index: ++this.data.free_games.index,
+			});
+			await this.trimFreeGames();
+		}
+		catch (error) {
+			this.client.error_manager.mark(ETM.create('pushFreeGame', error));
+			throw error;
+		}
 	}
 
 	async trimFreeGames() {
@@ -326,7 +396,8 @@ module.exports = class DatabaseManager {
 				await this.collections.free_games.doc(expired_freegame.id).delete();
 			}
 			catch (error) {
-				this.app.error_manager.mark(this.ErrorTicketManager.create('notificationTrim', error));
+				this.client.error_manager.mark(ETM.create('trimFreeGames', error));
+				throw error;
 			}
 		}
 	}

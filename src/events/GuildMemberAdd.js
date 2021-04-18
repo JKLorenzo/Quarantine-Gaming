@@ -1,18 +1,22 @@
-const Discord = require('discord.js');
-// eslint-disable-next-line no-unused-vars
-const { ExtendedMember } = require('../structures/Base');
+const { MessageEmbed } = require('discord.js');
+const { compareDate, constants } = require('../utils/Base.js');
 
 /**
- * @param {import('../app.js')} app
+ * @typedef {import('../structures/Base.js').Client} Client
+ * @typedef {import('../structures/Base.js').ExtendedMember} ExtendedMember
+ */
+
+/**
+ * @param {Client} client
  * @param {ExtendedMember} member
  */
-module.exports = async function(app, member) {
-	await member.init(app);
+module.exports = async function(client, member) {
+	await member.init();
 
 	const created_day = member.user.createdAt;
-	const created_day_difference = app.utils.compareDate(created_day);
+	const created_day_difference = compareDate(created_day);
 
-	const embed = new Discord.MessageEmbed();
+	const embed = new MessageEmbed();
 	embed.setAuthor('Quarantine Gaming: Member Submanager');
 	embed.setTitle('New Member');
 	embed.setThumbnail(member.user.displayAvatarURL());
@@ -21,5 +25,5 @@ module.exports = async function(app, member) {
 	embed.setFooter(`${member.user.tag} (${member.user.id})`);
 	embed.setTimestamp();
 	embed.setColor('#7bff64');
-	await app.message_manager.sendToChannel(app.utils.constants.channels.server.logs, embed);
+	await client.message_manager.sendToChannel(constants.channels.server.logs, embed);
 };

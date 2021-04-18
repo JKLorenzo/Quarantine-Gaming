@@ -1,3 +1,5 @@
+const { ErrorTicketManager, ProcessQueue } = require('../utils/Base.js');
+const onceReady = require('./Ready.js');
 const onMessage = require('./Message.js');
 const onUserUpdate = require('./UserUpdate.js');
 const onGuildMemberAdd = require('./GuildMemberAdd.js');
@@ -14,232 +16,251 @@ const onVoiceStateUpdate = require('./VoiceStateUpdate.js');
 const onMessageReactionAdd = require('./MessageReactionAdd.js');
 const onMessageReactionRemove = require('./MessageReactionRemove.js');
 
+const ETM = new ErrorTicketManager('BaseEvents');
+
+/**
+ * @typedef {import('../structures/Base.js').Client} Client
+ */
+
 module.exports = class BaseEvents {
-	/** @param {import('../app.js')} app */
-	constructor(app) {
-		this.app = app;
-		this.ErrorTicketManager = new app.utils.ErrorTicketManager('BaseEvents');
+	/** @param {Client} client */
+	constructor(client) {
+		this.client = client;
+
+		this.onceReady = {
+			emitted: false,
+			event: this.client.once('ready', async () => {
+				try {
+					if (this.onceReady.emitted) throw new Error('Event already emitted.');
+					this.onceReady.emitted = true;
+					await onceReady(this.client);
+				}
+				catch(error) {
+					this.client.error_manager.mark(ETM.create('ready', error));
+				}
+			}),
+		};
 
 		this.onMessage = {
-			queuer: new app.utils.ProcessQueue(1000),
-			event: app.client.on('message', (message) => {
+			queuer: new ProcessQueue(1000),
+			event: this.client.on('message', (message) => {
 				this.onMessage.queuer.queue(async () => {
 					try {
-						await onMessage(this.app, message);
+						await onMessage(this.client, message);
 					}
 					catch(error) {
-						app.error_manager.mark(this.ErrorTicketManager.create('message', error));
+						this.client.error_manager.mark(ETM.create('message', error));
 					}
 				});
 			}),
 		};
 
 		this.onUserUpdate = {
-			queuer: new app.utils.ProcessQueue(1000),
-			event:  app.client.on('userUpdate', (oldUser, newUser) => {
+			queuer: new ProcessQueue(1000),
+			event:  this.client.on('userUpdate', (oldUser, newUser) => {
 				this.onUserUpdate.queuer.queue(async () => {
 					try {
-						await onUserUpdate(this.app, oldUser, newUser);
+						await onUserUpdate(this.client, oldUser, newUser);
 					}
 					catch(error) {
-						app.error_manager.mark(this.ErrorTicketManager.create('userUpdate', error));
+						this.client.error_manager.mark(ETM.create('userUpdate', error));
 					}
 				});
 			}),
 		};
 
 		this.onGuildMemberAdd = {
-			queuer: new app.utils.ProcessQueue(1000),
-			event: app.client.on('guildMemberAdd', (member) => {
+			queuer: new ProcessQueue(1000),
+			event: this.client.on('guildMemberAdd', (member) => {
 				this.onGuildMemberAdd.queuer.queue(async () => {
 					try {
-						await onGuildMemberAdd(this.app, member);
+						await onGuildMemberAdd(this.client, member);
 					}
 					catch(error) {
-						app.error_manager.mark(this.ErrorTicketManager.create('guildMemberAdd', error));
+						this.client.error_manager.mark(ETM.create('guildMemberAdd', error));
 					}
 				});
 			}),
 		};
 
 		this.onGuildMemberUpdate = {
-			queuer: new app.utils.ProcessQueue(1000),
-			event: app.client.on('guildMemberUpdate', (oldMember, newMember) => {
+			queuer: new ProcessQueue(1000),
+			event: this.client.on('guildMemberUpdate', (oldMember, newMember) => {
 				this.onGuildMemberUpdate.queuer.queue(async () => {
 					try {
-						await onGuildMemberUpdate(this.app, oldMember, newMember);
+						await onGuildMemberUpdate(this.client, oldMember, newMember);
 					}
 					catch(error) {
-						app.error_manager.mark(this.ErrorTicketManager.create('guildMemberUpdate', error));
+						this.client.error_manager.mark(ETM.create('guildMemberUpdate', error));
 					}
 				});
 			}),
 		};
 
 		this.onGuildMemberRemove = {
-			queuer: new app.utils.ProcessQueue(1000),
-			event: app.client.on('guildMemberRemove', (member) => {
+			queuer: new ProcessQueue(1000),
+			event: this.client.on('guildMemberRemove', (member) => {
 				this.onGuildMemberRemove.queuer.queue(async () => {
 					try {
-						await onGuildMemberRemove(this.app, member);
+						await onGuildMemberRemove(this.client, member);
 					}
 					catch(error) {
-						app.error_manager.mark(this.ErrorTicketManager.create('guildMemberRemove', error));
+						this.client.error_manager.mark(ETM.create('guildMemberRemove', error));
 					}
 				});
 			}),
 		};
 
 		this.onGuildBanAdd = {
-			queuer: new app.utils.ProcessQueue(1000),
-			event: app.client.on('guildBanAdd', (guild, user) => {
-				if (guild.id != app.guild.id) return;
+			queuer: new ProcessQueue(1000),
+			event: this.client.on('guildBanAdd', (guild, user) => {
+				if (guild.id != this.client.guild.id) return;
 				this.onGuildBanAdd.queuer.queue(async () => {
 					try {
-						await onGuildBanAdd(this.app, user);
+						await onGuildBanAdd(this.client, user);
 					}
 					catch(error) {
-						app.error_manager.mark(this.ErrorTicketManager.create('guildBanAdd', error));
+						this.client.error_manager.mark(ETM.create('guildBanAdd', error));
 					}
 				});
 			}),
 		};
 
 		this.onGuildBanRemove = {
-			queuer: new app.utils.ProcessQueue(1000),
-			event: app.client.on('guildBanRemove', (guild, user) => {
-				if (guild.id != this.app.guild.id) return;
+			queuer: new ProcessQueue(1000),
+			event: this.client.on('guildBanRemove', (guild, user) => {
+				if (guild.id != this.this.client.guild.id) return;
 				this.onGuildBanRemove.queue.queue(async () => {
 					try {
-						await onGuildBanRemove(this.app, user);
+						await onGuildBanRemove(this.client, user);
 					}
 					catch(error) {
-						app.error_manager.mark(this.ErrorTicketManager.create('guildBanRemove', error));
+						this.client.error_manager.mark(ETM.create('guildBanRemove', error));
 					}
 				});
 			}),
 		};
 
 		this.onRoleCreate = {
-			queuer: new app.utils.ProcessQueue(1000),
-			event: app.client.on('roleCreate', (role) => {
-				if (role.guild.id != app.guild.id) return;
+			queuer: new ProcessQueue(1000),
+			event: this.client.on('roleCreate', (role) => {
+				if (role.guild.id != this.client.guild.id) return;
 				this.onRoleCreate.queuer.queue(async () => {
 					try {
-						await onRoleCreate(this.app, role);
+						await onRoleCreate(this.client, role);
 					}
 					catch(error) {
-						app.error_manager.mark(this.ErrorTicketManager.create('roleCreate', error));
+						this.client.error_manager.mark(ETM.create('roleCreate', error));
 					}
 				});
 			}),
 		};
 
 		this.onRoleUpdate = {
-			queuer: new app.utils.ProcessQueue(1000),
-			event: app.client.on('roleUpdate', (oldRole, newRole) => {
-				if (newRole.guild.id != app.guild.id) return;
+			queuer: new ProcessQueue(1000),
+			event: this.client.on('roleUpdate', (oldRole, newRole) => {
+				if (newRole.guild.id != this.client.guild.id) return;
 				this.onRoleUpdate.queuer.queue(async () => {
 					try {
-						await onRoleUpdate(this.app, oldRole, newRole);
+						await onRoleUpdate(this.client, oldRole, newRole);
 					}
 					catch(error) {
-						app.error_manager.mark(this.ErrorTicketManager.create('roleUpdate', error));
+						this.client.error_manager.mark(ETM.create('roleUpdate', error));
 					}
 				});
 			}),
 		};
 
 		this.onRoleDelete = {
-			queuer: new app.utils.ProcessQueue(1000),
-			event: app.client.on('roleDelete', (role) => {
-				if (role.guild.id != app.guild.id) return;
+			queuer: new ProcessQueue(1000),
+			event: this.client.on('roleDelete', (role) => {
+				if (role.guild.id != this.client.guild.id) return;
 				this.onRoleDelete.queuer.queue(async () => {
 					try {
-						await onRoleDelete(this.app, role);
+						await onRoleDelete(this.client, role);
 					}
 					catch(error) {
-						app.error_manager.mark(this.ErrorTicketManager.create('roleDelete', error));
+						this.client.error_manager.mark(ETM.create('roleDelete', error));
 					}
 				});
 			}),
 		};
 
 		this.onInviteCreate = {
-			queuer: new app.utils.ProcessQueue(1000),
-			event: app.client.on('inviteCreate', (invite) => {
-				if (invite.guild.id != app.guild.id) return;
+			queuer: new ProcessQueue(1000),
+			event: this.client.on('inviteCreate', (invite) => {
+				if (invite.guild.id != this.client.guild.id) return;
 				this.onInviteCreate.queuer.queue(async () => {
 					try {
-						await onInviteCreate(this.app, invite);
+						await onInviteCreate(this.client, invite);
 					}
 					catch(error) {
-						app.error_manager.mark(this.ErrorTicketManager.create('inviteCreate', error));
+						this.client.error_manager.mark(ETM.create('inviteCreate', error));
 					}
 				});
 			}),
 		};
 
 		this.onPresenceUpdate = {
-			queuer: new app.utils.ProcessQueue(1000),
-			event: app.client.on('presenceUpdate', (oldPresence, newPresence) => {
-				if (newPresence.member.guild.id != app.guild.id || newPresence.member.user.bot) return;
+			queuer: new ProcessQueue(1000),
+			event: this.client.on('presenceUpdate', (oldPresence, newPresence) => {
+				if (newPresence.member.guild.id != this.client.guild.id || newPresence.member.user.bot) return;
 				this.onPresenceUpdate.queuer.queue(async () => {
 					try {
-						await onPresenceUpdate(this.app, oldPresence, newPresence);
+						await onPresenceUpdate(this.client, oldPresence, newPresence);
 					}
 					catch(error) {
-						app.error_manager.mark(this.ErrorTicketManager.create('presenceUpdate', error));
+						this.client.error_manager.mark(ETM.create('presenceUpdate', error));
 					}
 				});
 			}),
 		};
 
 		this.onVoiceStateUpdate = {
-			queuer: new app.utils.ProcessQueue(1000),
-			event: app.client.on('voiceStateUpdate', (oldState, newState) => {
-				if (newState.guild.id != app.guild.id) return;
+			queuer: new ProcessQueue(1000),
+			event: this.client.on('voiceStateUpdate', (oldState, newState) => {
+				if (newState.guild.id != this.client.guild.id) return;
 				this.onVoiceStateUpdate.queuer.queue(async () => {
 					try {
-						await onVoiceStateUpdate(this.app, oldState, newState);
+						await onVoiceStateUpdate(this.client, oldState, newState);
 					}
 					catch(error) {
-						app.error_manager.mark(this.ErrorTicketManager.create('voiceStateUpdate', error));
+						this.client.error_manager.mark(ETM.create('voiceStateUpdate', error));
 					}
 				});
 			}),
 		};
 
 		this.onMessageReactionAdd = {
-			queuer: new app.utils.ProcessQueue(1000),
-			event: app.client.on('messageReactionAdd', (reaction, user) => {
+			queuer: new ProcessQueue(1000),
+			event: this.client.on('messageReactionAdd', (reaction, user) => {
 				this.onMessageReactionAdd.queuer.queue(async () => {
 					try {
 						if (reaction.partial) reaction = await reaction.fetch();
 						const message = await reaction.message.fetch();
-						if (message.author.id != app.client.user.id || user.id == app.client.user.id) return;
-						await onMessageReactionAdd(this.app, message, reaction, user);
+						if (message.author.id != client.user.id || user.id == client.user.id) return;
+						await onMessageReactionAdd(this.client, message, reaction, user);
 					}
 					catch(error) {
-						app.error_manager.mark(this.ErrorTicketManager.create('messageReactionAdd', error));
+						this.client.error_manager.mark(ETM.create('messageReactionAdd', error));
 					}
 				});
 			}),
 		};
 
 		this.onMessageReactionRemove = {
-			queuer: new app.utils.ProcessQueue(1000),
-			event: app.client.on('messageReactionRemove', (reaction, user) => {
+			queuer: new ProcessQueue(1000),
+			event: this.client.on('messageReactionRemove', (reaction, user) => {
 
 				this.onMessageReactionRemove.queuer.queue(async () => {
 					try {
 						if (reaction.partial) reaction = await reaction.fetch();
 						const message = await reaction.message.fetch();
-						if (message.author.id != app.client.user.id || user.id == app.client.user.id) return;
-						await onMessageReactionRemove(this.app, message, reaction, user);
+						if (message.author.id != client.user.id || user.id == client.user.id) return;
+						await onMessageReactionRemove(this.client, message, reaction, user);
 					}
 					catch(error) {
-						app.error_manager.mark(this.ErrorTicketManager.create('messageReactionRemove', error));
+						this.client.error_manager.mark(ETM.create('messageReactionRemove', error));
 					}
 				});
 			}),

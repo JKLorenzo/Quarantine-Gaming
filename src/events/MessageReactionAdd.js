@@ -1,57 +1,63 @@
-// eslint-disable-next-line no-unused-vars
-const Discord = require('discord.js');
+const { sleep, constants } = require('../utils/Base.js');
 
 /**
- * @param {import('../app.js')} app
- * @param {Discord.Message} message
- * @param {Discord.MessageReaction} reaction
- * @param {Discord.User} user
+ * @typedef {import('../structures/Base.js').Client} Client
+ * @typedef {import('discord.js').Message} Message
+ * @typedef {import('discord.js').MessageReaction} MessageReaction
+ * @typedef {import('discord.js').User} User
  */
-module.exports = async function onMessageReactionAdd(app, message, reaction, user) {
+
+/**
+ * @param {Client} client
+ * @param {Message} message
+ * @param {MessageReaction} reaction
+ * @param {User} user
+ */
+module.exports = async function onMessageReactionAdd(client, message, reaction, user) {
 	const embed = message.embeds[0];
 	const header_name = embed.author.name;
 	const emoji = reaction.emoji.name;
 
 	if (header_name == 'Quarantine Gaming: NSFW Content') {
 		if (emoji == '🔴') {
-			await app.role_manager.add(user, app.utils.constants.roles.nsfw);
+			await client.role_manager.add(user, constants.roles.nsfw);
 		}
 	}
 	else if (header_name == 'Quarantine Gaming: Free Game Updates') {
 		switch(emoji) {
 		case '1️⃣':
-			await app.role_manager.add(user, app.utils.constants.roles.steam);
+			await client.role_manager.add(user, constants.roles.steam);
 			break;
 		case '2️⃣':
-			await app.role_manager.add(user, app.utils.constants.roles.epic);
+			await client.role_manager.add(user, constants.roles.epic);
 			break;
 		case '3️⃣':
-			await app.role_manager.add(user, app.utils.constants.roles.gog);
+			await client.role_manager.add(user, constants.roles.gog);
 			break;
 		case '4️⃣':
-			await app.role_manager.add(user, app.utils.constants.roles.console);
+			await client.role_manager.add(user, constants.roles.console);
 			break;
 		case '5️⃣':
-			await app.role_manager.add(user, app.utils.constants.roles.ubisoft);
+			await client.role_manager.add(user, constants.roles.ubisoft);
 			break;
 		}
 	}
 	else if (header_name == 'Quarantine Gaming: Member Approval') {
-		if (app.member(user).hasRole([app.utils.constants.roles.staff, app.utils.constants.roles.moderator]) && embed.fields[3].name != 'Action Taken:' && message.reactions.cache.array().length >= 3) {
-			const this_user = app.member(embed.fields[0].value);
+		if (client.member(user).hasRole([constants.roles.staff, constants.roles.moderator]) && embed.fields[3].name != 'Action Taken:' && message.reactions.cache.array().length >= 3) {
+			const this_user = client.member(embed.fields[0].value);
 			if (this_user) {
 				const dm_message = new Array();
 				switch (emoji) {
 				case '✅':
-					await app.role_manager.add(this_user, app.utils.constants.roles.member);
+					await client.role_manager.add(this_user, constants.roles.member);
 					await message.reactions.removeAll();
 					embed.spliceFields(3, 1, [
 						{ name: 'Action Taken:', value: `Approved by ${user}` },
 					]).setTimestamp();
 					await message.edit(embed);
 					dm_message.push('Hooraaay! 🥳 Your membership request has been approved! You will now have access to all the features of this server!');
-					dm_message.push('Do `!help` on our ' + app.channel(app.utils.constants.channels.text.general).name + ' text channel to know more about these features or you can visit <https://quarantinegamingdiscord.wordpress.com/> for more info.');
-					await app.message_manager.sendToUser(this_user, dm_message.join('\n'));
+					dm_message.push('Do `!help` on our ' + client.channel(constants.channels.text.general).name + ' text channel to know more about these features or you can visit <https://quarantinegamingdiscord.wordpress.com/> for more info.');
+					await client.message_manager.sendToUser(this_user, dm_message.join('\n'));
 					break;
 				case '❌':
 					await this_user.kick();
@@ -84,7 +90,7 @@ module.exports = async function onMessageReactionAdd(app, message, reaction, use
 		if (embed.title == 'Audio Control Extension for Voice Channels') {
 			// Delete reactions
 			await message.reactions.removeAll();
-			const this_channel = app.member(user.id).voice.channel;
+			const this_channel = client.member(user.id).voice.channel;
 			if (this_channel) {
 				// Get reaction effect
 				let effect = null;
@@ -102,7 +108,7 @@ module.exports = async function onMessageReactionAdd(app, message, reaction, use
 					for (const this_channel_member of this_channel.members.array()) {
 						if (!this_channel_member.user.bot) {
 							await this_channel_member.voice.setMute(effect);
-							await app.utils.sleep(1000);
+							await sleep(1000);
 						}
 					}
 				}
@@ -110,13 +116,13 @@ module.exports = async function onMessageReactionAdd(app, message, reaction, use
 				// Add reactions
 				const reactions = ['🟠', '🟢'];
 				for (const this_reaction of reactions) {
-					await app.reaction_manager.add(message, this_reaction);
+					await client.reaction_manager.add(message, this_reaction);
 				}
 			}
 		}
 	}
 	else if (header_name == 'Quarantine Gaming: Game Coordinator') {
-		const inviter = app.member(embed.fields[0].value);
+		const inviter = client.member(embed.fields[0].value);
 		if (inviter && embed.thumbnail.url == emoji.url) {
 			if (user.id != inviter.id && embed.footer.text != 'Closed. This bracket is now full.') {
 				const players = new Array();
@@ -167,9 +173,9 @@ module.exports = async function onMessageReactionAdd(app, message, reaction, use
 				await message.edit({ content: message.content, embed: embed });
 				for (const this_field of embed.fields) {
 					if (this_field.value && this_field.value.length > 0) {
-						const player = app.member(this_field.value);
+						const player = client.member(this_field.value);
 						if (player && player.id != user.id) {
-							await app.message_manager.sendToUser(player, `${user} joined your ${embed.title} bracket. ${players.length > 1 ? `${players.length} players total.` : ''}`);
+							await client.message_manager.sendToUser(player, `${user} joined your ${embed.title} bracket. ${players.length > 1 ? `${players.length} players total.` : ''}`);
 						}
 					}
 				}
@@ -179,9 +185,9 @@ module.exports = async function onMessageReactionAdd(app, message, reaction, use
 					embed.setFooter('Game On!');
 					for (const this_field of embed.fields) {
 						if (this_field.value && this_field.value.length > 0) {
-							const player = app.member(this_field.value);
+							const player = client.member(this_field.value);
 							if (player && player.id != user.id) {
-								await app.message_manager.sendToUser(player, { content: `Your ${embed.title} bracket is now full.`, embed: embed });
+								await client.message_manager.sendToUser(player, { content: `Your ${embed.title} bracket is now full.`, embed: embed });
 							}
 						}
 					}

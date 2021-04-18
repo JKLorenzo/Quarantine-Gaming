@@ -1,18 +1,26 @@
-// eslint-disable-next-line no-unused-vars
-const Discord = require('discord.js');
+const { ErrorTicketManager, ProcessQueue } = require('../utils/Base.js');
+
+const ETM = new ErrorTicketManager('ReactionManager');
+
+/**
+ * @typedef {import('../structures/Base.js').Client} Client
+ * @typedef {import('discord.js').Message} Message
+ * @typedef {import('discord.js').EmojiResolvable} EmojiResolvable
+ * @typedef {import('discord.js').MessageReaction} MessageReaction
+ */
 
 module.exports = class ReactionManager {
-	/** @param {import('../app.js')} app */
-	constructor(app) {
-		this.app = app;
-		this.queuer = new app.utils.ProcessQueue(1000);
+	/** @param {Client} client */
+	constructor(client) {
+		this.client = client;
+		this.queuer = new ProcessQueue(1000);
 	}
 
 	/**
 	 * Adds a reaction to a message.
-	 * @param {Discord.Message} message
-	 * @param {Discord.EmojiResolvable} emoji_resolvable
-	 * @returns {Promise<Discord.MessageReaction>}
+	 * @param {Message} message
+	 * @param {EmojiResolvable} emoji_resolvable
+	 * @returns {Promise<MessageReaction>}
 	 */
 	add(message, emoji) {
 		console.log(`ReactionAdd: Queueing ${this.queuer.totalID} (${message.channel.id} | ${emoji.name ? emoji.name : emoji}})`);
@@ -22,6 +30,7 @@ module.exports = class ReactionManager {
 				result = await message.react(emoji);
 			}
 			catch (this_error) {
+				this.client.error_manager.mark(ETM.create('add', error));
 				error = this_error;
 			}
 			finally {

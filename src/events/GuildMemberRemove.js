@@ -1,14 +1,20 @@
-const Discord = require('discord.js');
+const { MessageEmbed } = require('discord.js');
+const { compareDate, constants } = require('../utils/Base.js');
 
 /**
- * @param {import('../app.js')} app
- * @param {Discord.GuildMember} member
+ * @typedef {import('../structures/Base.js').Client} Client
+ * @typedef {import('../structures/Base.js').ExtendedMember} ExtendedMember
  */
-module.exports = async function onGuildMemberRemove(app, member) {
-	const created_day = member.user.createdAt;
-	const created_day_difference = app.utils.compareDate(created_day);
 
-	const embed = new Discord.MessageEmbed();
+/**
+ * @param {Client} client
+ * @param {ExtendedMember} member
+ */
+module.exports = async function onGuildMemberRemove(client, member) {
+	const created_day = member.user.createdAt;
+	const created_day_difference = compareDate(created_day);
+
+	const embed = new MessageEmbed();
 	embed.setAuthor('Quarantine Gaming: Member Submanager');
 	embed.setTitle('Member Leave');
 	embed.setThumbnail(member.user.displayAvatarURL());
@@ -17,5 +23,5 @@ module.exports = async function onGuildMemberRemove(app, member) {
 	embed.setFooter(`${member.user.tag} (${member.user.id})`);
 	embed.setTimestamp();
 	embed.setColor('#7bff64');
-	app.message_manager.sendToChannel(app.utils.constants.channels.server.logs, embed);
+	client.message_manager.sendToChannel(constants.channels.server.logs, embed);
 };

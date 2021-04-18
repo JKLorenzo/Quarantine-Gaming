@@ -1,26 +1,37 @@
-// eslint-disable-next-line no-unused-vars
-const Discord = require('discord.js');
+const { ErrorTicketManager, ProcessQueue } = require('../utils/Base.js');
+
+const ETM = new ErrorTicketManager('RoleManager');
+
+/**
+ * @typedef {import('../structures/Base.js').Client} Client
+ * @typedef {import('discord.js').ColorResolvable} ColorResolvable
+ * @typedef {import('discord.js').PermissionResolvable} PermissionResolvable
+ * @typedef {import('discord.js').Role} Role
+ * @typedef {import('discord.js').RoleResolvable} RoleResolvable
+ * @typedef {import('discord.js').UserResolvable} UserResolvable
+ */
 
 module.exports = class RoleManager {
-	/** @param {import('../app.js')} app */
-	constructor(app) {
-		this.app = app;
-		this.queuer = new app.utils.ProcessQueue(1000);
+	/** @param {Client} client */
+	constructor(client) {
+		this.client = client;
+		this.queuer = new ProcessQueue(1000);
 	}
 
 	/**
  	 * Creates a new role in the guild.
  	 * @param {{name: String, color?: ColorResolvable, hoist?: Boolean, position?: number, permissions?: PermissionResolvable, mentionable?: Boolean, reason?: String}} options
- 	 * @returns {Discord.Role}
+ 	 * @returns {Role}
  	 */
 	create(options) {
 		console.log(`RoleCreate: Queueing ${this.queuer.totalID} (${options.name})`);
 		return this.queuer.queue(async () => {
 			let result, error;
 			try {
-				result = await this.app.guild.roles.create(options);
+				result = await this.client.guild.roles.create(options);
 			}
 			catch (this_error) {
+				this.client.error_manager.mark(ETM.create('create', error));
 				error = this_error;
 			}
 			finally {
@@ -33,12 +44,12 @@ module.exports = class RoleManager {
 
 	/**
  	 * Deletes a role from the guild.
- 	 * @param {Discord.RoleResolvable} role
+ 	 * @param {RoleResolvable} role
  	 * @param {String} reason
-	 * @returns {Promise<Discord.Role>}
+	 * @returns {Promise<Role>}
 	 */
 	delete(role, reason = '') {
-		const this_role = this.app.role(role);
+		const this_role = this.client.role(role);
 		console.log(`RoleDelete: Queueing ${this.queuer.totalID} (${this_role ? this_role.name : role})`);
 		return this.queuer.queue(async () => {
 			let result, error;
@@ -46,6 +57,7 @@ module.exports = class RoleManager {
 				result = await this_role.delete(reason);
 			}
 			catch (this_error) {
+				this.client.error_manager.mark(ETM.create('delete', error));
 				error = this_error;
 			}
 			finally {
@@ -58,14 +70,14 @@ module.exports = class RoleManager {
 
 	/**
 	 * Adds the role to the target user.
-	 * @param {Discord.UserResolvable} user
-	 * @param {Discord.RoleResolvable} role
+	 * @param {UserResolvable} user
+	 * @param {RoleResolvable} role
 	 * @param {String} reason
-	 * @returns {Promise<Discord.Role>}
+	 * @returns {Promise<Role>}
 	 */
 	add(user, role, reason = '') {
-		const this_member = this.app.member(user);
-		const this_role = this.app.role(role);
+		const this_member = this.client.member(user);
+		const this_role = this.client.role(role);
 		console.log(`RoleAdd: Queueing ${this.queuer.totalID} (${this_member ? this_member.displayName : user} | ${this_role ? this_role.name : role})`);
 		return this.queuer.queue(async () => {
 			let result, error;
@@ -73,6 +85,7 @@ module.exports = class RoleManager {
 				return await this_member.roles.add(this_role, reason);
 			}
 			catch (this_error) {
+				this.client.error_manager.mark(ETM.create('add', error));
 				error = this_error;
 			}
 			finally {
@@ -85,14 +98,14 @@ module.exports = class RoleManager {
 
 	/**
 	 * Removes the role from the target user.
-	 * @param {Discord.UserResolvable} user
-	 * @param {Discord.RoleResolvable} role
+	 * @param {UserResolvable} user
+	 * @param {RoleResolvable} role
 	 * @param {String} reason
-	 * @returns {Promise<Discord.Role>}
+	 * @returns {Promise<Role>}
 	 */
 	remove(user, role, reason = '') {
-		const this_member = this.app.member(user);
-		const this_role = this.app.role(role);
+		const this_member = this.client.member(user);
+		const this_role = this.client.role(role);
 		console.log(`RoleAdd: Queueing ${this.queuer.totalID} (${this_member ? this_member.displayName : user} | ${this_role ? this_role.name : role})`);
 		return this.queuer.queue(async () => {
 			let result, error;
@@ -100,6 +113,7 @@ module.exports = class RoleManager {
 				return await this_member.roles.remove(this_role, reason);
 			}
 			catch (this_error) {
+				this.client.error_manager.mark(ETM.create('remove', error));
 				error = this_error;
 			}
 			finally {

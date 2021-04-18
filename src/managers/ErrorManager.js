@@ -1,11 +1,15 @@
-// eslint-disable-next-line no-unused-vars
 const Discord = require('discord.js');
+const { ProcessQueue, constants } = require('../utils/Base.js');
+
+/**
+ * @typedef {import('../structures/Base.js').Client} Client
+ */
 
 module.exports = class ErrorManager {
-	/** @param {import('../app.js')} app */
-	constructor(app) {
-		this.app = app;
-		this.queuer = new app.utils.ProcessQueue(1000);
+	/** @param {Client} client */
+	constructor(client) {
+		this.client = client;
+		this.queuer = new ProcessQueue(1000);
 		this.threshold_hitcount = 0;
 		this.threshold_reached = false;
 		this.errors = new Array();
@@ -29,19 +33,19 @@ module.exports = class ErrorManager {
 
 				if ((epm > 5 || (error_ticket.error.code != null && error_ticket.error.code == '500')) && !this.threshold_reached) {
 					// Change bot presence
-					this.app.client.user.setActivity({
+					this.client.user.setActivity({
 						name: `SERVER RESTART (${++this.threshold_hitcount})`,
 						type: 'WATCHING',
 					});
 
 					// Notify staffs
-					this.app.message_manager.sendToChannel(this.app.utils.constants.channels.staff, 'I\'m currently detecting issues with Discord; some functionalities are disabled. A bot restart is recommended once the issues are resolved.').catch(async () => {
+					this.client.message_manager.sendToChannel(constants.channels.staff, 'I\'m currently detecting issues with Discord; some functionalities are disabled. A bot restart is recommended once the issues are resolved.').catch(async () => {
 						const embed = new Discord.MessageEmbed();
 						embed.setAuthor('Limited Functionality');
 						embed.setTitle('Issues with Discord');
 						embed.setDescription('I\'m currently detecting issues with Discord; some functionalities are disabled. A bot restart is recommended once the issues are resolved.');
 						embed.setColor('ffe300');
-						this.app.message_manager.sendToChannel(this.app.utils.constants.channels.server.management, embed);
+						this.client.message_manager.sendToChannel(constants.channels.server.management, embed);
 					});
 					this.threshold_reached = true;
 				}
@@ -57,7 +61,7 @@ module.exports = class ErrorManager {
 				embed.setThumbnail('https://mir-s3-cdn-cf.behance.net/project_modules/disp/c9955d46715833.589222657aded.png');
 				embed.setTimestamp();
 				embed.setColor('#FF0000');
-				return this.app.message_manager.sendToChannel(this.app.utils.constants.channels.qg.logs, embed);
+				return this.client.message_manager.sendToChannel(constants.channels.qg.logs, embed);
 			}
 			catch (error) {
 				console.log(`ErrorManager: Failed with error (${error})`);
