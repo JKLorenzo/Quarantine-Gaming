@@ -129,7 +129,7 @@ module.exports = class BaseEvents {
 		this.onGuildBanRemove = {
 			queuer: new ProcessQueue(1000),
 			event: this.client.on('guildBanRemove', (guild, user) => {
-				if (guild.id != this.this.client.guild.id) return;
+				if (guild.id != this.client.guild.id) return;
 				this.onGuildBanRemove.queue.queue(async () => {
 					try {
 						await onGuildBanRemove(this.client, user);
