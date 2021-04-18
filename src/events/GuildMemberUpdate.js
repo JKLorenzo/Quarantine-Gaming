@@ -1,18 +1,22 @@
-const Discord = require('discord.js');
-// eslint-disable-next-line no-unused-vars
-const { ExtendedMember } = require('../structures/Base.js');
+const { MessageEmbed } = require('discord.js');
+const { contains, constants } = require('../utils/Base.js');
 
 /**
- * @param {import('../app.js')} app
+ * @typedef {import('../structures/Base.js').Client} Client
+ * @typedef {import('../structures/Base.js').ExtendedMember} ExtendedMember
+ */
+
+/**
+ * @param {Client} client
  * @param {ExtendedMember} oldMember
  * @param {ExtendedMember} newMember
  */
-module.exports = async function onGuildMemberUpdate(app, oldMember, newMember) {
+module.exports = async function onGuildMemberUpdate(client, oldMember, newMember) {
 	if (newMember.pending == false && oldMember.pending != newMember.pending) {
-		await app.actions.memberScreening(newMember);
+		await client.methods.screenMember(newMember);
 	}
 
-	const embed = new Discord.MessageEmbed();
+	const embed = new MessageEmbed();
 	embed.setAuthor('Quarantine Gaming: Member Submanager');
 	embed.setTitle('Member Update');
 	embed.setThumbnail(newMember.user.displayAvatarURL());
@@ -27,8 +31,8 @@ module.exports = async function onGuildMemberUpdate(app, oldMember, newMember) {
 	if (newMember.roles.cache.size != oldMember.roles.cache.size) {
 		const added = new Array(), removed = new Array();
 		for (const this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
-			if (app.utils.contains(this_role.name, ['Play', 'Text', 'Team'])) continue;
-			if (app.utils.contains(this_role.id, app.utils.constants.roles.streaming)) continue;
+			if (contains(this_role.name, ['Play', 'Text', 'Team'])) continue;
+			if (contains(this_role.id, constants.roles.streaming)) continue;
 			newMember.roles.cache.has(this_role.id) ? added.push(this_role.name) : removed.push(this_role.name);
 		}
 		if (added.length > 0) {
@@ -41,5 +45,5 @@ module.exports = async function onGuildMemberUpdate(app, oldMember, newMember) {
 	embed.setFooter(`${newMember.user.tag} (${newMember.user.id})`);
 	embed.setTimestamp();
 	embed.setColor('#7bff64');
-	if (embed.fields.length > 1) app.message_manager.sendToChannel(app.utils.constants.channels.server.logs, embed);
+	if (embed.fields.length > 1) client.message_manager.sendToChannel(constants.channels.server.logs, embed);
 };

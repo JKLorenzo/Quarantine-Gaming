@@ -1,14 +1,20 @@
-const Discord = require('discord.js');
+const { MessageEmbed } = require('discord.js');
+const { contains, constants } = require('../utils/Base.js');
 
 /**
- * @param {import('../app.js')} app
- * @param {Discord.Role} oldRole
- * @param {Discord.Role} newRole
+ * @typedef {import('../structures/Base.js').Client} Client
+ * @typedef {import('discord.js').Role} Role
  */
-module.exports = async function onRoleUpdate(app, oldRole, newRole) {
-	if (app.utils.contains(newRole.name, ['Play', 'Text', 'Team'])) return;
 
-	const embed = new Discord.MessageEmbed();
+/**
+ * @param {Client} client
+ * @param {Role} oldRole
+ * @param {Role} newRole
+ */
+module.exports = async function onRoleUpdate(client, oldRole, newRole) {
+	if (contains(newRole.name, ['Play', 'Text', 'Team'])) return;
+
+	const embed = new MessageEmbed();
 	embed.setAuthor('Quarantine Gaming: Role Submanager');
 	embed.setTitle('Role Updated');
 	embed.setDescription(newRole);
@@ -20,5 +26,5 @@ module.exports = async function onRoleUpdate(app, oldRole, newRole) {
 	embed.setFooter(`${newRole.name} (${newRole.id})`);
 	embed.setTimestamp();
 	embed.setColor(newRole.color);
-	if (embed.fields.length > 0) await app.message_manager.sendToChannel(app.utils.constants.channels.server.logs, embed);
+	if (embed.fields.length > 0) await client.message_manager.sendToChannel(constants.channels.server.logs, embed);
 };

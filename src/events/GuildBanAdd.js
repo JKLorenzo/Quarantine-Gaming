@@ -1,14 +1,20 @@
-const Discord = require('discord.js');
+const { MessageEmbed } = require('discord.js');
+const { compareDate, constants } = require('../utils/Base.js');
 
 /**
- * @param {import('../app.js')} app
- * @param {Discord.User} user
+ * @typedef {import('../structures/Base.js').Client} Client
+ * @typedef {import('discord.js').User} User
  */
-module.exports = async function onGuildBanAdd(app, user) {
-	const created_day = user.createdAt;
-	const created_day_difference = app.utils.compareDate(created_day);
 
-	const embed = new Discord.MessageEmbed();
+/**
+ * @param {Client} client
+ * @param {User} user
+ */
+module.exports = async function onGuildBanAdd(client, user) {
+	const created_day = user.createdAt;
+	const created_day_difference = compareDate(created_day);
+
+	const embed = new MessageEmbed();
 	embed.setAuthor('Quarantine Gaming: Member Submanager');
 	embed.setTitle('Member Ban');
 	embed.setThumbnail(user.displayAvatarURL());
@@ -17,5 +23,5 @@ module.exports = async function onGuildBanAdd(app, user) {
 	embed.setFooter(`${user.tag} (${user.id})`);
 	embed.setTimestamp();
 	embed.setColor('#7bff64');
-	await app.message_manager.sendToChannel(app.utils.constants.channels.server.logs, embed);
+	await client.message_manager.sendToChannel(constants.channels.server.logs, embed);
 };

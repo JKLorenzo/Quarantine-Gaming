@@ -1,13 +1,19 @@
-const Discord = require('discord.js');
+const { MessageEmbed } = require('discord.js');
+const { contains, constants } = require('../utils/Base.js');
 
 /**
- * @param {import('../app.js')} app
- * @param {Discord.Role} role
+ * @typedef {import('../structures/Base.js').Client} Client
+ * @typedef {import('discord.js').Role} Role
  */
-module.exports = async function onRoleCreate(app, role) {
-	if (app.utils.contains(role.name, ['Play', 'Text', 'Team'])) return;
 
-	const embed = new Discord.MessageEmbed();
+/**
+ * @param {Client} client
+ * @param {Role} role
+ */
+module.exports = async function onRoleCreate(client, role) {
+	if (contains(role.name, ['Play', 'Text', 'Team'])) return;
+
+	const embed = new MessageEmbed();
 	embed.setAuthor('Quarantine Gaming: Role Submanager');
 	embed.setTitle('Role Created');
 	embed.setDescription(role);
@@ -19,5 +25,5 @@ module.exports = async function onRoleCreate(app, role) {
 	embed.setFooter(`${role.name} (${role.id})`);
 	embed.setTimestamp();
 	embed.setColor(role.color);
-	await app.message_manager.sendToChannel(app.utils.constants.channels.server.logs, embed);
+	await client.message_manager.sendToChannel(constants.channels.server.logs, embed);
 };

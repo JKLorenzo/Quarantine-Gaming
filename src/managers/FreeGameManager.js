@@ -6,10 +6,14 @@ const { ErrorTicketManager, fetchImage, parseHTML, compareDate, contains, consta
 
 const ETM = new ErrorTicketManager('Free Game Manager');
 
+/**
+ * @typedef {import('../structures/Base.js').Client} Client
+ */
+
 module.exports = class FreeGameManager {
-	/** @param {import('../app.js')} app */
-	constructor(app) {
-		this.app = app;
+	/** @param {Client} client */
+	constructor(client) {
+		this.client = client;
 
 		this.data = {
 			fetchInterval: 600000,
@@ -53,7 +57,7 @@ module.exports = class FreeGameManager {
 				});
 				responses.push(free_game);
 
-				const this_free_game = this.app.database_manager.getFreeGame(free_game);
+				const this_free_game = this.client.database_manager.getFreeGame(free_game);
 				if (url) {
 					if (url.trim().toLowerCase() == free_game.url.trim().toLowerCase() || url.trim().toLowerCase() == free_game.permalink.trim().toLowerCase()) {
 						if (!this_free_game) return await this.post(free_game);
@@ -71,7 +75,7 @@ module.exports = class FreeGameManager {
 			if (url) return 'Uh-oh! The link you provided is no longer valid.';
 		}
 		catch (error) {
-			this.app.error_manager.mark(ETM.create('fetch', error));
+			this.client.error_manager.mark(ETM.create('fetch', error));
 			return 'An error has occured while performing fetch.';
 		}
 	}
@@ -115,6 +119,7 @@ module.exports = class FreeGameManager {
 			}
 
 			const color = new Color();
+			/** @type {String[]} */
 			const mentionables = new Array();
 			const searchables = url.toLowerCase() + ' ' + (description ? description.toLowerCase() : '*');
 
@@ -161,14 +166,14 @@ module.exports = class FreeGameManager {
 			if (!embed.image.url) embed.setImage(constants.images.free_games_banner);
 
 			// Send
-			const message = await this.app.message_manager.sendToChannel(constants.channels.integrations.free_games, { content: embed.title + ' is now available on ' + mentionables.map(mentionable => this.app.role(mentionable)).join(' and ') + '.', embed: embed });
+			const message = await this.client.message_manager.sendToChannel(constants.channels.integrations.free_games, { content: embed.title + ' is now available on ' + mentionables.map(mentionable => this.client.role(mentionable)).join(' and ') + '.', embed: embed });
 			free_game.title = embed.title;
 			free_game.id = message.id;
-			await this.app.database_manager.pushFreeGame(free_game);
+			await this.client.database_manager.pushFreeGame(free_game);
 			return `Done! Reference ID: \`${message.id}\``;
 		}
 		catch(error) {
-			this.app.error_manager.mark(ETM.create('fetch', error));
+			this.client.error_manager.mark(ETM.create('fetch', error));
 			return 'An error has occured while performing post.';
 		}
 	}

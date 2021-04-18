@@ -1,14 +1,20 @@
-const Discord = require('discord.js');
+const { MessageEmbed } = require('discord.js');
+const { constants } = require('../utils/Base.js');
 
 /**
- * @param {import('../app.js')} app
- * @param {Discord.User} oldUser
- * @param {Discord.User} newUser
+ * @typedef {import('../structures/Base.js').Client} Client
+ * @typedef {import('discord.js').User} User
  */
-module.exports = async function onUserUpdate(app, oldUser, newUser) {
-	if (app.member(newUser)) return;
 
-	const embed = new Discord.MessageEmbed();
+/**
+ * @param {Client} client
+ * @param {User} oldUser
+ * @param {User} newUser
+ */
+module.exports = async function onUserUpdate(client, oldUser, newUser) {
+	if (client.member(newUser)) return;
+
+	const embed = new MessageEmbed();
 	embed.setAuthor('Quarantine Gaming: Member Submanager');
 	embed.setTitle('User Update');
 	embed.setThumbnail(newUser.displayAvatarURL());
@@ -32,5 +38,5 @@ module.exports = async function onUserUpdate(app, oldUser, newUser) {
 	embed.setFooter(`${newUser.tag} (${newUser.id})`);
 	embed.setTimestamp();
 	embed.setColor('#7bff64');
-	if (embed.fields.length > 1) app.message_manager.sendToChannel(app.utils.constants.channels.server.logs, embed);
+	if (embed.fields.length > 1) client.message_manager.sendToChannel(constants.channels.server.logs, embed);
 };

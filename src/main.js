@@ -1,20 +1,21 @@
-const Discord = require('discord.js');
-const FLAGS = Discord.Intents.FLAGS;
-const { CommandoClient } = require('discord.js-commando');
-const App = require('./app.js');
-const { ExtendedMember, ExtendedMessage } = require('./structures/Base.js');
-const path = require('path');
-const constants = require('./utils/Constants.js');
+const { Intents, Structures } = require('discord.js');
+const { Client, ExtendedMember, ExtendedMessage } = require('./structures/Base.js');
+const { constants } = require('./utils/Base.js');
 
-Discord.Structures.extend('GuildMember', () => ExtendedMember);
-Discord.Structures.extend('Message', () => ExtendedMessage);
+const FLAGS = Intents.FLAGS;
 
-const client = new CommandoClient({
-	commandPrefix: '!',
-	owner: constants.owner,
-	partials: [
-		'MESSAGE', 'CHANNEL', 'REACTION',
-	],
+Structures.extend('GuildMember', () => ExtendedMember);
+Structures.extend('Message', () => ExtendedMessage);
+
+const client = new Client({
+	ownerID: constants.owner,
+}, {
+	allowedMentions: {
+		parse: [
+			'everyone', 'roles', 'users',
+		],
+		repliedUser: true,
+	},
 	intents: [
 		FLAGS.DIRECT_MESSAGES,
 		FLAGS.GUILDS,
@@ -27,6 +28,9 @@ const client = new CommandoClient({
 		FLAGS.GUILD_PRESENCES,
 		FLAGS.GUILD_VOICE_STATES,
 	],
+	partials: [
+		'MESSAGE', 'CHANNEL', 'REACTION',
+	],
 	presence: {
 		activities: [
 			{
@@ -37,32 +41,7 @@ const client = new CommandoClient({
 		status: 'online',
 		afk: false,
 	},
-	allowedMentions: {
-		parse: [
-			'everyone', 'roles', 'users',
-		],
-		repliedUser: true,
-	},
 });
 
-client.registry
-	.registerDefaultTypes()
-	.registerGroups([
-		['management', 'Server Management'],
-		['services', 'Server Services'],
-		['experience', 'Server Experience Extensions'],
-	])
-	.registerDefaultGroups()
-	.registerDefaultCommands({
-		prefix: false,
-		commandState: false,
-	})
-	.registerCommandsIn(path.join(__dirname, 'commands'));
-
-client.once('ready', async () => {
-	console.log('Ready!');
-	client.app = new App(client);
-});
-
-console.log('Logging in');
 client.login(process.env.BOT_TOKEN);
+console.log('Logging in...');
