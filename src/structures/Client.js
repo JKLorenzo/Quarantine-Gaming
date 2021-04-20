@@ -58,9 +58,10 @@ module.exports = class Client extends AkairoClient {
 						});
 						return null;
 					},
-					modifyRetry: (message, text) => {
-						message.reply(`${text} Type \`cancel\` to cancel this command.`).then(reply => {
+					modifyRetry: (message, text, data) => {
+						data.message.reply(`${text} Type \`cancel\` to cancel this command.`).then(reply => {
 							reply.delete({ timeout: 30000 }).catch(e => void e);
+							data.message.delete({ timeout: 30000 }).catch(e => void e);
 						});
 						return null;
 					},
@@ -71,10 +72,11 @@ module.exports = class Client extends AkairoClient {
 						});
 						return null;
 					},
-					modifyCancel: (message) => {
-						message.reply('Command has been cancelled').then(reply => {
+					modifyCancel: (message, text, data) => {
+						data.message.reply('Command has been cancelled').then(reply => {
 							message.delete({ timeout: 30000 }).catch(e => void e);
 							reply.delete({ timeout: 30000 }).catch(e => void e);
+							data.message.delete({ timeout: 30000 }).catch(e => void e);
 						});
 						return null;
 					},
