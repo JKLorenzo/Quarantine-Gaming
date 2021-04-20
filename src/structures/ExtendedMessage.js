@@ -12,6 +12,7 @@ module.exports = class ExtendedMessage extends Message {
 
 	/**
      * @param {{timeout: Number}} options
+	 * @returns {Promise<ExtendedMessage>}
      */
 	delete(options = {}) {
 		return new Promise((resolve, reject) => {
