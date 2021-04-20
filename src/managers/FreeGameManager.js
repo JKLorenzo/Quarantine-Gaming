@@ -86,10 +86,16 @@ module.exports = class FreeGameManager {
 	 */
 	async post(free_game) {
 		try {
-			const { title, description, flair, permalink, url } = free_game;
+			const { author, title, description, flair, permalink, url, validity } = free_game;
 
 			const embed = new Discord.MessageEmbed({
-				author: 'Quarantine Gaming: Free Game/DLC Notification',
+				author: { name: 'Quarantine Gaming: Free Game/DLC Notification' },
+				url: url,
+				description: parseHTML(description),
+				fields: [
+					{ name: 'Author', value: author, inline: true },
+				],
+				footer: { text: `You will be redirected to \`${(new URL(url)).hostname}\`.` },
 			});
 
 			const words = title.split(' ');
@@ -106,16 +112,16 @@ module.exports = class FreeGameManager {
 			const safe_title = words.filter(word => !contains(word, filtered_title)).join(' ');
 			embed.setTitle(`**${safe_title ? safe_title : title}**`);
 
-			embed.setURL(url);
-			embed.setFooter((new URL(url)).hostname);
-
 			if (flair) {
 				if (flair.toLowerCase().indexOf('comment') !== -1 || flair.toLowerCase().indexOf('issue') !== -1) {
-					embed.setDescription(`[${flair}](${permalink})`);
+					embed.addField('Flair', `[${flair}](${permalink})`, true);
 				}
 				else {
-					embed.setDescription(flair);
+					embed.addField('Flair', flair, true);
 				}
+			}
+			else {
+				embed.addField('Validity', validity, true);
 			}
 
 			const color = new Color();
@@ -165,8 +171,12 @@ module.exports = class FreeGameManager {
 			}
 			if (!embed.image.url) embed.setImage(constants.images.free_games_banner);
 
+			// Mentionable Roles
+			const mentionable_roles = mentionables.map(mentionable => this.client.role(mentionable));
+			embed.addField('Platforms', mentionable_roles.join(', '), true);
+
 			// Send
-			const message = await this.client.message_manager.sendToChannel(constants.channels.integrations.free_games, { content: embed.title + ' is now available on ' + mentionables.map(mentionable => this.client.role(mentionable)).join(' and ') + '.', embed: embed });
+			const message = await this.client.message_manager.sendToChannel(constants.channels.integrations.free_games, { content: embed.title + ' is now available on ' + mentionable_roles.join(' and ') + '.', embed: embed });
 			free_game.title = embed.title;
 			free_game.id = message.id;
 			await this.client.database_manager.pushFreeGame(free_game);
