@@ -48,6 +48,38 @@ module.exports = class Client extends AkairoClient {
 		this.commandHandler = new CommandHandler(this, {
 			directory: path.join(__dirname, '../commands'),
 			prefix: '!',
+			argumentDefaults: {
+				prompt: {
+					retries: 4,
+					time: 30000,
+					modifyStart: (message, text) => {
+						message.reply(`${text} Type \`cancel\` to cancel this command.`).then(reply => {
+							reply.delete({ timeout: 30000 }).catch(e => void e);
+						});
+						return null;
+					},
+					modifyRetry: (message, text) => {
+						message.reply(`${text} Type \`cancel\` to cancel this command.`).then(reply => {
+							reply.delete({ timeout: 30000 }).catch(e => void e);
+						});
+						return null;
+					},
+					modifyTimeout: (message) => {
+						message.reply('Command has timed out.').then(reply => {
+							message.delete({ timeout: 30000 }).catch(e => void e);
+							reply.delete({ timeout: 30000 }).catch(e => void e);
+						});
+						return null;
+					},
+					modifyCancel: (message) => {
+						message.reply('Command has been cancelled').then(reply => {
+							message.delete({ timeout: 30000 }).catch(e => void e);
+							reply.delete({ timeout: 30000 }).catch(e => void e);
+						});
+						return null;
+					},
+				},
+			},
 		});
 		this.commandHandler.loadAll();
 	}
