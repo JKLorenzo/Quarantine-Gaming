@@ -1,4 +1,4 @@
-const { ErrorTicketManager, ProcessQueue } = require('../utils/Base.js');
+const { ErrorTicketManager, ProcessQueue, sleep } = require('../utils/Base.js');
 
 const ETM = new ErrorTicketManager('ReactionManager');
 
@@ -19,15 +19,24 @@ module.exports = class ReactionManager {
 	/**
 	 * Adds a reaction to a message.
 	 * @param {Message} message
-	 * @param {EmojiResolvable} emoji_resolvable
-	 * @returns {Promise<MessageReaction>}
+	 * @param {EmojiResolvable | EmojiResolvable[]} emoji
+	 * @returns {Promise<MessageReaction | MessageReaction[]>}
 	 */
 	add(message, emoji) {
 		console.log(`ReactionAdd: Queueing ${this.queuer.totalID} (${message.channel.id} | ${emoji.name ? emoji.name : emoji}})`);
 		return this.queuer.queue(async () => {
 			let result, error;
 			try {
-				result = await message.react(emoji);
+				if (Array.isArray(emoji)) {
+					result = new Array();
+					for (const this_emoji of emoji) {
+						result.push(await message.react(this_emoji));
+						await sleep(this.queuer.timeout);
+					}
+				}
+				else {
+					result = await message.react(emoji);
+				}
 			}
 			catch (this_error) {
 				this.client.error_manager.mark(ETM.create('add', error));
