@@ -43,5 +43,9 @@ const client = new Client({
 	},
 });
 
+client.on('warn', console.warn);
+client.on('rateLimit', console.warn);
+client.on('error', console.error);
+
 client.login(process.env.BOT_TOKEN);
 console.log('Logging in...');
