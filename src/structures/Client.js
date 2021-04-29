@@ -55,21 +55,21 @@ module.exports = class Client extends AkairoClient {
 					modifyStart: (message, text) => {
 						message.reply(`${text} Type \`cancel\` to cancel this command.`).then(reply => {
 							reply.delete({ timeout: 30000 }).catch(e => void e);
-						});
+						}).catch(e => void e);
 						return null;
 					},
 					modifyRetry: (message, text, data) => {
 						data.message.reply(`${text} Type \`cancel\` to cancel this command.`).then(reply => {
 							reply.delete({ timeout: 30000 }).catch(e => void e);
 							data.message.delete({ timeout: 30000 }).catch(e => void e);
-						});
+						}).catch(e => void e);
 						return null;
 					},
 					modifyTimeout: (message) => {
 						message.reply('Command has timed out.').then(reply => {
 							message.delete({ timeout: 30000 }).catch(e => void e);
 							reply.delete({ timeout: 30000 }).catch(e => void e);
-						});
+						}).catch(e => void e);
 						return null;
 					},
 					modifyCancel: (message, text, data) => {
@@ -77,7 +77,7 @@ module.exports = class Client extends AkairoClient {
 							message.delete({ timeout: 30000 }).catch(e => void e);
 							reply.delete({ timeout: 30000 }).catch(e => void e);
 							data.message.delete({ timeout: 30000 }).catch(e => void e);
-						});
+						}).catch(e => void e);
 						return null;
 					},
 				},

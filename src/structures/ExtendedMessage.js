@@ -1,11 +1,6 @@
 const { Message } = require('discord.js');
 
 module.exports = class ExtendedMessage extends Message {
-	/**
-     * @param {Discord.Client} client
-     * @param {Object} data
-     * @param {Discord.NewsChannel | Discord.TextChannel | Discord.DMChannel} channel
-     */
 	constructor(client, data, channel) {
 		super(client, data, channel);
 	}
@@ -25,6 +20,5 @@ module.exports = class ExtendedMessage extends Message {
 				super.delete().then(result => resolve(result)).catch(error => reject(error));
 			}
 		});
-
 	}
 };
