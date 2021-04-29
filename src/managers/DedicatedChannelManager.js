@@ -1,4 +1,5 @@
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, Permissions } = require('discord.js');
+const PFlags = Permissions.FLAGS;
 const { ErrorTicketManager, ProcessQueue, parseMention, sleep, constants } = require('../utils/Base.js');
 
 const ETM = new ErrorTicketManager('DedicatedChannelManager');
@@ -143,7 +144,6 @@ module.exports = class DedicatedChannelManager {
 						hoist: true,
 					});
 
-					const p = constants.permissions;
 					const dedicated_voice_channel = await this.client.channel_manager.create({
 						name: channel_name,
 						type: 'voice',
@@ -152,47 +152,19 @@ module.exports = class DedicatedChannelManager {
 							{
 								id: constants.roles.everyone,
 								deny: [
-									p.general.VIEW_CHANNEL,
-									p.general.CREATE_INVITE,
-									p.general.MANAGE_CHANNELS,
-									p.general.MANAGE_PERMISSIONS,
-									p.general.MANAGE_WEBHOOKS,
-									p.voice.CONNECT,
-									p.voice.MUTE_MEMBERS,
-									p.voice.DEAFEN_MEMBERS,
-									p.voice.MOVE_MEMBERS,
-									p.voice.PRIORITY_SPEAKER,
+									PFlags.VIEW_CHANNEL,
 								],
 							},
 							{
 								id: constants.roles.member,
 								allow: [
-									p.general.VIEW_CHANNEL,
-									p.voice.CONNECT,
-									p.voice.SPEAK,
-									p.voice.VIDEO,
-								],
-							},
-							{
-								id: constants.roles.moderator,
-								allow: [
-									p.general.VIEW_CHANNEL,
-									p.general.CREATE_INVITE,
-									p.general.MANAGE_CHANNELS,
-									p.voice.CONNECT,
-									p.voice.MUTE_MEMBERS,
-									p.voice.DEAFEN_MEMBERS,
-									p.voice.MOVE_MEMBERS,
-									p.voice.PRIORITY_SPEAKER,
+									PFlags.VIEW_CHANNEL,
 								],
 							},
 							{
 								id: constants.roles.music_bot,
 								allow: [
-									p.general.VIEW_CHANNEL,
-									p.voice.CONNECT,
-									p.voice.SPEAK,
-									p.voice.USE_VOICE_ACTIVITY,
+									PFlags.VIEW_CHANNEL,
 								],
 							},
 						],
@@ -207,41 +179,19 @@ module.exports = class DedicatedChannelManager {
 							{
 								id: constants.roles.everyone,
 								deny: [
-									p.general.VIEW_CHANNEL,
-									p.general.CREATE_INVITE,
-									p.general.MANAGE_CHANNELS,
-									p.general.MANAGE_PERMISSIONS,
-									p.general.MANAGE_WEBHOOKS,
-									p.text.MENTION_EVERYONE,
-									p.text.MANAGE_MESSAGES,
+									PFlags.VIEW_CHANNEL,
 								],
 							},
 							{
 								id: constants.roles.music_bot,
 								allow: [
-									p.general.VIEW_CHANNEL,
-									p.text.ADD_REACTIONS,
-									p.text.EMBED_LINKS,
-									p.text.SEND_MESSAGES,
+									PFlags.VIEW_CHANNEL,
 								],
 							},
 							{
 								id: team_role.id,
 								allow: [
-									p.general.VIEW_CHANNEL,
-									p.text.SEND_TTS_MESSAGES,
-									p.text.EMBED_LINKS,
-									p.text.ATTACH_FILES,
-								],
-							},
-							{
-								id: constants.roles.moderator,
-								allow: [
-									p.general.VIEW_CHANNEL,
-									p.general.CREATE_INVITE,
-									p.general.MANAGE_CHANNELS,
-									p.text.MENTION_EVERYONE,
-									p.text.MANAGE_MESSAGES,
+									PFlags.VIEW_CHANNEL,
 								],
 							},
 						],
@@ -257,7 +207,6 @@ module.exports = class DedicatedChannelManager {
 					// Sort streamers from members and transfer
 					const [streamers, members] = channel_origin.members.partition(this_member => this_member.roles.cache.has(constants.roles.streaming));
 					const transferProcess = this.client.methods.voiceChannelTransfer(dedicated_voice_channel, [...streamers.array(), ...members.array()]);
-
 					return {
 						team_role: team_role,
 						text_channel: dedicated_text_channel,
