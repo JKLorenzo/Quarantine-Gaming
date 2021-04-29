@@ -1,7 +1,10 @@
 const gis = require('g-i-s');
+const probe = require('probe-image-size');
+const fetch = require('node-fetch');
 const ProcessQueue = require('./ProcessQueue.js');
 const ErrorTicketManager = require('./ErrorTicketManager.js');
 const constants = require('./Constants.js');
+const { Color } = require('../types/Base.js');
 
 /**
  * Waits for the given amount of time.
@@ -137,18 +140,57 @@ function contains(base, part) {
 /**
  * Search for images using Google Image Search.
  * @param {String} title
- * @returns {Promise<{url: String, width: Number, height: Number}[]>}
+ * @returns {Promise<{large: String, small: String}>}
  */
 function fetchImage(title) {
 	return new Promise(resolve => {
-		gis(title, (error, results) => {
-			if (error) {
-				console.error(`BaseUtil(fetchImage): ${error}`);
-				resolve(new Array());
+		gis(title, async (error, results) => {
+			const data = { large: '', small: '' };
+			if (!error) {
+				for (const image of results) {
+					const response = await fetch(image.url).catch(e => void e);
+					if (response && response.ok) {
+						const probe_result = await probe(image.url, { timeout: 10000 }).catch(e => void e);
+						if (probe_result) {
+							const width = parseInt(probe_result.width);
+							const height = parseInt(probe_result.height);
+							const ratio = width / height;
+							if (width >= 200 && height >= 200 && ratio >= 1.7) {
+								if(!data.large) data.large = probe_result.url;
+							}
+							if (width >= 50 && height >= 50 && ratio >= 0.8 && ratio <= 1.2) {
+								if(!data.small) data.small = probe_result.url;
+							}
+							if (data.small && data.large) break;
+						}
+					}
+				}
 			}
-			resolve(results);
+			resolve(data);
 		});
 	});
+}
+
+/**
+ * Generates a random color.
+ * @param {{min: number, max: number}} options
+ * @returns {Color}
+ */
+function generateColor(options = { min: 0, max: 255 }) {
+	return new Color({
+		red: Math.floor(Math.random() * (options.max - options.min) + options.min),
+		green: Math.floor(Math.random() * (options.max - options.min) + options.min),
+		blue: Math.floor(Math.random() * (options.max - options.min) + options.min),
+	});
+}
+
+/**
+ * Checks if an object is a promise.
+ * @param {*} p
+ * @returns {boolean}
+ */
+function isPromise(p) {
+	return p && Object.prototype.toString.call(p) === '[object Promise]';
 }
 
 module.exports = {
@@ -163,4 +205,6 @@ module.exports = {
 	compareArray,
 	contains,
 	fetchImage,
+	isPromise,
+	generateColor,
 };
