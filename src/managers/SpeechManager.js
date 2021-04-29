@@ -52,7 +52,7 @@ module.exports = class SpeechManager {
 			}
 			catch (this_error) {
 				console.log(`Speech: Finished ${this.queuer.currentID} (${channel.name})`);
-				this.app.error_manager.mark(ETM.create('say', this_error));
+				this.client.error_manager.mark(ETM.create('say', this_error));
 			}
 		});
 	}

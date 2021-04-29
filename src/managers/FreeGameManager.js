@@ -1,5 +1,4 @@
 const Discord = require('discord.js');
-const probe = require('probe-image-size');
 const fetch = require('node-fetch');
 const { FreeGame, Color } = require('../types/Base.js');
 const { ErrorTicketManager, fetchImage, parseHTML, compareDate, contains, constants } = require('../utils/Base.js');
@@ -153,21 +152,10 @@ module.exports = class FreeGameManager {
 			embed.setColor(color.toHex());
 
 			// Image
-			const images = await fetchImage(title);
-			for (const image of images) {
-				const response = await fetch(image.url).catch(e => void e);
-				if (response && response.ok) {
-					const probe_result = await probe(image.url, { timeout: 10000 }).catch(e => void e);
-					if (probe_result) {
-						const width = parseInt(probe_result.width);
-						const height = parseInt(probe_result.height);
-						const ratio = width / height;
-						if (width >= 200 && height >= 200 && ratio >= 1.7) {
-							embed.setImage(probe_result.url);
-							break;
-						}
-					}
-				}
+			const image = await fetchImage(title);
+			if (image) {
+				if (image.small) embed.setThumbnail(image.small);
+				if (image.large) embed.setImage(image.large);
 			}
 			if (!embed.image.url) embed.setImage(constants.images.free_games_banner);
 
