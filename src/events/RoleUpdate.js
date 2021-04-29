@@ -1,5 +1,5 @@
 const { MessageEmbed } = require('discord.js');
-const { contains, constants } = require('../utils/Base.js');
+const { constants } = require('../utils/Base.js');
 
 /**
  * @typedef {import('../structures/Base.js').Client} Client
@@ -12,8 +12,6 @@ const { contains, constants } = require('../utils/Base.js');
  * @param {Role} newRole
  */
 module.exports = async function onRoleUpdate(client, oldRole, newRole) {
-	if (contains(newRole.name, ['Play', 'Text', 'Team'])) return;
-
 	const embed = new MessageEmbed();
 	embed.setAuthor('Quarantine Gaming: Role Submanager');
 	embed.setTitle('Role Updated');

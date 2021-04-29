@@ -44,12 +44,12 @@ module.exports = async function onMessageReactionRemove(client, message, reactio
 	}
 	else if (header_name == 'Quarantine Gaming: Game Coordinator') {
 		const inviter = client.member(embed.fields[0].value);
-		if (inviter && embed.thumbnail.url == emoji.url) {
+		if (inviter && emoji == 'blob_party') {
 			if (user.id != inviter.id && embed.footer.text != 'Closed. This bracket is now full.') {
 				const players = new Array();
 				const max = embed.fields.length;
 				let has_caps = false;
-				if (embed.description.indexOf('is looking for') !== -1) has_caps = true;
+				if (embed.fields.filter(field => field.value == '\u200b').length) has_caps = true;
 				for (const field of embed.fields) {
 					if (field.value && field.value != '\u200b' && (!(field.value.indexOf(user.id) !== -1) || inviter.user.id != user.id)) {
 						players.push(field.value);

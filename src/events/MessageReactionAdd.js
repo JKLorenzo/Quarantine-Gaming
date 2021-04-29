@@ -123,14 +123,14 @@ module.exports = async function onMessageReactionAdd(client, message, reaction, 
 	}
 	else if (header_name == 'Quarantine Gaming: Game Coordinator') {
 		const inviter = client.member(embed.fields[0].value);
-		if (inviter && embed.thumbnail.url == emoji.url) {
+		if (inviter && emoji == 'blob_party') {
 			if (user.id != inviter.id && embed.footer.text != 'Closed. This bracket is now full.') {
 				const players = new Array();
 				const max = embed.fields.length;
 				let cur = 0;
 				let has_caps = false;
 				let inserted = false;
-				if (embed.description.indexOf('is looking for') !== -1) has_caps = true;
+				if (embed.fields.filter(field => field.value == '\u200b').length) has_caps = true;
 				for (const field of embed.fields) {
 					if (field.value != '\u200b') {
 						players.push(field.value);

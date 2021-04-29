@@ -31,7 +31,8 @@ module.exports = async function onGuildMemberUpdate(client, oldMember, newMember
 	if (newMember.roles.cache.size != oldMember.roles.cache.size) {
 		const added = new Array(), removed = new Array();
 		for (const this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
-			if (contains(this_role.name, ['Play', 'Text', 'Team'])) continue;
+			if (this_role.name.startsWith('Team 🔰')) continue;
+			if (this_role.name.startsWith('Play ') && this_role.hexColor == constants.colors.play_role) continue;
 			if (contains(this_role.id, constants.roles.streaming)) continue;
 			newMember.roles.cache.has(this_role.id) ? added.push(this_role.name) : removed.push(this_role.name);
 		}

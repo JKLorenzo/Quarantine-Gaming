@@ -219,7 +219,7 @@ module.exports = class BaseEvents {
 		this.onVoiceStateUpdate = {
 			queuer: new ProcessQueue(1000),
 			event: this.client.on('voiceStateUpdate', (oldState, newState) => {
-				if (newState.guild.id != this.client.guild.id) return;
+				if (newState.guild.id != this.client.guild.id && !newState.member.user.bot && oldState.channel != newState.channel) return;
 				this.onVoiceStateUpdate.queuer.queue(async () => {
 					try {
 						await onVoiceStateUpdate(this.client, oldState, newState);

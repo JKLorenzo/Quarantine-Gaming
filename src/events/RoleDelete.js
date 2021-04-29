@@ -1,5 +1,5 @@
 const { MessageEmbed } = require('discord.js');
-const { contains, constants } = require('../utils/Base.js');
+const { constants } = require('../utils/Base.js');
 
 /**
  * @typedef {import('../structures/Base.js').Client} Client
@@ -11,7 +11,8 @@ const { contains, constants } = require('../utils/Base.js');
  * @param {Role} role
  */
 module.exports = async function onRoleDelete(client, role) {
-	if (contains(role.name, ['Play', 'Text', 'Team'])) return;
+	if (role.name.startsWith('Team 🔰')) return;
+	if (role.name.startsWith('Play ') && role.hexColor == constants.colors.play_role) return;
 
 	const embed = new MessageEmbed();
 	embed.setAuthor('Quarantine Gaming: Role Submanager');
