@@ -38,8 +38,7 @@ module.exports = class Purge extends Command {
 	userPermissions(message) {
 		/** @type {ExtendedMember} */
 		const member = message.member;
-		if (!member.hasRole([constants.roles.staff, constants.roles.moderator])) return 'Staff/Moderator';
-		if (!member.permissionsIn(message.channel).has(constants.permissions.text.MANAGE_MESSAGES)) return 'Manage Messages';
+		if (!member.hasRole(constants.roles.staff)) return 'Staff';
 		return null;
 	}
 

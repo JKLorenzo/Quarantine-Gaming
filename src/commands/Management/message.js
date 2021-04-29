@@ -65,7 +65,7 @@ module.exports = class Message extends Command {
 	userPermissions(message) {
 		/** @type {ExtendedMember} */
 		const member = message.member;
-		if (!member.hasRole([constants.roles.staff, constants.roles.moderator])) return 'Staff/Moderator';
+		if (!member.hasRole(constants.roles.staff)) return 'Staff';
 		return null;
 	}
 
