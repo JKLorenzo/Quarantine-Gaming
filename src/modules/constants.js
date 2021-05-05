@@ -5,10 +5,10 @@ module.exports = {
 	roles: {
 		// main
 		staff: '793318727223476245',
-		moderator: '757461486934163517',
+		moderator: '839185730399764511',
+		booster: '757461486934163517',
 		member: '722699433225224233',
 		everyone: '351178660725915649',
-		booster: '757461486934163517',
 		// integrations
 		nsfw: '700481554132107414',
 		streaming: '757128062276993115',
