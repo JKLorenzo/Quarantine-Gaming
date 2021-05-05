@@ -70,6 +70,7 @@ module.exports = {
 		free_games_banner: 'https://media.playstation.com/is/image/SCEA/playstation-vue-hero-banner-desktop-01-us-22jan19?$native_nt$',
 		nsfw_banner: 'https://s3.amazonaws.com/sofontsy-files-us/wp-content/uploads/2019/02/07163845/NSFW-Bundle_banner.jpg',
 		multiplayer_banner: 'https://playbingerepeat.files.wordpress.com/2018/05/fortnite-banner.png?w=1332&h=666&crop=1',
+		audio_control_thumbnail: 'http://www.extensions.in.th/amitiae/2013/prefs/images/sound_icon.png',
 	},
 	colors: {
 		play_role: '#7b00ff',
