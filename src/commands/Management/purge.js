@@ -61,11 +61,11 @@ module.exports = class Purge extends Command {
 		const deleted_messages = new Array();
 		/** @type {TextChannel} */
 		const channel = message.channel;
-		/** @type {ExtendedMessage[]} */
-		const messages_to_delete = new Array();
-		const authors_id = new Array();
 
 		do {
+			/** @type {ExtendedMessage[]} */
+			const messages_to_delete = new Array();
+			const authors_id = new Array();
 			await channel.messages.fetch().then(async messages => {
 				for (const this_message of messages.array()) {
 					if (this_message.id == message.id || this_message.id == reply.id) continue;
