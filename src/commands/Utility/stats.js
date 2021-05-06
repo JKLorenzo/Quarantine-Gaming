@@ -15,22 +15,23 @@ const { compareDate } = require('../../utils/Base.js');
 function getProcessQueueHealth(name, processqueue) {
 	let difference = 0;
 	let percent = 1;
+	let currentID, totalID;
 	if (Array.isArray(processqueue)) {
 		for (const this_pq of processqueue) {
-			const totalID = this_pq.totalID + 1;
-			const currentID = this_pq.currentID + 1;
+			totalID = this_pq.totalID + 1;
+			currentID = this_pq.currentID + 1;
 			difference += totalID;
 			difference -= currentID;
 			percent *= currentID / totalID;
 		}
 	}
 	else {
-		const totalID = processqueue.totalID + 1;
-		const currentID = processqueue.currentID + 1;
+		totalID = processqueue.totalID + 1;
+		currentID = processqueue.currentID + 1;
 		difference = totalID - currentID;
 		percent = currentID / totalID;
 	}
-	return `${difference >= 10 ? '🔴' : difference >= 5 ? '🟠' : '🟢'} **${name}**: ${(percent * 100).toFixed(0)}%`;
+	return `${difference >= 10 ? '🔴' : difference >= 5 ? '🟠' : '🟢'} **${name}**: ${(percent * 100).toFixed(0)}% of ${totalID}`;
 }
 
 /**

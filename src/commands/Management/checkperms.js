@@ -1,4 +1,4 @@
-const { MessageEmbed, Permissions } = require('discord.js');
+const { MessageEmbed, Permissions, Role } = require('discord.js');
 const { Command } = require('discord-akairo');
 const { parseMention, constants } = require('../../utils/Base.js');
 
@@ -136,7 +136,7 @@ module.exports = class CheckPerms extends Command {
 
 		const embed = new MessageEmbed({
 			author: { name: 'Quarantine Gaming: Permission Flags' },
-			title: 'Entity Permission Report',
+			title: `${args.entity instanceof Role ? 'Role' : 'Member'} Permissions Report`,
 			description: `${args.entity} permissions on ${args.channel} channel.`,
 			color: '#ffff00',
 			timestamp: new Date(),

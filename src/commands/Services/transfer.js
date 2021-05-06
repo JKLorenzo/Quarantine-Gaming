@@ -55,7 +55,7 @@ module.exports = class Transfer extends Command {
 
 		await client.methods.voiceChannelTransfer(voice_channel, args.members);
 		for (const member of args.members) {
-			await client.message_manager.sendToUser(member, `You have been transfered by ${message.member.displayName} to ${voice_channel.name}.`);
+			await client.message_manager.sendToUser(member, `You have been transferred by ${message.member.displayName} to ${voice_channel.name}.`);
 		}
 
 		return reply.edit('All done!').then(() => {

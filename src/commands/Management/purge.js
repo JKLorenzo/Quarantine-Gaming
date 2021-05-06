@@ -1,4 +1,4 @@
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, Permissions } = require('discord.js');
 const { Command } = require('discord-akairo');
 const { constants, sleep } = require('../../utils/Base.js');
 
@@ -39,7 +39,7 @@ module.exports = class Purge extends Command {
 		/** @type {ExtendedMember} */
 		const member = message.member;
 		if (!member.hasRole([constants.roles.staff, constants.roles.moderator])) return 'Staff/Moderator';
-		if (!member.permissionsIn(message.channel).has(constants.permissions.text.MANAGE_MESSAGES)) return 'Manage Messages';
+		if (!member.permissionsIn(message.channel).has(Permissions.FLAGS.MANAGE_MESSAGES)) return 'Manage Messages';
 		return null;
 	}
 
