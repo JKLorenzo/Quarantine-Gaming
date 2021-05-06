@@ -43,7 +43,7 @@ module.exports = async function onMessageReactionAdd(client, message, reaction, 
 		}
 	}
 	else if (header_name == 'Quarantine Gaming: Member Approval') {
-		if (client.member(user).hasRole(constants.roles.staff) && embed.fields[3].name != 'Action Taken:' && message.reactions.cache.array().length >= 3) {
+		if (client.member(user).hasRole([constants.roles.staff, constants.roles.moderator]) && embed.fields[3].name != 'Action Taken:' && message.reactions.cache.array().length >= 3) {
 			const this_user = client.member(embed.fields[0].value);
 			if (this_user) {
 				const dm_message = new Array();

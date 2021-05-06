@@ -33,7 +33,7 @@ async function displayInfo(client, text_channel, voice_channel, name) {
 				'\u200b \u200b \u200b \u200b 🔓 `!dedicate --unlock` to unlock this channel.',
 				'\u200b \u200b \u200b \u200b 🚏 `!transfer <@member>` to transfer members from other voice channel to this channel regardless whether this channel is locked or unlocked.',
 			].join('\n\n'),
-			`Note: ${client.role(constants.roles.staff)} and ${client.role(constants.roles.music_bot)} can interact with these channels.`,
+			`Note: ${client.role(constants.roles.staff)}, ${client.role(constants.roles.moderator)}, and ${client.role(constants.roles.music_bot)} can interact with these channels.`,
 		].join('\n\n'),
 		color: '#7b00ff',
 	}));

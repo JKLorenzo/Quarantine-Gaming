@@ -41,7 +41,7 @@ module.exports = async function ScreenMember(client, member) {
 	}
 	embed.setColor('#25c059');
 	const message = await client.message_manager.sendToChannel(constants.channels.server.management, {
-		content: `${member} wants to join this server. ${client.role(constants.roles.staff)} action is required.`,
+		content: `${member} wants to join this server. ${client.role(constants.roles.staff)} or ${client.role(constants.roles.moderator)} action is required.`,
 		embed: embed,
 	});
 	for (const emoji of reactions) {
