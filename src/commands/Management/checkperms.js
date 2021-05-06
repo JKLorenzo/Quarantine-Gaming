@@ -56,7 +56,7 @@ module.exports = class CheckPerms extends Command {
 	userPermissions(message) {
 		/** @type {ExtendedMember} */
 		const member = message.member;
-		if (!member.hasRole(constants.roles.staff)) return 'Staff';
+		if (!member.hasRole([constants.roles.staff, constants.roles.moderator])) return 'Staff/Moderator';
 		return null;
 	}
 
