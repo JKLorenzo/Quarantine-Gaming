@@ -14,10 +14,6 @@ module.exports = async function onPresenceUpdate(client, oldPresence, newPresenc
 	/** @type {ExtendedMember} */
 	const member = newPresence.member ? newPresence.member : oldPresence.member;
 
-	if (newPresence.status == 'offline') {
-		// general.memberOffline(member);
-	}
-
 	// Sort Changed Activities
 	let oldActivities = new Array(), newActivities = new Array();
 	if (oldPresence) oldActivities = oldPresence.activities.filter(activity => activity.type == 'PLAYING').map(activity => activity.name.trim());
@@ -44,33 +40,20 @@ module.exports = async function onPresenceUpdate(client, oldPresence, newPresenc
 			const streaming_role = client.role(constants.roles.streaming);
 			const game_role = client.guild.roles.cache.find(role => role.name == game_name) || await client.role_manager.create({ name: game_name, color: constants.colors.game_role });
 			let play_role = client.guild.roles.cache.find(role => role.name == 'Play ' + game_name);
-
 			if (!client.guild.roles.cache.find(role => role.name == game_name + ' ⭐')) await client.role_manager.create({ name: game_name + ' ⭐', color: constants.colors.game_role_mentionable, mentionable: true });
-
 			if (data.new) {
-				// Update database
-				await member.updateGameRole(game_role);
-
 				if (play_role) {
-					// Bring Play Role to Top
 					play_role.setPosition(streaming_role.position - 1);
 				}
 				else {
-					// Create Play Role
 					play_role = await client.role_manager.create({ name: 'Play ' + game_name, color: constants.colors.play_role, position: streaming_role.position, hoist: true });
 				}
-				await client.role_manager.add(member, game_role);
-				await client.role_manager.add(member, play_role);
+				client.role_manager.add(member, game_role);
+				client.role_manager.add(member, play_role);
 			}
 			else if (play_role) {
-				// Remove Play Role from this member
-				if (member.roles.cache.has(play_role.id)) {
-					await client.role_manager.remove(member, play_role);
-				}
-				// Delete Play Role
-				if (play_role.members.array().length == 0) {
-					await client.role_manager.delete(play_role);
-				}
+				if (member.roles.cache.has(play_role.id)) await client.role_manager.remove(member, play_role);
+				if (play_role.members.array().length == 0) await client.role_manager.delete(play_role);
 			}
 		}
 	}

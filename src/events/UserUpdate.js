@@ -12,31 +12,21 @@ const { constants } = require('../utils/Base.js');
  * @param {User} newUser
  */
 module.exports = async function onUserUpdate(client, oldUser, newUser) {
-	if (client.member(newUser)) return;
+	const member = client.member(newUser);
 
-	const embed = new MessageEmbed();
-	embed.setAuthor('Quarantine Gaming: Member Submanager');
-	embed.setTitle('User Update');
-	embed.setThumbnail(newUser.displayAvatarURL());
-	embed.addField('User:', newUser);
+	const description = [`**Profile:** ${member}`];
+	if (oldUser.username != newUser.username) description.push(`**Username:** ${oldUser.username} -> ${newUser.username}`);
+	if (oldUser.tag != newUser.tag) description.push(`**Tagname:** ${oldUser.tag} -> ${newUser.tag}`);
+	if (oldUser.displayAvatarURL() != newUser.displayAvatarURL()) description.push(`**Avatar:** [New Avatar](${newUser.displayAvatarURL()})`);
 
-	// Avatar
-	if (oldUser.displayAvatarURL() != newUser.displayAvatarURL()) {
-		embed.addField('Avatar:', `New [Avatar](${newUser.displayAvatarURL()})`);
+	if (description.length > 1) {
+		client.message_manager.sendToChannel(constants.channels.server.logs, new MessageEmbed({
+			author: { name: 'Quarantine Gaming: Member Update Events' },
+			title: 'User Property Changed',
+			description: description.join('\n'),
+			thumbnail: { url: newUser.displayAvatarURL() },
+			footer: { text: `Reference ID: ${newUser.id}` },
+			color: '#E1F358',
+		}));
 	}
-
-	// Username
-	if (oldUser.username != newUser.username) {
-		embed.addField('Username:', `Old: ${oldUser.username}\nNew: ${newUser.username}`);
-	}
-
-	// Tag
-	if (oldUser.tag != newUser.tag) {
-		embed.addField('Tag:', `Old: ${oldUser.tag}\nNew: ${newUser.tag}`);
-	}
-
-	embed.setFooter(`${newUser.tag} (${newUser.id})`);
-	embed.setTimestamp();
-	embed.setColor('#7bff64');
-	if (embed.fields.length > 1) client.message_manager.sendToChannel(constants.channels.server.logs, embed);
 };

@@ -1,5 +1,5 @@
 const { MessageEmbed } = require('discord.js');
-const { compareDate, constants } = require('../utils/Base.js');
+const { constants } = require('../utils/Base.js');
 
 /**
  * @typedef {import('../structures/Base.js').Client} Client
@@ -11,17 +11,12 @@ const { compareDate, constants } = require('../utils/Base.js');
  * @param {User} user
  */
 module.exports = async function onGuildBanAdd(client, user) {
-	const created_day = user.createdAt;
-	const created_day_difference = compareDate(created_day);
-
-	const embed = new MessageEmbed();
-	embed.setAuthor('Quarantine Gaming: Member Submanager');
-	embed.setTitle('Member Ban');
-	embed.setThumbnail(user.displayAvatarURL());
-	embed.addField('User:', user);
-	embed.addField('Account Created:', `${created_day.toUTCString().replace('GMT', 'UTC')} (${created_day_difference.estimate})`);
-	embed.setFooter(`${user.tag} (${user.id})`);
-	embed.setTimestamp();
-	embed.setColor('#7bff64');
-	await client.message_manager.sendToChannel(constants.channels.server.logs, embed);
+	await client.message_manager.sendToChannel(constants.channels.server.logs, new MessageEmbed({
+		author: { name: 'Quarantine Gaming: Server Gateway Events' },
+		title: 'Member Ban Implemented',
+		description: `**Profile:** ${user}`,
+		thumbnail: { url: user.displayAvatarURL() },
+		footer: { text: `Reference ID: ${user.id}` },
+		color: '#FF2222',
+	}));
 };

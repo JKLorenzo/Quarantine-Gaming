@@ -42,47 +42,40 @@ module.exports = async function onMessageReactionAdd(client, message, reaction, 
 			break;
 		}
 	}
-	else if (header_name == 'Quarantine Gaming: Member Approval') {
-		if (client.member(user).hasRole([constants.roles.staff, constants.roles.moderator]) && embed.fields[3].name != 'Action Taken:' && message.reactions.cache.array().length >= 3) {
-			const this_user = client.member(embed.fields[0].value);
-			if (this_user) {
-				const dm_message = new Array();
+	else if (header_name == 'Quarantine Gaming: Server Gateway Administrative') {
+		const member = client.member(user);
+		if (member.hasRole([constants.roles.staff, constants.roles.moderator, constants.roles.booster]) && embed.fields[3].value == 'Action Required') {
+			const this_member = client.member(embed.fields[0].value);
+			const inviter = client.member(embed.fields[1].value);
+			embed.setFooter(new Date());
+			if (this_member) {
 				switch (emoji) {
 				case '✅':
-					await client.role_manager.add(this_user, constants.roles.member);
 					await message.reactions.removeAll();
-					embed.spliceFields(3, 1, [
-						{ name: 'Action Taken:', value: `Approved by ${user}` },
-					]).setTimestamp();
-					await message.edit(embed);
-					dm_message.push('Hooraaay! 🥳 Your membership request has been approved! You will now have access to all the features of this server!');
-					dm_message.push('Do `!help` on our ' + client.channel(constants.channels.text.general).name + ' text channel to know more about these features or you can visit <https://quarantinegamingdiscord.wordpress.com/> for more info.');
-					await client.message_manager.sendToUser(this_user, dm_message.join('\n'));
+					await client.role_manager.add(this_member, constants.roles.member);
+					await this_member.setInviter(inviter, member);
+					embed.fields[3].value = `Approved by ${user}`;
+					await message.edit({ content: '', embed: embed });
+					await client.message_manager.sendToUser(this_member, 'Hooraaay! 🥳 Your membership request has been approved! You will now have access to all the features of this server!');
 					break;
 				case '❌':
-					await this_user.kick();
 					await message.reactions.removeAll();
-					embed.spliceFields(3, 1, [
-						{ name: 'Action Taken:', value: `Kicked by ${user}` },
-					]).setTimestamp();
-					await message.edit(embed);
+					await this_member.kick();
+					embed.fields[3].value = `Kicked by ${user}`;
+					await message.edit({ content: '', embed: embed });
 					break;
 				case '⛔':
-					await this_user.ban();
 					await message.reactions.removeAll();
-					embed.spliceFields(3, 1, [
-						{ name: 'Action Taken:', value: `Banned by ${user}` },
-					]).setTimestamp();
-					await message.edit(embed);
+					await this_member.ban();
+					embed.fields[3].value = `Banned by ${user}`;
+					await message.edit({ content: '', embed: embed });
 					break;
 				}
 			}
 			else {
 				await message.reactions.removeAll();
-				embed.spliceFields(3, 1, [
-					{ name: 'Action Taken:', value: `${emoji} attempted by ${user}. User not found ⚠` },
-				]).setTimestamp();
-				await message.edit(embed);
+				embed.fields[3].value = 'User not found ⚠';
+				await message.edit({ content: '', embed: embed });
 			}
 		}
 	}
