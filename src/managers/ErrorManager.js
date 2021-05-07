@@ -1,4 +1,4 @@
-const Discord = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const { ProcessQueue, constants } = require('../utils/Base.js');
 
 /**
@@ -34,33 +34,38 @@ module.exports = class ErrorManager {
 				if ((epm > 5 || (error_ticket.error.code != null && error_ticket.error.code == '500')) && !this.threshold_reached) {
 					// Change bot presence
 					this.client.user.setActivity({
-						name: `SERVER RESTART (${++this.threshold_hitcount})`,
+						name: `THC ${++this.threshold_hitcount}`,
 						type: 'WATCHING',
 					});
 
 					// Notify staffs
 					this.client.message_manager.sendToChannel(constants.channels.staff, 'I\'m currently detecting issues with Discord; some functionalities are disabled. A bot restart is recommended once the issues are resolved.').catch(async () => {
-						const embed = new Discord.MessageEmbed();
-						embed.setAuthor('Limited Functionality');
-						embed.setTitle('Issues with Discord');
-						embed.setDescription('I\'m currently detecting issues with Discord; some functionalities are disabled. A bot restart is recommended once the issues are resolved.');
-						embed.setColor('ffe300');
-						this.client.message_manager.sendToChannel(constants.channels.server.management, embed);
+						this.client.message_manager.sendToChannel(constants.channels.server.management, new MessageEmbed({
+							author: { name: 'Quarantine Gaming: Telemetry' },
+							title: 'Limited Functionality',
+							description: 'I\'m currently detecting issues with Discord; some functionalities are disabled. A bot restart is recommended once the issues are resolved.',
+							color: '#FF4700',
+						}));
 					});
 					this.threshold_reached = true;
 				}
 
-				const embed = new Discord.MessageEmbed();
-				embed.setAuthor('Quarantine Gaming: Telemetry');
-				embed.setTitle('Exception Details');
-				if (error_ticket.error) embed.setDescription(error_ticket.error);
+				const embed = new MessageEmbed({
+					author: { name: 'Quarantine Gaming: Telemetry' },
+					title: 'Error Detection',
+					thumbnail: { url: constants.images.error_message_thumbnail },
+					fields: [
+						{ name: 'Errors/Min:', value: epm, inline: true },
+						{ name: 'Threshold Hit:', value: this.threshold_reached ? 'True' : 'False', inline: true },
+						{ name: 'Threshold Hit Count:', value: this.threshold_hitcount, inline: true },
+					],
+					color: '#FF0000',
+				});
 				if (error_ticket.name) embed.addField('Method', error_ticket.name, true);
 				if (error_ticket.location) embed.addField('Location', error_ticket.location, true);
 				if (error_ticket.error.code) embed.addField('Error Code', error_ticket.error.code, true);
-				embed.setFooter(`EPM: ${epm}\t | \tTH: ${this.threshold_reached ? 'True' : 'False'}\t | \tTHC: ${this.threshold_hitcount}`);
-				embed.setThumbnail('https://mir-s3-cdn-cf.behance.net/project_modules/disp/c9955d46715833.589222657aded.png');
-				embed.setTimestamp();
-				embed.setColor('#FF0000');
+				if (error_ticket.error) embed.addField('Error Message', error_ticket.error);
+
 				return this.client.message_manager.sendToChannel(constants.channels.qg.logs, embed);
 			}
 			catch (error) {
