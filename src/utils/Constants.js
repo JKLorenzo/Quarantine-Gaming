@@ -6,6 +6,7 @@ module.exports = {
 		// main
 		staff: '793318727223476245',
 		moderator: '839185730399764511',
+		booster: '757461486934163517',
 		member: '722699433225224233',
 		everyone: '351178660725915649',
 		// integrations
