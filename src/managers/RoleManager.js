@@ -1,10 +1,11 @@
-const { ErrorTicketManager, ProcessQueue } = require('../utils/Base.js');
+const { ErrorTicketManager, ProcessQueue, constants } = require('../utils/Base.js');
 
 const ETM = new ErrorTicketManager('RoleManager');
 
 /**
  * @typedef {import('../structures/Base.js').Client} Client
  * @typedef {import('discord.js').ColorResolvable} ColorResolvable
+ * @typedef {import('discord.js').GuildMember} GuildMember
  * @typedef {import('discord.js').PermissionResolvable} PermissionResolvable
  * @typedef {import('discord.js').Role} Role
  * @typedef {import('discord.js').RoleResolvable} RoleResolvable
@@ -73,7 +74,7 @@ module.exports = class RoleManager {
 	 * @param {UserResolvable} user
 	 * @param {RoleResolvable} role
 	 * @param {String} reason
-	 * @returns {Promise<Role>}
+	 * @returns {Promise<GuildMember>}
 	 */
 	add(user, role, reason = '') {
 		const this_member = this.client.member(user);
@@ -82,7 +83,13 @@ module.exports = class RoleManager {
 		return this.queuer.queue(async () => {
 			let result, error;
 			try {
-				return await this_member.roles.add(this_role, reason);
+				result = await this_member.roles.add(this_role, reason);
+				if (this_role.hexColor == constants.colors.game_role) {
+					await this.client.database_manager.updateMemberGameRole(this_member.id, {
+						id: this_role.id,
+						name: this_role.name,
+					});
+				}
 			}
 			catch (this_error) {
 				this.client.error_manager.mark(ETM.create('add', error));
@@ -101,7 +108,7 @@ module.exports = class RoleManager {
 	 * @param {UserResolvable} user
 	 * @param {RoleResolvable} role
 	 * @param {String} reason
-	 * @returns {Promise<Role>}
+	 * @returns {Promise<GuildMember>}
 	 */
 	remove(user, role, reason = '') {
 		const this_member = this.client.member(user);
@@ -110,7 +117,7 @@ module.exports = class RoleManager {
 		return this.queuer.queue(async () => {
 			let result, error;
 			try {
-				return await this_member.roles.remove(this_role, reason);
+				result = await this_member.roles.remove(this_role, reason);
 			}
 			catch (this_error) {
 				this.client.error_manager.mark(ETM.create('remove', error));

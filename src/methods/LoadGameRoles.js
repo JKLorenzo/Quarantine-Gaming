@@ -19,11 +19,11 @@ module.exports = async function LoadGameRoles(client) {
 			if (!(game_activity.applicationID || client.database_manager.gameWhitelisted(game_name))) continue;
 			// Game Role
 			const game_role = client.guild.roles.cache.find(role => role.name == game_name) || await client.role_manager.create({ name: game_name, color: constants.colors.game_role });
-			await member.updateGameRole(game_role);
 			// Game Role Mentionable
 			if (!client.guild.roles.cache.find(role => role.name == game_name + ' ⭐')) {
 				await client.role_manager.create({ name: game_name + ' ⭐', color: constants.colors.game_role_mentionable, mentionable: true });
 			}
+			await client.role_manager.add(member, game_role);
 			// Play Role
 			const streaming_role = client.role(constants.roles.streaming);
 			const play_role = client.guild.roles.cache.find(role => role.name == 'Play ' + game_name) || await client.role_manager.create({ name: 'Play ' + game_name, color: constants.colors.play_role, position: streaming_role.position, hoist: true });
