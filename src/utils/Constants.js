@@ -72,6 +72,7 @@ module.exports = {
 		nsfw_banner: 'https://s3.amazonaws.com/sofontsy-files-us/wp-content/uploads/2019/02/07163845/NSFW-Bundle_banner.jpg',
 		multiplayer_banner: 'https://playbingerepeat.files.wordpress.com/2018/05/fortnite-banner.png?w=1332&h=666&crop=1',
 		audio_control_thumbnail: 'http://www.extensions.in.th/amitiae/2013/prefs/images/sound_icon.png',
+		error_message_thumbnail: 'https://mir-s3-cdn-cf.behance.net/project_modules/disp/c9955d46715833.589222657aded.png',
 	},
 	colors: {
 		play_role: '#7b00ff',
