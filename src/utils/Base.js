@@ -1,6 +1,7 @@
 const gis = require('g-i-s');
 const probe = require('probe-image-size');
 const fetch = require('node-fetch');
+const humanizeDuration = require('humanize-duration');
 const ProcessQueue = require('./ProcessQueue.js');
 const ErrorTicketManager = require('./ErrorTicketManager.js');
 const constants = require('./Constants.js');
@@ -80,22 +81,12 @@ function compareDate(date) {
 	const days = Math.floor(diffMs / 86400000);
 	const hours = Math.floor((diffMs % 86400000) / 3600000);
 	const minutes = Math.round(((diffMs % 86400000) % 3600000) / 60000);
-	let estimated = 'a few seconds ago';
-	if (days > 0) {
-		estimated = days + ` day${days > 1 ? 's' : ''} ago`;
-	}
-	else if (hours > 0) {
-		estimated = hours + ` hour${hours > 1 ? 's' : ''} ago`;
-	}
-	else if (minutes > 0) {
-		estimated = minutes + ` minute${minutes > 1 ? 's' : ''} ago`;
-	}
 	return {
 		days: days,
 		hours: hours,
 		minutes: minutes,
 		totalMinutes: Math.round(diffMs / 60000),
-		estimate: estimated,
+		estimate: humanizeDuration(diffMs, { largest: 2, conjunction: ' and ', round: true }),
 	};
 }
 
