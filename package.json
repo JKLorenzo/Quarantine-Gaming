@@ -23,7 +23,7 @@
     "discord-akairo": "^8.1.0",
     "discord.js": "github:discordjs/discord.js",
     "ffmpeg-static": "^4.3.0",
-    "firebase-admin": "^9.6.0",
+    "firebase-admin": "^9.7.0",
     "g-i-s": "^2.1.6",
     "humanize-duration": "^3.26.0",
     "jsdom": "^16.5.3",
@@ -32,6 +32,6 @@
     "probe-image-size": "^7.1.0"
   },
   "devDependencies": {
-    "eslint": "^7.24.0"
+    "eslint": "^7.25.0"
   }
 }
