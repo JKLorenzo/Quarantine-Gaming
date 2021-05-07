@@ -78,7 +78,6 @@ module.exports = class Stats extends Command {
 			onInviteCreate,
 			onMessage, onMessageReactionAdd, onMessageReactionRemove,
 			onPresenceUpdate,
-			onRoleCreate, onRoleDelete, onRoleUpdate,
 			onUserUpdate,
 			onVoiceStateUpdate,
 		} = client.events;
@@ -87,7 +86,6 @@ module.exports = class Stats extends Command {
 		buffer.push(getProcessQueueHealth('Member Events', [onGuildMemberAdd.queuer, onGuildMemberRemove.queuer, onGuildMemberUpdate.queuer]));
 		buffer.push(getProcessQueueHealth('Message Events', [onMessage.queuer, onMessageReactionAdd.queuer, onMessageReactionRemove.queuer]));
 		buffer.push(getProcessQueueHealth('Presence Events', [onPresenceUpdate.queuer]));
-		buffer.push(getProcessQueueHealth('Role Events', [onRoleCreate.queuer, onRoleDelete.queuer, onRoleUpdate.queuer]));
 		buffer.push(getProcessQueueHealth('Voice Events', [onVoiceStateUpdate.queuer]));
 		buffer.push(getProcessQueueHealth('Ban Events', [onGuildBanAdd.queuer, onGuildBanRemove.queuer]));
 		buffer.push(getProcessQueueHealth('Invite Events', [onInviteCreate.queuer]));
