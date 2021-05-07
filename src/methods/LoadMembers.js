@@ -15,14 +15,6 @@ module.exports = async function LoadMembers(client) {
 		await member.init();
 	}
 
-	// Check for users who doesn't have a member or bot role
-	for (const member of members) {
-		if (member.user.bot && member.roles.cache.has(constants.roles.bot)) continue;
-		if (!member.user.bot && member.roles.cache.has(constants.roles.member)) continue;
-		if (member.pending) continue;
-		await client.methods.screenMember(member);
-	}
-
 	// Check for streaming members
 	const streaming_role = client.role(constants.roles.streaming);
 	for (const member of streaming_role.members.array()) {
