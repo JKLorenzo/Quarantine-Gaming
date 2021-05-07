@@ -14,6 +14,9 @@ module.exports = class InviteManager {
 
 		/** @type {Collection} */
 		this.data = null;
+
+		/** @type {Invite[]} */
+		this.invites_queue = new Array();
 	}
 
 	async init() {
@@ -30,13 +33,18 @@ module.exports = class InviteManager {
 
 	/**
      *
-     * @returns {Promise<Invite[]>}]
+     * @returns {Promise<Invite>}]
      */
 	get() {
 		return this.queuer.queue(async () => {
 			if (!this.data) return new Array();
 			const newData = await this.client.guild.fetchInvites();
-			return newData.difference(this.data).array();
+			const updated_invites = newData.difference(this.data).array();
+			for (const invite of updated_invites) {
+				this.invites_queue.push(invite);
+			}
+			this.data = newData;
+			return this.invites_queue.shift();
 		});
 	}
 };
