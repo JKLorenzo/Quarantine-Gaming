@@ -48,7 +48,14 @@ module.exports = class InteractionManager {
 					return ApplicationCommandData;
 				});
 
-				await this.client.guild.commands.set(commands);
+				const ApplicationCommands = await this.client.guild.commands.set(commands).then(applicationCommands => applicationCommands.array());
+
+				for (const interaction_command of this.interaction_commands) {
+					if (!interaction_command.permissions) continue;
+					const this_command = ApplicationCommands.find(command => command.name == interaction_command.name);
+					if (!this_command) continue;
+					await this_command.setPermissions(interaction_command.transformPermissions());
+				}
 			}
 		}
 		catch (error) {

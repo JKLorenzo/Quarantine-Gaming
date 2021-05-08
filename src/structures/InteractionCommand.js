@@ -4,6 +4,7 @@
  * @property {string} name The name of the command
  * @property {string} description The description of the command
  * @property {ApplicationCommandOptionData[]} [options] Options for the command
+ * @property {InteractionCommandPermissionData} [permissions] The permissions for this command
  * @property {boolean} [defaultPermission] Whether the command is enabled by default when the app is added to a guild
  */
 
@@ -26,7 +27,28 @@
  */
 
 /**
+ * The object returned when fetching permissions for an application command.
+ * @typedef {Object} ApplicationCommandPermissionData
+ * @property {String} id The ID of the role or user
+ * @property {ApplicationCommandPermissionType|number} type Whether this permission is for a role or a user
+ * @property {boolean} permission Whether the role or user has the permission to use this command
+ */
+
+/**
  * @typedef {'SUB_COMMAND' | 'SUB_COMMAND_GROUP' | 'STRING' | 'INTEGER' | 'BOOLEAN' | 'USER' | 'CHANNEL' | 'ROLE' | 'MENTIONABLE'} ApplicationCommandOptionType
+ * @typedef {'ROLE' | 'USER'} ApplicationCommandPermissionType
+ */
+
+/**
+ * @typedef {Object} InteractionCommandPermissionData
+ * @property {InteractionCommandPermissionDataContent} [users] Sets the permission of users for this command.
+ * @property {InteractionCommandPermissionDataContent} [roles] Sets the permission of roles for this command.
+ */
+
+/**
+ * @typedef {Object} InteractionCommandPermissionDataContent
+ * @property {String[]} [allow] An array of ids allowed to use this command.
+ * @property {String[]} [deny] An array of ids denied to use this command.
  */
 
 /**
@@ -40,6 +62,7 @@ module.exports = class InteractionCommand {
 		this.name = data.name;
 		this.description = data.description;
 		this.options = data.options;
+		this.permissions = data.permissions;
 		this.defaultPermission = data.defaultPermission;
 	}
 
@@ -52,5 +75,53 @@ module.exports = class InteractionCommand {
 			interaction,
 			options,
 		});
+	}
+
+	transformPermissions() {
+		/** @type {ApplicationCommandPermissionData[]} */
+		const permissions = new Array();
+		if (this.permissions) {
+			if (this.permissions.roles) {
+				if (this.permissions.roles.allow) {
+					for (const role of this.permissions.roles.allow) {
+						permissions.push({
+							id: role,
+							permission: true,
+							type: 'ROLE',
+						});
+					}
+				}
+				if (this.permissions.roles.deny) {
+					for (const role of this.permissions.roles.deny) {
+						permissions.push({
+							id: role,
+							permission: false,
+							type: 'ROLE',
+						});
+					}
+				}
+			}
+			if (this.permissions.users) {
+				if (this.permissions.users.allow) {
+					for (const user of this.permissions.users.allow) {
+						permissions.push({
+							id: user,
+							permission: true,
+							type: 'USER',
+						});
+					}
+				}
+				if (this.permissions.users.deny) {
+					for (const user of this.permissions.users.deny) {
+						permissions.push({
+							id: user,
+							permission: false,
+							type: 'USER',
+						});
+					}
+				}
+			}
+		}
+		return permissions;
 	}
 };
