@@ -1,11 +1,11 @@
 const { Command } = require('discord-akairo');
 const { MessageEmbed } = require('discord.js');
-const { parseMention, constants, contains } = require('../../utils/Base.js');
+const { parseMention, constants, contains } = require('../../../utils/Base.js');
 
 /**
- * @typedef {import('../../structures/Base.js').Client} Client
- * @typedef {import('../../structures/Base.js').ExtendedMessage} ExtendedMessage
- * @typedef {import('../../structures/Base.js').ExtendedMember} ExtendedMember
+ * @typedef {import('../../../structures/Base.js').Client} Client
+ * @typedef {import('../../../structures/Base.js').ExtendedMessage} ExtendedMessage
+ * @typedef {import('../../../structures/Base.js').ExtendedMember} ExtendedMember
  * @typedef {import('discord.js').TextChannel} TextChannel
  * @typedef {import('discord.js').MessageAttachment} MessageAttachment
  * @typedef {import('discord.js').MessageAdditions} MessageAdditions

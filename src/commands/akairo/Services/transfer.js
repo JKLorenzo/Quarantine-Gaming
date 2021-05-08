@@ -1,9 +1,9 @@
 const { Command } = require('discord-akairo');
 
 /**
- * @typedef {import('../../structures/Base.js').Client} Client
- * @typedef {import('../../structures/Base.js').ExtendedMessage} ExtendedMessage
- * @typedef {import('../../structures/Base.js').ExtendedMember} ExtendedMember
+ * @typedef {import('../../../structures/Base.js').Client} Client
+ * @typedef {import('../../../structures/Base.js').ExtendedMessage} ExtendedMessage
+ * @typedef {import('../../../structures/Base.js').ExtendedMember} ExtendedMember
  */
 
 module.exports = class Transfer extends Command {

@@ -3,8 +3,8 @@ const { JSDOM } = require('jsdom');
 const axios = require('axios');
 
 /**
- * @typedef {import('../../structures/Base.js').Client} Client
- * @typedef {import('../../structures/Base.js').ExtendedMessage} ExtendedMessage
+ * @typedef {import('../../../structures/Base.js').Client} Client
+ * @typedef {import('../../../structures/Base.js').ExtendedMessage} ExtendedMessage
  */
 
 module.exports = class SteamSale extends Command {

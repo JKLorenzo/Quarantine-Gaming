@@ -1,7 +1,7 @@
 const { Command } = require('discord-akairo');
 
 /**
- * @typedef {import('../../structures/Base.js').ExtendedMessage} ExtendedMessage
+ * @typedef {import('../../../structures/Base.js').ExtendedMessage} ExtendedMessage
  */
 
 module.exports = class Ping extends Command {

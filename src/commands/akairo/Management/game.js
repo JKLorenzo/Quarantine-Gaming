@@ -1,11 +1,11 @@
 const { MessageEmbed } = require('discord.js');
 const { Command } = require('discord-akairo');
-const { getPercentSimilarity, constants } = require('../../utils/Base.js');
+const { getPercentSimilarity, constants } = require('../../../utils/Base.js');
 
 /**
- * @typedef {import('../../structures/Base.js').Client} Client
- * @typedef {import('../../structures/Base.js').ExtendedMessage} ExtendedMessage
- * @typedef {import('../../structures/Base.js').ExtendedMember} ExtendedMember
+ * @typedef {import('../../../structures/Base.js').Client} Client
+ * @typedef {import('../../../structures/Base.js').ExtendedMessage} ExtendedMessage
+ * @typedef {import('../../../structures/Base.js').ExtendedMember} ExtendedMember
  * @typedef {import('discord.js').GuildChannel} GuildChannel
  * @typedef {import('discord.js').Role} Role
  */

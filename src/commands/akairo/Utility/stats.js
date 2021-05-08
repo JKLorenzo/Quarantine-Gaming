@@ -1,11 +1,11 @@
 const { MessageEmbed } = require('discord.js');
 const { Command } = require('discord-akairo');
-const { compareDate } = require('../../utils/Base.js');
+const { compareDate } = require('../../../utils/Base.js');
 
 /**
- * @typedef {import('../../structures/Base.js').Client} Client
- * @typedef {import('../../structures/Base.js').ExtendedMessage} ExtendedMessage
- * @typedef {import('../../utils/Base.js').ProcessQueue} ProcessQueue
+ * @typedef {import('../../../structures/Base.js').Client} Client
+ * @typedef {import('../../../structures/Base.js').ExtendedMessage} ExtendedMessage
+ * @typedef {import('../../../utils/Base.js').ProcessQueue} ProcessQueue
  */
 
 /**

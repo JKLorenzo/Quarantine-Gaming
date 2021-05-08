@@ -47,7 +47,7 @@ module.exports = class Client extends AkairoClient {
 
 		// Load Commands
 		this.commandHandler = new CommandHandler(this, {
-			directory: path.join(__dirname, '../commands'),
+			directory: path.join(__dirname, '../commands/akairo'),
 			prefix: '!',
 			argumentDefaults: {
 				prompt: {

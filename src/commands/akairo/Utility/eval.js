@@ -4,7 +4,7 @@ const { Command } = require('discord-akairo');
 const tags = require('common-tags');
 
 /**
- * @typedef {import('../../structures/Base.js').ExtendedMessage} ExtendedMessage
+ * @typedef {import('../../../structures/Base.js').ExtendedMessage} ExtendedMessage
  */
 
 const nl = '!!NL!!';
