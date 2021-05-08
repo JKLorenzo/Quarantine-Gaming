@@ -68,7 +68,7 @@ module.exports = class InteractionCommand {
 
 	/**
      * @param {CommandInteraction} interaction
-     * @param {CommandInteractionOption[]} options
+     * @param {Object} options
     */
 	exec(interaction, options) {
 		console.log({

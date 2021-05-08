@@ -8,6 +8,7 @@ const ETM = new ErrorTicketManager('Interaction Manager');
  * @typedef {import('../structures/Base.js').Client} Client
  * @typedef {import('../structures/Base.js').InteractionCommand} InteractionCommand
  * @typedef {import('discord.js').CommandInteraction} CommandInteraction
+ * @typedef {import('discord.js').CommandInteractionOption} CommandInteractionOption
  */
 
 module.exports = class InteractionManager {
@@ -68,15 +69,38 @@ module.exports = class InteractionManager {
      * @param {CommandInteraction} commandInteraction
      */
 	processCommand(commandInteraction) {
-		/** @type {InteractionCommand} */
-		const this_interaction = this.interaction_commands.find(interaction => interaction.name == commandInteraction.commandName);
-		if (this_interaction) {
-			try{
-				this_interaction.exec(commandInteraction, commandInteraction.options);
+		try {
+			/** @type {InteractionCommand} */
+			const this_interaction = this.interaction_commands.find(interaction => interaction.name == commandInteraction.commandName);
+			if (this_interaction) this_interaction.exec(commandInteraction, this.transformCommandOptions(commandInteraction.options));
+		}
+		catch (error) {
+			this.client.error_manager.mark(ETM.create('processCommand', error));
+		}
+	}
+
+	/**
+	 * @private
+	 * @param {CommandInteractionOption[]} options
+	 * @param {Object} [arguments]
+	 * @returns {Object}
+	 */
+	transformCommandOptions(options, args = {}) {
+		try {
+			if (options && Array.isArray(options)) {
+				for (const option of options) {
+					if (option.options) {
+						args[option.name] = this.transformCommandOptions(option.options);
+					}
+					else {
+						args[option.name] = option[option.type.toLowerCase()];
+					}
+				}
 			}
-			catch (error) {
-				this.client.error_manager.mark(ETM.create('processCommand', error));
-			}
+			return args;
+		}
+		catch (error) {
+			this.client.error_manager.mark(ETM.create('transformCommandOptions', error));
 		}
 	}
 };
