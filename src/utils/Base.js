@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const gis = require('g-i-s');
 const probe = require('probe-image-size');
 const fetch = require('node-fetch');
@@ -184,6 +186,25 @@ function isPromise(p) {
 	return p && Object.prototype.toString.call(p) === '[object Promise]';
 }
 
+/**
+ * Gets all the file directories contained in the parent directory.
+ * @param {String} dirPath
+ * @param {String[]} arrayOfFiles
+ * @returns
+ */
+function getAllFiles(dirPath, arrayOfFiles = []) {
+	const files = fs.readdirSync(dirPath);
+	files.forEach(function(file) {
+		if (fs.statSync(dirPath + '/' + file).isDirectory()) {
+			arrayOfFiles = getAllFiles(dirPath + '/' + file, arrayOfFiles);
+		}
+		else {
+			arrayOfFiles.push(path.join(dirPath, '/', file));
+		}
+	});
+	return arrayOfFiles;
+}
+
 module.exports = {
 	ProcessQueue,
 	ErrorTicketManager,
@@ -198,4 +219,5 @@ module.exports = {
 	fetchImage,
 	isPromise,
 	generateColor,
+	getAllFiles,
 };
