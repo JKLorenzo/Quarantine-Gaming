@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { ErrorTicketManager } = require('../utils/Base.js');
+const { ErrorTicketManager, getAllFiles } = require('../utils/Base.js');
 
 const ETM = new ErrorTicketManager('Interaction Manager');
 
@@ -31,9 +31,7 @@ module.exports = class InteractionManager {
 			const slashcommands_dir = path.join(__dirname, '../commands/slash');
 			if (fs.existsSync(slashcommands_dir)) {
 				this.interaction_commands = new Array();
-				const slashcommands = fs.readdirSync(slashcommands_dir);
-				for (const slashcommand of slashcommands) {
-					const slashcommand_path = path.join(slashcommands_dir, slashcommand);
+				for (const slashcommand_path of getAllFiles(slashcommands_dir)) {
 					const slashcommand_class = require(slashcommand_path);
 					/** @type {InteractionCommand} */
 					const this_slashcommand = new slashcommand_class();
