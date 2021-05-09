@@ -82,10 +82,10 @@ module.exports = class InteractionManager {
 				for (const option of options) {
 					if (option.options) {
 						if(option.type) {
-							args[option.name] = this.transformSlashCommandOptions(option.options, { name: option.name });
+							args[option.name] = this.transformSlashCommandOptions(option.options, { option: option.name });
 						}
 						else {
-							args = this.transformSlashCommandOptions(option.options, { name: option.name });
+							args = this.transformSlashCommandOptions(option.options);
 						}
 					}
 					else {
