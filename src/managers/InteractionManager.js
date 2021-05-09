@@ -61,7 +61,6 @@ module.exports = class InteractionManager {
      */
 	processSlashCommand(commandInteraction) {
 		try {
-			/** @type {SlashCommand} */
 			const slash_command = this.slash_commands.find(this_slash_command => this_slash_command.name == commandInteraction.commandName);
 			if (slash_command) slash_command.exec(commandInteraction, this.transformSlashCommandOptions(commandInteraction.options));
 		}
@@ -88,8 +87,11 @@ module.exports = class InteractionManager {
 							args = this.transformSlashCommandOptions(option.options);
 						}
 					}
+					else if (typeof option.value !== 'undefined') {
+						args[option.name] = option.value;
+					}
 					else {
-						args[option.name] = option.channel || option.member || option.role || option.user || option.value || undefined;
+						args[option.name] = option.channel || option.member || option.role || option.user;
 					}
 				}
 			}
