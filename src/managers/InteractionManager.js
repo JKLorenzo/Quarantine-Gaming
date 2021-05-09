@@ -1,4 +1,3 @@
-const fs = require('fs');
 const path = require('path');
 const { ErrorTicketManager, getAllFiles } = require('../utils/Base.js');
 
@@ -6,7 +5,7 @@ const ETM = new ErrorTicketManager('Interaction Manager');
 
 /**
  * @typedef {import('../structures/Base.js').Client} Client
- * @typedef {import('../structures/Base.js').InteractionCommand} InteractionCommand
+ * @typedef {import('../structures/Base.js').SlashCommand} SlashCommand
  * @typedef {import('discord.js').CommandInteraction} CommandInteraction
  * @typedef {import('discord.js').CommandInteractionOption} CommandInteractionOption
  */
@@ -18,45 +17,37 @@ module.exports = class InteractionManager {
 
 		/**
          * @private
-         * @type {InteractionCommand[]}
+         * @type {SlashCommand[]}
          */
-		this.interaction_commands = new Array();
+		this.slash_commands = new Array();
 
 		this.client.on('interaction', interaction => {
-			if (interaction.isCommand()) this.processCommand(interaction);
+			if (interaction.isCommand()) return this.processSlashCommand(interaction);
 		});
 	}
 
+	/**
+	 * Loads all the slash commands.
+	 */
 	async loadAll() {
 		try {
+			this.slash_commands = new Array();
+
 			const slashcommands_dir = path.join(__dirname, '../commands/slash');
-			if (fs.existsSync(slashcommands_dir)) {
-				this.interaction_commands = new Array();
-				for (const slashcommand_path of getAllFiles(slashcommands_dir)) {
-					const slashcommand_class = require(slashcommand_path);
-					/** @type {InteractionCommand} */
-					const this_slashcommand = new slashcommand_class();
-					this.interaction_commands.push(this_slashcommand);
-				}
+			for (const slashcommand_path of getAllFiles(slashcommands_dir)) {
+				const slashcommand_class = require(slashcommand_path);
+				/** @type {SlashCommand} */
+				const slash_command = new slashcommand_class();
+				this.slash_commands.push(slash_command);
+			}
 
-				const commands = this.interaction_commands.map(interaction => {
-					const ApplicationCommandData = {
-						name: interaction.name,
-						description: interaction.description,
-						options: interaction.options,
-						defaultPermission: interaction.defaultPermission,
-					};
-					return ApplicationCommandData;
-				});
+			const ApplicationCommandData = this.slash_commands.map(slash_command => slash_command.getApplicationCommandData());
+			const ApplicationCommands = await this.client.guild.commands.set(ApplicationCommandData).then(application_commands => application_commands.array());
 
-				const ApplicationCommands = await this.client.guild.commands.set(commands).then(applicationCommands => applicationCommands.array());
-
-				for (const interaction_command of this.interaction_commands) {
-					if (!interaction_command.permissions) continue;
-					const this_command = ApplicationCommands.find(command => command.name == interaction_command.name);
-					if (!this_command) continue;
-					await this_command.setPermissions(interaction_command.transformPermissions());
-				}
+			for (const slash_command of this.slash_commands) {
+				if (!slash_command.permissions) continue;
+				const application_command = ApplicationCommands.find(this_application_command => this_application_command.name == slash_command.name);
+				if (application_command) await application_command.setPermissions(slash_command.transformPermissions());
 			}
 		}
 		catch (error) {
@@ -68,11 +59,11 @@ module.exports = class InteractionManager {
      * @private
      * @param {CommandInteraction} commandInteraction
      */
-	processCommand(commandInteraction) {
+	processSlashCommand(commandInteraction) {
 		try {
-			/** @type {InteractionCommand} */
-			const this_interaction = this.interaction_commands.find(interaction => interaction.name == commandInteraction.commandName);
-			if (this_interaction) this_interaction.exec(commandInteraction, this.transformCommandOptions(commandInteraction.options));
+			/** @type {SlashCommand} */
+			const slash_command = this.slash_commands.find(this_slash_command => this_slash_command.name == commandInteraction.commandName);
+			if (slash_command) slash_command.exec(commandInteraction, this.transformSlashCommandOptions(commandInteraction.options));
 		}
 		catch (error) {
 			this.client.error_manager.mark(ETM.create('processCommand', error));
@@ -85,15 +76,20 @@ module.exports = class InteractionManager {
 	 * @param {Object} [arguments]
 	 * @returns {Object}
 	 */
-	transformCommandOptions(options, args = {}) {
+	transformSlashCommandOptions(options, args = {}) {
 		try {
 			if (options && Array.isArray(options)) {
 				for (const option of options) {
 					if (option.options) {
-						args[option.name] = this.transformCommandOptions(option.options);
+						if(option.type) {
+							args[option.name] = this.transformSlashCommandOptions(option.options, { name: option.name });
+						}
+						else {
+							args = this.transformSlashCommandOptions(option.options, { name: option.name });
+						}
 					}
 					else {
-						args[option.name] = option[option.type.toLowerCase()];
+						args[option.name] = option.channel || option.member || option.role || option.user || option.value || undefined;
 					}
 				}
 			}

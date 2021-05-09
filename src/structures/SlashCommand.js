@@ -1,10 +1,19 @@
 /**
+ * Data for creating or editing a slash command.
+ * @typedef {Object} SlashCommandData
+ * @property {string} name The name of the command
+ * @property {string} description The description of the command
+ * @property {ApplicationCommandOptionData[]} [options] Options for the command
+ * @property {SlashCommandPermissionData} [permissions] The permissions for this command
+ * @property {boolean} [defaultPermission] Whether the command is enabled by default when the app is added to a guild
+ */
+
+/**
  * Data for creating or editing an application command.
  * @typedef {Object} ApplicationCommandData
  * @property {string} name The name of the command
  * @property {string} description The description of the command
  * @property {ApplicationCommandOptionData[]} [options] Options for the command
- * @property {InteractionCommandPermissionData} [permissions] The permissions for this command
  * @property {boolean} [defaultPermission] Whether the command is enabled by default when the app is added to a guild
  */
 
@@ -35,20 +44,20 @@
  */
 
 /**
- * @typedef {'SUB_COMMAND' | 'SUB_COMMAND_GROUP' | 'STRING' | 'INTEGER' | 'BOOLEAN' | 'USER' | 'CHANNEL' | 'ROLE' | 'MENTIONABLE'} ApplicationCommandOptionType
- * @typedef {'ROLE' | 'USER'} ApplicationCommandPermissionType
+ * @typedef {Object} SlashCommandPermissionData
+ * @property {SlashCommandPermissionDataContent} [users] Sets the permission of users for this command.
+ * @property {SlashCommandPermissionDataContent} [roles] Sets the permission of roles for this command.
  */
 
 /**
- * @typedef {Object} InteractionCommandPermissionData
- * @property {InteractionCommandPermissionDataContent} [users] Sets the permission of users for this command.
- * @property {InteractionCommandPermissionDataContent} [roles] Sets the permission of roles for this command.
- */
-
-/**
- * @typedef {Object} InteractionCommandPermissionDataContent
+ * @typedef {Object} SlashCommandPermissionDataContent
  * @property {String[]} [allow] An array of ids allowed to use this command.
  * @property {String[]} [deny] An array of ids denied to use this command.
+ */
+
+/**
+ * @typedef {'SUB_COMMAND' | 'SUB_COMMAND_GROUP' | 'STRING' | 'INTEGER' | 'BOOLEAN' | 'USER' | 'CHANNEL' | 'ROLE' | 'MENTIONABLE'} ApplicationCommandOptionType
+ * @typedef {'ROLE' | 'USER'} ApplicationCommandPermissionType
  */
 
 /**
@@ -56,8 +65,8 @@
  * @typedef {import('discord.js').CommandInteractionOption} CommandInteractionOption
  */
 
-module.exports = class InteractionCommand {
-	/** @param {ApplicationCommandData} data */
+module.exports = class SlashCommand {
+	/** @param {SlashCommandData} data */
 	constructor(data) {
 		this.name = data.name;
 		this.description = data.description;
@@ -77,8 +86,24 @@ module.exports = class InteractionCommand {
 		});
 	}
 
+	/**
+	 * Gets the application command data of this slash comamnd.
+	 * @returns {ApplicationCommandData}
+	 */
+	getApplicationCommandData() {
+		return {
+			name: this.name,
+			description: this.description,
+			options: this.options,
+			defaultPermission: this.defaultPermission,
+		};
+	}
+
+	/**
+	 * Transforms this slash command permissions into an array of ApplicationCommandPermissionData.
+	 * @returns {ApplicationCommandPermissionData[]}
+	 */
 	transformPermissions() {
-		/** @type {ApplicationCommandPermissionData[]} */
 		const permissions = new Array();
 		if (this.permissions) {
 			if (this.permissions.roles) {
