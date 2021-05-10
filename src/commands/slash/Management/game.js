@@ -57,7 +57,7 @@ module.exports = class Game extends SlashCommand {
 
 	/**
 	 * @param {CommandInteraction} interaction
-	 * @param {{whitelist?: {option: String, name: String}, blacklist?: {option: String, name: String}}} options
+	 * @param {{whitelist?: {option: 'whitelist', name: String}, blacklist?: {option: 'blacklist', name: String}}} options
 	 */
 	async exec(interaction, options) {
 		await interaction.defer();
