@@ -65,7 +65,7 @@ module.exports = class InteractionManager {
 			if (slash_command) slash_command.exec(commandInteraction, this.transformSlashCommandOptions(commandInteraction.options));
 		}
 		catch (error) {
-			this.client.error_manager.mark(ETM.create('processCommand', error));
+			this.client.error_manager.mark(ETM.create('processSlashCommand', error));
 		}
 	}
 
@@ -80,7 +80,7 @@ module.exports = class InteractionManager {
 			if (options && Array.isArray(options)) {
 				for (const option of options) {
 					if (option.options) {
-						if(option.type) {
+						if (option.type) {
 							args[option.name] = this.transformSlashCommandOptions(option.options, { option: option.name });
 						}
 						else {
@@ -98,7 +98,7 @@ module.exports = class InteractionManager {
 			return args;
 		}
 		catch (error) {
-			this.client.error_manager.mark(ETM.create('transformCommandOptions', error));
+			this.client.error_manager.mark(ETM.create('transformSlashCommandOptions', error));
 		}
 	}
 };
