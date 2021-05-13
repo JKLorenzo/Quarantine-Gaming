@@ -8,7 +8,7 @@ module.exports = async function onceReady(client) {
 
 	await client.database_manager.init();
 	await client.invite_manager.init();
-	await client.interaction_manager.loadAll();
+	await client.interaction_manager.init();
 
 	await client.methods.loadMembers();
 	await client.methods.loadGameRoles();

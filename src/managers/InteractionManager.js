@@ -1,7 +1,9 @@
 const path = require('path');
-const { ErrorTicketManager, getAllFiles } = require('../utils/Base.js');
+const { ProcessQueue, ErrorTicketManager, getAllFiles, sleep } = require('../utils/Base.js');
 
 const ETM = new ErrorTicketManager('Interaction Manager');
+
+const initQueuer = new ProcessQueue(1000);
 
 /**
  * @typedef {import('../structures/Base.js').Client} Client
@@ -26,28 +28,101 @@ module.exports = class InteractionManager {
 		});
 	}
 
-	/**
-	 * Loads all the slash commands.
-	 */
-	async loadAll() {
+	async init() {
 		try {
 			this.slash_commands = new Array();
 
-			const slashcommands_dir = path.join(__dirname, '../commands/slash');
-			for (const slashcommand_path of getAllFiles(slashcommands_dir)) {
-				const slashcommand_class = require(slashcommand_path);
-				/** @type {SlashCommand} */
-				const slash_command = new slashcommand_class();
-				this.slash_commands.push(slash_command);
+			const slash_commands_dir = path.join(__dirname, '../commands/slash');
+			for (const slash_command_path of getAllFiles(slash_commands_dir)) {
+				const slash_command = require(slash_command_path);
+				this.slash_commands.push(new slash_command());
 			}
 
+			const existingApplicationCommands = await this.client.guild.commands.fetch().then(application_commands => application_commands.array());
+			const existingApplicationCommandPermissions = await this.client.guild.commands.fetchPermissions();
 			const ApplicationCommandData = this.slash_commands.map(slash_command => slash_command.getApplicationCommandData());
-			const ApplicationCommands = await this.client.guild.commands.set(ApplicationCommandData).then(application_commands => application_commands.array());
 
-			for (const slash_command of this.slash_commands) {
-				if (!slash_command.permissions) continue;
-				const application_command = ApplicationCommands.find(this_application_command => this_application_command.name == slash_command.name);
-				if (application_command) await application_command.setPermissions(slash_command.transformPermissions());
+			// Delete commands
+			for (const this_application_command of existingApplicationCommands) {
+				const this_application_command_data = ApplicationCommandData.find(application_command_data => application_command_data.name == this_application_command.name);
+				if (this_application_command_data) continue;
+				initQueuer.queue(async () => {
+					console.log(`InteractionManager: Deleting ${this_application_command.name}`);
+					try {
+						await this_application_command.delete();
+					}
+					catch (error) {
+						this.client.error_manager.mark(ETM.create('delete', error, 'loadAll'));
+					}
+					finally {
+						console.log(`InteractionManager: Deleted ${this_application_command.name}`);
+					}
+				});
+			}
+
+			// Create commands
+			for (const this_application_command_data of ApplicationCommandData) {
+				const this_application_command = existingApplicationCommands.find(application_command => application_command.name == this_application_command_data.name);
+				if (this_application_command) continue;
+				initQueuer.queue(async () => {
+					console.log(`InteractionManager: Creating ${this_application_command_data.name}`);
+					try {
+						await this.client.guild.commands.create(this_application_command_data);
+					}
+					catch (error) {
+						this.client.error_manager.mark(ETM.create('create', error, 'loadAll'));
+					}
+					finally {
+						console.log(`InteractionManager: Created ${this_application_command.name}`);
+					}
+				});
+			}
+
+			// Update commands
+			for (const this_slash_command of this.slash_commands) {
+				const this_application_command = this.client.guild.commands.cache.find(application_command => application_command.name == this_slash_command.name);
+				if (!this_application_command) continue;
+				const sameDescription = this_application_command.description === this_slash_command.description;
+				const sameOptions = JSON.stringify(this_application_command.options) === JSON.stringify(this_slash_command.getApplicationCommandOptions());
+				const sameDefaultPermissions = this_application_command.defaultPermission === this_slash_command.defaultPermission;
+				if (sameDescription && sameOptions && sameDefaultPermissions) continue;
+				initQueuer.queue(async () => {
+					console.log(`InteractionManager: Updating ${this_application_command.name}`);
+					try {
+						await this.client.guild.commands.edit(this_application_command, this_slash_command.getApplicationCommandData());
+					}
+					catch (error) {
+						this.client.error_manager.mark(ETM.create('update', error, 'loadAll'));
+					}
+					finally {
+						console.log(`InteractionManager: Updated ${this_application_command.name}`);
+					}
+				});
+			}
+
+			// Wait for the above methods to finish
+			await initQueuer.queue(async () => await sleep(1000));
+
+			// Update command permissions
+			for (const this_slash_command of this.slash_commands) {
+				const this_application_command = this.client.guild.commands.cache.find(application_command => application_command.name == this_slash_command.name);
+				if (!this_application_command) continue;
+				const this_application_command_permissions = existingApplicationCommandPermissions.get(this_application_command.id);
+				const this_slash_command_permissions = this_slash_command.getApplicationCommandPermissionData();
+				const samePermissions = JSON.stringify(this_application_command_permissions) === JSON.stringify(this_slash_command_permissions);
+				if (samePermissions) continue;
+				initQueuer.queue(async () => {
+					console.log(`InteractionManager: Permission Updating ${this_application_command.name}`);
+					try {
+						await this_application_command.setPermissions(this_slash_command.getApplicationCommandPermissionData());
+					}
+					catch (error) {
+						this.client.error_manager.mark(ETM.create('permission', error, 'loadAll'));
+					}
+					finally {
+						console.log(`InteractionManager: Permission Updated ${this_application_command.name}`);
+					}
+				});
 			}
 		}
 		catch (error) {

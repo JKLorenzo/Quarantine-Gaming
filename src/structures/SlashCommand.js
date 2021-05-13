@@ -29,6 +29,17 @@
  */
 
 /**
+ * An option for an application command or subcommand.
+ * @typedef {Object} ApplicationCommandOption
+ * @property {ApplicationCommandOptionType} type The type of the option
+ * @property {string} name The name of the option
+ * @property {string} description The description of the option
+ * @property {boolean} [required] Whether the option is required
+ * @property {ApplicationCommandOptionChoice[]} [choices] The choices of the option for the user to pick from
+ * @property {ApplicationCommandOptionData[]} [options] Additional options if this option is a subcommand (group)
+ */
+
+/**
  * A choice for an application command option.
  * @typedef {Object} ApplicationCommandOptionChoice
  * @property {string} name The name of the choice
@@ -72,22 +83,19 @@ module.exports = class SlashCommand {
 		this.description = data.description;
 		this.options = data.options;
 		this.permissions = data.permissions;
-		this.defaultPermission = data.defaultPermission;
+		this.defaultPermission = typeof data.defaultPermission === 'boolean' ? data.defaultPermission : true;
 	}
 
 	/**
-     * @param {CommandInteraction} interaction
-     * @param {Object} options
-    */
+	 * @param {CommandInteraction} interaction
+	 * @param {Object} options
+	*/
 	exec(interaction, options) {
-		console.log({
-			interaction,
-			options,
-		});
+		console.log({ interaction, options });
 	}
 
 	/**
-	 * Gets the application command data of this slash comamnd.
+	 * Gets the ApplicationCommandData of this slash command.
 	 * @returns {ApplicationCommandData}
 	 */
 	getApplicationCommandData() {
@@ -100,53 +108,40 @@ module.exports = class SlashCommand {
 	}
 
 	/**
-	 * Transforms this slash command permissions into an array of ApplicationCommandPermissionData.
+	 * Gets the array of ApplicationCommandOption of this slash command.
+	 * @param {ApplicationCommandOptionData[]} [options]
+	 * @returns {ApplicationCommandOption[]}
+	 */
+	getApplicationCommandOptions(options = this.options) {
+		if (!options && !Array.isArray(options)) return [];
+		return options.map(option => {
+			return {
+				type: option.type,
+				name: option.name,
+				description: option.description,
+				required: option.required,
+				choices: option.choices,
+				options: option.options ? this.getApplicationCommandOptions(option.options) : undefined,
+			};
+		});
+	}
+
+	/**
+	 * Gets the array of ApplicationCommandPermissionData of this slash command.
 	 * @returns {ApplicationCommandPermissionData[]}
 	 */
-	transformPermissions() {
+	getApplicationCommandPermissionData() {
 		const permissions = new Array();
 		if (this.permissions) {
 			if (this.permissions.roles) {
-				if (this.permissions.roles.allow) {
-					for (const role of this.permissions.roles.allow) {
-						permissions.push({
-							id: role,
-							permission: true,
-							type: 'ROLE',
-						});
-					}
-				}
-				if (this.permissions.roles.deny) {
-					for (const role of this.permissions.roles.deny) {
-						permissions.push({
-							id: role,
-							permission: false,
-							type: 'ROLE',
-						});
-					}
-				}
+				if (this.permissions.roles.allow) this.permissions.roles.allow.forEach(id => permissions.push({ id: id, permission: true, type: 'ROLE' }));
+				if (this.permissions.roles.deny) this.permissions.roles.deny.forEach(id => permissions.push({ id: id, permission: false, type: 'ROLE' }));
 			}
 			if (this.permissions.users) {
-				if (this.permissions.users.allow) {
-					for (const user of this.permissions.users.allow) {
-						permissions.push({
-							id: user,
-							permission: true,
-							type: 'USER',
-						});
-					}
-				}
-				if (this.permissions.users.deny) {
-					for (const user of this.permissions.users.deny) {
-						permissions.push({
-							id: user,
-							permission: false,
-							type: 'USER',
-						});
-					}
-				}
+				if (this.permissions.users.allow) this.permissions.users.allow.forEach(id => permissions.push({ id: id, permission: true, type: 'USER' }));
+				if (this.permissions.users.deny) this.permissions.users.deny.forEach(id => permissions.push({ id: id, permission: false, type: 'USER' }));
 			}
 		}
-		return permissions;
+		return permissions.length ? permissions : undefined;
 	}
 };
