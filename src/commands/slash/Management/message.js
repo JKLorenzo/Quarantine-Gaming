@@ -12,11 +12,11 @@ module.exports = class Message extends SlashCommand {
 	constructor() {
 		super({
 			name: 'message',
-			description: '[Staff/Mod] Sends a message to a user or a channel as Quarantine Gaming.',
+			description: '[Staff/Mod] Sends a message to a member or a channel as Quarantine Gaming.',
 			options: [
 				{
 					name: 'text_channel',
-					description: 'Sends a message to a channel as Quarantine Gaming.',
+					description: '[Staff/Mod] Sends a message to a channel as Quarantine Gaming.',
 					type: 'SUB_COMMAND',
 					options: [
 						{
@@ -35,7 +35,7 @@ module.exports = class Message extends SlashCommand {
 				},
 				{
 					name: 'dm',
-					description: 'Sends a message to a member as Quarantine Gaming.',
+					description: '[Staff/Mod] Sends a message to a member as Quarantine Gaming.',
 					type: 'SUB_COMMAND',
 					options: [
 						{

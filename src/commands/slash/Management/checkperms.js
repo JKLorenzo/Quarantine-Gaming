@@ -13,11 +13,11 @@ module.exports = class CheckPerms extends SlashCommand {
 	constructor() {
 		super({
 			name: 'checkperms',
-			description: '[Mod] Gets the permission of a member or a role.',
+			description: '[Staff/Mod] Gets the permissions of a member or a role.',
 			options: [
 				{
 					name: 'userperms',
-					description: 'Gets the permission of the user.',
+					description: '[Staff/Mod] Gets the permissions of a user.',
 					type: 'SUB_COMMAND',
 					options: [
 						{
@@ -41,7 +41,7 @@ module.exports = class CheckPerms extends SlashCommand {
 				},
 				{
 					name: 'roleperms',
-					description: 'Gets the permission of the role.',
+					description: '[Staff/Mod] Gets the permissions of a role.',
 					type: 'SUB_COMMAND',
 					options: [
 						{

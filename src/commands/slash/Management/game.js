@@ -17,7 +17,7 @@ module.exports = class Game extends SlashCommand {
 			options: [
 				{
 					name: 'whitelist',
-					description: 'Whitelist a game.',
+					description: '[Staff/Mod/Booster] Whitelist a game (used in game roles and play roles).',
 					type: 'SUB_COMMAND',
 					options: [
 						{
@@ -30,7 +30,7 @@ module.exports = class Game extends SlashCommand {
 				},
 				{
 					name: 'blacklist',
-					description: 'Blacklist a game.',
+					description: '[Staff/Mod/Booster] Blacklist a game (used in game roles and play roles).',
 					type: 'SUB_COMMAND',
 					options: [
 						{
