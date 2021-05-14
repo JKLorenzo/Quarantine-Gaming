@@ -62,9 +62,15 @@ module.exports = {
 		},
 		qg: {
 			dm: '773425152750125106',
-			logs: '822117370675986484',
 			testing_ground_text: '822020064043466802',
 			testing_ground_voice: '822020338102829057',
+		},
+	},
+	interface: {
+		guild: '806481618008539137',
+		channels: {
+			logs: '842696900235100190',
+			telemetry: '842698906067927060',
 		},
 	},
 	images: {
@@ -73,6 +79,9 @@ module.exports = {
 		multiplayer_banner: 'https://playbingerepeat.files.wordpress.com/2018/05/fortnite-banner.png?w=1332&h=666&crop=1',
 		audio_control_thumbnail: 'http://www.extensions.in.th/amitiae/2013/prefs/images/sound_icon.png',
 		error_message_thumbnail: 'https://mir-s3-cdn-cf.behance.net/project_modules/disp/c9955d46715833.589222657aded.png',
+		ratelimit_thumbnail: 'https://th.bing.com/th/id/Rf7832050f813fd4298d1e088f0f3fa55?rik=7Xq2EbPkqJZkOA&riu=http%3a%2f%2fwikitravel.org%2fupload%2fen%2fb%2fb2%2fWarning-icon.png&ehk=PkXja2hMq1jutYB%2b0GFtPqmAz5kDFDNF46LFCMRThhs%3d&risl=&pid=ImgRaw',
+		error_thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Alert-Stop-Warning-Error_icon.svg/1024px-Alert-Stop-Warning-Error_icon.svg.png',
+		warning_thumbnail: 'https://th.bing.com/th/id/R56a2c39ff1eb81159883eb0199a23a55?rik=P0sSInV4jnLJ4A&riu=http%3a%2f%2ficons.iconarchive.com%2ficons%2fcreative-freedom%2fshimmer%2f256%2fWarning-icon.png&ehk=%2bzahp%2f2lHxKQmBVmJvWgliQGudrOs9%2ftdVwSnN5FQPM%3d&risl=&pid=ImgRaw',
 	},
 	colors: {
 		play_role: '#7b00ff',

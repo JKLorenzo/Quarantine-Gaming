@@ -100,7 +100,10 @@ module.exports = class Client extends AkairoClient {
  	 * @returns {GuildChannel}
  	 */
 	channel(channel) {
-		return this.guild.channels.resolve(channel) || this.guild.channels.resolve(parseMention(channel));
+		return this.guild.channels.resolve(channel)
+			|| this.guild.channels.resolve(parseMention(channel))
+			|| this.guilds.cache.get(constants.interface.guild).channels.resolve(channel)
+			|| this.guilds.cache.get(constants.interface.guild).channels.resolve(parseMention(channel));
 	}
 
 	/**
