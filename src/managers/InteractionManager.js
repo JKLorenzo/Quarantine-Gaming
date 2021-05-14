@@ -161,11 +161,11 @@ module.exports = class InteractionManager {
 							args = this.transformSlashCommandOptions(option.options);
 						}
 					}
-					else if (typeof option.value !== 'undefined') {
-						args[option.name] = option.value;
+					else if (option.channel || option.member || option.role || option.user) {
+						args[option.name] = option.channel || option.member || option.role || option.user;
 					}
 					else {
-						args[option.name] = option.channel || option.member || option.role || option.user;
+						args[option.name] = option.value;
 					}
 				}
 			}
