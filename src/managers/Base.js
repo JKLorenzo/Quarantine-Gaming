@@ -8,6 +8,7 @@ const ReactionManager = require('./ReactionManager.js');
 const RoleManager = require('./RoleManager.js');
 const SpeechManager = require('./SpeechManager.js');
 const FreeGameManager = require('./FreeGameManager.js');
+const GameManager = require('./GameManager.js');
 const DedicatedChannelManager = require('./DedicatedChannelManager.js');
 
 module.exports = {
@@ -21,5 +22,6 @@ module.exports = {
 	RoleManager,
 	SpeechManager,
 	FreeGameManager,
+	GameManager,
 	DedicatedChannelManager,
 };

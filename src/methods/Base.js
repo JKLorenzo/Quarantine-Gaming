@@ -1,6 +1,4 @@
 const loadMembers = require('./LoadMembers.js');
-const flushExpiredGameRoles = require('./FlushExpiredGameRoles.js');
-const loadGameRoles = require('./LoadGameRoles.js');
 const screenMember = require('./ScreenMember');
 const voiceChannelTransfer = require('./VoiceChannelTransfer.js');
 
@@ -22,20 +20,6 @@ module.exports = class BaseMethods {
 	 */
 	loadMembers() {
 		return loadMembers(this.client);
-	}
-
-	/**
-	 * Remove expired game roles from members.
-	 */
-	flushExpiredGameRoles() {
-		return flushExpiredGameRoles(this.client);
-	}
-
-	/**
-	 * Add and remove game roles of all members.
-	 */
-	loadGameRoles() {
-		return loadGameRoles(this.client);
 	}
 
 	/**

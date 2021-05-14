@@ -140,7 +140,7 @@ module.exports = class DatabaseManager {
 								break;
 							}
 						}
-						this.client.methods.loadGameRoles();
+						this.client.game_manager.reload();
 					}, error => {
 						this.client.error_manager.mark(ETM.create('game_overrides', error, 'listeners'));
 					});

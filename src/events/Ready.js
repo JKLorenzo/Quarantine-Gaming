@@ -11,8 +11,7 @@ module.exports = async function onceReady(client) {
 	await client.interaction_manager.init();
 
 	await client.methods.loadMembers();
-	await client.methods.loadGameRoles();
-	await client.methods.flushExpiredGameRoles();
+	await client.game_manager.init();
 
 	client.dedicated_channel_manager.actions.start();
 	client.free_game_manager.actions.start();

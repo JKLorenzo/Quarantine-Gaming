@@ -8,7 +8,6 @@ const onGuildMemberRemove = require('./GuildMemberRemove.js');
 const onGuildBanAdd = require('./GuildBanAdd.js');
 const onGuildBanRemove = require('./GuildBanRemove.js');
 const onInviteCreate = require('./InviteCreate.js');
-const onPresenceUpdate = require('./PresenceUpdate.js');
 const onVoiceStateUpdate = require('./VoiceStateUpdate.js');
 const onMessageReactionAdd = require('./MessageReactionAdd.js');
 const onMessageReactionRemove = require('./MessageReactionRemove.js');
@@ -149,21 +148,6 @@ module.exports = class BaseEvents {
 						}
 						catch(error) {
 							this.client.error_manager.mark(ETM.create('inviteCreate', error));
-						}
-					});
-				}),
-			};
-
-			this.onPresenceUpdate = {
-				queuer: new ProcessQueue(1000),
-				event: this.client.on('presenceUpdate', (oldPresence, newPresence) => {
-					if (newPresence.member.guild.id != this.client.guild.id || newPresence.member.user.bot) return;
-					this.onPresenceUpdate.queuer.queue(async () => {
-						try {
-							await onPresenceUpdate(this.client, oldPresence, newPresence);
-						}
-						catch(error) {
-							this.client.error_manager.mark(ETM.create('presenceUpdate', error));
 						}
 					});
 				}),
