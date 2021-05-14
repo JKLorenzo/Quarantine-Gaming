@@ -133,13 +133,20 @@ module.exports = class InteractionManager {
      * @private
      * @param {CommandInteraction} commandInteraction
      */
-	processSlashCommand(commandInteraction) {
+	async processSlashCommand(commandInteraction) {
 		try {
 			const slash_command = this.slash_commands.find(this_slash_command => this_slash_command.name == commandInteraction.commandName);
-			if (slash_command) slash_command.exec(commandInteraction, this.transformSlashCommandOptions(commandInteraction.options));
+			if (slash_command) {
+				await slash_command.exec(commandInteraction, this.transformSlashCommandOptions(commandInteraction.options));
+			}
+			else {
+				throw new ReferenceError('Interaction command does not exist.');
+			}
 		}
 		catch (error) {
-			this.client.error_manager.mark(ETM.create('processSlashCommand', error));
+			const message = 'It looks like this command has failed.';
+			commandInteraction.deferred || commandInteraction.replied ? commandInteraction.editReply(message) : commandInteraction.reply(message);
+			this.client.error_manager.mark(ETM.create(commandInteraction.commandName, error, 'processSlashCommand'));
 		}
 	}
 
