@@ -91,16 +91,17 @@ module.exports = class GameManager {
  	 */
 	async processPresenceUpdate(newPresence, oldPresence) {
 		/** @type {ExtendedMember} */
-		const member = newPresence.member ? newPresence.member : oldPresence.member;
+		const member = newPresence ? newPresence.member : oldPresence.member;
 
 		/** @type {Collection<String, ActivityData>} */
 		const oldGames = new Collection();
 		/** @type {Collection<String, ActivityData>} */
 		const newGames = new Collection();
 
-		oldPresence.activities.filter(activity => activity.type == 'PLAYING').forEach(activity => oldGames.set(activity.name.trim(), { activity: activity, status: 'OLD' }));
-		newPresence.activities.filter(activity => activity.type == 'PLAYING').forEach(activity => newGames.set(activity.name.trim(), { activity: activity, status: 'NEW' }));
+		if (oldPresence) oldPresence.activities.filter(activity => activity.type === 'PLAYING').forEach(activity => oldGames.set(activity.name.trim(), { activity: activity, status: 'OLD' }));
+		if (newPresence) newPresence.activities.filter(activity => activity.type === 'PLAYING').forEach(activity => newGames.set(activity.name.trim(), { activity: activity, status: 'NEW' }));
 		const difference = newGames.difference(oldGames);
+
 		for (const [game_name, { activity, status }] of difference) {
 			const not_blacklisted = !this.client.database_manager.gameBlacklisted(game_name);
 			const valid = activity.applicationID || this.client.database_manager.gameWhitelisted(game_name);
