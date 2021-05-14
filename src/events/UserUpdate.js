@@ -20,7 +20,7 @@ module.exports = async function onUserUpdate(client, oldUser, newUser) {
 	if (oldUser.displayAvatarURL() != newUser.displayAvatarURL()) description.push(`**Avatar:** [New Avatar](${newUser.displayAvatarURL()})`);
 
 	if (description.length > 1) {
-		client.message_manager.sendToChannel(constants.channels.server.logs, new MessageEmbed({
+		client.message_manager.sendToChannel(constants.interface.channels.logs, new MessageEmbed({
 			author: { name: 'Quarantine Gaming: Member Update Events' },
 			title: 'User Property Changed',
 			description: description.join('\n'),

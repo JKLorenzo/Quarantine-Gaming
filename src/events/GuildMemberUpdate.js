@@ -69,7 +69,7 @@ module.exports = async function onGuildMemberUpdate(client, oldMember, newMember
 	if (role_removed.length) description.push(`**Role Removed:** ${role_removed.map(role => role.name).join(', ')}`);
 
 	if (description.length > 1) {
-		client.message_manager.sendToChannel(constants.channels.server.logs, new MessageEmbed({
+		client.message_manager.sendToChannel(constants.interface.channels.logs, new MessageEmbed({
 			author: { name: 'Quarantine Gaming: Member Update Events' },
 			title: 'Member Property Changed',
 			description: description.join('\n'),

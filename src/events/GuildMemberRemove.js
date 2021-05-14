@@ -15,7 +15,7 @@ module.exports = async function onGuildMemberRemove(client, member) {
 	const created_day_formatted = created_day.toString().split('GMT')[0];
 	const created_day_difference = compareDate(created_day);
 
-	await client.message_manager.sendToChannel(constants.channels.server.logs, new MessageEmbed({
+	await client.message_manager.sendToChannel(constants.interface.channels.logs, new MessageEmbed({
 		author: { name: 'Quarantine Gaming: Server Gateway Events' },
 		title: 'Member Leave',
 		description: [

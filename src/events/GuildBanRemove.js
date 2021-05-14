@@ -11,7 +11,7 @@ const { constants } = require('../utils/Base.js');
  * @param {User} user
  */
 module.exports = async function onGuildBanRemove(client, user) {
-	await client.message_manager.sendToChannel(constants.channels.server.logs, new MessageEmbed({
+	await client.message_manager.sendToChannel(constants.interface.channels.logs, new MessageEmbed({
 		author: { name: 'Quarantine Gaming: Server Gateway Events' },
 		title: 'Member Ban Lifted',
 		description: `**Profile:** ${user}`,

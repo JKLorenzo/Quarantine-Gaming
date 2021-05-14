@@ -1,3 +1,5 @@
+const { constants } = require('../utils/Base.js');
+
 /**
  * @typedef {import('../structures/Base.js').Client} Client
  */
@@ -15,6 +17,8 @@ module.exports = async function onceReady(client) {
 
 	client.dedicated_channel_manager.actions.start();
 	client.free_game_manager.actions.start();
+
+	client.message_manager.sendToChannel(constants.interface.channels.logs, '<------------------------------**STARTUP**------------------------------>');
 
 	console.log('Client initialized.');
 };
