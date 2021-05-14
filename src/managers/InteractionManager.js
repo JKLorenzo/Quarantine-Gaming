@@ -2,7 +2,6 @@ const path = require('path');
 const { ProcessQueue, ErrorTicketManager, getAllFiles, sleep } = require('../utils/Base.js');
 
 const ETM = new ErrorTicketManager('Interaction Manager');
-
 const initQueuer = new ProcessQueue(1000);
 
 /**
@@ -52,7 +51,7 @@ module.exports = class InteractionManager {
 						await this_application_command.delete();
 					}
 					catch (error) {
-						this.client.error_manager.mark(ETM.create('delete', error, 'loadAll'));
+						this.client.error_manager.mark(ETM.create('delete', error, 'init'));
 					}
 					finally {
 						console.log(`InteractionManager: Deleted ${this_application_command.name}`);
@@ -62,7 +61,7 @@ module.exports = class InteractionManager {
 
 			// Create commands
 			for (const this_application_command_data of ApplicationCommandData) {
-				const this_application_command = existingApplicationCommands.find(application_command => application_command.name == this_application_command_data.name);
+				const this_application_command = existingApplicationCommands.some(application_command => application_command.name == this_application_command_data.name);
 				if (this_application_command) continue;
 				initQueuer.queue(async () => {
 					console.log(`InteractionManager: Creating ${this_application_command_data.name}`);
@@ -70,10 +69,10 @@ module.exports = class InteractionManager {
 						await this.client.guild.commands.create(this_application_command_data);
 					}
 					catch (error) {
-						this.client.error_manager.mark(ETM.create('create', error, 'loadAll'));
+						this.client.error_manager.mark(ETM.create('create', error, 'init'));
 					}
 					finally {
-						console.log(`InteractionManager: Created ${this_application_command.name}`);
+						console.log(`InteractionManager: Created ${this_application_command_data.name}`);
 					}
 				});
 			}
@@ -92,7 +91,7 @@ module.exports = class InteractionManager {
 						await this.client.guild.commands.edit(this_application_command, this_slash_command.getApplicationCommandData());
 					}
 					catch (error) {
-						this.client.error_manager.mark(ETM.create('update', error, 'loadAll'));
+						this.client.error_manager.mark(ETM.create('update', error, 'init'));
 					}
 					finally {
 						console.log(`InteractionManager: Updated ${this_application_command.name}`);
@@ -117,7 +116,7 @@ module.exports = class InteractionManager {
 						await this_application_command.setPermissions(this_slash_command.getApplicationCommandPermissionData());
 					}
 					catch (error) {
-						this.client.error_manager.mark(ETM.create('permission', error, 'loadAll'));
+						this.client.error_manager.mark(ETM.create('permission', error, 'init'));
 					}
 					finally {
 						console.log(`InteractionManager: Permission Updated ${this_application_command.name}`);
@@ -126,7 +125,7 @@ module.exports = class InteractionManager {
 			}
 		}
 		catch (error) {
-			this.client.error_manager.mark(ETM.create('loadAll', error));
+			this.client.error_manager.mark(ETM.create('init', error));
 		}
 	}
 
