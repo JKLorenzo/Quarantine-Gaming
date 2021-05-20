@@ -1,5 +1,4 @@
 const loadMembers = require('./LoadMembers.js');
-const screenMember = require('./ScreenMember');
 const voiceChannelTransfer = require('./VoiceChannelTransfer.js');
 
 /**
@@ -20,14 +19,6 @@ module.exports = class BaseMethods {
 	 */
 	loadMembers() {
 		return loadMembers(this.client);
-	}
-
-	/**
-	 * Allow staff and moderator to screen this member.
-	 * @param {GuildMember} member
-	 */
-	screenMember(member) {
-		return screenMember(this.client, member);
 	}
 
 	/**

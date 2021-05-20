@@ -58,15 +58,19 @@ module.exports = class ExtendedMember extends GuildMember {
 	/**
 	 * Sets the inviter of this member.
 	 * @param {ExtendedMember} member
-	 * @param {ExtendedMember} moderator
 	 */
-	async setInviter(member, moderator) {
-		await this.client.database_manager.updateMemberData(this.id, {
-			inviter: member.id,
-			moderator: moderator.id,
-		});
+	async setInviter(member) {
+		await this.client.database_manager.updateMemberData(this.id, { inviter: member.id });
 		this.inviter = member;
-		this.moderator = moderator;
+	}
+
+	/**
+	 * Sets the moderator of this member.
+	 * @param {ExtendedMember} member
+	 */
+	async setModerator(member) {
+		await this.client.database_manager.updateMemberData(this.id, { moderator: member.id });
+		this.moderator = member;
 	}
 
 	/**

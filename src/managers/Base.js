@@ -2,7 +2,7 @@ const DatabaseManager = require('./DatabaseManager.js');
 const ChannelManager = require('./ChannelManager.js');
 const ErrorManager = require('./ErrorManager.js');
 const InteractionManager = require('./InteractionManager.js');
-const InviteManager = require('./InviteManager');
+const GatewayManager = require('./GatewayManager');
 const MessageManager = require('./MessageManager.js');
 const ReactionManager = require('./ReactionManager.js');
 const RoleManager = require('./RoleManager.js');
@@ -16,7 +16,7 @@ module.exports = {
 	DatabaseManager,
 	ErrorManager,
 	InteractionManager,
-	InviteManager,
+	GatewayManager,
 	MessageManager,
 	ReactionManager,
 	RoleManager,

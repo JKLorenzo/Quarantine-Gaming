@@ -14,37 +14,6 @@ const { constants } = require('../utils/Base.js');
  * @param {ExtendedMember} newMember
  */
 module.exports = async function onGuildMemberUpdate(client, oldMember, newMember) {
-	if (newMember.pending == false && oldMember.pending != newMember.pending) {
-		/** @type {TextChannel} */
-		const management_channel = client.channel(constants.channels.server.management);
-		const messages = await management_channel.messages.fetch();
-		const member_approval_requests = messages.filter(message => message.embeds.length && message.embeds[0].title == 'Member Approval Request');
-		const this_member_approval_request = member_approval_requests.find(message => {
-			const member = client.member(message.embeds[0].fields[0].value);
-			if (member) return member.id == newMember.id && message.embeds[0].fields[3].value == 'Pending';
-			return false;
-		});
-		if (this_member_approval_request) {
-			if (!newMember.user.bot) {
-				client.message_manager.sendToUser(newMember, [
-					`Hi ${newMember.user.username}, and welcome to **Quarantine Gaming**!`,
-					'Please wait while we are processing your membership approval.',
-				].join('\n'));
-			}
-			const reply_embed = this_member_approval_request.embeds[0];
-			reply_embed.fields[3].value = 'Action Required';
-			reply_embed.setFooter('✅ - Approve     ❌ - Kick     ⛔ - Ban');
-			await this_member_approval_request.edit({
-				content:`${newMember} wants to join this server.`,
-				embed: reply_embed,
-			});
-			await client.reaction_manager.add(this_member_approval_request, ['✅', '❌', '⛔']);
-			await this_member_approval_request.reply(`${client.role(constants.roles.staff)}, ${client.role(constants.roles.moderator)}, or ${client.role(constants.roles.booster)} action is required.`, { allowedMentions: { parse: ['roles'] } }).then(reply => {
-				reply.delete({ timeout: 10000 }).catch(e => void e);
-			});
-		}
-	}
-
 	/** @type {Role[]} */
 	const role_add = new Array();
 	/** @type {Role[]} */
@@ -69,7 +38,7 @@ module.exports = async function onGuildMemberUpdate(client, oldMember, newMember
 	if (role_removed.length) description.push(`**Role Removed:** ${role_removed.map(role => role.name).join(', ')}`);
 
 	if (description.length > 1) {
-		client.message_manager.sendToChannel(constants.interface.channels.logs, new MessageEmbed({
+		client.message_manager.sendToChannel(constants.interface.channels.member_events, new MessageEmbed({
 			author: { name: 'Quarantine Gaming: Member Update Events' },
 			title: 'Member Property Changed',
 			description: description.join('\n'),

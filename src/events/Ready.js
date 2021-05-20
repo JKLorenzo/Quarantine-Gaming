@@ -9,7 +9,7 @@ module.exports = async function onceReady(client) {
 	console.log('Client logged in. Initializing...');
 
 	await client.database_manager.init();
-	await client.invite_manager.init();
+	await client.gateway_manager.init();
 	await client.interaction_manager.init();
 
 	await client.methods.loadMembers();

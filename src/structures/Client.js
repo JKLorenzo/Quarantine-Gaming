@@ -1,7 +1,7 @@
 const { AkairoClient, CommandHandler } = require('discord-akairo');
 const {
 	ChannelManager, DatabaseManager, DedicatedChannelManager, ErrorManager,	FreeGameManager, GameManager,
-	InteractionManager, InviteManager, MessageManager, ReactionManager, RoleManager, SpeechManager,
+	InteractionManager, GatewayManager, MessageManager, ReactionManager, RoleManager, SpeechManager,
 } = require('../managers/Base.js');
 const Events = require('../events/Base.js');
 const Methods = require('../methods/Base.js');
@@ -37,7 +37,7 @@ module.exports = class Client extends AkairoClient {
 		this.free_game_manager = new FreeGameManager(this);
 		this.game_manager = new GameManager(this);
 		this.interaction_manager = new InteractionManager(this);
-		this.invite_manager = new InviteManager(this);
+		this.gateway_manager = new GatewayManager(this);
 		this.message_manager = new MessageManager(this);
 		this.reaction_manager = new ReactionManager(this);
 		this.role_manager = new RoleManager(this);

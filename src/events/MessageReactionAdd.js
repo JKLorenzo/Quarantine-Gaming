@@ -42,43 +42,6 @@ module.exports = async function onMessageReactionAdd(client, message, reaction, 
 			break;
 		}
 	}
-	else if (header_name == 'Quarantine Gaming: Server Gateway Administrative') {
-		const member = client.member(user);
-		if (member.hasRole([constants.roles.staff, constants.roles.moderator, constants.roles.booster]) && embed.fields[3].value == 'Action Required') {
-			const this_member = client.member(embed.fields[0].value);
-			const inviter = client.member(embed.fields[1].value);
-			embed.setFooter(new Date());
-			if (this_member) {
-				switch (emoji) {
-				case '✅':
-					await message.reactions.removeAll();
-					await client.role_manager.add(this_member, constants.roles.member);
-					await this_member.setInviter(inviter, member);
-					embed.fields[3].value = `Approved by ${user}`;
-					await message.edit({ content: '', embed: embed });
-					await client.message_manager.sendToUser(this_member, 'Hooraaay! 🥳 Your membership request has been approved! You will now have access to all the features of this server!');
-					break;
-				case '❌':
-					await message.reactions.removeAll();
-					await this_member.kick();
-					embed.fields[3].value = `Kicked by ${user}`;
-					await message.edit({ content: '', embed: embed });
-					break;
-				case '⛔':
-					await message.reactions.removeAll();
-					await this_member.ban();
-					embed.fields[3].value = `Banned by ${user}`;
-					await message.edit({ content: '', embed: embed });
-					break;
-				}
-			}
-			else {
-				await message.reactions.removeAll();
-				embed.fields[3].value = 'User not found ⚠';
-				await message.edit({ content: '', embed: embed });
-			}
-		}
-	}
 	else if (header_name == 'Quarantine Gaming: Experience') {
 		if (embed.title == 'Audio Control Extension for Voice Channels') {
 			// Delete reactions

@@ -2,12 +2,7 @@ const { ErrorTicketManager, ProcessQueue } = require('../utils/Base.js');
 const onceReady = require('./Ready.js');
 const onMessage = require('./Message.js');
 const onUserUpdate = require('./UserUpdate.js');
-const onGuildMemberAdd = require('./GuildMemberAdd.js');
 const onGuildMemberUpdate = require('./GuildMemberUpdate.js');
-const onGuildMemberRemove = require('./GuildMemberRemove.js');
-const onGuildBanAdd = require('./GuildBanAdd.js');
-const onGuildBanRemove = require('./GuildBanRemove.js');
-const onInviteCreate = require('./InviteCreate.js');
 const onVoiceStateUpdate = require('./VoiceStateUpdate.js');
 const onMessageReactionAdd = require('./MessageReactionAdd.js');
 const onMessageReactionRemove = require('./MessageReactionRemove.js');
@@ -66,20 +61,6 @@ module.exports = class BaseEvents {
 				}),
 			};
 
-			this.onGuildMemberAdd = {
-				queuer: new ProcessQueue(1000),
-				event: this.client.on('guildMemberAdd', (member) => {
-					this.onGuildMemberAdd.queuer.queue(async () => {
-						try {
-							await onGuildMemberAdd(this.client, member);
-						}
-						catch(error) {
-							this.client.error_manager.mark(ETM.create('guildMemberAdd', error));
-						}
-					});
-				}),
-			};
-
 			this.onGuildMemberUpdate = {
 				queuer: new ProcessQueue(1000),
 				event: this.client.on('guildMemberUpdate', (oldMember, newMember) => {
@@ -89,65 +70,6 @@ module.exports = class BaseEvents {
 						}
 						catch(error) {
 							this.client.error_manager.mark(ETM.create('guildMemberUpdate', error));
-						}
-					});
-				}),
-			};
-
-			this.onGuildMemberRemove = {
-				queuer: new ProcessQueue(1000),
-				event: this.client.on('guildMemberRemove', (member) => {
-					this.onGuildMemberRemove.queuer.queue(async () => {
-						try {
-							await onGuildMemberRemove(this.client, member);
-						}
-						catch(error) {
-							this.client.error_manager.mark(ETM.create('guildMemberRemove', error));
-						}
-					});
-				}),
-			};
-
-			this.onGuildBanAdd = {
-				queuer: new ProcessQueue(1000),
-				event: this.client.on('guildBanAdd', (guild, user) => {
-					if (guild.id != this.client.guild.id) return;
-					this.onGuildBanAdd.queuer.queue(async () => {
-						try {
-							await onGuildBanAdd(this.client, user);
-						}
-						catch(error) {
-							this.client.error_manager.mark(ETM.create('guildBanAdd', error));
-						}
-					});
-				}),
-			};
-
-			this.onGuildBanRemove = {
-				queuer: new ProcessQueue(1000),
-				event: this.client.on('guildBanRemove', (guild, user) => {
-					if (guild.id != this.client.guild.id) return;
-					this.onGuildBanRemove.queuer.queue(async () => {
-						try {
-							await onGuildBanRemove(this.client, user);
-						}
-						catch(error) {
-							this.client.error_manager.mark(ETM.create('guildBanRemove', error));
-						}
-					});
-				}),
-			};
-
-			this.onInviteCreate = {
-				queuer: new ProcessQueue(1000),
-				event: this.client.on('inviteCreate', (invite) => {
-					if (invite.guild.id != this.client.guild.id) return;
-					this.onInviteCreate.queuer.queue(async () => {
-						try {
-							await onInviteCreate(this.client, invite);
-						}
-						catch(error) {
-							this.client.error_manager.mark(ETM.create('inviteCreate', error));
 						}
 					});
 				}),
