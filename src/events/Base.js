@@ -1,6 +1,5 @@
 const { ErrorTicketManager, ProcessQueue } = require('../utils/Base.js');
 const onceReady = require('./Ready.js');
-const onMessage = require('./Message.js');
 const onUserUpdate = require('./UserUpdate.js');
 const onGuildMemberUpdate = require('./GuildMemberUpdate.js');
 const onVoiceStateUpdate = require('./VoiceStateUpdate.js');
@@ -30,20 +29,6 @@ module.exports = class BaseEvents {
 					catch(error) {
 						this.client.error_manager.mark(ETM.create('ready', error));
 					}
-				}),
-			};
-
-			this.onMessage = {
-				queuer: new ProcessQueue(1000),
-				event: this.client.on('message', (message) => {
-					this.onMessage.queuer.queue(async () => {
-						try {
-							await onMessage(this.client, message);
-						}
-						catch(error) {
-							this.client.error_manager.mark(ETM.create('message', error));
-						}
-					});
 				}),
 			};
 
