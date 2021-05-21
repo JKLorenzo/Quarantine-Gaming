@@ -1,4 +1,4 @@
-module.exports = class ErrorTicket {
+export default class ErrorTicket {
 	/**
      * Creates an Error Ticket for the Error Manager.
      * @param {String} location The location of this module.
@@ -12,4 +12,4 @@ module.exports = class ErrorTicket {
 		this.name = base ? base + ' -> ' + method : method;
 		this.error = error;
 	}
-};
+}

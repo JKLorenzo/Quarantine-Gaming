@@ -1,4 +1,4 @@
-module.exports = class Color {
+export default class Color {
 	/**
      * @param {{red: Number, green: Number, blue: Number}} options
      */
@@ -38,4 +38,4 @@ module.exports = class Color {
 		if (blue.length == 1) blue = `0${blue}`;
 		return `#${red}${green}${blue}`;
 	}
-};
+}

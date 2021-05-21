@@ -1,4 +1,4 @@
-module.exports = class FreeGame {
+export default class FreeGame {
 	/** @param {{title: String, url: String, author: String, description: String, validity: Number, score: Number, flair: String, permalink: String, id?: String}} data */
 	constructor(data) {
 		this.title = data.title;
@@ -11,4 +11,4 @@ module.exports = class FreeGame {
 		this.permalink = data.permalink;
 		this.id = data.id;
 	}
-};
+}

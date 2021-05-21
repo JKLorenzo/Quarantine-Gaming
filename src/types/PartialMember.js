@@ -1,7 +1,5 @@
-/**
- * A Member Object represented on the database.
- */
-module.exports = class PartialMember {
+/** A Member Object represented on the database. */
+export default class PartialMember {
 	/**
      * Initializes this member.
      * @param {{id: String, name: String, tagname: String, inviter?: String, moderator?: String}} data
@@ -33,4 +31,4 @@ module.exports = class PartialMember {
 		 */
 		this.moderator = data.moderator;
 	}
-};
+}

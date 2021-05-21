@@ -1,7 +1,5 @@
-/**
- * A Role Object represented on the database.
- */
-class ParitalRole {
+/** A Role Object represented on the database. */
+export default class ParitalRole {
 	/**
      * Initializes this role.
 	 * @param {{id: String, name: String, lastUpdated: String}} options
@@ -12,5 +10,3 @@ class ParitalRole {
 		this.lastUpdated = options.lastUpdated;
 	}
 }
-
-module.exports = ParitalRole;

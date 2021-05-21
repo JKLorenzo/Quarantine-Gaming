@@ -1,10 +1,10 @@
-const PartialMember = require('./PartialMember.js');
-const PartialRole = require('./PartialRole.js');
-const ErrorTicket = require('./ErrorTicket.js');
-const FreeGame = require('./FreeGame.js');
-const Color = require('./Color.js');
+import Color from'./Color.js';
+import ErrorTicket from './ErrorTicket.js';
+import FreeGame from './FreeGame.js';
+import PartialMember from './PartialMember.js';
+import PartialRole from './PartialRole.js';
 
-module.exports = {
+export {
 	PartialMember,
 	PartialRole,
 	ErrorTicket,
