@@ -1,14 +1,14 @@
-const Firebase = require('firebase-admin');
-const { FreeGame, PartialMember, PartialRole } = require('../types/Base.js');
-const { ErrorTicketManager, ProcessQueue, getPercentSimilarity } = require('../utils/Base.js');
-
-const ETM = new ErrorTicketManager('DatabaseManager');
+import Firebase from 'firebase-admin';
+import { FreeGame, PartialMember, PartialRole } from '../types/Base.js';
+import { ErrorTicketManager, ProcessQueue, getPercentSimilarity } from '../utils/Base.js';
 
 /**
- * @typedef {import('../structures/Base.js').Client} Client
+ * @typedef {import('../structures/Base').Client} Client
  */
 
-module.exports = class DatabaseManager {
+const ETM = new ErrorTicketManager('Database Manager');
+
+export default class DatabaseManager {
 	/** @param {Client} client */
 	constructor(client) {
 		this.client = client;
@@ -54,8 +54,7 @@ module.exports = class DatabaseManager {
 							...member_QueDocSnap.data(),
 						});
 					}
-				}
-				catch (error) {
+				} catch (error) {
 					this.client.error_manager.mark(ETM.create('loadMembers', error, 'actions'));
 				}
 			},
@@ -74,8 +73,7 @@ module.exports = class DatabaseManager {
 							break;
 						}
 					}
-				}
-				catch (error) {
+				} catch (error) {
 					this.client.error_manager.mark(ETM.create('loadGameOverrides', error, 'actions'));
 				}
 			},
@@ -92,8 +90,7 @@ module.exports = class DatabaseManager {
 						}));
 					}
 					await this.trimFreeGames();
-				}
-				catch (error) {
+				} catch (error) {
 					this.client.error_manager.mark(ETM.create('loadFreeGames', error, 'actions'));
 				}
 			},
@@ -167,8 +164,7 @@ module.exports = class DatabaseManager {
 	getMemberData(id) {
 		try {
 			return this.data.members[id];
-		}
-		catch (error) {
+		} catch (error) {
 			this.client.error_manager.mark(ETM.create('getMemberData', error));
 			throw error;
 		}
@@ -186,8 +182,7 @@ module.exports = class DatabaseManager {
 			});
 			this.data.members[data.id] = new PartialMember(data);
 			return this.data.members[data.id];
-		}
-		catch (error) {
+		} catch (error) {
 			this.client.error_manager.mark(ETM.create('setMemberData', error));
 			throw error;
 		}
@@ -205,8 +200,7 @@ module.exports = class DatabaseManager {
 			if (data.tagname) this.data.members[id].tagname = data.tagname;
 			if (data.inviter) this.data.members[id].inviter = data.inviter;
 			if (data.moderator) this.data.members[id].moderator = data.moderator;
-		}
-		catch (error) {
+		} catch (error) {
 			this.client.error_manager.mark(ETM.create('updateMemberData', error));
 			throw error;
 		}
@@ -230,8 +224,7 @@ module.exports = class DatabaseManager {
 					lastUpdated: role.data().lastUpdated,
 				}));
 			}
-		}
-		catch (error) {
+		} catch (error) {
 			this.error_manager.mark(ETM.create('getMemberExpiredGameRoles', error));
 			throw error;
 		}
@@ -252,15 +245,13 @@ module.exports = class DatabaseManager {
 				await reference.update({
 					lastUpdated: now.getTime(),
 				});
-			}
-			else {
+			} else {
 				await reference.set({
 					name: data.name,
 					lastUpdated: now.getTime(),
 				});
 			}
-		}
-		catch (error) {
+		} catch (error) {
 			this.client.error_manager.mark(ETM.create('updateMemberGameRole', error));
 			throw error;
 		}
@@ -274,8 +265,7 @@ module.exports = class DatabaseManager {
 	async deleteMemberGameRole(id, role_id) {
 		try {
 			await this.collections.members.doc(id).collection('GameRoles').doc(role_id).delete();
-		}
-		catch (error) {
+		} catch (error) {
 			this.client.error_manager.mark(ETM.create('deleteMemberGameRole', error));
 			throw error;
 		}
@@ -293,15 +283,13 @@ module.exports = class DatabaseManager {
 				await reference.update({
 					category: 'whitelist',
 				});
-			}
-			else {
+			} else {
 				await reference.set({
 					category: 'whitelist',
 				});
 			}
 			return true;
-		}
-		catch (error) {
+		} catch (error) {
 			this.client.error_manager.mark(new ETM.create('gameWhitelist', error));
 			return false;
 		}
@@ -319,15 +307,13 @@ module.exports = class DatabaseManager {
 				await reference.update({
 					category: 'blacklist',
 				});
-			}
-			else {
+			} else {
 				await reference.set({
 					category: 'blacklist',
 				});
 			}
 			return true;
-		}
-		catch (error) {
+		} catch (error) {
 			this.client.error_manager.mark(new ETM.create('gameBlacklist', error));
 			return false;
 		}
@@ -340,8 +326,7 @@ module.exports = class DatabaseManager {
 	gameWhitelisted(game_name) {
 		try {
 			return this.data.game_overrides.whitelisted.includes(game_name.toLowerCase());
-		}
-		catch (error) {
+		} catch (error) {
 			this.client.error_manager.mark(ETM.create('gameWhitelisted', error));
 			throw error;
 		}
@@ -354,8 +339,7 @@ module.exports = class DatabaseManager {
 	gameBlacklisted(game_name) {
 		try {
 			return this.data.game_overrides.blacklisted.includes(game_name.toLowerCase());
-		}
-		catch (error) {
+		} catch (error) {
 			this.client.error_manager.mark(ETM.create('gameBlacklisted', error));
 			throw error;
 		}
@@ -388,8 +372,7 @@ module.exports = class DatabaseManager {
 				index: ++this.data.free_games.index,
 			});
 			await this.trimFreeGames();
-		}
-		catch (error) {
+		} catch (error) {
 			this.client.error_manager.mark(ETM.create('pushFreeGame', error));
 			throw error;
 		}
@@ -400,11 +383,10 @@ module.exports = class DatabaseManager {
 			try {
 				const expired_freegame = this.data.free_games.list.shift();
 				await this.collections.free_games.doc(expired_freegame.id).delete();
-			}
-			catch (error) {
+			} catch (error) {
 				this.client.error_manager.mark(ETM.create('trimFreeGames', error));
 				throw error;
 			}
 		}
 	}
-};
+}

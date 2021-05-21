@@ -1,11 +1,11 @@
-const { MessageEmbed } = require('discord.js');
-const { ProcessQueue, constants } = require('../utils/Base.js');
+import { MessageEmbed } from 'discord.js';
+import { ProcessQueue, constants } from '../utils/Base.js';
 
 /**
- * @typedef {import('../structures/Base.js').Client} Client
+ * @typedef {import('../structures/Base').Client} Client
  */
 
-module.exports = class ErrorManager {
+export default class ErrorManager {
 	/** @param {Client} client */
 	constructor(client) {
 		this.client = client;
@@ -93,13 +93,11 @@ module.exports = class ErrorManager {
 				if (error_ticket.error.code) embed.fields[2].value = error_ticket.error.code;
 
 				return this.client.message_manager.sendToChannel(constants.interface.channels.telemetry, embed);
-			}
-			catch (error) {
+			} catch (error) {
 				console.error(`ErrorManager: ${error}`);
-			}
-			finally {
+			} finally {
 				console.log(`ErrorManager: Finished ${this.queuer.currentID}`);
 			}
 		});
 	}
-};
+}

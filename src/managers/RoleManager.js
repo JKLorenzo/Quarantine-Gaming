@@ -1,18 +1,19 @@
-const { ErrorTicketManager, ProcessQueue, constants } = require('../utils/Base.js');
-
-const ETM = new ErrorTicketManager('RoleManager');
+import { ErrorTicketManager, ProcessQueue, constants } from '../utils/Base.js';
 
 /**
- * @typedef {import('../structures/Base.js').Client} Client
- * @typedef {import('discord.js').ColorResolvable} ColorResolvable
- * @typedef {import('discord.js').GuildMember} GuildMember
- * @typedef {import('discord.js').PermissionResolvable} PermissionResolvable
  * @typedef {import('discord.js').Role} Role
+ * @typedef {import('discord.js').RoleData} RoleData
+ * @typedef {import('discord.js').GuildMember} GuildMember
  * @typedef {import('discord.js').RoleResolvable} RoleResolvable
  * @typedef {import('discord.js').UserResolvable} UserResolvable
+ * @typedef {import('discord.js').ColorResolvable} ColorResolvable
+ * @typedef {import('discord.js').PermissionResolvable} PermissionResolvable
+ * @typedef {import('../structures/Base').Client} Client
  */
 
-module.exports = class RoleManager {
+const ETM = new ErrorTicketManager('Role Manager');
+
+export default class RoleManager {
 	/** @param {Client} client */
 	constructor(client) {
 		this.client = client;
@@ -21,7 +22,7 @@ module.exports = class RoleManager {
 
 	/**
  	 * Creates a new role in the guild.
- 	 * @param {{name: String, color?: ColorResolvable, hoist?: Boolean, position?: number, permissions?: PermissionResolvable, mentionable?: Boolean, reason?: String}} options
+ 	 * @param {RoleData & {reason?: String}} options
  	 * @returns {Role}
  	 */
 	create(options) {
@@ -30,12 +31,10 @@ module.exports = class RoleManager {
 			let result, error;
 			try {
 				result = await this.client.guild.roles.create(options);
-			}
-			catch (this_error) {
+			} catch (this_error) {
 				this.client.error_manager.mark(ETM.create('create', error));
 				error = this_error;
-			}
-			finally {
+			} finally {
 				console.log(`RoleCreate: Finished ${this.queuer.currentID} (${options.name})`);
 			}
 			if (error) throw error;
@@ -56,12 +55,10 @@ module.exports = class RoleManager {
 			let result, error;
 			try {
 				result = await this_role.delete(reason);
-			}
-			catch (this_error) {
+			} catch (this_error) {
 				this.client.error_manager.mark(ETM.create('delete', error));
 				error = this_error;
-			}
-			finally {
+			} finally {
 				console.log(`RoleDelete: Finished ${this.queuer.currentID} (${this_role ? this_role.name : role})`);
 			}
 			if (error) throw error;
@@ -90,12 +87,10 @@ module.exports = class RoleManager {
 						name: this_role.name,
 					});
 				}
-			}
-			catch (this_error) {
+			} catch (this_error) {
 				this.client.error_manager.mark(ETM.create('add', error));
 				error = this_error;
-			}
-			finally {
+			} finally {
 				console.log(`RoleAdd: Finished ${this.queuer.currentID} (${this_member ? this_member.displayName : user} | ${this_role ? this_role.name : role})`);
 			}
 			if (error) throw error;
@@ -118,16 +113,14 @@ module.exports = class RoleManager {
 			let result, error;
 			try {
 				result = await this_member.roles.remove(this_role, reason);
-			}
-			catch (this_error) {
+			} catch (this_error) {
 				this.client.error_manager.mark(ETM.create('remove', error));
 				error = this_error;
-			}
-			finally {
+			} finally {
 				console.log(`RoleRemove: Finished ${this.queuer.currentID} (${this_member ? this_member.displayName : user} | ${this_role ? this_role.name : role})`);
 			}
 			if (error) throw error;
 			return result;
 		});
 	}
-};
+}

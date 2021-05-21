@@ -1,48 +1,52 @@
-const { MessageEmbed } = require('discord.js');
-const { ErrorTicketManager, ProcessQueue, constants } = require('../utils/Base.js');
-
-const ETM = new ErrorTicketManager('MessageManager');
+import { MessageEmbed } from 'discord.js';
+import { ErrorTicketManager, ProcessQueue, constants } from '../utils/Base.js';
 
 /**
- * @typedef {import('../structures/Base.js').Client} Client
- * @typedef {import('discord.js').GuildChannelResolvable} GuildChannelResolvable
- * @typedef {import('discord.js').APIMessageContentResolvable} APIMessageContentResolvable
- * @typedef {import('discord.js').MessageOptions} MessageOptions
- * @typedef {import('discord.js').MessageAdditions} MessageAdditions
  * @typedef {import('discord.js').Message} Message
  * @typedef {import('discord.js').TextChannel} TextChannel
  * @typedef {import('discord.js').UserResolvable} UserResolvable
+ * @typedef {import('discord.js').MessageOptions} MessageOptions
+ * @typedef {import('discord.js').MessageAdditions} MessageAdditions
+ * @typedef {import('discord.js').GuildChannelResolvable} GuildChannelResolvable
+ * @typedef {import('discord.js').APIMessageContentResolvable} APIMessageContentResolvable
+ * @typedef {import('../structures/Base').Client} Client
  */
 
-module.exports = class MessageManager {
+const ETM = new ErrorTicketManager('Message Manager');
+
+export default class MessageManager {
 	/** @param {Client} client */
 	constructor(client) {
 		this.client = client;
 		this.queuer = new ProcessQueue(1000);
 
 		client.on('message', (message) => {
-			// Game Invites Channel Blocking
-			if (message.channel && message.channel.id == constants.channels.integrations.game_invites && (message.embeds.length == 0 || (message.embeds.length > 0 && message.embeds[0].author.name != 'Quarantine Gaming: Game Coordinator'))) {
-				client.message_manager.sendToUser(message.author, 'Hello there! You can\'t send any messages in ' + message.channel + ' channel.').then(async reply => {
-					message.delete({ timeout: 2500 }).catch(e => void e);
-					reply.delete({ timeout: 2500 }).catch(e => void e);
-				});
-			}
-
-			// DM
-			if (message.guild == null) {
-				const this_member = client.member(message.author);
-				if (this_member && !this_member.user.bot) {
-					const embed = new MessageEmbed();
-					embed.setAuthor('Quarantine Gaming: Direct Message Handler');
-					embed.setTitle('New Message');
-					embed.setThumbnail(message.author.displayAvatarURL());
-					embed.addField('Sender:', this_member);
-					embed.addField('Message:', message.content);
-					embed.setFooter(`To reply, do: !message dm ${this_member.user.id} <message>`);
-					embed.setColor('#00ff6f');
-					client.message_manager.sendToChannel(constants.interface.channels.dm, embed);
+			try {
+				// Game Invites Channel Blocking
+				if (message.channel && message.channel.id == constants.channels.integrations.game_invites && (message.embeds.length == 0 || (message.embeds.length > 0 && message.embeds[0].author.name != 'Quarantine Gaming: Game Coordinator'))) {
+					client.message_manager.sendToUser(message.author, 'Hello there! You can\'t send any messages in ' + message.channel + ' channel.').then(async reply => {
+						message.delete({ timeout: 2500 }).catch(e => void e);
+						reply.delete({ timeout: 2500 }).catch(e => void e);
+					});
 				}
+
+				// DM
+				if (message.guild == null) {
+					const this_member = client.member(message.author);
+					if (this_member && !this_member.user.bot) {
+						const embed = new MessageEmbed();
+						embed.setAuthor('Quarantine Gaming: Direct Message Handler');
+						embed.setTitle('New Message');
+						embed.setThumbnail(message.author.displayAvatarURL());
+						embed.addField('Sender:', this_member);
+						embed.addField('Message:', message.content);
+						embed.setFooter(`To reply, do: !message dm ${this_member.user.id} <message>`);
+						embed.setColor('#00ff6f');
+						client.message_manager.sendToChannel(constants.interface.channels.dm, embed);
+					}
+				}
+			} catch (error) {
+				this.client.error_manager.mark(ETM.create('message', error));
 			}
 		});
 	}
@@ -61,12 +65,10 @@ module.exports = class MessageManager {
 			let result, error;
 			try {
 				result = await this_channel.send(content);
-			}
-			catch (this_error) {
+			} catch (this_error) {
 				this.client.error_manager.mark(ETM.create('sendToChannel', error));
 				error = this_error;
-			}
-			finally {
+			} finally {
 				console.log(`MessageChannelSend: Finished ${this.queuer.currentID} (${this_channel ? this_channel.name : channel})`);
 			}
 			if (error) throw error;
@@ -88,16 +90,14 @@ module.exports = class MessageManager {
 			try {
 				result = await member.send(content);
 				result.delete({ timeout:3600000 }).catch(e => void e);
-			}
-			catch (this_error) {
+			} catch (this_error) {
 				this.client.error_manager.mark(ETM.create('sendToUser', error));
 				error = this_error;
-			}
-			finally {
+			} finally {
 				console.log(`MessageUserSend: Finished ${this.queuer.currentID} (${member ? member.displayName : user})`);
 			}
 			if (error) throw error;
 			return result;
 		});
 	}
-};
+}

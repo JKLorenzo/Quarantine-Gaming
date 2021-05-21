@@ -1,17 +1,17 @@
-const DatabaseManager = require('./DatabaseManager.js');
-const ChannelManager = require('./ChannelManager.js');
-const ErrorManager = require('./ErrorManager.js');
-const InteractionManager = require('./InteractionManager.js');
-const GatewayManager = require('./GatewayManager');
-const MessageManager = require('./MessageManager.js');
-const ReactionManager = require('./ReactionManager.js');
-const RoleManager = require('./RoleManager.js');
-const SpeechManager = require('./SpeechManager.js');
-const FreeGameManager = require('./FreeGameManager.js');
-const GameManager = require('./GameManager.js');
-const DedicatedChannelManager = require('./DedicatedChannelManager.js');
+import ChannelManager from './ChannelManager.js';
+import DatabaseManager from './DatabaseManager.js';
+import DedicatedChannelManager from './DedicatedChannelManager.js';
+import ErrorManager from './ErrorManager.js';
+import FreeGameManager from './FreeGameManager.js';
+import GameManager from './GameManager.js';
+import GatewayManager from './GatewayManager.js';
+import InteractionManager from './InteractionManager.js';
+import MessageManager from './MessageManager.js';
+import ReactionManager from './ReactionManager.js';
+import RoleManager from './RoleManager.js';
+import SpeechManager from './SpeechManager.js';
 
-module.exports = {
+export {
 	ChannelManager,
 	DatabaseManager,
 	ErrorManager,

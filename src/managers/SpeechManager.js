@@ -1,16 +1,16 @@
-const { ErrorTicketManager, ProcessQueue, sleep } = require('../utils/Base.js');
-const gtts = require('node-google-tts-api');
-const tts = new gtts();
-const fs = require('fs');
-
-const ETM = new ErrorTicketManager('SpeechManager');
+import fs from 'fs';
+import gtts from 'node-google-tts-api';
+import { ErrorTicketManager, ProcessQueue, sleep } from '../utils/Base.js';
 
 /**
- * @typedef {import('../structures/Base.js').Client} Client
  * @typedef {import('discord.js').VoiceChannel} VoiceChannel
+ * @typedef {import('../structures/Base').Client} Client
  */
 
-module.exports = class SpeechManager {
+const ETM = new ErrorTicketManager('SpeechManager');
+const tts = new gtts();
+
+export default class SpeechManager {
 	/** @param {Client} client */
 	constructor(client) {
 		this.client = client;
@@ -49,11 +49,10 @@ module.exports = class SpeechManager {
 					});
 				});
 				await speak;
-			}
-			catch (this_error) {
+			} catch (this_error) {
 				console.log(`Speech: Finished ${this.queuer.currentID} (${channel.name})`);
 				this.client.error_manager.mark(ETM.create('say', this_error));
 			}
 		});
 	}
-};
+}

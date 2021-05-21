@@ -1,17 +1,17 @@
-const { MessageEmbed, Permissions } = require('discord.js');
-const PFlags = Permissions.FLAGS;
-const { ErrorTicketManager, ProcessQueue, parseMention, sleep, constants } = require('../utils/Base.js');
-
-const ETM = new ErrorTicketManager('DedicatedChannelManager');
+import { MessageEmbed, Permissions } from 'discord.js';
+import { ErrorTicketManager, ProcessQueue, parseMention, sleep, constants } from '../utils/Base.js';
 
 /**
- * @typedef {import('../structures/Base.js').Client} Client
- * @typedef {import('../structures/Base.js').ExtendedMember} ExtendedMember
- * @typedef {import('discord.js').CategoryChannel} CategoryChannel
+ * @typedef {import('discord.js').Role} Role
  * @typedef {import('discord.js').TextChannel} TextChannel
  * @typedef {import('discord.js').VoiceChannel} VoiceChannel
- * @typedef {import('discord.js').Role} Role
+ * @typedef {import('discord.js').CategoryChannel} CategoryChannel
+ * @typedef {import('../structures/Base').Client} Client
+ * @typedef {import('../structures/Base').ExtendedMember} ExtendedMember
  */
+
+const ETM = new ErrorTicketManager('Dedicated Channel Manager');
+const PFlags = Permissions.FLAGS;
 
 /**
  * @param {Client} client
@@ -39,7 +39,7 @@ async function displayInfo(client, text_channel, voice_channel, name) {
 	}));
 }
 
-module.exports = class DedicatedChannelManager {
+export default class DedicatedChannelManager {
 	/** @param {Client} client */
 	constructor(client) {
 		this.client = client;
@@ -84,8 +84,7 @@ module.exports = class DedicatedChannelManager {
 								for (const the_member of this_channel.members.array()) {
 									if (the_member.roles.cache.find(role => role == this_role)) {
 										same_acitivities++;
-									}
-									else if (the_member.roles.cache.find(role => role.name.startsWith('Play'))) {
+									} else if (the_member.roles.cache.find(role => role.name.startsWith('Play'))) {
 										diff_acitivities++;
 									}
 								}
@@ -98,8 +97,7 @@ module.exports = class DedicatedChannelManager {
 					}
 				}
 			}
-		}
-		catch(error) {
+		} catch(error) {
 			this.client.error_manager.mark(ETM.create('autoDedicate', error));
 		}
 	}
@@ -133,8 +131,7 @@ module.exports = class DedicatedChannelManager {
 						text_channel: dedicated_text_channel,
 						voice_channel: channel_origin,
 					};
-				}
-				else {
+				} else {
 					// Notify
 					const this_speech = this.client.speech_manager.say(channel_origin, `You will be transferred to ${name} dedicated channel. Please wait.`);
 
@@ -214,8 +211,7 @@ module.exports = class DedicatedChannelManager {
 						transfer_process: transferProcess,
 					};
 				}
-			}
-			catch (error) {
+			} catch (error) {
 				this.client.error_manager.mark(ETM.create('create', error));
 			}
 		});
@@ -261,18 +257,16 @@ module.exports = class DedicatedChannelManager {
 							// Add team role
 							if (this_member.roles.cache.has(team_role.id)) continue;
 							await this.client.role_manager.add(this_member, team_role);
-						}
-						else {
+						} else {
 							// Remove team role
 							if (!this_member.roles.cache.has(team_role.id)) continue;
 							await this.client.role_manager.remove(this_member, team_role);
 						}
 					}
 				}
-			}
-			catch (error) {
+			} catch (error) {
 				this.client.error_manager.mark(ETM.create('load', error));
 			}
 		});
 	}
-};
+}

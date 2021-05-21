@@ -1,17 +1,22 @@
-const path = require('path');
-const { ProcessQueue, ErrorTicketManager, getAllFiles, sleep } = require('../utils/Base.js');
+import path from 'path';
+import { dirname } from 'path';
+import { fileURLToPath, pathToFileURL } from 'url';
+import { ProcessQueue, ErrorTicketManager, getAllFiles, sleep } from '../utils/Base.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+/**
+ * @typedef {import('discord.js').CommandInteraction} CommandInteraction
+ * @typedef {import('discord.js').CommandInteractionOption} CommandInteractionOption
+ * @typedef {import('../structures/Base').Client} Client
+ * @typedef {import('../structures/Base').SlashCommand} SlashCommand
+ */
 
 const ETM = new ErrorTicketManager('Interaction Manager');
 const initQueuer = new ProcessQueue(1000);
 
-/**
- * @typedef {import('../structures/Base.js').Client} Client
- * @typedef {import('../structures/Base.js').SlashCommand} SlashCommand
- * @typedef {import('discord.js').CommandInteraction} CommandInteraction
- * @typedef {import('discord.js').CommandInteractionOption} CommandInteractionOption
- */
-
-module.exports = class InteractionManager {
+export default class InteractionManager {
 	/** @param {Client} client */
 	constructor(client) {
 		this.client = client;
@@ -33,7 +38,8 @@ module.exports = class InteractionManager {
 
 			const slash_commands_dir = path.join(__dirname, '../commands/slash');
 			for (const slash_command_path of getAllFiles(slash_commands_dir)) {
-				const slash_command = require(slash_command_path);
+				const slash_command_class = await import(pathToFileURL(slash_command_path));
+				const slash_command = slash_command_class.default;
 				this.slash_commands.push(new slash_command());
 			}
 
@@ -49,11 +55,9 @@ module.exports = class InteractionManager {
 					console.log(`InteractionManager: Deleting ${this_application_command.name}`);
 					try {
 						await this_application_command.delete();
-					}
-					catch (error) {
+					} catch (error) {
 						this.client.error_manager.mark(ETM.create('delete', error, 'init'));
-					}
-					finally {
+					} finally {
 						console.log(`InteractionManager: Deleted ${this_application_command.name}`);
 					}
 				});
@@ -67,11 +71,9 @@ module.exports = class InteractionManager {
 					console.log(`InteractionManager: Creating ${this_application_command_data.name}`);
 					try {
 						await this.client.guild.commands.create(this_application_command_data);
-					}
-					catch (error) {
+					} catch (error) {
 						this.client.error_manager.mark(ETM.create('create', error, 'init'));
-					}
-					finally {
+					} finally {
 						console.log(`InteractionManager: Created ${this_application_command_data.name}`);
 					}
 				});
@@ -89,11 +91,9 @@ module.exports = class InteractionManager {
 					console.log(`InteractionManager: Updating ${this_application_command.name}`);
 					try {
 						await this.client.guild.commands.edit(this_application_command, this_slash_command.getApplicationCommandData());
-					}
-					catch (error) {
+					} catch (error) {
 						this.client.error_manager.mark(ETM.create('update', error, 'init'));
-					}
-					finally {
+					} finally {
 						console.log(`InteractionManager: Updated ${this_application_command.name}`);
 					}
 				});
@@ -114,17 +114,14 @@ module.exports = class InteractionManager {
 					console.log(`InteractionManager: Permission Updating ${this_application_command.name}`);
 					try {
 						await this_application_command.setPermissions(this_slash_command.getApplicationCommandPermissionData());
-					}
-					catch (error) {
+					} catch (error) {
 						this.client.error_manager.mark(ETM.create('permission', error, 'init'));
-					}
-					finally {
+					} finally {
 						console.log(`InteractionManager: Permission Updated ${this_application_command.name}`);
 					}
 				});
 			}
-		}
-		catch (error) {
+		} catch (error) {
 			this.client.error_manager.mark(ETM.create('init', error));
 		}
 	}
@@ -138,12 +135,10 @@ module.exports = class InteractionManager {
 			const slash_command = this.slash_commands.find(this_slash_command => this_slash_command.name == commandInteraction.commandName);
 			if (slash_command) {
 				await slash_command.exec(commandInteraction, this.transformSlashCommandOptions(commandInteraction.options));
-			}
-			else {
+			} else {
 				throw new ReferenceError('Interaction command does not exist.');
 			}
-		}
-		catch (error) {
+		} catch (error) {
 			const message = 'It looks like this command has failed.';
 			commandInteraction.deferred || commandInteraction.replied ? commandInteraction.editReply(message) : commandInteraction.reply(message);
 			this.client.error_manager.mark(ETM.create(commandInteraction.commandName, error, 'processSlashCommand'));
@@ -163,23 +158,19 @@ module.exports = class InteractionManager {
 					if (option.options) {
 						if (option.type) {
 							args[option.name] = this.transformSlashCommandOptions(option.options, { option: option.name });
-						}
-						else {
+						} else {
 							args = this.transformSlashCommandOptions(option.options);
 						}
-					}
-					else if (option.channel || option.member || option.role || option.user) {
-						args[option.name] = option.channel || option.member || option.role || option.user;
-					}
-					else {
+					} else if (option.channel || option.member || option.role || option.user) {
+						args[option.name] = option.channel ?? option.member ?? option.role ?? option.user;
+					} else {
 						args[option.name] = option.value;
 					}
 				}
 			}
 			return args;
-		}
-		catch (error) {
+		} catch (error) {
 			this.client.error_manager.mark(ETM.create('transformSlashCommandOptions', error));
 		}
 	}
-};
+}

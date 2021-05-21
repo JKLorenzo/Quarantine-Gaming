@@ -1,15 +1,15 @@
-const Discord = require('discord.js');
-const fetch = require('node-fetch');
-const { FreeGame, Color } = require('../types/Base.js');
-const { ErrorTicketManager, fetchImage, parseHTML, compareDate, contains, constants } = require('../utils/Base.js');
+import { MessageEmbed } from 'discord.js';
+import fetch from 'node-fetch';
+import { Color, FreeGame } from '../types/Base.js';
+import { ErrorTicketManager, fetchImage, parseHTML, compareDate, contains, constants } from '../utils/Base.js';
+
+/**
+ * @typedef {import('../structures/Base').Client} Client
+ */
 
 const ETM = new ErrorTicketManager('Free Game Manager');
 
-/**
- * @typedef {import('../structures/Base.js').Client} Client
- */
-
-module.exports = class FreeGameManager {
+export default class FreeGameManager {
 	/** @param {Client} client */
 	constructor(client) {
 		this.client = client;
@@ -62,8 +62,7 @@ module.exports = class FreeGameManager {
 						if (!this_free_game) return await this.post(free_game);
 						return 'This entry is already posted on the free games channel.';
 					}
-				}
-				else {
+				} else {
 					const elapsedMinutes = compareDate(new Date(free_game.createdAt * 1000)).totalMinutes;
 					if (!this_free_game && free_game.score >= 100 && free_game.validity >= 75 && elapsedMinutes >= 30 && elapsedMinutes <= 300) {
 						return await this.post(free_game);
@@ -72,8 +71,7 @@ module.exports = class FreeGameManager {
 			}
 			this.data.responses = responses;
 			if (url) return 'Uh-oh! The link you provided is no longer valid.';
-		}
-		catch (error) {
+		} catch (error) {
 			this.client.error_manager.mark(ETM.create('fetch', error));
 			return 'An error has occured while performing fetch.';
 		}
@@ -87,7 +85,7 @@ module.exports = class FreeGameManager {
 		try {
 			const { author, title, description, flair, permalink, url, validity } = free_game;
 
-			const embed = new Discord.MessageEmbed({
+			const embed = new MessageEmbed({
 				author: { name: 'Quarantine Gaming: Free Game/DLC Notification' },
 				url: url,
 				description: parseHTML(description),
@@ -114,12 +112,10 @@ module.exports = class FreeGameManager {
 			if (flair) {
 				if (flair.toLowerCase().indexOf('comment') !== -1 || flair.toLowerCase().indexOf('issue') !== -1) {
 					embed.addField('Flair', `[${flair}](${permalink})`, true);
-				}
-				else {
+				} else {
 					embed.addField('Flair', flair, true);
 				}
-			}
-			else {
+			} else {
 				embed.addField('Validity', validity, true);
 			}
 
@@ -169,10 +165,9 @@ module.exports = class FreeGameManager {
 			free_game.id = message.id;
 			await this.client.database_manager.pushFreeGame(free_game);
 			return `Done! Reference ID: \`${message.id}\``;
-		}
-		catch(error) {
+		} catch(error) {
 			this.client.error_manager.mark(ETM.create('fetch', error));
 			return 'An error has occured while performing post.';
 		}
 	}
-};
+}

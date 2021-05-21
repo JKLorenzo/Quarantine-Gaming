@@ -1,15 +1,15 @@
-const { ErrorTicketManager, ProcessQueue, sleep } = require('../utils/Base.js');
-
-const ETM = new ErrorTicketManager('ReactionManager');
+import { ErrorTicketManager, ProcessQueue, sleep } from '../utils/Base.js';
 
 /**
- * @typedef {import('../structures/Base.js').Client} Client
  * @typedef {import('discord.js').Message} Message
  * @typedef {import('discord.js').EmojiResolvable} EmojiResolvable
  * @typedef {import('discord.js').MessageReaction} MessageReaction
+ * @typedef {import('../structures/Base').Client} Client
  */
 
-module.exports = class ReactionManager {
+const ETM = new ErrorTicketManager('Reaction Manager');
+
+export default class ReactionManager {
 	/** @param {Client} client */
 	constructor(client) {
 		this.client = client;
@@ -33,20 +33,17 @@ module.exports = class ReactionManager {
 						result.push(await message.react(this_emoji));
 						await sleep(this.queuer.timeout);
 					}
-				}
-				else {
+				} else {
 					result = await message.react(emoji);
 				}
-			}
-			catch (this_error) {
+			} catch (this_error) {
 				this.client.error_manager.mark(ETM.create('add', error));
 				error = this_error;
-			}
-			finally {
+			} finally {
 				console.log(`ReactionAdd: Finished ${this.queuer.currentID} (${message.channel.id} | ${emoji.name ? emoji.name : emoji}})`);
 			}
 			if (error) throw error;
 			return result;
 		});
 	}
-};
+}
