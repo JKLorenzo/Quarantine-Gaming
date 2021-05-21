@@ -1,16 +1,40 @@
 {
     "extends": "eslint:recommended",
+    "plugins": [
+        "import"
+    ],
     "env": {
         "node": true,
         "es6": true
     },
     "parserOptions": {
-        "ecmaVersion": 2019
+        "ecmaVersion": 2021,
+        "sourceType": "module"
     },
     "rules": {
+        "import/order": [
+            "error",
+            {
+                "groups": [
+                    "builtin",
+                    "external",
+                    "internal",
+                    "index",
+                    "sibling",
+                    "parent"
+                ],
+                "alphabetize": {
+                    "order": "asc"
+                }
+            }
+        ],
+        "strict": [
+            "error",
+            "global"
+        ],
         "brace-style": [
             "error",
-            "stroustrup",
+            "1tbs",
             {
                 "allowSingleLine": true
             }
