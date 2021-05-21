@@ -6,6 +6,10 @@
   "engines": {
     "node": "14.x"
   },
+  "scripts": {
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/JKLorenzo/Quarantine-Gaming"
@@ -32,6 +36,7 @@
     "probe-image-size": "^7.1.0"
   },
   "devDependencies": {
-    "eslint": "^7.26.0"
+    "eslint": "^7.26.0",
+    "eslint-plugin-import": "^2.23.2"
   }
 }
