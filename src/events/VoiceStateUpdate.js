@@ -1,9 +1,9 @@
-const { MessageEmbed } = require('discord.js');
-const { parseMention, sleep, constants } = require('../utils/Base.js');
+import { MessageEmbed } from 'discord.js';
+import { parseMention, sleep, constants } from '../utils/Base.js';
 
 /**
- * @typedef {import('../structures/Base.js').Client} Client
  * @typedef {import('discord.js').VoiceState} VoiceState
+ * @typedef {import('../structures/Base').Client} Client
  */
 
 /**
@@ -11,7 +11,7 @@ const { parseMention, sleep, constants } = require('../utils/Base.js');
  * @param {VoiceState} oldState
  * @param {VoiceState} newState
  */
-module.exports = async function onVoiceStateUpdate(client, oldState, newState) {
+export default async function onVoiceStateUpdate(client, oldState, newState) {
 	const member = newState.member;
 	if (oldState.channel && oldState.channel.parent.id == constants.channels.category.dedicated_voice) {
 		const text_channel = client.channel(constants.channels.category.dedicated).children.find(channel => channel.type == 'text' && channel.topic && parseMention(channel.topic.split(' ')[0]) == oldState.channelID);
@@ -29,8 +29,7 @@ module.exports = async function onVoiceStateUpdate(client, oldState, newState) {
 			embed.setTimestamp();
 			embed.setColor('#7b00ff');
 			client.message_manager.sendToChannel(text_channel, embed);
-		}
-		else {
+		} else {
 			await client.role_manager.delete(team_role);
 			await client.channel_manager.delete(oldState.channel);
 			await client.channel_manager.delete(text_channel);
@@ -74,14 +73,12 @@ module.exports = async function onVoiceStateUpdate(client, oldState, newState) {
 				client.message_manager.sendToChannel(text_channel, embed);
 				client.role_manager.add(member, team_role);
 			}
-		}
-		else if (newState.channel.parent.id == constants.channels.category.voice && newState.channel.members.array().length >= 5) {
+		} else if (newState.channel.parent.id == constants.channels.category.voice && newState.channel.members.array().length >= 5) {
 			// Dedicate this channel
 			await sleep(5000);
 			await client.dedicated_channel_manager.create(newState.channel, newState.channel.members.array()[0].displayName);
 		}
-	}
-	else if (member.roles.cache.has(constants.roles.streaming)) {
+	} else if (member.roles.cache.has(constants.roles.streaming)) {
 		client.role_manager.remove(member, constants.roles.streaming);
 	}
-};
+}

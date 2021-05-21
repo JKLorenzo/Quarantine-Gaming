@@ -1,10 +1,10 @@
-const { sleep, constants } = require('../utils/Base.js');
+import { sleep, constants } from '../utils/Base.js';
 
 /**
- * @typedef {import('../structures/Base.js').Client} Client
+ * @typedef {import('discord.js').User} User
  * @typedef {import('discord.js').Message} Message
  * @typedef {import('discord.js').MessageReaction} MessageReaction
- * @typedef {import('discord.js').User} User
+ * @typedef {import('../structures/Base').Client} Client
  */
 
 /**
@@ -13,7 +13,7 @@ const { sleep, constants } = require('../utils/Base.js');
  * @param {MessageReaction} reaction
  * @param {User} user
  */
-module.exports = async function onMessageReactionAdd(client, message, reaction, user) {
+export default async function onMessageReactionAdd(client, message, reaction, user) {
 	const embed = message.embeds[0];
 	const header_name = embed.author.name;
 	const emoji = reaction.emoji.name;
@@ -22,8 +22,7 @@ module.exports = async function onMessageReactionAdd(client, message, reaction, 
 		if (emoji == '🔴') {
 			await client.role_manager.add(user, constants.roles.nsfw);
 		}
-	}
-	else if (header_name == 'Quarantine Gaming: Free Game Updates') {
+	} else if (header_name == 'Quarantine Gaming: Free Game Updates') {
 		switch(emoji) {
 		case '1️⃣':
 			await client.role_manager.add(user, constants.roles.steam);
@@ -41,8 +40,7 @@ module.exports = async function onMessageReactionAdd(client, message, reaction, 
 			await client.role_manager.add(user, constants.roles.ubisoft);
 			break;
 		}
-	}
-	else if (header_name == 'Quarantine Gaming: Experience') {
+	} else if (header_name == 'Quarantine Gaming: Experience') {
 		if (embed.title == 'Audio Control Extension for Voice Channels') {
 			// Delete reactions
 			await message.reactions.removeAll();
@@ -76,8 +74,7 @@ module.exports = async function onMessageReactionAdd(client, message, reaction, 
 				}
 			}
 		}
-	}
-	else if (header_name == 'Quarantine Gaming: Game Coordinator') {
+	} else if (header_name == 'Quarantine Gaming: Game Coordinator') {
 		const inviter = client.member(embed.fields[0].value);
 		if (inviter && emoji == 'blob_party') {
 			if (user.id != inviter.id && embed.footer.text != 'Closed. This bracket is now full.') {
@@ -101,18 +98,15 @@ module.exports = async function onMessageReactionAdd(client, message, reaction, 
 					for (let i = 1; i <= max; i++) {
 						if (i <= cur) {
 							embed.addField(`Player ${i}:`, players[i - 1]);
-						}
-						else if (!inserted) {
+						} else if (!inserted) {
 							embed.addField(`Player ${i}:`, user);
 							players.push(user);
 							inserted = true;
-						}
-						else {
+						} else {
 							embed.addField(`Player ${i}:`, '\u200b');
 						}
 					}
-				}
-				else {
+				} else {
 					let i = 1;
 					for (i; i <= cur; i++) {
 						embed.addField(`Player ${i}:`, players[i - 1]);
@@ -151,4 +145,4 @@ module.exports = async function onMessageReactionAdd(client, message, reaction, 
 			}
 		}
 	}
-};
+}

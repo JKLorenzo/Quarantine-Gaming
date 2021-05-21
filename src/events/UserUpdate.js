@@ -1,9 +1,9 @@
-const { MessageEmbed } = require('discord.js');
-const { constants } = require('../utils/Base.js');
+import { MessageEmbed } from 'discord.js';
+import { constants } from '../utils/Base.js';
 
 /**
- * @typedef {import('../structures/Base.js').Client} Client
  * @typedef {import('discord.js').User} User
+ * @typedef {import('../structures/Base').Client} Client
  */
 
 /**
@@ -11,7 +11,7 @@ const { constants } = require('../utils/Base.js');
  * @param {User} oldUser
  * @param {User} newUser
  */
-module.exports = async function onUserUpdate(client, oldUser, newUser) {
+export default async function onUserUpdate(client, oldUser, newUser) {
 	const member = client.member(newUser);
 
 	const description = [`**Profile:** ${member}`];
@@ -29,4 +29,4 @@ module.exports = async function onUserUpdate(client, oldUser, newUser) {
 			color: '#E1F358',
 		}));
 	}
-};
+}

@@ -1,11 +1,11 @@
-const { MessageEmbed } = require('discord.js');
-const { constants } = require('../utils/Base.js');
+import { MessageEmbed } from 'discord.js';
+import { constants } from '../utils/Base.js';
 
 /**
- * @typedef {import('../structures/Base.js').Client} Client
- * @typedef {import('../structures/Base.js').ExtendedMember} ExtendedMember
  * @typedef {import('discord.js').Role} Role
  * @typedef {import('discord.js').TextChannel} TextChannel
+ * @typedef {import('../structures/Base').Client} Client
+ * @typedef {import('../structures/Base').ExtendedMember} ExtendedMember
  */
 
 /**
@@ -13,7 +13,7 @@ const { constants } = require('../utils/Base.js');
  * @param {ExtendedMember} oldMember
  * @param {ExtendedMember} newMember
  */
-module.exports = async function onGuildMemberUpdate(client, oldMember, newMember) {
+export default async function onGuildMemberUpdate(client, oldMember, newMember) {
 	/** @type {Role[]} */
 	const role_add = new Array();
 	/** @type {Role[]} */
@@ -47,4 +47,4 @@ module.exports = async function onGuildMemberUpdate(client, oldMember, newMember
 			color: '#E1F358',
 		}));
 	}
-};
+}

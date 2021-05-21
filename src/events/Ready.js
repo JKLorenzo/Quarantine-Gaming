@@ -1,11 +1,11 @@
-const { constants } = require('../utils/Base.js');
+import { constants } from '../utils/Base.js';
 
 /**
- * @typedef {import('../structures/Base.js').Client} Client
+ * @typedef {import('../structures/Base').Client} Client
  */
 
 /** @param {Client} client */
-module.exports = async function onceReady(client) {
+export default async function onceReady(client) {
 	console.log('Client logged in. Initializing...');
 
 	await client.database_manager.init();
@@ -21,4 +21,4 @@ module.exports = async function onceReady(client) {
 	client.message_manager.sendToChannel(constants.interface.channels.logs, '<------------------------------**STARTUP**------------------------------>');
 
 	console.log('Client initialized.');
-};
+}

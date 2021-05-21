@@ -1,23 +1,23 @@
-const { ErrorTicketManager, ProcessQueue } = require('../utils/Base.js');
-const onceReady = require('./Ready.js');
-const onUserUpdate = require('./UserUpdate.js');
-const onGuildMemberUpdate = require('./GuildMemberUpdate.js');
-const onVoiceStateUpdate = require('./VoiceStateUpdate.js');
-const onMessageReactionAdd = require('./MessageReactionAdd.js');
-const onMessageReactionRemove = require('./MessageReactionRemove.js');
+import onGuildMemberUpdate from './GuildMemberUpdate.js';
+import onMessageReactionAdd from './MessageReactionAdd.js';
+import onMessageReactionRemove from './MessageReactionRemove.js';
+import onceReady from './Ready.js';
+import onUserUpdate from './UserUpdate.js';
+import onVoiceStateUpdate from './VoiceStateUpdate.js';
+import { ErrorTicketManager, ProcessQueue } from '../utils/Base.js';
 
-const ETM = new ErrorTicketManager('BaseEvents');
+const ETM = new ErrorTicketManager('Base Events');
 
 /**
- * @typedef {import('../structures/Base.js').Client} Client
+ * @typedef {import('../structures/Base').Client} Client
  */
 
-module.exports = class BaseEvents {
+export default class BaseEvents {
 	/** @param {Client} client */
 	constructor(client) {
 		this.client = client;
 
-		try{
+		try {
 			this.onceReady = {
 				emitted: false,
 				event: this.client.once('ready', async () => {
@@ -25,8 +25,7 @@ module.exports = class BaseEvents {
 						if (this.onceReady.emitted) throw new Error('Event already emitted.');
 						this.onceReady.emitted = true;
 						await onceReady(this.client);
-					}
-					catch(error) {
+					} catch(error) {
 						this.client.error_manager.mark(ETM.create('ready', error));
 					}
 				}),
@@ -38,8 +37,7 @@ module.exports = class BaseEvents {
 					this.onUserUpdate.queuer.queue(async () => {
 						try {
 							await onUserUpdate(this.client, oldUser, newUser);
-						}
-						catch(error) {
+						} catch(error) {
 							this.client.error_manager.mark(ETM.create('userUpdate', error));
 						}
 					});
@@ -52,8 +50,7 @@ module.exports = class BaseEvents {
 					this.onGuildMemberUpdate.queuer.queue(async () => {
 						try {
 							await onGuildMemberUpdate(this.client, oldMember, newMember);
-						}
-						catch(error) {
+						} catch(error) {
 							this.client.error_manager.mark(ETM.create('guildMemberUpdate', error));
 						}
 					});
@@ -67,8 +64,7 @@ module.exports = class BaseEvents {
 					this.onVoiceStateUpdate.queuer.queue(async () => {
 						try {
 							await onVoiceStateUpdate(this.client, oldState, newState);
-						}
-						catch(error) {
+						} catch(error) {
 							this.client.error_manager.mark(ETM.create('voiceStateUpdate', error));
 						}
 					});
@@ -84,8 +80,7 @@ module.exports = class BaseEvents {
 							const message = await reaction.message.fetch();
 							if (message.author.id != client.user.id || user.id == client.user.id) return;
 							await onMessageReactionAdd(this.client, message, reaction, user);
-						}
-						catch(error) {
+						} catch(error) {
 							this.client.error_manager.mark(ETM.create('messageReactionAdd', error));
 						}
 					});
@@ -102,16 +97,14 @@ module.exports = class BaseEvents {
 							const message = await reaction.message.fetch();
 							if (message.author.id != client.user.id || user.id == client.user.id) return;
 							await onMessageReactionRemove(this.client, message, reaction, user);
-						}
-						catch(error) {
+						} catch(error) {
 							this.client.error_manager.mark(ETM.create('messageReactionRemove', error));
 						}
 					});
 				}),
 			};
-		}
-		catch (error) {
+		} catch (error) {
 			this.client.error_manager.mark(ETM.create('Base', error));
 		}
 	}
-};
+}
