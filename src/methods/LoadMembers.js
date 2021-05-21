@@ -1,12 +1,12 @@
-const { constants } = require('../utils/Base.js');
+import { constants } from '../utils/Base.js';
 
 /**
- * @typedef {import('../structures/Base.js').Client} Client
- * @typedef {import('../structures/Base.js').ExtendedMember} ExtendedMember
+ * @typedef {import('../structures/Base').Client} Client
+ * @typedef {import('../structures/Base').ExtendedMember} ExtendedMember
  */
 
 /** @param {Client} client */
-module.exports = async function LoadMembers(client) {
+export default async function LoadMembers(client) {
 	/** @type {ExtendedMember[]} */
 	const members = client.guild.members.cache.array();
 
@@ -21,4 +21,4 @@ module.exports = async function LoadMembers(client) {
 		if (member.voice.channelID) continue;
 		await client.role_manager.remove(member, streaming_role);
 	}
-};
+}

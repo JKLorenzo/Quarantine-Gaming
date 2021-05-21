@@ -1,14 +1,14 @@
-const loadMembers = require('./LoadMembers.js');
-const voiceChannelTransfer = require('./VoiceChannelTransfer.js');
+import loadMembers from './LoadMembers.js';
+import voiceChannelTransfer from './VoiceChannelTransfer.js';
 
 /**
- * @typedef {import('../structures/Base.js').Client} Client
- * @typedef {import('../structures/Base.js').ExtendedMember} ExtendedMember
- * @typedef {import('discord.js').GuildMember} GuildMember
- * @typedef {import('discord.js').VoiceChannel} VoiceChannel
+ * @typedef {import('discord').GuildMember} GuildMember
+ * @typedef {import('discord').VoiceChannel} VoiceChannel
+ * @typedef {import('../structures/Base').Client} Client
+ * @typedef {import('../structures/Base').ExtendedMember} ExtendedMember
  */
 
-module.exports = class BaseMethods {
+export default class BaseMethods {
 	/** @param {Client} client */
 	constructor(client) {
 		this.client = client;
@@ -29,4 +29,4 @@ module.exports = class BaseMethods {
 	voiceChannelTransfer(channel, member) {
 		return voiceChannelTransfer(channel, member);
 	}
-};
+}
