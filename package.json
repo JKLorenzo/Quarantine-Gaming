@@ -10,6 +10,7 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix"
   },
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/JKLorenzo/Quarantine-Gaming"
