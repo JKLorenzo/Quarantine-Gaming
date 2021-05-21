@@ -1,15 +1,13 @@
-const { AkairoClient, CommandHandler } = require('discord-akairo');
-const {
+import { Client } from 'discord.js';
+import BaseEvents from '../events/Base.js';
+import {
 	ChannelManager, DatabaseManager, DedicatedChannelManager, ErrorManager,	FreeGameManager, GameManager,
 	InteractionManager, GatewayManager, MessageManager, ReactionManager, RoleManager, SpeechManager,
-} = require('../managers/Base.js');
-const Events = require('../events/Base.js');
-const Methods = require('../methods/Base.js');
-const {	constants, parseMention } = require('../utils/Base.js');
-const path = require('path');
+} from '../managers/Base.js';
+import Methods from '../methods/Base.js';
+import { constants, parseMention } from '../utils/Base.js';
 
 /**
- * @typedef {import('discord-akairo').AkairoOptions} AkairoOptions
  * @typedef {import('discord.js').ClientOptions} ClientOptions
  * @typedef {import('discord.js').GuildChannel} GuildChannel
  * @typedef {import('discord.js').GuildChannelResolvable} GuildChannelResolvable
@@ -19,16 +17,13 @@ const path = require('path');
  * @typedef {import('discord.js').RoleResolvable} RoleResolvable
  * @typedef {import('discord.js').TextChannel} TextChannel
  * @typedef {import('discord.js').UserResolvable} UserResolvable
- * @typedef {import('../structures/ExtendedMember.js')} ExtendedMember
+ * @typedef {import('../structures/Base.js').ExtendedMember} ExtendedMember
  */
 
-module.exports = class Client extends AkairoClient {
-	/**
-     * @param {AkairoOptions & ClientOptions} options
-     * @param {ClientOptions} clientOptions
-     */
-	constructor(options = {}, clientOptions = {}) {
-		super(options, clientOptions);
+export default class QGClient extends Client {
+	/** @param {ClientOptions} clientOptions */
+	constructor(clientOptions) {
+		super(clientOptions);
 
 		this.channel_manager = new ChannelManager(this);
 		this.database_manager = new DatabaseManager(this);
@@ -44,48 +39,7 @@ module.exports = class Client extends AkairoClient {
 		this.speech_manager = new SpeechManager(this);
 
 		this.methods = new Methods(this);
-		this.events = new Events(this);
-
-		// Load Commands
-		this.commandHandler = new CommandHandler(this, {
-			directory: path.join(__dirname, '../commands/akairo'),
-			prefix: '!',
-			argumentDefaults: {
-				prompt: {
-					retries: 4,
-					time: 30000,
-					modifyStart: (message, text) => {
-						message.reply(`${text} Type \`cancel\` to cancel this command.`).then(reply => {
-							reply.delete({ timeout: 30000 }).catch(e => void e);
-						}).catch(e => void e);
-						return null;
-					},
-					modifyRetry: (message, text, data) => {
-						data.message.reply(`${text} Type \`cancel\` to cancel this command.`).then(reply => {
-							reply.delete({ timeout: 30000 }).catch(e => void e);
-							data.message.delete({ timeout: 30000 }).catch(e => void e);
-						}).catch(e => void e);
-						return null;
-					},
-					modifyTimeout: (message) => {
-						message.reply('Command has timed out.').then(reply => {
-							message.delete({ timeout: 30000 }).catch(e => void e);
-							reply.delete({ timeout: 30000 }).catch(e => void e);
-						}).catch(e => void e);
-						return null;
-					},
-					modifyCancel: (message, text, data) => {
-						data.message.reply('Command has been cancelled').then(reply => {
-							message.delete({ timeout: 30000 }).catch(e => void e);
-							reply.delete({ timeout: 30000 }).catch(e => void e);
-							data.message.delete({ timeout: 30000 }).catch(e => void e);
-						}).catch(e => void e);
-						return null;
-					},
-				},
-			},
-		});
-		this.commandHandler.loadAll();
+		this.events = new BaseEvents(this);
 	}
 
 	/**
@@ -102,9 +56,9 @@ module.exports = class Client extends AkairoClient {
  	 */
 	channel(channel) {
 		return this.guild.channels.resolve(channel)
-			|| this.guild.channels.resolve(parseMention(channel))
-			|| this.guilds.cache.get(constants.interface.guild).channels.resolve(channel)
-			|| this.guilds.cache.get(constants.interface.guild).channels.resolve(parseMention(channel));
+			?? this.guild.channels.resolve(parseMention(channel))
+			?? this.guilds.cache.get(constants.interface.guild).channels.resolve(channel)
+			?? this.guilds.cache.get(constants.interface.guild).channels.resolve(parseMention(channel));
 	}
 
 	/**
@@ -113,7 +67,8 @@ module.exports = class Client extends AkairoClient {
  	 * @returns {ExtendedMember}
  	 */
 	member(user) {
-		return this.guild.members.resolve(user) || this.guild.members.resolve(parseMention(user));
+		return this.guild.members.resolve(user)
+			?? this.guild.members.resolve(parseMention(user));
 	}
 
 	/**
@@ -122,7 +77,8 @@ module.exports = class Client extends AkairoClient {
 	 * @returns {Role}
 	 */
 	role(role) {
-		return this.guild.roles.resolve(role) || this.guild.roles.resolve(parseMention(role));
+		return this.guild.roles.resolve(role)
+			?? this.guild.roles.resolve(parseMention(role));
 	}
 
 	/**
@@ -134,7 +90,7 @@ module.exports = class Client extends AkairoClient {
 	message(channel, message) {
 		/** @type {TextChannel} */
 		const this_channel = this.channel(channel);
-		if (channel) return this_channel.messages.resolve(message);
+		if (this_channel) return this_channel.messages.resolve(message);
 		return null;
 	}
-};
+}

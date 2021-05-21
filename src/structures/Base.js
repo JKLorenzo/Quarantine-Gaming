@@ -1,9 +1,9 @@
-const Client = require('./Client.js');
-const ExtendedMember = require('./ExtendedMember.js');
-const ExtendedMessage = require('./ExtendedMessage.js');
-const SlashCommand = require('./SlashCommand.js');
+import Client from './Client.js';
+import ExtendedMember from './ExtendedMember.js';
+import ExtendedMessage from './ExtendedMessage.js';
+import SlashCommand from './SlashCommand.js';
 
-module.exports = {
+export {
 	Client,
 	ExtendedMember,
 	ExtendedMessage,

@@ -1,6 +1,6 @@
-const { Message } = require('discord.js');
+import { Message } from 'discord.js';
 
-module.exports = class ExtendedMessage extends Message {
+export default class ExtendedMessage extends Message {
 	constructor(client, data, channel) {
 		super(client, data, channel);
 	}
@@ -15,10 +15,9 @@ module.exports = class ExtendedMessage extends Message {
 				setTimeout(() => {
 					super.delete().then(result => resolve(result)).catch(error => reject(error));
 				}, options.timeout);
-			}
-			else {
+			} else {
 				super.delete().then(result => resolve(result)).catch(error => reject(error));
 			}
 		});
 	}
-};
+}

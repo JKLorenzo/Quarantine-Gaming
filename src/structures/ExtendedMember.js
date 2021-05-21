@@ -1,14 +1,14 @@
-const { GuildMember } = require('discord.js');
-const { constants } = require('../utils/Base.js');
+import { GuildMember } from 'discord.js';
+import { constants } from '../utils/Base.js';
 
 /**
- * @typedef {import('../structures/Base.js').Client} Client
- * @typedef {import('../types/Base.js').PartialRole} PartialRole
  * @typedef {import('discord.js').Role} Role
  * @typedef {import('discord.js').RoleResolvable} RoleResolvable
+ * @typedef {import('../structures/Base.js').Client} Client
+ * @typedef {import('../types/Base.js').PartialRole} PartialRole
  */
 
-module.exports = class ExtendedMember extends GuildMember {
+export default class ExtendedMember extends GuildMember {
 	constructor(client, data, guild) {
 		super(client, data, guild);
 
@@ -94,8 +94,7 @@ module.exports = class ExtendedMember extends GuildMember {
 				const this_role = this.client.role(this_roleresolvable);
 				if (this_role) roleIDs.push(this_role.id);
 			}
-		}
-		else {
+		} else {
 			const this_role = this.client.role(role);
 			if (this_role) roleIDs.push(this_role.id);
 		}
@@ -104,4 +103,4 @@ module.exports = class ExtendedMember extends GuildMember {
 		}
 		return false;
 	}
-};
+}

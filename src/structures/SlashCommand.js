@@ -1,4 +1,12 @@
 /**
+ * @typedef {import('discord.js').CommandInteraction} CommandInteraction
+ * @typedef {import('discord.js').ApplicationCommandData} ApplicationCommandData
+ * @typedef {import('discord.js').ApplicationCommandOption} ApplicationCommandOption
+ * @typedef {import('discord.js').ApplicationCommandOptionData} ApplicationCommandOptionData
+ * @typedef {import('discord.js').ApplicationCommandPermissionData} ApplicationCommandPermissionData
+ */
+
+/**
  * Data for creating or editing a slash command.
  * @typedef {Object} SlashCommandData
  * @property {string} name The name of the command
@@ -6,52 +14,6 @@
  * @property {ApplicationCommandOptionData[]} [options] Options for the command
  * @property {SlashCommandPermissionData} [permissions] The permissions for this command
  * @property {boolean} [defaultPermission] Whether the command is enabled by default when the app is added to a guild
- */
-
-/**
- * Data for creating or editing an application command.
- * @typedef {Object} ApplicationCommandData
- * @property {string} name The name of the command
- * @property {string} description The description of the command
- * @property {ApplicationCommandOptionData[]} [options] Options for the command
- * @property {boolean} [defaultPermission] Whether the command is enabled by default when the app is added to a guild
- */
-
-/**
- * An option for an application command or subcommand.
- * @typedef {Object} ApplicationCommandOptionData
- * @property {ApplicationCommandOptionType|number} type The type of the option
- * @property {string} name The name of the option
- * @property {string} description The description of the option
- * @property {boolean} [required] Whether the option is required
- * @property {ApplicationCommandOptionChoice[]} [choices] The choices of the option for the user to pick from
- * @property {ApplicationCommandOptionData[]} [options] Additional options if this option is a subcommand (group)
- */
-
-/**
- * An option for an application command or subcommand.
- * @typedef {Object} ApplicationCommandOption
- * @property {ApplicationCommandOptionType} type The type of the option
- * @property {string} name The name of the option
- * @property {string} description The description of the option
- * @property {boolean} [required] Whether the option is required
- * @property {ApplicationCommandOptionChoice[]} [choices] The choices of the option for the user to pick from
- * @property {ApplicationCommandOptionData[]} [options] Additional options if this option is a subcommand (group)
- */
-
-/**
- * A choice for an application command option.
- * @typedef {Object} ApplicationCommandOptionChoice
- * @property {string} name The name of the choice
- * @property {string|number} value The value of the choice
- */
-
-/**
- * The object returned when fetching permissions for an application command.
- * @typedef {Object} ApplicationCommandPermissionData
- * @property {String} id The ID of the role or user
- * @property {ApplicationCommandPermissionType|number} type Whether this permission is for a role or a user
- * @property {boolean} permission Whether the role or user has the permission to use this command
  */
 
 /**
@@ -66,17 +28,7 @@
  * @property {String[]} [deny] An array of ids denied to use this command.
  */
 
-/**
- * @typedef {'SUB_COMMAND' | 'SUB_COMMAND_GROUP' | 'STRING' | 'INTEGER' | 'BOOLEAN' | 'USER' | 'CHANNEL' | 'ROLE' | 'MENTIONABLE'} ApplicationCommandOptionType
- * @typedef {'ROLE' | 'USER'} ApplicationCommandPermissionType
- */
-
-/**
- * @typedef {import('discord.js').CommandInteraction} CommandInteraction
- * @typedef {import('discord.js').CommandInteractionOption} CommandInteractionOption
- */
-
-module.exports = class SlashCommand {
+export default class SlashCommand {
 	/** @param {SlashCommandData} data */
 	constructor(data) {
 		this.name = data.name;
@@ -131,6 +83,7 @@ module.exports = class SlashCommand {
 	 * @returns {ApplicationCommandPermissionData[]}
 	 */
 	getApplicationCommandPermissionData() {
+		/** @type {ApplicationCommandPermissionData[]} */
 		const permissions = new Array();
 		if (this.permissions) {
 			if (this.permissions.roles) {
@@ -144,4 +97,4 @@ module.exports = class SlashCommand {
 		}
 		return permissions.length ? permissions : undefined;
 	}
-};
+}
