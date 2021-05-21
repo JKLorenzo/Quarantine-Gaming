@@ -1,20 +1,20 @@
-const fs = require('fs');
-const path = require('path');
-const gis = require('g-i-s');
-const probe = require('probe-image-size');
-const fetch = require('node-fetch');
-const humanizeDuration = require('humanize-duration');
-const ProcessQueue = require('./ProcessQueue.js');
-const ErrorTicketManager = require('./ErrorTicketManager.js');
-const constants = require('./Constants.js');
-const { Color } = require('../types/Base.js');
+import fs from 'fs';
+import path from 'path';
+import gis from 'g-i-s';
+import humanizeDuration from 'humanize-duration';
+import fetch from 'node-fetch';
+import probe from 'probe-image-size';
+import constants from './Constants.js';
+import ErrorTicketManager from './ErrorTicketManager.js';
+import ProcessQueue from './ProcessQueue.js';
+import { Color } from '../types/Base.js';
 
 /**
  * Waits for the given amount of time.
  * @param {number} timeout Time in miliseconds.
  * @returns {Promise<null>}
  */
-function sleep(timeout) {
+export function sleep(timeout) {
 	return new Promise(resolve => setTimeout(resolve, timeout));
 }
 
@@ -22,7 +22,7 @@ function sleep(timeout) {
  * Parses html character symbols to their string variant.
  * @param {String} html
  */
-function parseHTML(html) {
+export function parseHTML(html) {
 	return String(html).replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"');
 }
 
@@ -31,7 +31,7 @@ function parseHTML(html) {
  * @param {String} mention The mentioned object.
  * @returns {String} Mentioned ID
  */
-function parseMention(mention) {
+export function parseMention(mention) {
 	return String(mention).replace(/\W/g, '');
 }
 
@@ -41,7 +41,7 @@ function parseMention(mention) {
  * @param {String} string2
  * @returns {Number} Ranges from 0 - 100
  */
-function getPercentSimilarity(string1, string2) {
+export function getPercentSimilarity(string1, string2) {
 	let longer_string = string1;
 	let shorter_string = string2;
 
@@ -56,8 +56,9 @@ function getPercentSimilarity(string1, string2) {
 	for (let i = 0; i <= longer_string.length; i++) {
 		let lastValue = i;
 		for (let j = 0; j <= shorter_string.length; j++) {
-			if (i == 0) {costs[j] = j;}
-			else if (j > 0) {
+			if (i == 0) {
+				costs[j] = j;
+			} else if (j > 0) {
 				let newValue = costs[j - 1];
 				if (longer_string.charAt(i - 1) != shorter_string.charAt(j - 1)) {
 					newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
@@ -77,7 +78,7 @@ function getPercentSimilarity(string1, string2) {
  * @param {Date} date
  * @returns
  */
-function compareDate(date) {
+export function compareDate(date) {
 	const today = new Date();
 	const diffMs = (today - date);
 	const days = Math.floor(diffMs / 86400000);
@@ -92,7 +93,7 @@ function compareDate(date) {
 	};
 }
 
-function compareArray(array1, array2) {
+export function compareArray(array1, array2) {
 	const a = [], difference = [];
 	for (let i = 0; i < array1.length; i++) {
 		a[array1[i]] = true;
@@ -100,8 +101,7 @@ function compareArray(array1, array2) {
 	for (let i = 0; i < array2.length; i++) {
 		if (a[array2[i]]) {
 			delete a[array2[i]];
-		}
-		else {
+		} else {
 			a[array2[i]] = true;
 		}
 	}
@@ -116,12 +116,11 @@ function compareArray(array1, array2) {
  * @param {String} base
  * @param {String | String[]} part
  */
-function contains(base, part) {
+export function contains(base, part) {
 	let parts = new Array();
 	if (part instanceof Array) {
 		parts = [...part];
-	}
-	else {
+	} else {
 		parts.push(part);
 	}
 	for (const this_part of parts) {
@@ -135,7 +134,7 @@ function contains(base, part) {
  * @param {String} title
  * @returns {Promise<{large: String, small: String}>}
  */
-function fetchImage(title) {
+export function fetchImage(title) {
 	return new Promise(resolve => {
 		gis(title, async (error, results) => {
 			const data = { large: '', small: '' };
@@ -169,7 +168,7 @@ function fetchImage(title) {
  * @param {{min: number, max: number}} options
  * @returns {Color}
  */
-function generateColor(options = { min: 0, max: 255 }) {
+export function generateColor(options = { min: 0, max: 255 }) {
 	return new Color({
 		red: Math.floor(Math.random() * (options.max - options.min) + options.min),
 		green: Math.floor(Math.random() * (options.max - options.min) + options.min),
@@ -182,7 +181,7 @@ function generateColor(options = { min: 0, max: 255 }) {
  * @param {*} p
  * @returns {boolean}
  */
-function isPromise(p) {
+export function isPromise(p) {
 	return p && Object.prototype.toString.call(p) === '[object Promise]';
 }
 
@@ -192,32 +191,20 @@ function isPromise(p) {
  * @param {String[]} arrayOfFiles
  * @returns
  */
-function getAllFiles(dirPath, arrayOfFiles = []) {
+export function getAllFiles(dirPath, arrayOfFiles = []) {
 	const files = fs.readdirSync(dirPath);
 	files.forEach(function(file) {
 		if (fs.statSync(dirPath + '/' + file).isDirectory()) {
 			arrayOfFiles = getAllFiles(dirPath + '/' + file, arrayOfFiles);
-		}
-		else {
+		} else {
 			arrayOfFiles.push(path.join(dirPath, '/', file));
 		}
 	});
 	return arrayOfFiles;
 }
 
-module.exports = {
+export {
 	ProcessQueue,
 	ErrorTicketManager,
 	constants,
-	sleep,
-	parseHTML,
-	parseMention,
-	getPercentSimilarity,
-	compareDate,
-	compareArray,
-	contains,
-	fetchImage,
-	isPromise,
-	generateColor,
-	getAllFiles,
 };

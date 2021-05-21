@@ -1,8 +1,10 @@
-function sleep(timeout = 0) {
-	return new Promise(resolve => setTimeout(resolve, timeout));
-}
+// function sleep(timeout = 0) {
+// 	return new Promise(resolve => setTimeout(resolve, timeout));
+// }
 
-module.exports = class ProcessQueue {
+import { sleep } from './Base.js';
+
+export default class ProcessQueue {
 	/**
      * Creates a process queuer.
      * @param {Number} timeout Timeout between function execution in ms.
@@ -70,8 +72,7 @@ module.exports = class ProcessQueue {
 			const data = this.array.shift();
 			try {
 				data.promise.resolve(await data.function());
-			}
-			catch(error) {
+			} catch(error) {
 				data.promise.reject(error);
 			}
 			this.currentID++;
@@ -79,4 +80,4 @@ module.exports = class ProcessQueue {
 		}
 		this.running = false;
 	}
-};
+}

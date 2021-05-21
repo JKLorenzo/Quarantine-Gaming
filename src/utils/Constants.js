@@ -1,4 +1,4 @@
-module.exports = {
+export default {
 	me: '782308458803232842',
 	guild: '351178660725915649',
 	owner: '393013053488103435',

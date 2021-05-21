@@ -1,6 +1,6 @@
-const { ErrorTicket } = require('../types/Base.js');
+import { ErrorTicket } from '../types/Base.js';
 
-module.exports = class ErrorTicketManager {
+export default class ErrorTicketManager {
 	/**
      * Constructs an object used to create error tickets.
      * @param {String} location The location of this module.
@@ -19,4 +19,4 @@ module.exports = class ErrorTicketManager {
 	create(method, error, base = '') {
 		return new ErrorTicket(this.location, method, error, base);
 	}
-};
+}
