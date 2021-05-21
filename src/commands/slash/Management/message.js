@@ -1,14 +1,14 @@
-const { SlashCommand } = require('../../../structures/Base.js');
-const { constants } = require('../../../utils/Base.js');
+import { SlashCommand } from '../../../structures/Base.js';
+import { constants } from '../../../utils/Base.js';
 
 /**
+ * @typedef {import('discord.js').TextChannel} TextChannel
+ * @typedef {import('discord.js').CommandInteraction} CommandInteraction
  * @typedef {import('../../../structures/Base.js').Client} Client
  * @typedef {import('../../../structures/Base.js').ExtendedMember} ExtendedMember
- * @typedef {import('discord.js').CommandInteraction} CommandInteraction
- * @typedef {import('discord.js').TextChannel} TextChannel
  */
 
-module.exports = class Message extends SlashCommand {
+export default class Message extends SlashCommand {
 	constructor() {
 		super({
 			name: 'message',
@@ -82,12 +82,11 @@ module.exports = class Message extends SlashCommand {
 			const channel = options.text_channel.channel;
 			if (!channel.isText()) return interaction.editReply('Failed to send the message. Supplied channel is not a text-based channel.');
 			await client.message_manager.sendToChannel(channel, message);
-		}
-		else {
+		} else {
 			const member = options.dm.member;
 			if (member.user.bot) return interaction.editReply('Failed to send the message. Supplied member must not be a bot.');
 			await client.message_manager.sendToUser(member, message);
 		}
 		interaction.editReply('Message sent!');
 	}
-};
+}

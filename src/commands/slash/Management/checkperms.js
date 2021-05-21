@@ -1,15 +1,15 @@
-const { MessageEmbed, Permissions, Role } = require('discord.js');
-const { SlashCommand } = require('../../../structures/Base.js');
-const { constants } = require('../../../utils/Base.js');
+import { MessageEmbed, Permissions, Role } from 'discord.js';
+import { SlashCommand } from '../../../structures/Base.js';
+import { constants } from '../../../utils/Base.js';
 
 /**
+ * @typedef {import('discord.js').GuildChannel} GuildChannel
+ * @typedef {import('discord.js').CommandInteraction} CommandInteraction
  * @typedef {import('../../../structures/Base.js').Client} Client
  * @typedef {import('../../../structures/Base.js').ExtendedMember} ExtendedMember
- * @typedef {import('discord.js').CommandInteraction} CommandInteraction
- * @typedef {import('discord.js').GuildChannel} GuildChannel
  */
 
-module.exports = class CheckPerms extends SlashCommand {
+export default class CheckPerms extends SlashCommand {
 	constructor() {
 		super({
 			name: 'checkperms',
@@ -135,23 +135,17 @@ module.exports = class CheckPerms extends SlashCommand {
 			const this_permission = `${entity_permissions.has(permission) ? '✅' : '❌'} - ${permission_name}`;
 			if (server_permissions.flags.includes(permission)) {
 				server_permissions.result.push(this_permission);
-			}
-			else if (general_channel_permissions.flags.includes(permission)) {
+			} else if (general_channel_permissions.flags.includes(permission)) {
 				general_channel_permissions.result.push(this_permission);
-			}
-			else if (membership_permissions.flags.includes(permission)) {
+			} else if (membership_permissions.flags.includes(permission)) {
 				membership_permissions.result.push(this_permission);
-			}
-			else if (text_channel_permissions.flags.includes(permission)) {
+			} else if (text_channel_permissions.flags.includes(permission)) {
 				text_channel_permissions.result.push(this_permission);
-			}
-			else if (voice_channel_permissions.flags.includes(permission)) {
+			} else if (voice_channel_permissions.flags.includes(permission)) {
 				voice_channel_permissions.result.push(this_permission);
-			}
-			else if (stage_channel_permissions.flags.includes(permission)) {
+			} else if (stage_channel_permissions.flags.includes(permission)) {
 				stage_channel_permissions.result.push(this_permission);
-			}
-			else {
+			} else {
 				others_permissions.push(this_permission);
 			}
 		}
@@ -185,4 +179,4 @@ module.exports = class CheckPerms extends SlashCommand {
 
 		interaction.editReply(embed);
 	}
-};
+}

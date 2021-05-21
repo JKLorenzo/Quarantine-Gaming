@@ -1,15 +1,12 @@
-const { Intents, Structures } = require('discord.js');
-const { Client, ExtendedMember, ExtendedMessage } = require('./structures/Base.js');
-const { constants } = require('./utils/Base.js');
-
-const FLAGS = Intents.FLAGS;
+import { Intents, Structures } from 'discord.js';
+import { Client, ExtendedMember, ExtendedMessage } from './structures/Base.js';
 
 Structures.extend('GuildMember', () => ExtendedMember);
 Structures.extend('Message', () => ExtendedMessage);
 
+const FLAGS = Intents.FLAGS;
+
 const client = new Client({
-	ownerID: constants.owner,
-}, {
 	allowedMentions: {
 		parse: [
 			'everyone', 'roles', 'users',

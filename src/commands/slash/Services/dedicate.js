@@ -1,15 +1,15 @@
-const { MessageEmbed } = require('discord.js');
-const { SlashCommand } = require('../../../structures/Base.js');
-const { parseMention, sleep, constants } = require('../../../utils/Base.js');
+import { MessageEmbed } from 'discord.js';
+import { SlashCommand } from '../../../structures/Base.js';
+import { parseMention, sleep, constants } from '../../../utils/Base.js';
 
 /**
- * @typedef {import('../../../structures/Base.js').Client} Client
- * @typedef {import('discord.js').CommandInteraction} CommandInteraction
  * @typedef {import('discord.js').TextChannel} TextChannel
  * @typedef {import('discord.js').CategoryChannel} CategoryChannel
+ * @typedef {import('discord.js').CommandInteraction} CommandInteraction
+ * @typedef {import('../../../structures/Base.js').Client} Client
  */
 
-module.exports = class Dedicate extends SlashCommand {
+export default class Dedicate extends SlashCommand {
 	constructor() {
 		super({
 			name: 'dedicate',
@@ -48,8 +48,7 @@ module.exports = class Dedicate extends SlashCommand {
 
 			if (voice_channel.parentID != constants.channels.category.dedicated_voice) {
 				await interaction.editReply(`Got it! Please wait while I'm preparing **${options.custom_name}** voice and text channels.`);
-			}
-			else {
+			} else {
 				await interaction.editReply(`Alright, renaming your dedicated channel to **${options.custom_name}**.`);
 			}
 
@@ -70,8 +69,7 @@ module.exports = class Dedicate extends SlashCommand {
 				await voice_channel.updateOverwrite(constants.roles.member, {
 					'CONNECT': false,
 				});
-			}
-			else {
+			} else {
 				await voice_channel.updateOverwrite(constants.roles.member, {
 					'CONNECT': true,
 				});
@@ -95,4 +93,4 @@ module.exports = class Dedicate extends SlashCommand {
 
 		interaction.editReply('Done!');
 	}
-};
+}

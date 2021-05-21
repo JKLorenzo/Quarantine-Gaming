@@ -1,14 +1,14 @@
-const { MessageEmbed } = require('discord.js');
-const { SlashCommand } = require('../../../structures/Base.js');
-const { constants } = require('../../../utils/Base.js');
+import { MessageEmbed } from 'discord.js';
+import { SlashCommand } from '../../../structures/Base.js';
+import { constants } from '../../../utils/Base.js';
 
 /**
- * @typedef {import('../../../structures/Base.js').ExtendedMessage} ExtendedMessage
- * @typedef {import('discord.js').CommandInteraction} CommandInteraction
  * @typedef {import('discord.js').TextChannel} TextChannel
+ * @typedef {import('discord.js').CommandInteraction} CommandInteraction
+ * @typedef {import('../../../structures/Base.js').ExtendedMessage} ExtendedMessage
  */
 
-module.exports = class Purge extends SlashCommand {
+export default class Purge extends SlashCommand {
 	constructor() {
 		super({
 			name: 'purge',
@@ -64,8 +64,7 @@ module.exports = class Purge extends SlashCommand {
 					deleted_messages_count++;
 					if (deleted_messages[authors_id[this_message.id]]) {
 						deleted_messages[authors_id[this_message.id]] += 1;
-					}
-					else {
+					} else {
 						deleted_messages[authors_id[this_message.id]] = 1;
 					}
 				}
@@ -88,4 +87,4 @@ module.exports = class Purge extends SlashCommand {
 
 		return interaction.editReply(embed);
 	}
-};
+}

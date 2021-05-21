@@ -1,15 +1,15 @@
-const { MessageEmbed } = require('discord.js');
-const { SlashCommand } = require('../../../structures/Base.js');
-const { getPercentSimilarity, constants } = require('../../../utils/Base.js');
+import { MessageEmbed } from 'discord.js';
+import { SlashCommand } from '../../../structures/Base.js';
+import { getPercentSimilarity, constants } from '../../../utils/Base.js';
 
 /**
+ * @typedef {import('discord.js').GuildChannel} GuildChannel
+ * @typedef {import('discord.js').CommandInteraction} CommandInteraction
  * @typedef {import('../../../structures/Base.js').Client} Client
  * @typedef {import('../../../structures/Base.js').ExtendedMember} ExtendedMember
- * @typedef {import('discord.js').CommandInteraction} CommandInteraction
- * @typedef {import('discord.js').GuildChannel} GuildChannel
  */
 
-module.exports = class Game extends SlashCommand {
+export default class Game extends SlashCommand {
 	constructor() {
 		super({
 			name: 'game',
@@ -100,14 +100,12 @@ module.exports = class Game extends SlashCommand {
 
 		if (!game_name) {
 			embed.fields[0].value = 'Game not found';
-		}
-		else {
+		} else {
 			let result;
 			if (type == 'whitelist') {
 				result = await client.database_manager.gameWhitelist(game_name);
 				if (result) embed.fields[0].value = 'Game Whitelisted';
-			}
-			else {
+			} else {
 				result = await client.database_manager.gameBlacklist(game_name);
 				if (result) embed.fields[0].value = 'Game Blacklisted';
 			}
@@ -115,4 +113,4 @@ module.exports = class Game extends SlashCommand {
 
 		return interaction.editReply(embed);
 	}
-};
+}

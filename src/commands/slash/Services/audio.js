@@ -1,13 +1,13 @@
-const { MessageEmbed } = require('discord.js');
-const { SlashCommand } = require('../../../structures/Base.js');
-const { constants } = require('../../../utils/Base.js');
+import { MessageEmbed } from 'discord.js';
+import { SlashCommand } from '../../../structures/Base.js';
+import { constants } from '../../../utils/Base.js';
 
 /**
- * @typedef {import('../../../structures/Base.js').Client} Client
  * @typedef {import('discord.js').CommandInteraction} CommandInteraction
+ * @typedef {import('../../../structures/Base.js').Client} Client
  */
 
-module.exports = class Audio extends SlashCommand {
+export default class Audio extends SlashCommand {
 	constructor() {
 		super({
 			name: 'audio',
@@ -42,4 +42,4 @@ module.exports = class Audio extends SlashCommand {
 
 		interaction.editReply('Done!');
 	}
-};
+}
