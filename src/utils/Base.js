@@ -164,12 +164,12 @@ export async function fetchImage(title) {
 		return promise;
 	}
 
-	const gameIconReq = searchImage(`${title} logo`, {
+	const gameIconReq = searchImage(`${title} game logo`, {
 		ratio: 1,
 		minWidth: 100,
 		minHeight: 100,
 	});
-	const gameBannerReq = searchImage(`${title} background hd`, {
+	const gameBannerReq = searchImage(`${title} game background hd`, {
 		ratio: 1.7,
 		minWidth: 500,
 		minHeight: 500,
