@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import gis from 'g-i-s';
 import humanizeDuration from 'humanize-duration';
-import fetch from 'node-fetch';
 import probe from 'probe-image-size';
 import constants from './Constants.js';
 import ErrorTicketManager from './ErrorTicketManager.js';
@@ -134,45 +133,73 @@ export function contains(base, part) {
  * @param {String} title
  * @returns {Promise<{large: String, small: String}>}
  */
-export function fetchImage(title) {
-	return new Promise(resolve => {
-		gis(title, async (error, results) => {
-			const data = { large: '', small: '' };
-			if (!error) {
-				for (const image of results) {
-					const response = await fetch(image.url).catch(e => void e);
-					if (response && response.ok) {
-						const probe_result = await probe(image.url, { timeout: 10000 }).catch(e => void e);
-						if (probe_result) {
-							const width = parseInt(probe_result.width);
-							const height = parseInt(probe_result.height);
-							const ratio = width / height;
-							if (width >= 200 && height >= 200 && ratio >= 1.7) {
-								if(!data.large) data.large = probe_result.url;
-							}
-							if (width >= 50 && height >= 50 && ratio >= 0.8 && ratio <= 1.2) {
-								if(!data.small) data.small = probe_result.url;
-							}
-							if (data.small && data.large) break;
-						}
-					}
-				}
-			}
-			resolve(data);
+export async function fetchImage(title) {
+	/**
+	 * @param {String} title
+	 * @param {{ratio: Number, minWidth: Number, minHeight: Number}} options
+	 * @returns {Promise<String>}
+	 */
+	function searchImage(name, options) {
+		let res, rej;
+		const promise = new Promise((resolve, reject) => {
+			res = resolve;
+			rej = reject;
 		});
+		gis(name, async (error, results) => {
+			if (error) rej(error);
+			for (const result of results) {
+				if (!result || !result.url) continue;
+				const probe_result = await probe(result.url, { timeout: 10000 }).catch(e => void e);
+				if (!probe_result) continue;
+				const width = parseInt(probe_result.width);
+				if (options.minWidth && width < options.minWidth) continue;
+				const height = parseInt(probe_result.height);
+				if (options.minHeight && height < options.minHeight) continue;
+				const ratio = width / height;
+				if (options.ratio && (ratio > options.ratio + 0.2 || ratio < options.ratio - 0.2)) continue;
+				res(result.url);
+			}
+			res();
+		});
+		return promise;
+	}
+
+	const gameIconReq = searchImage(`${title} logo`, {
+		ratio: 1,
+		minWidth: 100,
+		minHeight: 100,
 	});
+	const gameBannerReq = searchImage(`${title} background hd`, {
+		ratio: 1.7,
+		minWidth: 500,
+		minHeight: 500,
+	});
+
+	return {
+		small: await gameIconReq,
+		large: await gameBannerReq,
+	};
 }
 
 /**
  * Generates a random color.
- * @param {{min: number, max: number}} options
+ * @param {{min?: number, max?: number}} options
  * @returns {Color}
  */
-export function generateColor(options = { min: 0, max: 255 }) {
+export function generateColor(options = {}) {
+	options.min = options.min ?? 0;
+	options.max = options.max ?? 255;
+
+	function randomize() {
+		const randomNumber = Math.random();
+		const min_max = options.max - options.min;
+		return Math.floor((randomNumber * min_max) + options.min);
+	}
+
 	return new Color({
-		red: Math.floor(Math.random() * (options.max - options.min) + options.min),
-		green: Math.floor(Math.random() * (options.max - options.min) + options.min),
-		blue: Math.floor(Math.random() * (options.max - options.min) + options.min),
+		red: randomize(),
+		green: randomize(),
+		blue: randomize(),
 	});
 }
 
