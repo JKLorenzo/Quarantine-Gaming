@@ -1,21 +1,21 @@
 export default class Color {
 	/**
-     * @param {{red: Number, green: Number, blue: Number}} options
+     * @param {{red: number, green: number, blue: number}} options
      */
-	constructor(options = {}) {
-		this.red = options.red || 0;
-		this.green = options.green || 0;
-		this.blue = options.blue || 0;
+	constructor(options) {
+		this.red = options.red ?? 0;
+		this.green = options.green ?? 0;
+		this.blue = options.blue ?? 0;
 	}
 
 	/**
      * Adds the values to this color object.
-     * @param {{red: Number, green: Number, blue: Number}} options
+     * @param {{red: number, green: number, blue: number}} options
      */
 	add(options = {}) {
-		this.red += options.red || 0;
-		this.green += options.green || 0;
-		this.blue += options.blue || 0;
+		this.red += options.red ?? 0;
+		this.green += options.green ?? 0;
+		this.blue += options.blue ?? 0;
 
 		// Scale the colors until its acceptable
 		while (this.red > 255 || this.green > 255 || this.blue > 255) {
