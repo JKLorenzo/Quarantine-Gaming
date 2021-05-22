@@ -2,7 +2,7 @@
  * @typedef {import('discord.js').CommandInteraction} CommandInteraction
  * @typedef {import('discord.js').ApplicationCommandData} ApplicationCommandData
  * @typedef {import('discord.js').ApplicationCommandOption} ApplicationCommandOption
- * @typedef {import('discord.js').ApplicationCommandOptionData} ApplicationCommandOptionData
+ * @typedef {import('discord.js').ApplicationCommandOptionChoice} ApplicationCommandOptionChoice
  * @typedef {import('discord.js').ApplicationCommandPermissionData} ApplicationCommandPermissionData
  */
 
@@ -14,6 +14,22 @@
  * @property {ApplicationCommandOptionData[]} [options] Options for the command
  * @property {SlashCommandPermissionData} [permissions] The permissions for this command
  * @property {boolean} [defaultPermission] Whether the command is enabled by default when the app is added to a guild
+ */
+
+/**
+ * An option for an application command or subcommand.
+ * @typedef {Object} ApplicationCommandOptionData
+ * @property {ApplicationCommandOptionType} type The type of the option
+ * @property {String} name The name of the option
+ * @property {String} description The description of the option
+ * @property {boolean} required Whether the option is required
+ * @property {ApplicationCommandOptionChoice[]} choices The choices of the option for the user to pick from
+ * @property {ApplicationCommandOptionData[]} options Additional options if this option is a subcommand (group)
+ */
+
+/**
+ * The type of an ApplicationCommandOption object
+ * @typedef {'SUB_COMMAND' | 'SUB_COMMAND_GROUP' | 'STRING' | 'INTEGER' | 'BOOLEAN' | 'USER' | 'CHANNEL' | 'ROLE' | 'MENTIONABLE'} ApplicationCommandOptionType
  */
 
 /**
