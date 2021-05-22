@@ -1,4 +1,4 @@
-import Color from'./Color.js';
+import Color from './Color.js';
 import ErrorTicket from './ErrorTicket.js';
 import FreeGame from './FreeGame.js';
 import PartialMember from './PartialMember.js';
