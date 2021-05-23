@@ -12,7 +12,10 @@ import { parseMention, sleep, constants } from '../utils/Base.js';
  * @param {VoiceState} newState
  */
 export default async function onVoiceStateUpdate(client, oldState, newState) {
+	if (oldState.channel === newState.channel) return;
+
 	const member = newState.member;
+
 	if (oldState.channel && oldState.channel.parent.id == constants.channels.category.dedicated_voice) {
 		const text_channel = client.channel(constants.channels.category.dedicated).children.find(channel => channel.type == 'text' && channel.topic && parseMention(channel.topic.split(' ')[0]) == oldState.channelID);
 		const linked_data = text_channel.topic.split(' ');
