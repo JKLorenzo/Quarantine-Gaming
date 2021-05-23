@@ -4,6 +4,7 @@
  * @typedef {import('discord.js').ApplicationCommandOption} ApplicationCommandOption
  * @typedef {import('discord.js').ApplicationCommandOptionChoice} ApplicationCommandOptionChoice
  * @typedef {import('discord.js').ApplicationCommandPermissionData} ApplicationCommandPermissionData
+ * @typedef {import('../structures/Base.js').Client} Client
  */
 
 /**
@@ -52,6 +53,15 @@ export default class SlashCommand {
 		this.options = data.options;
 		this.permissions = data.permissions;
 		this.defaultPermission = typeof data.defaultPermission === 'boolean' ? data.defaultPermission : true;
+	}
+
+	/**
+	 * Initializes this slash command.
+	 * @param {Client} client
+	 */
+	init(client) {
+		this.client = client;
+		return this;
 	}
 
 	/**
