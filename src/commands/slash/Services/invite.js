@@ -14,7 +14,7 @@ export default class Invite extends SlashCommand {
 			options: [
 				{
 					name: 'game',
-					description: 'Select the game you wanted to play. Note: Only the first 25 most-played games in this server are listed.',
+					description: 'Select the game you wanted to play. Note: Only the 25 most-played games in this server are listed.',
 					type: 'STRING',
 					choices: [],
 					required: true,
