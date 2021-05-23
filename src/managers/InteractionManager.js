@@ -1,7 +1,7 @@
 import path from 'path';
 import { dirname } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
-import { ProcessQueue, ErrorTicketManager, getAllFiles, sleep } from '../utils/Base.js';
+import { ProcessQueue, ErrorTicketManager, getAllFiles, sleep, constants } from '../utils/Base.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -135,6 +135,12 @@ export default class InteractionManager {
 			const slash_command = this.slash_commands.find(this_slash_command => this_slash_command.name == commandInteraction.commandName);
 			if (slash_command) {
 				await slash_command.exec(commandInteraction, this.transformSlashCommandOptions(commandInteraction.options));
+				this.client.message_manager.sendToChannel(constants.interface.channels.logs, {
+					content: `${commandInteraction.user} executed the \`${commandInteraction.commandName}\` command on **${commandInteraction.channel}** channel.`,
+					allowedMentions: {
+						parse: [],
+					},
+				}).catch(e => void e);
 			} else {
 				throw new ReferenceError('Interaction command does not exist.');
 			}
