@@ -39,8 +39,9 @@ export default class InteractionManager {
 			const slash_commands_dir = path.join(__dirname, '../commands/slash');
 			for (const slash_command_path of getAllFiles(slash_commands_dir)) {
 				const slash_command_class = await import(pathToFileURL(slash_command_path));
-				const slash_command = slash_command_class.default;
-				this.slash_commands.push(new slash_command());
+				/** @type {SlashCommand} */
+				const slash_command = new slash_command_class.default();
+				this.slash_commands.push(slash_command.init(this.client));
 			}
 
 			const existingApplicationCommands = await this.client.guild.commands.fetch().then(application_commands => application_commands.array());
