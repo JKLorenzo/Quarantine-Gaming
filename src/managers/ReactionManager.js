@@ -37,7 +37,7 @@ export default class ReactionManager {
 					result = await message.react(emoji);
 				}
 			} catch (this_error) {
-				this.client.error_manager.mark(ETM.create('add', error));
+				this.client.error_manager.mark(ETM.create('add', this_error));
 				error = this_error;
 			} finally {
 				console.log(`ReactionAdd: Finished ${this.queuer.currentID} (${message.channel.id} | ${emoji.name ? emoji.name : emoji}})`);

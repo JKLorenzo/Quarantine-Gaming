@@ -30,7 +30,7 @@ export default class ChannelManager {
 			try {
 				result = await this.client.guild.channels.create(options.name, options);
 			} catch (this_error) {
-				this.client.error_manager.mark(ETM.create('create', error));
+				this.client.error_manager.mark(ETM.create('create', this_error));
 				error = this_error;
 			} finally {
 				console.log(`ChannelCreate: Finished ${this.queuer.currentID} (${options.name})`);
@@ -54,7 +54,7 @@ export default class ChannelManager {
 			try {
 				result = await this_channel.delete(reason);
 			} catch (this_error) {
-				this.client.error_manager.mark(ETM.create('delete', error));
+				this.client.error_manager.mark(ETM.create('delete', this_error));
 				error = this_error;
 			} finally {
 				console.log(`ChannelDelete: Finished ${this.queuer.totalID} (${this_channel ? this_channel.name : channel})`);

@@ -66,7 +66,7 @@ export default class MessageManager {
 			try {
 				result = await this_channel.send(content);
 			} catch (this_error) {
-				this.client.error_manager.mark(ETM.create('sendToChannel', error));
+				this.client.error_manager.mark(ETM.create('sendToChannel', this_error));
 				error = this_error;
 			} finally {
 				console.log(`MessageChannelSend: Finished ${this.queuer.currentID} (${this_channel ? this_channel.name : channel})`);
@@ -91,7 +91,7 @@ export default class MessageManager {
 				result = await member.send(content);
 				result.delete({ timeout:3600000 }).catch(e => void e);
 			} catch (this_error) {
-				this.client.error_manager.mark(ETM.create('sendToUser', error));
+				this.client.error_manager.mark(ETM.create('sendToUser', this_error));
 				error = this_error;
 			} finally {
 				console.log(`MessageUserSend: Finished ${this.queuer.currentID} (${member ? member.displayName : user})`);

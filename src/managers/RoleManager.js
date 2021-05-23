@@ -32,7 +32,7 @@ export default class RoleManager {
 			try {
 				result = await this.client.guild.roles.create(options);
 			} catch (this_error) {
-				this.client.error_manager.mark(ETM.create('create', error));
+				this.client.error_manager.mark(ETM.create('create', this_error));
 				error = this_error;
 			} finally {
 				console.log(`RoleCreate: Finished ${this.queuer.currentID} (${options.name})`);
@@ -56,7 +56,7 @@ export default class RoleManager {
 			try {
 				result = await this_role.delete(reason);
 			} catch (this_error) {
-				this.client.error_manager.mark(ETM.create('delete', error));
+				this.client.error_manager.mark(ETM.create('delete', this_error));
 				error = this_error;
 			} finally {
 				console.log(`RoleDelete: Finished ${this.queuer.currentID} (${this_role ? this_role.name : role})`);
@@ -88,7 +88,7 @@ export default class RoleManager {
 					});
 				}
 			} catch (this_error) {
-				this.client.error_manager.mark(ETM.create('add', error));
+				this.client.error_manager.mark(ETM.create('add', this_error));
 				error = this_error;
 			} finally {
 				console.log(`RoleAdd: Finished ${this.queuer.currentID} (${this_member ? this_member.displayName : user} | ${this_role ? this_role.name : role})`);
@@ -114,7 +114,7 @@ export default class RoleManager {
 			try {
 				result = await this_member.roles.remove(this_role, reason);
 			} catch (this_error) {
-				this.client.error_manager.mark(ETM.create('remove', error));
+				this.client.error_manager.mark(ETM.create('remove', this_error));
 				error = this_error;
 			} finally {
 				console.log(`RoleRemove: Finished ${this.queuer.currentID} (${this_member ? this_member.displayName : user} | ${this_role ? this_role.name : role})`);
