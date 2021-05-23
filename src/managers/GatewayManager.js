@@ -176,7 +176,7 @@ export default class GatewayManager {
 
 		client.on('messageReactionAdd', async (reaction, user) => {
 			try {
-				const message = reaction.message;
+				const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
 				if (message.embeds.length) return;
 				const emoji = reaction.emoji.name;
 				const embed = message.embeds[0];
