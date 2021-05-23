@@ -108,7 +108,7 @@ export default class RoleManager {
 	remove(user, role, reason = '') {
 		const this_member = this.client.member(user);
 		const this_role = this.client.role(role);
-		console.log(`RoleAdd: Queueing ${this.queuer.totalID} (${this_member ? this_member.displayName : user} | ${this_role ? this_role.name : role})`);
+		console.log(`RoleRemove: Queueing ${this.queuer.totalID} (${this_member ? this_member.displayName : user} | ${this_role ? this_role.name : role})`);
 		return this.queuer.queue(async () => {
 			let result, error;
 			try {
