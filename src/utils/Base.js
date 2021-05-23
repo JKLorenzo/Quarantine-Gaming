@@ -169,10 +169,10 @@ export async function fetchImage(title) {
 		minWidth: 100,
 		minHeight: 100,
 	});
-	const gameBannerReq = searchImage(`${title} game background hd`, {
+	const gameBannerReq = searchImage(`${title} game background`, {
 		ratio: 1.7,
-		minWidth: 500,
-		minHeight: 500,
+		minWidth: 1000,
+		minHeight: 1000,
 	});
 
 	return {
