@@ -33,7 +33,7 @@ export default async function onGuildMemberUpdate(client, oldMember, newMember) 
 	}
 
 	const description = [`**Profile:** ${newMember}`];
-	if (newMember.displayName != oldMember.displayName) description.push(`**Nickname:** ${oldMember.displayName} -> ${newMember.displayName}`);
+	if (newMember.displayName != oldMember.displayName) description.push(`**Nickname:** \nOld: ${oldMember.displayName} \nNew: ${newMember.displayName}`);
 	if (role_add.length) description.push(`**Role Added:** ${role_add.map(role => role.name).join(', ')}`);
 	if (role_removed.length) description.push(`**Role Removed:** ${role_removed.map(role => role.name).join(', ')}`);
 

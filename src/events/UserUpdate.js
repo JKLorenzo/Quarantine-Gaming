@@ -15,12 +15,12 @@ export default async function onUserUpdate(client, oldUser, newUser) {
 	const member = client.member(newUser);
 
 	const description = [`**Profile:** ${member}`];
-	if (oldUser.username != newUser.username) description.push(`**Username:** ${oldUser.username} -> ${newUser.username}`);
-	if (oldUser.tag != newUser.tag) description.push(`**Tagname:** ${oldUser.tag} -> ${newUser.tag}`);
+	if (oldUser.username != newUser.username) description.push(`**Username:** \nOld: ${oldUser.username} \nNew: ${newUser.username}`);
+	if (oldUser.tag != newUser.tag) description.push(`**Tagname:** \nOld: ${oldUser.tag} \nNew: ${newUser.tag}`);
 	if (oldUser.displayAvatarURL() != newUser.displayAvatarURL()) description.push(`**Avatar:** [New Avatar](${newUser.displayAvatarURL()})`);
 
 	if (description.length > 1) {
-		client.message_manager.sendToChannel(constants.interface.channels.logs, new MessageEmbed({
+		client.message_manager.sendToChannel(constants.interface.channels.member_events, new MessageEmbed({
 			author: { name: 'Quarantine Gaming: Member Update Events' },
 			title: 'User Property Changed',
 			description: description.join('\n'),
