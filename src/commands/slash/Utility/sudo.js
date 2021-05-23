@@ -1,6 +1,7 @@
 import util from 'util';
 import tags from 'common-tags';
 import discord from 'discord.js';
+import { MessageEmbed } from 'discord.js';
 import { SlashCommand } from '../../../structures/Base.js';
 import { constants } from '../../../utils/Base.js';
 
@@ -51,8 +52,24 @@ export default class Sudo extends SlashCommand {
 		this.client = client;
 		let command = options.command;
 
-		// eslint-disable-next-line no-unused-vars
+		/* eslint-disable no-unused-vars */
 		const lastResult = this.lastResult;
+		const doReply = val => {
+			if(val instanceof Error) {
+				interaction.editReply(`Callback error: \`${val}\``);
+			} else {
+				const result = this.makeResultMessages(val, process.hrtime(this.hrStart));
+				if(Array.isArray(result)) {
+					/** @type {MessageEmbed[]} */
+					const embeds = new Array();
+					for(const item of result) embeds.push(new MessageEmbed().setDescription(item));
+					interaction.editReply({ embeds: embeds });
+				} else {
+					interaction.editReply(result);
+				}
+			}
+		};
+		/* eslint-disable no-unused-vars */
 
 		// Remove any surrounding code blocks before evaluation
 		if(command.startsWith('```') && command.endsWith('```')) {
@@ -73,7 +90,10 @@ export default class Sudo extends SlashCommand {
 		this.hrStart = process.hrtime();
 		const result = this.makeResultMessages(this.lastResult, hrDiff, command);
 		if(Array.isArray(result)) {
-			return result.map(item => interaction.editReply(item));
+			/** @type {MessageEmbed[]} */
+			const embeds = new Array();
+			result.forEach(item => embeds.push(new MessageEmbed().setDescription(item)));
+			interaction.editReply(result);
 		} else {
 			return interaction.editReply(result);
 		}
