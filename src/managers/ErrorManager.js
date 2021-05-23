@@ -90,7 +90,7 @@ export default class ErrorManager {
 				if (error_ticket.name) embed.fields[0].value = error_ticket.name;
 				if (error_ticket.location) embed.fields[1].value = error_ticket.location;
 				if (error_ticket.error) embed.fields[3].value = error_ticket.error;
-				if (error_ticket.error.code) embed.fields[2].value = error_ticket.error.code;
+				if (error_ticket.error?.code) embed.fields[2].value = error_ticket.error.code;
 
 				return this.client.message_manager.sendToChannel(constants.interface.channels.telemetry, embed);
 			} catch (error) {
