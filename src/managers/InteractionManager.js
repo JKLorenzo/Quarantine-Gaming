@@ -41,7 +41,7 @@ export default class InteractionManager {
 				const slash_command_class = await import(pathToFileURL(slash_command_path));
 				/** @type {SlashCommand} */
 				const slash_command = new slash_command_class.default();
-				this.slash_commands.push(slash_command.init(this.client));
+				this.slash_commands.push(await slash_command.init(this.client));
 			}
 
 			const existingApplicationCommands = await this.client.guild.commands.fetch().then(application_commands => application_commands.array());

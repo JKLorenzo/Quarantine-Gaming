@@ -59,7 +59,7 @@ export default class SlashCommand {
 	 * Initializes this slash command.
 	 * @param {Client} client
 	 */
-	init(client) {
+	async init(client) {
 		this.client = client;
 		return this;
 	}
