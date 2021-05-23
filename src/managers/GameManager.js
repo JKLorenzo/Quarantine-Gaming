@@ -1,7 +1,9 @@
-import { Collection } from 'discord.js';
-import { ErrorTicketManager, ProcessQueue, contains, sleep, constants } from '../utils/Base.js';
+import { Collection, MessageEmbed } from 'discord.js';
+import { ErrorTicketManager, ProcessQueue, contains, fetchImage, sleep, constants, generateColor, parseMention } from '../utils/Base.js';
 
 /**
+ * @typedef {import('discord.js').Role} Role
+ * @typedef {import('discord.js').Message} Message
  * @typedef {import('discord.js').Presence} Presence
  * @typedef {import('discord.js').Activity} Activity
  * @typedef {import('../structures/Base').Client} Client
@@ -20,12 +22,32 @@ export default class GameManager {
 	/** @param {Client} client */
 	constructor(client) {
 		this.client = client;
+
+		this.gameBracketQueuer = new ProcessQueue();
 	}
 
 	async init() {
 		// Subscribe to presence events
 		this.client.on('presenceUpdate', (oldPresence, newPresence) => {
 			if (newPresence.guild.id == constants.guild) return this.processPresenceUpdate(oldPresence, newPresence);
+		});
+
+		this.client.on('messageReactionAdd', async (message_reaction, user) => {
+			const member = this.client.member(user);
+			if (!member || member.user.bot) return;
+			const message = message_reaction.message.partial ? await message_reaction.message.fetch() : message_reaction.message;
+			const embed = message.embeds[0];
+			if (!embed || !embed.author || !embed.author.name || embed.author.name !== 'Quarantine Gaming: Game Coordinator') return;
+			this.processBracket(message, 'join', member);
+		});
+
+		this.client.on('messageReactionRemove', async (message_reaction, user) => {
+			const member = this.client.member(user);
+			if (!member || member.user.bot) return;
+			const message = message_reaction.message.partial ? await message_reaction.message.fetch() : message_reaction.message;
+			const embed = message.embeds[0];
+			if (!embed || !embed.author || !embed.author.name || embed.author.name !== 'Quarantine Gaming: Game Coordinator') return;
+			this.processBracket(message, 'leave', member);
 		});
 
 		await this.reload();
@@ -107,9 +129,14 @@ export default class GameManager {
 			/** @type {Collection<String, ActivityData>} */
 			const newGames = new Collection();
 
-			if (oldPresence) oldPresence.activities.filter(activity => activity.type === 'PLAYING').forEach(activity => oldGames.set(activity.name.trim(), { activity: activity, status: 'OLD' }));
-			if (newPresence) newPresence.activities.filter(activity => activity.type === 'PLAYING').forEach(activity => newGames.set(activity.name.trim(), { activity: activity, status: 'NEW' }));
-			const difference = newGames.difference(oldGames);
+			oldPresence?.activities.filter(activity => activity.type === 'PLAYING').forEach(activity => {
+				oldGames.set(activity.name.trim(), { activity: activity, status: 'NEW' });
+			});
+			newPresence?.activities.filter(activity => activity.type === 'PLAYING').forEach(activity => {
+				newGames.set(activity.name.trim(), { activity: activity, status: 'OLD' });
+			});
+
+			const difference = oldGames.difference(newGames);
 
 			for (const [game_name, { activity, status }] of difference) {
 				const not_blacklisted = !this.client.database_manager.gameBlacklisted(game_name);
@@ -163,5 +190,130 @@ export default class GameManager {
 		} catch (error) {
 			this.client.error_manager.mark(ETM.create('clearExpired', error));
 		}
+	}
+
+	/**
+	 * Sends a game invite to the game invites channel.
+	 * @param {ExtendedMember} inviter
+	 * @param {Role} game_role
+	 * @param {{description?: String, needed?: Number, reserved: ExtendedMember[]}} options
+	 * @returns {Message}
+	 */
+	async createInvite(inviter, game_role, options = {}) {
+		try {
+			const embed = new MessageEmbed({
+				author: { name: 'Quarantine Gaming: Game Coordinator' },
+				title: game_role.name,
+				description: options.description ?? `${inviter} wants to play ${game_role}.`,
+				fields: [
+					{ name: 'Player 1', value: inviter },
+				],
+				image: { url: constants.images.multiplayer_banner },
+				footer: { text: `Join this ${options.player_count ? 'limited' : 'open'} bracket by reacting below.` },
+				color: generateColor({ min: 100 }).toHex(),
+			});
+
+			if (options.reserved) {
+				for (const member of options.reserved) {
+					if (member) embed.addField(`Player ${embed.fields.length + 1}`, member);
+				}
+			}
+
+			if (options.player_count) {
+				for (let i = 0; i < options.player_count; i++) {
+					if (embed.fields.length < 25) embed.addField(`Player ${embed.fields.length + 1}`, 'Slot Available');
+				}
+			}
+
+			const images = await fetchImage(game_role.name);
+			if (images.small) embed.setThumbnail(images.small);
+			if (images.large) embed.setImage(images.large);
+
+			const invite = await this.client.message_manager.sendToChannel(constants.channels.integrations.game_invites, {
+				content: `${inviter} is inviting you to play ${game_role}.`,
+				embed: embed,
+				allowedMentions: {
+					roles: [game_role.id],
+				},
+			});
+			this.client.reaction_manager.add(invite, this.client.emojis.cache.filter(emoji => {
+				return [
+					'pika_hi',
+					'blob_game',
+					'knife_brean',
+					'amongus_shy',
+					'blob_nomparty',
+					'finger_wave',
+					'pinged_bean',
+					'poppop_cat',
+					'pepe_pewpew',
+				].includes(emoji.name);
+			}).array());
+			invite.delete({ timeout: 600000 }).catch(e => void e);
+			return invite;
+		} catch (error) {
+			this.client.error_manager.mark(ETM.create('createInvite', error));
+		}
+	}
+
+	/**
+	 * @param {Message} message
+	 * @param {'join' | 'leave'} type
+	 * @param {ExtendedMember} member
+	 */
+	processBracket(message, type, member) {
+		this.gameBracketQueuer.queue(async () => {
+			const embed = message.embeds[0];
+			const bracket_name = embed.title;
+			const slots = embed.fields.length;
+			const isLimited = contains(embed.footer.text, 'limited');
+			const inviter = this.client.member(embed.fields[0].value);
+			const players = embed.fields.map(field => field.value).filter(p => p !== 'Slot Available');
+
+			if (inviter.id === member.id) return;
+			if (contains(embed.footer.text, 'bracket is now full')) return;
+
+			switch (type) {
+			case 'join':
+				if (players.includes(member.toString())) return;
+				players.forEach(player => {
+					this.client.message_manager.sendToUser(player, `${member} joined your ${bracket_name} bracket.`);
+				});
+				players.push(member);
+				break;
+			case 'leave':
+				if (!players.includes(member.toString())) return;
+				players.splice(players.indexOf(member.toString()), 1);
+				players.forEach(player => {
+					this.client.message_manager.sendToUser(player, `${member} left your ${bracket_name} bracket.`);
+				});
+				break;
+			}
+
+			if (isLimited) {
+				for (let slot = 1; slot < slots; slot++) {
+					embed.fields[slot].value = players[slot] ?? 'Slot Available';
+				}
+
+				if (players.length === slots) {
+					message.reactions.removeAll();
+					embed.setFooter('This limited bracket is now full.');
+					players.forEach(player => {
+						this.client.message_manager.sendToUser(player, {
+							content: `Your ${bracket_name} bracket is now full.`,
+							embed: embed,
+						});
+					});
+				}
+			} else {
+				embed.spliceFields(1, slots - 1 > 0 ? slots - 1 : 0, players.filter(p => parseMention(p) !== inviter.id).map((value, index) => {
+					return {
+						name: `Player ${index + 2}`, value: value,
+					};
+				}));
+			}
+
+			await message.edit(embed);
+		});
 	}
 }

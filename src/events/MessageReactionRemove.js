@@ -40,43 +40,5 @@ export default async function onMessageReactionRemove(client, message, reaction,
 			await client.role_manager.remove(user, constants.roles.ubisoft);
 			break;
 		}
-	} else if (header_name == 'Quarantine Gaming: Game Coordinator') {
-		const inviter = client.member(embed.fields[0].value);
-		if (inviter && emoji == 'blob_party') {
-			if (user.id != inviter.id && embed.footer.text != 'Closed. This bracket is now full.') {
-				const players = new Array();
-				const max = embed.fields.length;
-				let has_caps = false;
-				if (embed.fields.filter(field => field.value == '\u200b').length) has_caps = true;
-				for (const field of embed.fields) {
-					if (field.value && field.value != '\u200b' && (!(field.value.indexOf(user.id) !== -1) || inviter.user.id != user.id)) {
-						players.push(field.value);
-					}
-				}
-				embed.spliceFields(0, max);
-				if (has_caps) {
-					for (let i = 1; i <= max; i++) {
-						if (i <= players.length) {
-							embed.addField(`Player ${i}:`, players[i - 1]);
-						} else {
-							embed.addField(`Player ${i}:`, '\u200b');
-						}
-					}
-				} else {
-					for (let i = 1; i <= players.length; i++) {
-						embed.addField(`Player ${i}:`, players[i - 1]);
-					}
-				}
-				await message.edit({ content: message.content, embed: embed });
-				for (const this_field of embed.fields) {
-					if (this_field.value && this_field.value.length > 0) {
-						const player = client.member(this_field.value);
-						if (player && player.id != user.id) {
-							await client.message_manager.sendToUser(player, `${user} left your ${embed.title} bracket. ${players.length > 1 ? `${players.length} players total.` : ''}`);
-						}
-					}
-				}
-			}
-		}
 	}
 }
