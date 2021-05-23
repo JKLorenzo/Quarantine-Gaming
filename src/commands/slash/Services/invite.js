@@ -13,15 +13,11 @@ export default class Invite extends SlashCommand {
 			description: 'Invite members to play a game.',
 			options: [
 				{
-					name: 'game_role',
-					description: 'Select the game role representing the game you wanted to play.',
-					type: 'ROLE',
-					required: true,
-				},
-				{
-					name: 'description',
-					description: 'Enter a custom message to be added into this game invite.',
+					name: 'game',
+					description: 'Select the game you wanted to play. Note: Only the first 25 most-played games in this server are listed.',
 					type: 'STRING',
+					choices: [],
+					required: true,
 				},
 				{
 					name: 'player_count',
@@ -53,18 +49,51 @@ export default class Invite extends SlashCommand {
 					description: 'Select the user to reserve in this game invite bracket.',
 					type: 'USER',
 				},
+				{
+					name: 'description',
+					description: 'Enter a custom message to be added into this game invite.',
+					type: 'STRING',
+				},
 			],
 		});
 	}
 
+	async init(client) {
+		this.client = client;
+
+		// Get all the game roles
+		const games = this.client.guild.roles.cache.filter(r => {
+			if (r.hexColor !== constants.colors.game_role) return false;
+			if (r.members.size < 2) return false;
+			return true;
+		}).array();
+
+		// Sort game roles based on the number of players
+		const most_played_games = games.sort((a, b) => a.members.size - b.members.size);
+
+		// Get the first 25 game roles
+		const first_25_games = most_played_games.filter((value, index) => index < 25);
+		// Sort these game roles alphabetically
+		const first_25_game_names = first_25_games.map(role => role.name).sort();
+
+		// Register these roles as choices to this slash command
+		first_25_game_names.forEach(game_name => {
+			this.options[0].choices.push({
+				name: game_name.trim(),
+				value: first_25_games.find(role => role.name === game_name).id,
+			});
+		});
+
+		return this;
+	}
+
 	/**
      * @param {CommandInteraction} interaction
-     * @param {{game_role: Role, player_count?: Number}} options
+     * @param {{game: String, player_count?: Number}} options
      */
 	async exec(interaction, options) {
-		if (options.game_role.hexColor !== constants.colors.game_role) {
-			return interaction.reply('Invalid game role. Please try again.', { ephemeral: true });
-		}
+		const game_role = this.client.role(options.game);
+		if (!game_role) return interaction.reply('Invite failed. The game you specified is no longer supported.', { ephemeral: true });
 
 		await interaction.defer(true);
 
@@ -79,7 +108,7 @@ export default class Invite extends SlashCommand {
 				options.reserved_5,
 			],
 		};
-		const invite = await this.client.game_manager.createInvite(interaction.member, options.game_role, inviteOptions);
+		const invite = await this.client.game_manager.createInvite(interaction.member, game_role, inviteOptions);
 		interaction.editReply(`Got it! [This bracket](${invite.url}) will be available on the ${this.client.channel(constants.channels.integrations.game_invites)} channel.`);
 	}
 }
