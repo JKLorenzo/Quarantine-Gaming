@@ -7,7 +7,6 @@ import { constants } from '../../../utils/Base.js';
 
 /**
  * @typedef {import('discord.js').CommandInteraction} CommandInteraction
- * @typedef {import('../../../structures/Base.js').Client} Client
  */
 
 const nl = '!!NL!!';
@@ -47,9 +46,6 @@ export default class Sudo extends SlashCommand {
 	async exec(interaction, options) {
 		await interaction.defer(true);
 
-		/** @type {Client} */
-		const client = interaction.client;
-		this.client = client;
 		let command = options.command;
 
 		/* eslint-disable no-unused-vars */

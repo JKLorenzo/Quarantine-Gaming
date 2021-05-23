@@ -5,7 +5,6 @@ import { getPercentSimilarity, constants } from '../../../utils/Base.js';
 /**
  * @typedef {import('discord.js').GuildChannel} GuildChannel
  * @typedef {import('discord.js').CommandInteraction} CommandInteraction
- * @typedef {import('../../../structures/Base.js').Client} Client
  * @typedef {import('../../../structures/Base.js').ExtendedMember} ExtendedMember
  */
 
@@ -62,23 +61,20 @@ export default class Game extends SlashCommand {
 	async exec(interaction, options) {
 		await interaction.defer();
 
-		/** @type {Client} */
-		const client = interaction.client;
-
 		const args = options.whitelist || options.blacklist;
 		const type = args.option;
 		const raw_name = args.name.trim();
 		const safe_name = raw_name.toLowerCase();
 		let game_name = '';
 
-		checkRole: for (const this_role of client.guild.roles.cache.array()) {
+		checkRole: for (const this_role of this.client.guild.roles.cache.array()) {
 			if (this_role.hexColor != constants.colors.game_role) continue;
 			if (getPercentSimilarity(this_role.name.trim().toLowerCase(), safe_name) >= 75) {
 				game_name = this_role.name.trim();
 				break checkRole;
 			}
 		}
-		checkPresence: for (const this_member of client.guild.members.cache.array()) {
+		checkPresence: for (const this_member of this.client.guild.members.cache.array()) {
 			for (const this_activity of this_member.presence.activities) {
 				if (this_activity.type !== 'PLAYING') continue;
 				if (getPercentSimilarity(this_activity.name.trim().toLowerCase(), safe_name) >= 75) {
@@ -103,10 +99,10 @@ export default class Game extends SlashCommand {
 		} else {
 			let result;
 			if (type == 'whitelist') {
-				result = await client.database_manager.gameWhitelist(game_name);
+				result = await this.client.database_manager.gameWhitelist(game_name);
 				if (result) embed.fields[0].value = 'Game Whitelisted';
 			} else {
-				result = await client.database_manager.gameBlacklist(game_name);
+				result = await this.client.database_manager.gameBlacklist(game_name);
 				if (result) embed.fields[0].value = 'Game Blacklisted';
 			}
 		}

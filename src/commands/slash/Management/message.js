@@ -4,7 +4,6 @@ import { constants } from '../../../utils/Base.js';
 /**
  * @typedef {import('discord.js').TextChannel} TextChannel
  * @typedef {import('discord.js').CommandInteraction} CommandInteraction
- * @typedef {import('../../../structures/Base.js').Client} Client
  * @typedef {import('../../../structures/Base.js').ExtendedMember} ExtendedMember
  */
 
@@ -72,20 +71,17 @@ export default class Message extends SlashCommand {
 	async exec(interaction, options) {
 		await interaction.defer(true);
 
-		/** @type {Client} */
-		const client = interaction.client;
-
 		const args = options.text_channel || options.dm;
 		const message = args.message;
 
 		if (args.option == 'text_channel') {
 			const channel = options.text_channel.channel;
 			if (!channel.isText()) return interaction.editReply('Failed to send the message. Supplied channel is not a text-based channel.');
-			await client.message_manager.sendToChannel(channel, message);
+			await this.client.message_manager.sendToChannel(channel, message);
 		} else {
 			const member = options.dm.member;
 			if (member.user.bot) return interaction.editReply('Failed to send the message. Supplied member must not be a bot.');
-			await client.message_manager.sendToUser(member, message);
+			await this.client.message_manager.sendToUser(member, message);
 		}
 		interaction.editReply('Message sent!');
 	}

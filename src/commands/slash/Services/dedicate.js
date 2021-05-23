@@ -6,7 +6,6 @@ import { parseMention, sleep, constants } from '../../../utils/Base.js';
  * @typedef {import('discord.js').TextChannel} TextChannel
  * @typedef {import('discord.js').CategoryChannel} CategoryChannel
  * @typedef {import('discord.js').CommandInteraction} CommandInteraction
- * @typedef {import('../../../structures/Base.js').Client} Client
  */
 
 export default class Dedicate extends SlashCommand {
@@ -36,10 +35,7 @@ export default class Dedicate extends SlashCommand {
 	async exec(interaction, options) {
 		await interaction.defer(true);
 
-		/** @type {Client} */
-		const client = interaction.client;
-
-		const member = client.member(interaction.user);
+		const member = this.client.member(interaction.user);
 		let voice_channel = member.voice.channel;
 		if (!voice_channel) return interaction.editReply('You must be connected to any voice channels to create a dedicated channel.');
 
@@ -52,7 +48,7 @@ export default class Dedicate extends SlashCommand {
 				await interaction.editReply(`Alright, renaming your dedicated channel to **${options.custom_name}**.`);
 			}
 
-			const data = await client.dedicated_channel_manager.create(voice_channel, options.custom_name);
+			const data = await this.client.dedicated_channel_manager.create(voice_channel, options.custom_name);
 			voice_channel = data.voice_channel;
 			if (data.transfer_process) {
 				await interaction.editReply(`You will be transfered to ${data.voice_channel} dedicated channel momentarily.`);
@@ -76,7 +72,7 @@ export default class Dedicate extends SlashCommand {
 			}
 
 			/** @type {CategoryChannel} */
-			const dedicated_text_channels_category = client.channel(constants.channels.category.dedicated);
+			const dedicated_text_channels_category = this.client.channel(constants.channels.category.dedicated);
 			/** @type {Array<TextChannel>} */
 			const dedicated_text_channels = dedicated_text_channels_category.children.array();
 			const text_channel = dedicated_text_channels.find(channel => channel.topic && parseMention(channel.topic.split(' ')[0]) == voice_channel.id);
@@ -87,7 +83,7 @@ export default class Dedicate extends SlashCommand {
 				color: '#ffe500',
 				timestamp: new Date(),
 			});
-			await client.message_manager.sendToChannel(text_channel, embed);
+			await this.client.message_manager.sendToChannel(text_channel, embed);
 			await sleep(2500);
 		}
 

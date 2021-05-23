@@ -5,7 +5,6 @@ import { constants } from '../../../utils/Base.js';
 /**
  * @typedef {import('discord.js').GuildChannel} GuildChannel
  * @typedef {import('discord.js').CommandInteraction} CommandInteraction
- * @typedef {import('../../../structures/Base.js').Client} Client
  * @typedef {import('../../../structures/Base.js').ExtendedMember} ExtendedMember
  */
 

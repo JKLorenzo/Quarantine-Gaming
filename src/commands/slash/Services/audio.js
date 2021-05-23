@@ -4,7 +4,6 @@ import { constants } from '../../../utils/Base.js';
 
 /**
  * @typedef {import('discord.js').CommandInteraction} CommandInteraction
- * @typedef {import('../../../structures/Base.js').Client} Client
  */
 
 export default class Audio extends SlashCommand {
@@ -19,9 +18,6 @@ export default class Audio extends SlashCommand {
 	async exec(interaction) {
 		await interaction.defer(true);
 
-		/** @type {Client} */
-		const client = interaction.client;
-
 		const embed = new MessageEmbed({
 			author: { name: 'Quarantine Gaming: Experience' },
 			title: 'Audio Control Extension for Voice Channels',
@@ -35,8 +31,8 @@ export default class Audio extends SlashCommand {
 			footer: { text: 'Apply selected actions by reacting below.' },
 		});
 
-		await client.message_manager.sendToChannel(interaction.channel, embed).then(async reply => {
-			await client.reaction_manager.add(reply, ['🟠', '🟢']);
+		await this.client.message_manager.sendToChannel(interaction.channel, embed).then(async reply => {
+			await this.client.reaction_manager.add(reply, ['🟠', '🟢']);
 			if (reply && reply.deletable) reply.delete({ timeout: 1800000 }).catch(e => void e);
 		});
 

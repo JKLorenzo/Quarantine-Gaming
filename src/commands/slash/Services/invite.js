@@ -4,7 +4,6 @@ import { constants } from '../../../utils/Base.js';
 /**
  * @typedef {import('discord.js').Role} Role
  * @typedef {import('discord.js').CommandInteraction} CommandInteraction
- * @typedef {import('../../../structures/Base.js').Client} Client
  */
 
 export default class Invite extends SlashCommand {
@@ -63,13 +62,12 @@ export default class Invite extends SlashCommand {
      * @param {{game_role: Role, player_count?: Number}} options
      */
 	async exec(interaction, options) {
-		/** @type {Client} */
-		const client = interaction.client;
-
 		if (options.game_role.hexColor !== constants.colors.game_role) {
 			return interaction.reply('Invalid game role. Please try again.', { ephemeral: true });
 		}
+
 		await interaction.defer(true);
+
 		const inviteOptions = {
 			description: options.description,
 			player_count: options.player_count,
@@ -81,7 +79,7 @@ export default class Invite extends SlashCommand {
 				options.reserved_5,
 			],
 		};
-		const invite = await client.game_manager.createInvite(interaction.member, options.game_role, inviteOptions);
-		interaction.editReply(`Got it! [This bracket](${invite.url}) will be available on the ${client.channel(constants.channels.integrations.game_invites)} channel.`);
+		const invite = await this.client.game_manager.createInvite(interaction.member, options.game_role, inviteOptions);
+		interaction.editReply(`Got it! [This bracket](${invite.url}) will be available on the ${this.client.channel(constants.channels.integrations.game_invites)} channel.`);
 	}
 }
