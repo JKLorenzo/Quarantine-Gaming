@@ -10,7 +10,7 @@ export default class Streaming extends SlashCommand {
 	constructor() {
 		super({
 			name: 'streaming',
-			description: 'Manually add a streaming role to your account to let other know you\'re streaming.',
+			description: 'Manually add a streaming role to your account to let others know you\'re streaming.',
 		});
 	}
 
