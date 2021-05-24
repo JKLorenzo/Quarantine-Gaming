@@ -56,11 +56,11 @@ export default class Players extends SlashCommand {
 		/** @type {Partition[]} */
 		const partitions = new Array();
 		const games = this.client.guild.roles.cache.filter(r => r.hexColor === constants.colors.game_role).array();
-		const games_alphabetical = games.map(r => r.name).sort();
+		const games_alphabetical = games.map(r => r.name.toLowerCase()).sort();
 		for (const game_name of games_alphabetical) {
 			// Initialize the first and the next partition
 			if (!partitions.length || partitions[partitions.length - 1].length > 24) partitions.push(new Array());
-			partitions[partitions.length - 1].push(games.find(r => r.name === game_name));
+			partitions[partitions.length - 1].push(games.find(r => r.name.toLowerCase() === game_name));
 		}
 		for (const partition of partitions) this.registerPartitionAsSubCommand(partition);
 
