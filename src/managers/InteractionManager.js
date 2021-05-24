@@ -38,10 +38,14 @@ export default class InteractionManager {
 
 			const slash_commands_dir = path.join(__dirname, '../commands/slash');
 			for (const slash_command_path of getAllFiles(slash_commands_dir)) {
-				const slash_command_class = await import(pathToFileURL(slash_command_path));
-				/** @type {SlashCommand} */
-				const slash_command = new slash_command_class.default();
-				this.slash_commands.push(await slash_command.init(this.client));
+				try {
+					const slash_command_class = await import(pathToFileURL(slash_command_path));
+					/** @type {SlashCommand} */
+					const slash_command = new slash_command_class.default();
+					this.slash_commands.push(await slash_command.init(this.client));
+				} catch (error) {
+					this.client.error_manager.mark(ETM.create('import', error, 'init'));
+				}
 			}
 
 			const existingApplicationCommands = await this.client.guild.commands.fetch().then(application_commands => application_commands.array());
@@ -56,6 +60,7 @@ export default class InteractionManager {
 					console.log(`InteractionManager: Deleting ${this_application_command.name}`);
 					try {
 						await this_application_command.delete();
+						this.client.message_manager.sendToChannel(constants.interface.channels.logs, `Command \`${this_application_command.name}\` deleted.`).catch(e => void e);
 					} catch (error) {
 						this.client.error_manager.mark(ETM.create('delete', error, 'init'));
 					} finally {
@@ -72,6 +77,7 @@ export default class InteractionManager {
 					console.log(`InteractionManager: Creating ${this_application_command_data.name}`);
 					try {
 						await this.client.guild.commands.create(this_application_command_data);
+						this.client.message_manager.sendToChannel(constants.interface.channels.logs, `Command \`${this_application_command_data.name}\` created.`).catch(e => void e);
 					} catch (error) {
 						this.client.error_manager.mark(ETM.create('create', error, 'init'));
 					} finally {
@@ -92,6 +98,7 @@ export default class InteractionManager {
 					console.log(`InteractionManager: Updating ${this_application_command.name}`);
 					try {
 						await this.client.guild.commands.edit(this_application_command, this_slash_command.getApplicationCommandData());
+						this.client.message_manager.sendToChannel(constants.interface.channels.logs, `Command \`${this_application_command.name}\` updated.`).catch(e => void e);
 					} catch (error) {
 						this.client.error_manager.mark(ETM.create('update', error, 'init'));
 					} finally {
@@ -115,6 +122,7 @@ export default class InteractionManager {
 					console.log(`InteractionManager: Permission Updating ${this_application_command.name}`);
 					try {
 						await this_application_command.setPermissions(this_slash_command.getApplicationCommandPermissionData());
+						this.client.message_manager.sendToChannel(constants.interface.channels.logs, `Command \`${this_application_command.name}\` permission updated.`).catch(e => void e);
 					} catch (error) {
 						this.client.error_manager.mark(ETM.create('permission', error, 'init'));
 					} finally {
