@@ -8,7 +8,7 @@ export default class Ping extends SlashCommand {
 	constructor() {
 		super({
 			name: 'ping',
-			description: 'Check the ping of this bot.',
+			description: 'Check the ping of this bot from the discord server.',
 		});
 	}
 
