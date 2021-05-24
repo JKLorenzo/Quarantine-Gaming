@@ -15,30 +15,26 @@ export default class Game extends SlashCommand {
 			description: '[Staff/Mod/Booster] Whitelist or blacklist a game (used in game roles and play roles).',
 			options: [
 				{
-					name: 'whitelist',
-					description: '[Staff/Mod/Booster] Whitelist a game (used in game roles and play roles).',
-					type: 'SUB_COMMAND',
-					options: [
+					name: 'mode',
+					description: '[Staff/Mod] Whitelist or blacklist a game used in game roles and play roles.',
+					type: 'STRING',
+					choices: [
 						{
-							name: 'name',
-							description: 'The complete name of the game (case insensitive).',
-							type: 'STRING',
-							required: true,
+							name: 'Whitelist',
+							value: 'whitelist',
+						},
+						{
+							name: 'Blacklist',
+							value: 'blacklist',
 						},
 					],
+					required: true,
 				},
 				{
-					name: 'blacklist',
-					description: '[Staff/Mod/Booster] Blacklist a game (used in game roles and play roles).',
-					type: 'SUB_COMMAND',
-					options: [
-						{
-							name: 'name',
-							description: 'The complete name of the game (case insensitive).',
-							type: 'STRING',
-							required: true,
-						},
-					],
+					name: 'name',
+					description: 'The complete name of the game you\'d like to whitelist or blacklist. (case insensitive)',
+					type: 'STRING',
+					required: true,
 				},
 			],
 			defaultPermission: false,
@@ -56,14 +52,12 @@ export default class Game extends SlashCommand {
 
 	/**
 	 * @param {CommandInteraction} interaction
-	 * @param {{whitelist?: {option: 'whitelist', name: String}, blacklist?: {option: 'blacklist', name: String}}} options
+	 * @param {{mode: 'whitelist' | 'blacklist', name: String}} options
 	 */
 	async exec(interaction, options) {
 		await interaction.defer();
 
-		const args = options.whitelist || options.blacklist;
-		const type = args.option;
-		const raw_name = args.name.trim();
+		const raw_name = options.name.trim();
 		const safe_name = raw_name.toLowerCase();
 		let game_name = '';
 
@@ -87,7 +81,7 @@ export default class Game extends SlashCommand {
 		const embed = new MessageEmbed({
 			author: { name: 'Quarantine Gaming: Game Role Manager' },
 			title: game_name ? game_name : raw_name,
-			description: `Game ${type} requested by ${interaction.member}.`,
+			description: `Game ${options.mode} requested by ${interaction.member}.`,
 			fields: [
 				{ name: 'Status', value: 'Failed' },
 			],
@@ -98,7 +92,7 @@ export default class Game extends SlashCommand {
 			embed.fields[0].value = 'Game not found';
 		} else {
 			let result;
-			if (type == 'whitelist') {
+			if (options.mode == 'whitelist') {
 				result = await this.client.database_manager.gameWhitelist(game_name);
 				if (result) embed.fields[0].value = 'Game Whitelisted';
 			} else {
