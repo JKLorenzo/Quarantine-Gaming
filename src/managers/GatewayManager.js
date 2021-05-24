@@ -181,11 +181,12 @@ export default class GatewayManager {
 
 		client.on('messageReactionAdd', async (reaction, user) => {
 			try {
+				if (user.bot) return;
 				const message = reaction.message.partial ? await reaction.message.fetch() : reaction.message;
 				if (message.embeds.length) return;
 				const emoji = reaction.emoji.name;
 				const embed = message.embeds[0];
-				if (embed.author.name && embed.author.name !== 'Quarantine Gaming: Server Gateway Administrative') return;
+				if (!embed || (embed.author?.name !== 'Quarantine Gaming: Server Gateway Administrative')) return;
 				const member = client.member(user);
 
 				if (member.hasRole([constants.roles.staff, constants.roles.moderator, constants.roles.booster]) && embed.fields[3].value == 'Action Required') {
