@@ -10,10 +10,10 @@ import { constants } from '../../../utils/Base.js';
  * @typedef {Role[]} Partition Represents a subcommand choice containing 25 roles
  */
 
-export default class Invite extends SlashCommand {
+export default class Play extends SlashCommand {
 	constructor() {
 		super({
-			name: 'invite',
+			name: 'play',
 			description: 'Invite members to play a game.',
 			options: [],
 		});
