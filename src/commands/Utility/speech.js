@@ -1,4 +1,5 @@
 import { SlashCommand } from '../../structures/Base.js';
+import { constants } from '../../utils/Base.js';
 
 /**
  * @typedef {import('discord.js').VoiceChannel} VoiceChannel
@@ -9,7 +10,7 @@ export default class Speech extends SlashCommand {
 	constructor() {
 		super({
 			name: 'speech',
-			description: 'Say a message to a voice channel using Quarantine Gaming\'s TTS.',
+			description: '[Staff/Mod] Sends a message to a voice channel using Quarantine Gaming\'s TTS.',
 			options: [
 				{
 					name: 'voice_channel',
@@ -24,6 +25,15 @@ export default class Speech extends SlashCommand {
 					required: true,
 				},
 			],
+			defaultPermission: false,
+			permissions: {
+				roles: {
+					allow: [
+						constants.roles.staff,
+						constants.roles.moderator,
+					],
+				},
+			},
 		});
 	}
 
