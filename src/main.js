@@ -31,8 +31,8 @@ const client = new Client({
 	presence: {
 		activities: [
 			{
-				name: 'QG Arena',
-				type: 'COMPETING',
+				name: '/commands',
+				type: 'LISTENING',
 			},
 		],
 		status: 'online',
