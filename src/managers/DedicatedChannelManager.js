@@ -44,22 +44,90 @@ export default class DedicatedChannelManager {
 	constructor(client) {
 		this.client = client;
 		this.queuer = new ProcessQueue(1000);
+	}
 
-		this.data = {
-			interval: 120000,
-			intervalID: null,
-		};
+	async init() {
+		// Auto dedicate every 5 minutes
+		setInterval(() => {
+			this.autoDedicate();
+		}, 300000);
 
-		this.actions = {
-			start: () => {
-				this.data.intervalID = setInterval(() => {
-					this.autoDedicate();
-				}, this.data.interval);
-			},
-			stop: () => {
-				if (this.data.intervalID) clearInterval(this.data.intervalID);
-			},
-		};
+		this.client.on('voiceStateUpdate', async (oldState, newState) => {
+			const member = newState.member;
+			if (newState.channelID === oldState.channelID) return;
+
+			if (oldState.channel?.parent?.id === constants.channels.category.dedicated_voice) {
+				const text_channel = this.client.channel(constants.channels.category.dedicated).children.find(channel => channel.type == 'text' && channel.topic && parseMention(channel.topic.split(' ')[0]) == oldState.channelID);
+				const linked_data = text_channel.topic.split(' ');
+				const team_role = this.client.role(linked_data[1]);
+
+				if (oldState.channel.members.size > 0 && !(oldState.channel.members.size == 1 && oldState.channel.members.first().user.bot)) {
+					this.client.role_manager.remove(member, team_role);
+					this.client.message_manager.sendToChannel(text_channel, new MessageEmbed({
+						author: { name: 'Quarantine Gaming: Dedicated Channels' },
+						title: oldState.channel.name,
+						thumbnail: { url: member.user.displayAvatarURL() },
+						description: `${oldState.member} left this channel.`,
+						footer: { text: `${member.user.tag} (${member.user.id})` },
+						timestamp: new Date(),
+						color: '#7b00ff',
+					}));
+				} else {
+					await this.client.role_manager.delete(team_role);
+					await this.client.channel_manager.delete(oldState.channel);
+					await this.client.channel_manager.delete(text_channel);
+				}
+			}
+
+			if (newState.channel) {
+				// Check if members are streaming
+				const streamers = new Array();
+				for (const this_member of newState.channel.members.array()) {
+					if (member.user.id != this_member.user.id && this_member.roles.cache.has(constants.roles.streaming)) {
+						streamers.push(this_member);
+					}
+				}
+
+				// Notify member
+				if (streamers.length > 0) {
+					this.client.message_manager.sendToUser(member, new MessageEmbed({
+						author: { name: 'Quarantine Gaming: Information' },
+						title: `${streamers.length > 1
+							? `${streamers.map(this_member => this_member.displayName).join(' and ')} are`
+							: `${streamers.map(this_member => this_member.displayName)} is`} currently Streaming`,
+						thumbnail: { url: member.user.displayAvatarURL() },
+						description: 'Please observe proper behavior on your current voice channel.',
+						image: { url: 'https://pa1.narvii.com/6771/d33918fa87ad0d84b7dc854dcbf6a8545c73f94d_hq.gif' },
+						color: '#5dff00',
+					}));
+				}
+
+				if (newState.channel.parent?.id == constants.channels.category.dedicated_voice) {
+					const text_channel = this.client.channel(constants.channels.category.dedicated).children.find(channel => channel.topic && parseMention(channel.topic.split(' ')[0]) == newState.channelID);
+					const linked_data = text_channel.topic.split(' ');
+					const team_role = this.client.role(linked_data[1]);
+
+					// Add Text Role
+					if (!member.roles.cache.has(team_role.id)) {
+						this.client.role_manager.add(member, team_role);
+						this.client.message_manager.sendToChannel(text_channel, new MessageEmbed({
+							author: { name: 'Quarantine Gaming: Dedicated Channels' },
+							title: newState.channel.name,
+							thumbnail: { url: newState.member.user.displayAvatarURL() },
+							description: `${newState.member} joined this channel.`,
+							footer: { text: `${newState.member.user.tag} (${newState.member.user.id})` },
+							timestamp: new Date(),
+							color: '#7b00ff',
+						}));
+					}
+				} else if (newState.channel.parent?.id == constants.channels.category.voice && newState.channel.members.array().length == 5) {
+					// Dedicate this channel
+					await this.client.dedicated_channel_manager.create(newState.channel, newState.channel.members.array()[0].displayName);
+				}
+			} else if (member.roles.cache.has(constants.roles.streaming)) {
+				this.client.role_manager.remove(member, constants.roles.streaming);
+			}
+		});
 	}
 
 	/**

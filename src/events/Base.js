@@ -3,7 +3,6 @@ import onMessageReactionAdd from './MessageReactionAdd.js';
 import onMessageReactionRemove from './MessageReactionRemove.js';
 import onceReady from './Ready.js';
 import onUserUpdate from './UserUpdate.js';
-import onVoiceStateUpdate from './VoiceStateUpdate.js';
 import { ErrorTicketManager, ProcessQueue } from '../utils/Base.js';
 
 const ETM = new ErrorTicketManager('Base Events');
@@ -52,20 +51,6 @@ export default class BaseEvents {
 							await onGuildMemberUpdate(this.client, oldMember, newMember);
 						} catch(error) {
 							this.client.error_manager.mark(ETM.create('guildMemberUpdate', error));
-						}
-					});
-				}),
-			};
-
-			this.onVoiceStateUpdate = {
-				queuer: new ProcessQueue(1000),
-				event: this.client.on('voiceStateUpdate', (oldState, newState) => {
-					if (newState.guild.id != this.client.guild.id && !newState.member.user.bot && oldState.channel != newState.channel) return;
-					this.onVoiceStateUpdate.queuer.queue(async () => {
-						try {
-							await onVoiceStateUpdate(this.client, oldState, newState);
-						} catch(error) {
-							this.client.error_manager.mark(ETM.create('voiceStateUpdate', error));
 						}
 					});
 				}),

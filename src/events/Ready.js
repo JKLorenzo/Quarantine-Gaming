@@ -15,8 +15,8 @@ export default async function onceReady(client) {
 
 	await client.methods.loadMembers();
 	await client.game_manager.init();
+	await client.dedicated_channel_manager.init();
 
-	client.dedicated_channel_manager.actions.start();
 	client.free_game_manager.actions.start();
 
 	client.message_manager.sendToChannel(constants.interface.channels.logs, '<-----------**INITIALIZED**----------->');
