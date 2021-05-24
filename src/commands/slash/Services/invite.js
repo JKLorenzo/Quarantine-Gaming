@@ -6,22 +6,48 @@ import { constants } from '../../../utils/Base.js';
  * @typedef {import('discord.js').CommandInteraction} CommandInteraction
  */
 
+/**
+ * @typedef {Role[]} Partition Represents a subcommand choice containing 25 roles
+ */
+
 export default class Invite extends SlashCommand {
 	constructor() {
 		super({
 			name: 'invite',
 			description: 'Invite members to play a game.',
+			options: [],
+		});
+	}
+
+	/** @param {Partition} partition */
+	registerPartitionAsSubCommand(partition, iteration = 0) {
+		const start = partition[0].name.substring(0, 1).toLowerCase();
+		const end = partition[partition.length - 1].name.substring(0, 1).toLowerCase();
+		const this_name = `${start}_to_${end}${iteration ? `_${iteration}` : ''}`;
+		if (this.options.map(option => option.name).includes(this_name)) {
+			return this.registerPartitionAsSubCommand(partition, ++iteration);
+		}
+
+		this.options.push({
+			name: this_name,
+			description: `Invite members to play a game. (${start.toUpperCase()} to ${end.toUpperCase()})`,
+			type: 'SUB_COMMAND',
 			options: [
 				{
 					name: 'game',
-					description: 'Select the game you wanted to play. Note: Only the 25 most-played games in this server are listed.',
+					description: 'Select the game you want to play.',
 					type: 'STRING',
-					choices: [],
+					choices: partition.map(role => {
+						return {
+							name: role.name,
+							value: role.id,
+						};
+					}),
 					required: true,
 				},
 				{
 					name: 'player_count',
-					description: 'Enter the number of players you\'re looking for. (25 Max including reserved)',
+					description: 'Enter the number of players you\'re looking for. (Max of 25 players per bracket)',
 					type: 'INTEGER',
 				},
 				{
@@ -61,39 +87,30 @@ export default class Invite extends SlashCommand {
 	async init(client) {
 		this.client = client;
 
-		// Get all the game roles
-		const games = this.client.guild.roles.cache.filter(r => {
-			if (r.hexColor !== constants.colors.game_role) return false;
-			if (r.members.size < 2) return false;
-			return true;
-		}).array();
-
-		// Sort game roles based on the number of players
-		const most_played_games = games.sort((a, b) => a.members.size - b.members.size);
-
-		// Get the first 25 game roles
-		const first_25_games = most_played_games.filter((value, index) => index < 25);
-		// Sort these game roles alphabetically
-		const first_25_game_names = first_25_games.map(role => role.name).sort();
-
-		// Register these roles as choices to this slash command
-		first_25_game_names.forEach(game_name => {
-			this.options[0].choices.push({
-				name: game_name.trim(),
-				value: first_25_games.find(role => role.name === game_name).id,
-			});
-		});
+		/** @type {Partition[]} */
+		const partitions = new Array();
+		const games = this.client.guild.roles.cache.filter(r => r.hexColor === constants.colors.game_role).array();
+		const games_alphabetical = games.map(r => r.name).sort();
+		for (const game_name of games_alphabetical) {
+			// Initialize the first and the next partition
+			if (!partitions.length || partitions[partitions.length - 1].length > 24) partitions.push(new Array());
+			partitions[partitions.length - 1].push(games.find(r => r.name === game_name));
+		}
+		for (const partition of partitions) this.registerPartitionAsSubCommand(partition);
 
 		return this;
 	}
 
 	/**
      * @param {CommandInteraction} interaction
-     * @param {{game: String, player_count?: Number}} options
+     * @param {{game: String, player_count?: Number, description?: String} options
      */
 	async exec(interaction, options) {
+		// further transform the options to match the properties of a subcommand
+		options = options[Object.keys(options)[0]];
+
 		const game_role = this.client.role(options.game);
-		if (!game_role) return interaction.reply('Invite failed. The game you specified is no longer supported.', { ephemeral: true });
+		if (!game_role) return interaction.reply('Command failed. The game you specified no longer exists.', { ephemeral: true });
 
 		await interaction.defer(true);
 
