@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { JSDOM } from 'jsdom';
-import { SlashCommand } from '../../../structures/Base.js';
+import { SlashCommand } from '../../structures/Base.js';
 
 /**
  * @typedef {import('discord.js').CommandInteraction} CommandInteraction

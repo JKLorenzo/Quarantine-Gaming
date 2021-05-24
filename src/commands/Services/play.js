@@ -1,5 +1,5 @@
-import { SlashCommand } from '../../../structures/Base.js';
-import { constants } from '../../../utils/Base.js';
+import { SlashCommand } from '../../structures/Base.js';
+import { constants } from '../../utils/Base.js';
 
 /**
  * @typedef {import('discord.js').Role} Role

@@ -1,6 +1,6 @@
 import { MessageEmbed } from 'discord.js';
-import { SlashCommand } from '../../../structures/Base.js';
-import { parseMention, sleep, constants } from '../../../utils/Base.js';
+import { SlashCommand } from '../../structures/Base.js';
+import { parseMention, sleep, constants } from '../../utils/Base.js';
 
 /**
  * @typedef {import('discord.js').TextChannel} TextChannel

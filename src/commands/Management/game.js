@@ -1,11 +1,11 @@
 import { MessageEmbed } from 'discord.js';
-import { SlashCommand } from '../../../structures/Base.js';
-import { getPercentSimilarity, constants } from '../../../utils/Base.js';
+import { SlashCommand } from '../../structures/Base.js';
+import { getPercentSimilarity, constants } from '../../utils/Base.js';
 
 /**
  * @typedef {import('discord.js').GuildChannel} GuildChannel
  * @typedef {import('discord.js').CommandInteraction} CommandInteraction
- * @typedef {import('../../../structures/Base.js').ExtendedMember} ExtendedMember
+ * @typedef {import('../../structures/Base.js').ExtendedMember} ExtendedMember
  */
 
 export default class Game extends SlashCommand {

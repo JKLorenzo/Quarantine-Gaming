@@ -1,8 +1,8 @@
-import { SlashCommand } from '../../../structures/Base.js';
+import { SlashCommand } from '../../structures/Base.js';
 
 /**
  * @typedef {import('discord.js').CommandInteraction} CommandInteraction
- * @typedef {import('../../../structures/Base.js').ExtendedMember} ExtendedMember
+ * @typedef {import('../../structures/Base.js').ExtendedMember} ExtendedMember
  */
 
 export default class Transfer extends SlashCommand {

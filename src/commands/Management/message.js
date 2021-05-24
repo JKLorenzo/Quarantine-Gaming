@@ -1,10 +1,10 @@
-import { SlashCommand } from '../../../structures/Base.js';
-import { constants } from '../../../utils/Base.js';
+import { SlashCommand } from '../../structures/Base.js';
+import { constants } from '../../utils/Base.js';
 
 /**
  * @typedef {import('discord.js').TextChannel} TextChannel
  * @typedef {import('discord.js').CommandInteraction} CommandInteraction
- * @typedef {import('../../../structures/Base.js').ExtendedMember} ExtendedMember
+ * @typedef {import('../../structures/Base.js').ExtendedMember} ExtendedMember
  */
 
 export default class Message extends SlashCommand {
