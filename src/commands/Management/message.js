@@ -3,6 +3,7 @@ import { constants } from '../../utils/Base.js';
 
 /**
  * @typedef {import('discord.js').TextChannel} TextChannel
+ * @typedef {import('discord.js').VoiceChannel} VoiceChannel
  * @typedef {import('discord.js').CommandInteraction} CommandInteraction
  * @typedef {import('../../structures/Base.js').ExtendedMember} ExtendedMember
  */
@@ -14,7 +15,7 @@ export default class Message extends SlashCommand {
 			description: '[Staff/Mod] Sends a message to a member or a channel as Quarantine Gaming.',
 			options: [
 				{
-					name: 'text_channel',
+					name: 'channel',
 					description: '[Staff/Mod] Sends a message to a channel as Quarantine Gaming.',
 					type: 'SUB_COMMAND',
 					options: [
@@ -66,22 +67,26 @@ export default class Message extends SlashCommand {
 
 	/**
 	 * @param {CommandInteraction} interaction
-	 * @param {{text_channel?: {option: 'text_channel', channel: TextChannel, message: String}, dm?: {option: 'dm', member: ExtendedMember, message: String} }} options
+	 * @param {{option: 'channel' | 'dm', channel?: TextChannel | VoiceChannel, member?: ExtendedMember, message: String}} options
 	 */
 	async exec(interaction, options) {
 		await interaction.defer(true);
 
-		const args = options.text_channel || options.dm;
-		const message = args.message;
+		options = options[Object.keys(options)[0]];
 
-		if (args.option == 'text_channel') {
-			const channel = options.text_channel.channel;
-			if (!channel.isText()) return interaction.editReply('Failed to send the message. Supplied channel is not a text-based channel.');
-			await this.client.message_manager.sendToChannel(channel, message);
+		if (options.option == 'channel') {
+			const channel = options.channel;
+			if (channel.isText()) {
+				await this.client.message_manager.sendToChannel(channel, options.message);
+			} else {
+				await this.client.speech_manager.say(channel, options.message.split(' ').map(word => {
+					return this.client.channel(word)?.name ?? this.client.member(word)?.displayName ?? this.client.role(word)?.name ?? word;
+				}));
+			}
 		} else {
-			const member = options.dm.member;
+			const member = options.member;
 			if (member.user.bot) return interaction.editReply('Failed to send the message. Supplied member must not be a bot.');
-			await this.client.message_manager.sendToUser(member, message);
+			await this.client.message_manager.sendToUser(member, options.message);
 		}
 		interaction.editReply('Message sent!');
 	}
