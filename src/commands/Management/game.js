@@ -12,7 +12,7 @@ export default class Game extends SlashCommand {
 	constructor() {
 		super({
 			name: 'game',
-			description: '[Staff/Mod/Booster] Whitelist or blacklist a game (used in game roles and play roles).',
+			description: '[Staff/Mod/Booster] Whitelist or blacklist a game used in game roles and play roles.',
 			options: [
 				{
 					name: 'mode',
@@ -31,8 +31,8 @@ export default class Game extends SlashCommand {
 					required: true,
 				},
 				{
-					name: 'name',
-					description: 'The complete name of the game you\'d like to whitelist or blacklist. (case insensitive)',
+					name: 'game',
+					description: 'The complete name of the game you\'d like to whitelist or blacklist (case insensitive) or its corresponding game role.',
 					type: 'STRING',
 					required: true,
 				},
@@ -52,28 +52,32 @@ export default class Game extends SlashCommand {
 
 	/**
 	 * @param {CommandInteraction} interaction
-	 * @param {{mode: 'whitelist' | 'blacklist', name: String}} options
+	 * @param {{mode: 'whitelist' | 'blacklist', game: String}} options
 	 */
 	async exec(interaction, options) {
-		await interaction.defer();
+		await interaction.defer(true);
 
-		const raw_name = options.name.trim();
+		const raw_name = options.game.trim();
 		const safe_name = raw_name.toLowerCase();
-		let game_name = '';
+		let game_name = this.client.role(raw_name)?.name ?? '';
 
-		checkRole: for (const this_role of this.client.guild.roles.cache.array()) {
-			if (this_role.hexColor != constants.colors.game_role) continue;
-			if (getPercentSimilarity(this_role.name.trim().toLowerCase(), safe_name) >= 75) {
-				game_name = this_role.name.trim();
-				break checkRole;
+		if (!game_name) {
+			checkRole: for (const this_role of this.client.guild.roles.cache.array()) {
+				if (this_role.hexColor != constants.colors.game_role) continue;
+				if (getPercentSimilarity(this_role.name.trim().toLowerCase(), safe_name) >= 75) {
+					game_name = this_role.name.trim();
+					break checkRole;
+				}
 			}
 		}
-		checkPresence: for (const this_member of this.client.guild.members.cache.array()) {
-			for (const this_activity of this_member.presence.activities) {
-				if (this_activity.type !== 'PLAYING') continue;
-				if (getPercentSimilarity(this_activity.name.trim().toLowerCase(), safe_name) >= 75) {
-					game_name = this_activity.name.trim();
-					break checkPresence;
+		if (!game_name) {
+			checkPresence: for (const this_member of this.client.guild.members.cache.array()) {
+				for (const this_activity of this_member.presence.activities) {
+					if (this_activity.type !== 'PLAYING') continue;
+					if (getPercentSimilarity(this_activity.name.trim().toLowerCase(), safe_name) >= 75) {
+						game_name = this_activity.name.trim();
+						break checkPresence;
+					}
 				}
 			}
 		}
@@ -101,6 +105,8 @@ export default class Game extends SlashCommand {
 			}
 		}
 
-		return interaction.editReply(embed);
+		await this.client.message_manager.sendToChannel(constants.interface.channels.game, embed);
+
+		return interaction.editReply('Request sent!');
 	}
 }
