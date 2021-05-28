@@ -1,6 +1,7 @@
 import path from 'path';
 import { dirname } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
+import { Collection } from 'discord.js';
 import { ProcessQueue, ErrorTicketManager, getAllFiles, sleep, constants } from '../utils/Base.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -9,8 +10,14 @@ const __dirname = dirname(__filename);
 /**
  * @typedef {import('discord.js').CommandInteraction} CommandInteraction
  * @typedef {import('discord.js').CommandInteractionOption} CommandInteractionOption
+ * @typedef {import('discord.js').MessageComponentInteraction} MessageComponentInteraction
  * @typedef {import('../structures/Base').Client} Client
  * @typedef {import('../structures/Base').SlashCommand} SlashCommand
+ * @typedef {import('../structures/Base').MessageComponent} MessageComponent
+ */
+
+/**
+ * @typedef {Collection<String, MessageComponent>} MessageComponentCollection
  */
 
 const ETM = new ErrorTicketManager('Interaction Manager');
@@ -21,36 +28,49 @@ export default class InteractionManager {
 	constructor(client) {
 		this.client = client;
 
-		/**
-         * @private
-         * @type {SlashCommand[]}
-         */
-		this.slash_commands = new Array();
+		/** @type {SlashCommand[]} */
+		this.commands = new Array();
+
+		/** @type {MessageComponentCollection} */
+		this.components = new Collection();
 
 		this.client.on('interaction', interaction => {
 			if (interaction.isCommand()) return this.processSlashCommand(interaction);
+			if (interaction.isMessageComponent()) return this.processComponent(interaction);
 		});
 	}
 
 	async init() {
 		try {
-			this.slash_commands = new Array();
-
-			const slash_commands_dir = path.join(__dirname, '../commands');
-			for (const slash_command_path of getAllFiles(slash_commands_dir)) {
+			this.components = new Collection();
+			const components_dir = path.join(__dirname, '../components');
+			for (const component_path of getAllFiles(components_dir)) {
 				try {
-					const slash_command_class = await import(pathToFileURL(slash_command_path));
-					/** @type {SlashCommand} */
-					const slash_command = new slash_command_class.default();
-					this.slash_commands.push(await slash_command.init(this.client));
+					const component_class = await import(pathToFileURL(component_path));
+					/** @type {MessageComponent} */
+					const component = new component_class.default();
+					this.components.set(component.name, await component.init(this.client));
 				} catch (error) {
-					this.client.error_manager.mark(ETM.create('import', error, 'init'));
+					this.client.error_manager.mark(ETM.create('Import Components', error, 'init'));
+				}
+			}
+
+			this.commands = new Array();
+			const commands_dir = path.join(__dirname, '../commands');
+			for (const command_path of getAllFiles(commands_dir)) {
+				try {
+					const command_class = await import(pathToFileURL(command_path));
+					/** @type {SlashCommand} */
+					const command = new command_class.default();
+					this.commands.push(await command.init(this.client));
+				} catch (error) {
+					this.client.error_manager.mark(ETM.create('Import Commands', error, 'init'));
 				}
 			}
 
 			const existingApplicationCommands = await this.client.guild.commands.fetch().then(application_commands => application_commands.array());
 			const existingApplicationCommandPermissions = await this.client.guild.commands.fetchPermissions();
-			const ApplicationCommandData = this.slash_commands.map(slash_command => slash_command.getApplicationCommandData());
+			const ApplicationCommandData = this.commands.map(command => command.getApplicationCommandData());
 
 			// Delete commands
 			for (const this_application_command of existingApplicationCommands) {
@@ -87,17 +107,17 @@ export default class InteractionManager {
 			}
 
 			// Update commands
-			for (const this_slash_command of this.slash_commands) {
-				const this_application_command = this.client.guild.commands.cache.find(application_command => application_command.name == this_slash_command.name);
+			for (const this_command of this.commands) {
+				const this_application_command = this.client.guild.commands.cache.find(application_command => application_command.name == this_command.name);
 				if (!this_application_command) continue;
-				const sameDescription = this_application_command.description === this_slash_command.description;
-				const sameOptions = JSON.stringify(this_application_command.options) === JSON.stringify(this_slash_command.getApplicationCommandOptions());
-				const sameDefaultPermissions = this_application_command.defaultPermission === this_slash_command.defaultPermission;
+				const sameDescription = this_application_command.description === this_command.description;
+				const sameOptions = JSON.stringify(this_application_command.options) === JSON.stringify(this_command.getApplicationCommandOptions());
+				const sameDefaultPermissions = this_application_command.defaultPermission === this_command.defaultPermission;
 				if (sameDescription && sameOptions && sameDefaultPermissions) continue;
 				initQueuer.queue(async () => {
 					console.log(`InteractionManager: Updating ${this_application_command.name}`);
 					try {
-						await this.client.guild.commands.edit(this_application_command, this_slash_command.getApplicationCommandData());
+						await this.client.guild.commands.edit(this_application_command, this_command.getApplicationCommandData());
 						this.client.message_manager.sendToChannel(constants.interface.channels.logs, `Command \`${this_application_command.name}\` updated.`).catch(e => void e);
 					} catch (error) {
 						this.client.error_manager.mark(ETM.create('update', error, 'init'));
@@ -111,17 +131,17 @@ export default class InteractionManager {
 			await initQueuer.queue(async () => await sleep(1000));
 
 			// Update command permissions
-			for (const this_slash_command of this.slash_commands) {
-				const this_application_command = this.client.guild.commands.cache.find(application_command => application_command.name == this_slash_command.name);
+			for (const this_command of this.commands) {
+				const this_application_command = this.client.guild.commands.cache.find(application_command => application_command.name == this_command.name);
 				if (!this_application_command) continue;
 				const this_application_command_permissions = existingApplicationCommandPermissions.get(this_application_command.id);
-				const this_slash_command_permissions = this_slash_command.getApplicationCommandPermissionData();
-				const samePermissions = JSON.stringify(this_application_command_permissions) === JSON.stringify(this_slash_command_permissions);
+				const this_command_permissions = this_command.getApplicationCommandPermissionData();
+				const samePermissions = JSON.stringify(this_application_command_permissions) === JSON.stringify(this_command_permissions);
 				if (samePermissions) continue;
 				initQueuer.queue(async () => {
 					console.log(`InteractionManager: Permission Updating ${this_application_command.name}`);
 					try {
-						await this_application_command.setPermissions(this_slash_command.getApplicationCommandPermissionData());
+						await this_application_command.setPermissions(this_command.getApplicationCommandPermissionData());
 						this.client.message_manager.sendToChannel(constants.interface.channels.logs, `Command \`${this_application_command.name}\` permission updated.`).catch(e => void e);
 					} catch (error) {
 						this.client.error_manager.mark(ETM.create('permission', error, 'init'));
@@ -137,13 +157,38 @@ export default class InteractionManager {
 
 	/**
      * @private
+     * @param {MessageComponentInteraction} componentInteraction
+     */
+	async processComponent(componentInteraction) {
+		try {
+			const name = componentInteraction.customID.split('_')[0];
+			const customID = componentInteraction.customID.split('_').slice(1).join('_');
+			const component = this.components.get(name);
+			if (component) {
+				await component.exec(componentInteraction, customID);
+				this.client.message_manager.sendToChannel(constants.interface.channels.logs, {
+					content: `${componentInteraction.user} interacted with the \`${componentInteraction.customID}\` component on **${componentInteraction.channel}** channel.`,
+					allowedMentions: {
+						parse: [],
+					},
+				}).catch(e => void e);
+			} else {
+				throw new ReferenceError('Interaction component does not exist.');
+			}
+		} catch (error) {
+			this.client.error_manager.mark(ETM.create(componentInteraction.customID, error, 'processComponent'));
+		}
+	}
+
+	/**
+     * @private
      * @param {CommandInteraction} commandInteraction
      */
 	async processSlashCommand(commandInteraction) {
 		try {
-			const slash_command = this.slash_commands.find(this_slash_command => this_slash_command.name == commandInteraction.commandName);
-			if (slash_command) {
-				await slash_command.exec(commandInteraction, this.transformSlashCommandOptions(commandInteraction.options));
+			const command = this.commands.find(this_command => this_command.name == commandInteraction.commandName);
+			if (command) {
+				await command.exec(commandInteraction, this.transformSlashCommandOptions(commandInteraction.options));
 				this.client.message_manager.sendToChannel(constants.interface.channels.logs, {
 					content: `${commandInteraction.user} executed the \`${commandInteraction.commandName}\` command on **${commandInteraction.channel}** channel.`,
 					allowedMentions: {
