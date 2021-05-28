@@ -17,6 +17,7 @@ const __dirname = dirname(__filename);
  */
 
 /**
+ * @typedef {Collection<String, SlashCommand} SlashCommandCollection
  * @typedef {Collection<String, MessageComponent>} MessageComponentCollection
  */
 
@@ -28,8 +29,8 @@ export default class InteractionManager {
 	constructor(client) {
 		this.client = client;
 
-		/** @type {SlashCommand[]} */
-		this.commands = new Array();
+		/** @type {SlashCommandCollection} */
+		this.commands = new Collection();
 
 		/** @type {MessageComponentCollection} */
 		this.components = new Collection();
@@ -55,14 +56,14 @@ export default class InteractionManager {
 				}
 			}
 
-			this.commands = new Array();
+			this.commands = new Collection();
 			const commands_dir = path.join(__dirname, '../commands');
 			for (const command_path of getAllFiles(commands_dir)) {
 				try {
 					const command_class = await import(pathToFileURL(command_path));
 					/** @type {SlashCommand} */
 					const command = new command_class.default();
-					this.commands.push(await command.init(this.client));
+					this.commands.set(command.name, await command.init(this.client));
 				} catch (error) {
 					this.client.error_manager.mark(ETM.create('Import Commands', error, 'init'));
 				}
@@ -70,11 +71,10 @@ export default class InteractionManager {
 
 			const existingApplicationCommands = await this.client.guild.commands.fetch().then(application_commands => application_commands.array());
 			const existingApplicationCommandPermissions = await this.client.guild.commands.fetchPermissions();
-			const ApplicationCommandData = this.commands.map(command => command.getApplicationCommandData());
 
 			// Delete commands
 			for (const this_application_command of existingApplicationCommands) {
-				const this_application_command_data = ApplicationCommandData.find(application_command_data => application_command_data.name == this_application_command.name);
+				const this_application_command_data = this.commands.get(this_application_command.name)?.getApplicationCommandData();
 				if (this_application_command_data) continue;
 				initQueuer.queue(async () => {
 					console.log(`InteractionManager: Deleting ${this_application_command.name}`);
@@ -90,24 +90,24 @@ export default class InteractionManager {
 			}
 
 			// Create commands
-			for (const this_application_command_data of ApplicationCommandData) {
-				const this_application_command = existingApplicationCommands.some(application_command => application_command.name == this_application_command_data.name);
-				if (this_application_command) continue;
+			for (const this_command of this.commands.array()) {
+				const isPresent = existingApplicationCommands.some(application_command => application_command.name == this_command.name);
+				if (isPresent) continue;
 				initQueuer.queue(async () => {
-					console.log(`InteractionManager: Creating ${this_application_command_data.name}`);
+					console.log(`InteractionManager: Creating ${this_command.name}`);
 					try {
-						await this.client.guild.commands.create(this_application_command_data);
-						this.client.message_manager.sendToChannel(constants.interface.channels.logs, `Command \`${this_application_command_data.name}\` created.`).catch(e => void e);
+						await this.client.guild.commands.create(this_command.getApplicationCommandData());
+						this.client.message_manager.sendToChannel(constants.interface.channels.logs, `Command \`${this_command.name}\` created.`).catch(e => void e);
 					} catch (error) {
 						this.client.error_manager.mark(ETM.create('create', error, 'init'));
 					} finally {
-						console.log(`InteractionManager: Created ${this_application_command_data.name}`);
+						console.log(`InteractionManager: Created ${this_command.name}`);
 					}
 				});
 			}
 
 			// Update commands
-			for (const this_command of this.commands) {
+			for (const this_command of this.commands.array()) {
 				const this_application_command = this.client.guild.commands.cache.find(application_command => application_command.name == this_command.name);
 				if (!this_application_command) continue;
 				const sameDescription = this_application_command.description === this_command.description;
@@ -131,7 +131,7 @@ export default class InteractionManager {
 			await initQueuer.queue(async () => await sleep(1000));
 
 			// Update command permissions
-			for (const this_command of this.commands) {
+			for (const this_command of this.commands.array()) {
 				const this_application_command = this.client.guild.commands.cache.find(application_command => application_command.name == this_command.name);
 				if (!this_application_command) continue;
 				const this_application_command_permissions = existingApplicationCommandPermissions.get(this_application_command.id);
@@ -186,7 +186,7 @@ export default class InteractionManager {
      */
 	async processSlashCommand(commandInteraction) {
 		try {
-			const command = this.commands.find(this_command => this_command.name == commandInteraction.commandName);
+			const command = this.commands.get(commandInteraction.commandName);
 			if (command) {
 				await command.exec(commandInteraction, this.transformSlashCommandOptions(commandInteraction.options));
 				this.client.message_manager.sendToChannel(constants.interface.channels.logs, {
