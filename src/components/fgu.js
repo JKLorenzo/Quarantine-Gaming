@@ -1,3 +1,4 @@
+import { MessageActionRow, MessageButton } from 'discord.js';
 import { MessageComponent } from '../structures/Base.js';
 import { constants } from '../utils/Base.js';
 
@@ -10,33 +11,30 @@ export default class FreeGameUpdate extends MessageComponent {
 		super({
 			name: 'fgu',
 			options: [
-				[
-					{
-						customID: 'steam',
-						type: 'BUTTON',
-						style: 'SECONDARY',
-					},
-					{
-						customID: 'epic',
-						type: 'BUTTON',
-						style: 'SECONDARY',
-					},
-					{
-						customID: 'gog',
-						type: 'BUTTON',
-						style: 'SECONDARY',
-					},
-					{
-						customID: 'ubisoft',
-						type: 'BUTTON',
-						style: 'SECONDARY',
-					},
-					{
-						customID: 'console',
-						type: 'BUTTON',
-						style: 'SECONDARY',
-					},
-				],
+				new MessageActionRow({
+					components: [
+						new MessageButton({
+							customID: 'steam',
+							style: 'SECONDARY',
+						}),
+						new MessageButton({
+							customID: 'epic',
+							style: 'SECONDARY',
+						}),
+						new MessageButton({
+							customID: 'gog',
+							style: 'SECONDARY',
+						}),
+						new MessageButton({
+							customID: 'ubisoft',
+							style: 'SECONDARY',
+						}),
+						new MessageButton({
+							customID: 'console',
+							style: 'SECONDARY',
+						}),
+					],
+				}),
 			],
 		});
 	}
@@ -44,11 +42,11 @@ export default class FreeGameUpdate extends MessageComponent {
 	async init(client) {
 		this.client = client;
 
-		this.options[0][0].emoji = this.client.guild.emojis.cache.find(e => e.name === 'steam');
-		this.options[0][1].emoji = this.client.guild.emojis.cache.find(e => e.name === 'epic_games');
-		this.options[0][2].emoji = this.client.guild.emojis.cache.find(e => e.name === 'gog');
-		this.options[0][3].emoji = this.client.guild.emojis.cache.find(e => e.name === 'ubisoft');
-		this.options[0][4].emoji = this.client.guild.emojis.cache.find(e => e.name === 'controller');
+		this.options[0].components[0].setEmoji(this.client.guild.emojis.cache.find(e => e.name === 'steam'));
+		this.options[0].components[1].setEmoji(this.client.guild.emojis.cache.find(e => e.name === 'epic_games'));
+		this.options[0].components[2].setEmoji(this.client.guild.emojis.cache.find(e => e.name === 'gog'));
+		this.options[0].components[3].setEmoji(this.client.guild.emojis.cache.find(e => e.name === 'ubisoft'));
+		this.options[0].components[4].setEmoji(this.client.guild.emojis.cache.find(e => e.name === 'controller'));
 
 		return this;
 	}
