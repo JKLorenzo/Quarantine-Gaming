@@ -36,14 +36,20 @@ export default class InteractionManager {
 		this.components = new Collection();
 
 		this.client.on('interaction', interaction => {
-			if (interaction.isCommand()) return this.processSlashCommand(interaction);
-			if (interaction.isMessageComponent()) return this.processComponent(interaction);
+			if (interaction.isCommand()) return this.processCommand(interaction);
+			if (interaction.isMessageComponent()) return this.processMessageComponent(interaction);
 		});
 	}
 
 	async init() {
+		await Promise.all([
+			this.loadComponents(),
+			this.loadCommands(),
+		]);
+	}
+
+	async loadComponents() {
 		try {
-			this.components = new Collection();
 			const components_dir = path.join(__dirname, '../components');
 			for (const component_path of getAllFiles(components_dir)) {
 				try {
@@ -52,11 +58,16 @@ export default class InteractionManager {
 					const component = new component_class.default();
 					this.components.set(component.name, await component.init(this.client));
 				} catch (error) {
-					this.client.error_manager.mark(ETM.create('Import Components', error, 'init'));
+					this.client.error_manager.mark(ETM.create(component_path, error, 'loadComponents'));
 				}
 			}
+		} catch(error) {
+			this.client.error_manager.mark(ETM.create('loadComponents', error));
+		}
+	}
 
-			this.commands = new Collection();
+	async loadCommands() {
+		try {
 			const commands_dir = path.join(__dirname, '../commands');
 			for (const command_path of getAllFiles(commands_dir)) {
 				try {
@@ -65,7 +76,7 @@ export default class InteractionManager {
 					const command = new command_class.default();
 					this.commands.set(command.name, await command.init(this.client));
 				} catch (error) {
-					this.client.error_manager.mark(ETM.create('Import Commands', error, 'init'));
+					this.client.error_manager.mark(ETM.create(command_path, error, 'loadCommands'));
 				}
 			}
 
@@ -82,7 +93,7 @@ export default class InteractionManager {
 						await this_application_command.delete();
 						this.client.message_manager.sendToChannel(constants.interface.channels.logs, `Command \`${this_application_command.name}\` deleted.`).catch(e => void e);
 					} catch (error) {
-						this.client.error_manager.mark(ETM.create('delete', error, 'init'));
+						this.client.error_manager.mark(ETM.create(`delete ${this_application_command.name}`, error, 'loadCommands'));
 					} finally {
 						console.log(`InteractionManager: Deleted ${this_application_command.name}`);
 					}
@@ -99,7 +110,7 @@ export default class InteractionManager {
 						await this.client.guild.commands.create(this_command.getApplicationCommandData());
 						this.client.message_manager.sendToChannel(constants.interface.channels.logs, `Command \`${this_command.name}\` created.`).catch(e => void e);
 					} catch (error) {
-						this.client.error_manager.mark(ETM.create('create', error, 'init'));
+						this.client.error_manager.mark(ETM.create(`create ${this_command.name}`, error, 'loadCommands'));
 					} finally {
 						console.log(`InteractionManager: Created ${this_command.name}`);
 					}
@@ -120,7 +131,7 @@ export default class InteractionManager {
 						await this.client.guild.commands.edit(this_application_command, this_command.getApplicationCommandData());
 						this.client.message_manager.sendToChannel(constants.interface.channels.logs, `Command \`${this_application_command.name}\` updated.`).catch(e => void e);
 					} catch (error) {
-						this.client.error_manager.mark(ETM.create('update', error, 'init'));
+						this.client.error_manager.mark(ETM.create(`update ${this_command.name}`, error, 'loadCommands'));
 					} finally {
 						console.log(`InteractionManager: Updated ${this_application_command.name}`);
 					}
@@ -144,14 +155,14 @@ export default class InteractionManager {
 						await this_application_command.setPermissions(this_command.getApplicationCommandPermissionData());
 						this.client.message_manager.sendToChannel(constants.interface.channels.logs, `Command \`${this_application_command.name}\` permission updated.`).catch(e => void e);
 					} catch (error) {
-						this.client.error_manager.mark(ETM.create('permission', error, 'init'));
+						this.client.error_manager.mark(ETM.create(`update permission ${this_command.name}`, error, 'loadCommands'));
 					} finally {
 						console.log(`InteractionManager: Permission Updated ${this_application_command.name}`);
 					}
 				});
 			}
-		} catch (error) {
-			this.client.error_manager.mark(ETM.create('init', error));
+		} catch(error) {
+			this.client.error_manager.mark(ETM.create('loadCommands', error));
 		}
 	}
 
@@ -159,7 +170,7 @@ export default class InteractionManager {
      * @private
      * @param {MessageComponentInteraction} componentInteraction
      */
-	async processComponent(componentInteraction) {
+	async processMessageComponent(componentInteraction) {
 		try {
 			const name = componentInteraction.customID.split('_')[0];
 			const customID = componentInteraction.customID.split('_').slice(1).join('_');
@@ -173,10 +184,10 @@ export default class InteractionManager {
 					},
 				}).catch(e => void e);
 			} else {
-				throw new ReferenceError('Interaction component does not exist.');
+				throw new ReferenceError(`Interaction component \`${componentInteraction.customID}\` does not exist.`);
 			}
 		} catch (error) {
-			this.client.error_manager.mark(ETM.create(componentInteraction.customID, error, 'processComponent'));
+			this.client.error_manager.mark(ETM.create(componentInteraction.customID, error, 'processMessageComponent'));
 		}
 	}
 
@@ -184,11 +195,11 @@ export default class InteractionManager {
      * @private
      * @param {CommandInteraction} commandInteraction
      */
-	async processSlashCommand(commandInteraction) {
+	async processCommand(commandInteraction) {
 		try {
 			const command = this.commands.get(commandInteraction.commandName);
 			if (command) {
-				await command.exec(commandInteraction, this.transformSlashCommandOptions(commandInteraction.options));
+				await command.exec(commandInteraction, this.transformCommandOptions(commandInteraction.options));
 				this.client.message_manager.sendToChannel(constants.interface.channels.logs, {
 					content: `${commandInteraction.user} executed the \`${commandInteraction.commandName}\` command on **${commandInteraction.channel}** channel.`,
 					allowedMentions: {
@@ -196,12 +207,12 @@ export default class InteractionManager {
 					},
 				}).catch(e => void e);
 			} else {
-				throw new ReferenceError('Interaction command does not exist.');
+				throw new ReferenceError(`Interaction command \`${commandInteraction.commandName}\` does not exist.`);
 			}
 		} catch (error) {
 			const message = 'It looks like this command has failed.';
 			commandInteraction.deferred || commandInteraction.replied ? commandInteraction.editReply(message) : commandInteraction.reply(message);
-			this.client.error_manager.mark(ETM.create(commandInteraction.commandName, error, 'processSlashCommand'));
+			this.client.error_manager.mark(ETM.create(commandInteraction.commandName, error, 'processCommand'));
 		}
 	}
 
@@ -211,15 +222,15 @@ export default class InteractionManager {
 	 * @param {Object} [arguments]
 	 * @returns {Object}
 	 */
-	transformSlashCommandOptions(options, args = {}) {
+	transformCommandOptions(options, args = {}) {
 		try {
 			if (options && Array.isArray(options)) {
 				for (const option of options) {
 					if (option.options) {
 						if (option.type) {
-							args[option.name] = this.transformSlashCommandOptions(option.options, { option: option.name });
+							args[option.name] = this.transformCommandOptions(option.options, { option: option.name });
 						} else {
-							args = this.transformSlashCommandOptions(option.options);
+							args = this.transformCommandOptions(option.options);
 						}
 					} else if (option.channel || option.member || option.role || option.user) {
 						args[option.name] = option.channel ?? option.member ?? option.role ?? option.user;
@@ -230,7 +241,7 @@ export default class InteractionManager {
 			}
 			return args;
 		} catch (error) {
-			this.client.error_manager.mark(ETM.create('transformSlashCommandOptions', error));
+			this.client.error_manager.mark(ETM.create('transformCommandOptions', error));
 		}
 	}
 }
