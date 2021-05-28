@@ -27,27 +27,79 @@ export default class GameManager {
 	}
 
 	async init() {
-		// Subscribe to presence events
 		this.client.on('presenceUpdate', (oldPresence, newPresence) => {
 			if (newPresence.guild.id == constants.guild) return this.processPresenceUpdate(oldPresence, newPresence);
 		});
 
-		this.client.on('messageReactionAdd', async (message_reaction, user) => {
-			const member = this.client.member(user);
-			if (!member || member.user.bot) return;
-			const message = message_reaction.message.partial ? await message_reaction.message.fetch() : message_reaction.message;
-			const embed = message.embeds[0];
-			if (!embed || !embed.author || !embed.author.name || embed.author.name !== 'Quarantine Gaming: Game Coordinator') return;
-			this.processBracket(message, 'join', member);
+		this.client.on('roleCreate', async (role) => {
+			if (role.guild !== constants.guild) return;
+			if (role.hexColor !== constants.colors.game_role) return;
+
+			await this.client.interaction_manager.loadCommands();
+
+			await this.client.message_manager.sendToChannel(constants.interface.channels.game_events, new MessageEmbed({
+				author: { name: 'Quarantine Gaming: Game Coordinator' },
+				title: 'Game Create',
+				description: role.name,
+				footer: { text:`Reference ID: ${role.id}` },
+				color: 'GREEN',
+			}));
 		});
 
-		this.client.on('messageReactionRemove', async (message_reaction, user) => {
-			const member = this.client.member(user);
-			if (!member || member.user.bot) return;
-			const message = message_reaction.message.partial ? await message_reaction.message.fetch() : message_reaction.message;
-			const embed = message.embeds[0];
-			if (!embed || !embed.author || !embed.author.name || embed.author.name !== 'Quarantine Gaming: Game Coordinator') return;
-			this.processBracket(message, 'leave', member);
+		this.client.on('roleDelete', async (role) => {
+			if (role.guild !== constants.guild) return;
+			if (role.hexColor !== constants.colors.game_role) return;
+
+			await this.client.interaction_manager.loadCommands();
+
+			await this.client.message_manager.sendToChannel(constants.interface.channels.game_events, new MessageEmbed({
+				author: { name: 'Quarantine Gaming: Game Coordinator' },
+				title: 'Game Delete',
+				description: role.name,
+				footer: { text:`Reference ID: ${role.id}` },
+				color: 'RED',
+			}));
+		});
+
+		this.client.on('guildMemberUpdate', async (oldMember, newMember) => {
+			if (newMember.guild !== constants.guild) return;
+			const difference = newMember.roles.cache.difference(oldMember.roles.cache);
+			if (difference.size === 0) return;
+
+			for (const this_role of difference.array()) {
+				const isNew = newMember.roles.cache.has(this_role.id);
+				if (this_role.hexColor !== constants.colors.game_role) return;
+				if (isNew) {
+					// Handles manual role add by members with manage roles permissions
+					await this.client.database_manager.updateMemberGameRole(newMember.id, {
+						id: this_role.id,
+						name: this_role.name,
+					});
+
+					await this.client.message_manager.sendToChannel(constants.interface.channels.game_events, new MessageEmbed({
+						author: { name: 'Quarantine Gaming: Game Coordinator' },
+						title: 'Game Add',
+						description: [
+							`**Profile:** ${newMember}`,
+							`**Game:** ${this_role.name}`,
+						].join('\n'),
+						footer: { text:`Reference ID: ${newMember.id} | ${this_role.id}` },
+						color: 'YELLOW',
+					}));
+				} else {
+					await this.client.database_manager.deleteMemberGameRole(newMember.id, this_role.id);
+					await this.client.message_manager.sendToChannel(constants.interface.channels.game_events, new MessageEmbed({
+						author: { name: 'Quarantine Gaming: Game Coordinator' },
+						title: 'Game Remove',
+						description: [
+							`**Profile:** ${newMember}`,
+							`**Game:** ${this_role.name}`,
+						].join('\n'),
+						footer: { text:`Reference ID: ${newMember.id} | ${this_role.id}` },
+						color: 'FUCHSIA',
+					}));
+				}
+			}
 		});
 
 		await this.reload();
