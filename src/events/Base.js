@@ -1,6 +1,4 @@
 import onGuildMemberUpdate from './GuildMemberUpdate.js';
-import onMessageReactionAdd from './MessageReactionAdd.js';
-import onMessageReactionRemove from './MessageReactionRemove.js';
 import onceReady from './Ready.js';
 import onUserUpdate from './UserUpdate.js';
 import { ErrorTicketManager, ProcessQueue } from '../utils/Base.js';
@@ -51,39 +49,6 @@ export default class BaseEvents {
 							await onGuildMemberUpdate(this.client, oldMember, newMember);
 						} catch(error) {
 							this.client.error_manager.mark(ETM.create('guildMemberUpdate', error));
-						}
-					});
-				}),
-			};
-
-			this.onMessageReactionAdd = {
-				queuer: new ProcessQueue(1000),
-				event: this.client.on('messageReactionAdd', (reaction, user) => {
-					this.onMessageReactionAdd.queuer.queue(async () => {
-						try {
-							if (reaction.partial) reaction = await reaction.fetch();
-							const message = await reaction.message.fetch();
-							if (message.author.id != client.user.id || user.id == client.user.id) return;
-							await onMessageReactionAdd(this.client, message, reaction, user);
-						} catch(error) {
-							this.client.error_manager.mark(ETM.create('messageReactionAdd', error));
-						}
-					});
-				}),
-			};
-
-			this.onMessageReactionRemove = {
-				queuer: new ProcessQueue(1000),
-				event: this.client.on('messageReactionRemove', (reaction, user) => {
-
-					this.onMessageReactionRemove.queuer.queue(async () => {
-						try {
-							if (reaction.partial) reaction = await reaction.fetch();
-							const message = await reaction.message.fetch();
-							if (message.author.id != client.user.id || user.id == client.user.id) return;
-							await onMessageReactionRemove(this.client, message, reaction, user);
-						} catch(error) {
-							this.client.error_manager.mark(ETM.create('messageReactionRemove', error));
 						}
 					});
 				}),
