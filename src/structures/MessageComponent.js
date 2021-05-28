@@ -1,15 +1,15 @@
+import { MessageActionRow, MessageButton } from 'discord.js';
+
 /**
- * @typedef {import('discord.js').MessageComponentInteraction} MessageComponentInteraction
  * @typedef {import('discord.js').MessageActionRowOptions} MessageActionRowOptions
- * @typedef {import('discord.js').MessageButtonOptions} MessageButtonOptions
+ * @typedef {import('discord.js').MessageComponentInteraction} MessageComponentInteraction
  * @typedef {import('./Base.js').Client} Client
  */
 
 /**
- * @typedef {MessageButtonOptions[]} Components
  * @typedef {Object} ComponentData
  * @property {String} name The name of this component
- * @property {Components[]} options An array of action row containing message components.
+ * @property {MessageActionRowOptions[]} options An array of action row containing message components.
  */
 
 export default class MessageComponent {
@@ -40,18 +40,18 @@ export default class MessageComponent {
 	 * Transforms this component options to message action row options.
 	 */
 	getComponents() {
-		return this.options.map(action_row => {
-			/** @type {MessageActionRowOptions} */
-			const this_row = {
-				type: 'ACTION_ROW',
-				components: action_row.map(component => {
-					return {
+		return this.options?.map(action_row => {
+			return new MessageActionRow({
+				components: action_row.components?.map(component => {
+					switch(component.type) {
+					case 'BUTTON': return new MessageButton({
 						...component,
 						customID: `${this.name}_${component.customID}`,
-					};
-				}),
-			};
-			return this_row;
+					});
+					default: return undefined;
+					}
+				}).filter(component => typeof component !== 'undefined'),
+			});
 		});
 	}
 }
