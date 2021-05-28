@@ -7,7 +7,7 @@ import { constants } from '../utils/Base.js';
 /** @param {Client} client */
 export default async function onceReady(client) {
 	console.log('Client logged in. Initializing...');
-	client.message_manager.sendToChannel(constants.interface.channels.logs, '<--------------**ONLINE**-------------->');
+	client.message_manager.sendToChannel(constants.interface.channels.logs, '[-- **ONLINE**  -------------------------->');
 
 	await client.database_manager.init();
 	await client.gateway_manager.init();
@@ -19,7 +19,7 @@ export default async function onceReady(client) {
 
 	client.free_game_manager.actions.start();
 
-	client.message_manager.sendToChannel(constants.interface.channels.logs, '<-----------**INITIALIZED**----------->');
+	client.message_manager.sendToChannel(constants.interface.channels.logs, '[-- **INITIALIZED**  -------------------->');
 
 	console.log('Client initialized.');
 }
