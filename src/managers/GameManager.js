@@ -203,17 +203,18 @@ export default class GameManager {
 					switch (status) {
 					case 'NEW':
 						if (play_role) {
-							play_role.setPosition(streaming_role.position - 1);
+							await play_role.setPosition(streaming_role.position - 1);
 						} else {
 							play_role = await this.client.role_manager.create({ name: 'Play ' + game_name, color: constants.colors.play_role, position: streaming_role.position, hoist: true });
 						}
-						this.client.role_manager.add(member, game_role);
-						this.client.role_manager.add(member, play_role);
+						await Promise.all([
+							this.client.role_manager.add(member, game_role),
+							this.client.role_manager.add(member, play_role),
+						]);
 						break;
 					case 'OLD':
-						if (play_role) {
-							if (member.hasRole(play_role)) await this.client.role_manager.remove(member, play_role);
-							if (play_role.members.array().length == 0) await this.client.role_manager.delete(play_role);
+						if (play_role && member.hasRole(play_role)) {
+							await this.client.role_manager.remove(member, play_role);
 						}
 						break;
 					}
