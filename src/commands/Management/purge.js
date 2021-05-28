@@ -38,7 +38,7 @@ export default class Purge extends SlashCommand {
 	 * @param {{message_count: Number}} options
 	 */
 	async exec(interaction, options) {
-		await interaction.defer(true);
+		await interaction.defer({ ephemeral: true });
 
 		let retries = 3;
 		let deleted_messages_count = 0;

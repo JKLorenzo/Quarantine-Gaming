@@ -71,7 +71,7 @@ export default class Message extends SlashCommand {
 	 * @param {{option: 'channel' | 'dm', channel?: TextChannel | VoiceChannel, member?: ExtendedMember, message: String}} options
 	 */
 	async exec(interaction, options) {
-		await interaction.defer(true);
+		await interaction.defer({ ephemeral: true });
 
 		options = options[Object.keys(options)[0]];
 

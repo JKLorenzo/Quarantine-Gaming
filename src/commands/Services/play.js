@@ -112,7 +112,7 @@ export default class Play extends SlashCommand {
 		const game_role = this.client.role(options.game);
 		if (!game_role) return interaction.reply('Command failed. The game you specified no longer exists.', { ephemeral: true });
 
-		await interaction.defer(true);
+		await interaction.defer({ ephemeral: true });
 
 		const inviteOptions = {
 			description: options.description,

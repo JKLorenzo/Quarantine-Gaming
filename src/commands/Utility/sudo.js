@@ -44,7 +44,7 @@ export default class Sudo extends SlashCommand {
      * @param {{command: String}} options
      */
 	async exec(interaction, options) {
-		await interaction.defer(true);
+		await interaction.defer({ ephemeral: true });
 
 		let command = options.command;
 

@@ -33,7 +33,7 @@ export default class Dedicate extends SlashCommand {
      * @param {{custom_name?: String, lock?: boolean}} options
      */
 	async exec(interaction, options) {
-		await interaction.defer(true);
+		await interaction.defer({ ephemeral: true });
 
 		const member = this.client.member(interaction.user);
 		let voice_channel = member.voice.channel;

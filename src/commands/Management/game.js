@@ -55,7 +55,7 @@ export default class Game extends SlashCommand {
 	 * @param {{mode: 'whitelist' | 'blacklist', game: String}} options
 	 */
 	async exec(interaction, options) {
-		await interaction.defer(true);
+		await interaction.defer({ ephemeral: true });
 
 		const raw_name = options.game.trim();
 		const safe_name = raw_name.toLowerCase();

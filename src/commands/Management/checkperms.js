@@ -80,7 +80,7 @@ export default class CheckPerms extends SlashCommand {
 	 * @param {{userperms?: {user: ExtendedMember, channel: GuildChannel, advanced?: boolean}, roleperms?: {role: Role, channel: GuildChannel, advanced?: boolean}}} options
 	 */
 	async exec(interaction, options) {
-		await interaction.defer();
+		await interaction.defer({ ephemeral: true });
 
 		const args = options.userperms || options.roleperms;
 		const target = args.user || args.role;

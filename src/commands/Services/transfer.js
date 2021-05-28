@@ -49,7 +49,7 @@ export default class Transfer extends SlashCommand {
 		const voice_channel = this.client.member(interaction.member)?.voice.channel;
 		if (!voice_channel) interaction.reply('You must be active on a voice channel to use this command.');
 
-		await interaction.defer(true);
+		await interaction.defer({ ephemeral: true });
 
 		/** @type {ExtendedMember[]} */
 		const members = Object.keys(options).map(name => options[name]);

@@ -18,7 +18,7 @@ export default class Streaming extends SlashCommand {
      * @param {CommandInteraction} interaction
      */
 	async exec(interaction) {
-		await interaction.defer(true);
+		await interaction.defer({ ephemeral: true });
 
 		const member = interaction.member;
 		const streaming_role = this.client.role(constants.roles.streaming);

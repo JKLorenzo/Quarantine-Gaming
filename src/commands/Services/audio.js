@@ -16,7 +16,7 @@ export default class Audio extends SlashCommand {
 
 	/** @param {CommandInteraction} interaction */
 	async exec(interaction) {
-		await interaction.defer(true);
+		await interaction.defer({ ephemeral: true });
 
 		const embed = new MessageEmbed({
 			author: { name: 'Quarantine Gaming: Experience' },

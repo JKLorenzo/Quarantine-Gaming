@@ -18,7 +18,7 @@ export default class SteamSale extends SlashCommand {
      * @param {CommandInteraction} interaction
      */
 	async exec(interaction) {
-		await interaction.defer(true);
+		await interaction.defer({ ephemeral: true });
 
 		const response = await axios.get('https://www.whenisthenextsteamsale.com/').then(resp => {
 			const { document } = (new JSDOM(resp.data)).window;
