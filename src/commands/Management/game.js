@@ -32,7 +32,7 @@ export default class Game extends SlashCommand {
 				},
 				{
 					name: 'game',
-					description: 'The complete name of the game you\'d like to whitelist or blacklist (case insensitive) or its corresponding game role.',
+					description: 'Enter the complete name of the game or mention its corresponding game role.',
 					type: 'STRING',
 					required: true,
 				},
