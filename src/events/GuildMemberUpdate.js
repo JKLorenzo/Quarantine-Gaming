@@ -22,29 +22,24 @@ export default async function onGuildMemberUpdate(client, oldMember, newMember) 
 		for (const this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
 			const isNew = newMember.roles.cache.has(this_role.id);
 			if (this_role.name.startsWith('Team 🔰')) continue;
-			if (this_role.id == constants.roles.streaming) continue;
-			if (this_role.hexColor == constants.colors.play_role) continue;
-			if (this_role.hexColor == constants.colors.game_role) {
-				if (isNew) await client.database_manager.deleteMemberGameRole(newMember.id, this_role.id);
-				continue;
-			}
+			if (this_role.id === constants.roles.streaming) continue;
+			if (this_role.hexColor === constants.colors.play_role) continue;
+			if (this_role.hexColor === constants.colors.game_role) continue;
 			isNew ? role_add.push(this_role) : role_removed.push(this_role);
 		}
 	}
 
 	const description = [`**Profile:** ${newMember}`];
-	if (newMember.displayName != oldMember.displayName) description.push(`**Nickname:** \nOld: ${oldMember.displayName} \nNew: ${newMember.displayName}`);
+	if (newMember.displayName !== oldMember.displayName) description.push(`**Nickname:** \nOld: ${oldMember.displayName} \nNew: ${newMember.displayName}`);
 	if (role_add.length) description.push(`**Role Added:** ${role_add.map(role => role.name).join(', ')}`);
 	if (role_removed.length) description.push(`**Role Removed:** ${role_removed.map(role => role.name).join(', ')}`);
 
 	if (description.length > 1) {
 		client.message_manager.sendToChannel(constants.interface.channels.member_events, new MessageEmbed({
-			author: { name: 'Quarantine Gaming: Member Update Events' },
-			title: 'Member Property Changed',
+			author: { name: newMember.displayName, icon_url: newMember.displayAvatarURL() },
 			description: description.join('\n'),
-			thumbnail: { url: newMember.user.displayAvatarURL() },
-			footer: { text: `Reference ID: ${newMember.user.id}` },
-			color: '#E1F358',
+			footer: { text: `Reference ID: ${newMember.id}` },
+			color: 'BLURPLE',
 		}));
 	}
 }
