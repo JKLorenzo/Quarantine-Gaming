@@ -21,12 +21,10 @@ export default async function onUserUpdate(client, oldUser, newUser) {
 
 	if (description.length > 1) {
 		client.message_manager.sendToChannel(constants.interface.channels.member_events, new MessageEmbed({
-			author: { name: 'Quarantine Gaming: Member Update Events' },
-			title: 'User Property Changed',
+			author: { name: member.displayName, icon_url: member.displayAvatarURL() },
 			description: description.join('\n'),
-			thumbnail: { url: newUser.displayAvatarURL() },
-			footer: { text: `Reference ID: ${newUser.id}` },
-			color: '#E1F358',
+			footer: { text: `Reference ID: ${member.id}` },
+			color: 'BLURPLE',
 		}));
 	}
 }
