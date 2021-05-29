@@ -40,6 +40,25 @@ export default class QGClient extends Client {
 
 		this.methods = new Methods(this);
 		this.events = new BaseEvents(this);
+
+		this.once('ready', async () => {
+			console.log('Client logged in. Initializing...');
+			this.message_manager.sendToChannel(constants.interface.channels.logs, '[ **ONLINE**  -------------------------->');
+
+			await this.database_manager.init();
+			await this.gateway_manager.init();
+			await this.interaction_manager.init();
+
+			await this.methods.loadMembers();
+			await this.game_manager.init();
+			await this.dedicated_channel_manager.init();
+
+			this.free_game_manager.actions.start();
+
+			this.message_manager.sendToChannel(constants.interface.channels.logs, '[ **INITIALIZED**  -------------------->');
+
+			console.log('Client initialized.');
+		});
 	}
 
 	/**

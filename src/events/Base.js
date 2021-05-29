@@ -1,5 +1,4 @@
 import onGuildMemberUpdate from './GuildMemberUpdate.js';
-import onceReady from './Ready.js';
 import onUserUpdate from './UserUpdate.js';
 import { ErrorTicketManager, ProcessQueue } from '../utils/Base.js';
 
@@ -15,19 +14,6 @@ export default class BaseEvents {
 		this.client = client;
 
 		try {
-			this.onceReady = {
-				emitted: false,
-				event: this.client.once('ready', async () => {
-					try {
-						if (this.onceReady.emitted) throw new Error('Event already emitted.');
-						this.onceReady.emitted = true;
-						await onceReady(this.client);
-					} catch(error) {
-						this.client.error_manager.mark(ETM.create('ready', error));
-					}
-				}),
-			};
-
 			this.onUserUpdate = {
 				queuer: new ProcessQueue(1000),
 				event:  this.client.on('userUpdate', (oldUser, newUser) => {
