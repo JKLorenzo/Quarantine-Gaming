@@ -1,5 +1,5 @@
 import { Collection, MessageEmbed } from 'discord.js';
-import { ErrorTicketManager, ProcessQueue, contains, constants, generateColor, parseMention } from '../utils/Base.js';
+import { ErrorTicketManager, ProcessQueue, contains, constants, parseMention } from '../utils/Base.js';
 
 /**
  * @typedef {import('discord.js').Role} Role
@@ -278,7 +278,7 @@ export default class GameManager {
 				],
 				image: { url: constants.images.multiplayer_banner },
 				footer: { text: `Join this ${options.player_count ? 'limited' : 'open'} bracket by reacting below.` },
-				color: generateColor({ min: 100 }).toHex(),
+				color: 'BLURPLE',
 			});
 
 			if (options.reserved) {
