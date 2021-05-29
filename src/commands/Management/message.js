@@ -100,14 +100,15 @@ export default class Message extends SlashCommand {
 		if (typeof message !== 'string') return message;
 
 		switch(message) {
-		case 'fgu': return this.freeGameUpdates();
+		case 'fgu_pc': return this.freeGameUpdatesPC();
+		case 'fgu_cs': return this.freeGameUpdatesCS();
 		case 'nsfw': return this.notSafeForWork();
 		default: return message;
 		}
 	}
 
 	/** @private */
-	freeGameUpdates() {
+	freeGameUpdatesPC() {
 		return {
 			embed: new MessageEmbed({
 				author: { name: 'Quarantine Gaming: Free Game Updates' },
@@ -115,26 +116,49 @@ export default class Message extends SlashCommand {
 				description: [
 					`All notifications will be made available on our ${this.client.channel(constants.channels.integrations.free_games)}.`,
 					'',
-					`${this.client.guild.emojis.cache.find(e => e.name === 'steam')} - ${this.client.role(constants.roles.steam)}`,
+					`**${this.client.guild.emojis.cache.find(e => e.name === 'steam')} - Steam (${this.client.role(constants.roles.steam)})**`,
 					'Notifies you with games that are currently free on Steam.',
 					'',
-					`${this.client.guild.emojis.cache.find(e => e.name === 'epic_games')} - ${this.client.role(constants.roles.epic)}`,
+					`**${this.client.guild.emojis.cache.find(e => e.name === 'epic_games')} - Epic Games (${this.client.role(constants.roles.epic)})**`,
 					'Notifies you with games that are currently free on Epic Games.',
 					'',
-					`${this.client.guild.emojis.cache.find(e => e.name === 'gog')} - ${this.client.role(constants.roles.gog)}`,
+					`**${this.client.guild.emojis.cache.find(e => e.name === 'gog')} - GOG (${this.client.role(constants.roles.gog)})**`,
 					'Notifies you with games that are currently free on GOG.',
 					'',
-					`${this.client.guild.emojis.cache.find(e => e.name === 'ubisoft')} - ${this.client.role(constants.roles.ubisoft)}`,
+					`**${this.client.guild.emojis.cache.find(e => e.name === 'ubisoft')} - UPlay (${this.client.role(constants.roles.ubisoft)})**`,
 					'Notifies you with games that are currently free on UPlay.',
-					'',
-					`${this.client.guild.emojis.cache.find(e => e.name === 'controller')} - ${this.client.role(constants.roles.console)}`,
-					'Notifies you with games that are currently free for Xbox(One/360), PlayStation(3/4/Vita), and Wii(U/3DS/Switch).',
 				].join('\n'),
 				image: { url: constants.images.free_games_banner },
-				footer: { text: 'Powered by r/FreeGameFindings' },
-				color: '#C4FF00',
+				footer: { text: 'Update your role by clicking the buttons below.' },
+				color: 'GREEN',
 			}),
-			components: this.client.interaction_manager.components.get('fgu').getComponents(),
+			components: [this.client.interaction_manager.components.get('fgu').getComponents()[0]],
+		};
+	}
+
+	/** @private */
+	freeGameUpdatesCS() {
+		return {
+			embed: new MessageEmbed({
+				author: { name: 'Quarantine Gaming: Free Game Updates' },
+				title: 'Subscribe to get Updated',
+				description: [
+					`All notifications will be made available on our ${this.client.channel(constants.channels.integrations.free_games)}.`,
+					'',
+					`**${this.client.guild.emojis.cache.find(e => e.name === 'xbox')} - Xbox (${this.client.role(constants.roles.xbox)})**`,
+					'Notifies you with games that are currently free for Xbox One/360.',
+					'',
+					`**${this.client.guild.emojis.cache.find(e => e.name === 'playstation')} - PlayStation (${this.client.role(constants.roles.playstation)})**`,
+					'Notifies you with games that are currently free for PlayStation 3/4/Vita.',
+					'',
+					`**${this.client.guild.emojis.cache.find(e => e.name === 'wii')} - Wii (${this.client.role(constants.roles.wii)})**`,
+					'Notifies you with games that are currently free for Wii U/3DS/Switch.',
+				].join('\n'),
+				image: { url: constants.images.free_games_banner },
+				footer: { text: 'Update your role by clicking the buttons below.' },
+				color: 'GREEN',
+			}),
+			components: [this.client.interaction_manager.components.get('fgu').getComponents()[1]],
 		};
 	}
 
