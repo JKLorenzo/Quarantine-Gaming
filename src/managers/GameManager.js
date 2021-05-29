@@ -1,5 +1,5 @@
 import { Collection, MessageEmbed } from 'discord.js';
-import { ErrorTicketManager, ProcessQueue, contains, fetchImage, constants, generateColor, parseMention } from '../utils/Base.js';
+import { ErrorTicketManager, ProcessQueue, contains, constants, generateColor, parseMention } from '../utils/Base.js';
 
 /**
  * @typedef {import('discord.js').Role} Role
@@ -37,10 +37,15 @@ export default class GameManager {
 
 			await this.client.interaction_manager.loadCommands();
 
+			const images = await this.client.methods.fetchImage(role.name);
 			await this.client.message_manager.sendToChannel(constants.interface.channels.game_events, new MessageEmbed({
 				author: { name: 'Quarantine Gaming: Game Manager' },
-				title: 'Game Create',
-				description: role.name,
+				title: 'Server Game Created',
+				thumbnail: { url: images?.small },
+				description: [
+					`**Game:** ${role.name}`,
+				],
+				image: { url: images?.large },
 				footer: { text:`Reference ID: ${role.id}` },
 				color: 'GREEN',
 			}));
@@ -52,10 +57,15 @@ export default class GameManager {
 
 			await this.client.interaction_manager.loadCommands();
 
+			const images = await this.client.methods.fetchImage(role.name);
 			await this.client.message_manager.sendToChannel(constants.interface.channels.game_events, new MessageEmbed({
 				author: { name: 'Quarantine Gaming: Game Manager' },
-				title: 'Game Delete',
-				description: role.name,
+				title: 'Server Game Deleted',
+				thumbnail: { url: images?.small },
+				description: [
+					`**Game:** ${role.name}`,
+				],
+				image: { url: images?.large },
 				footer: { text:`Reference ID: ${role.id}` },
 				color: 'RED',
 			}));
@@ -69,6 +79,7 @@ export default class GameManager {
 			for (const this_role of difference.array()) {
 				const isNew = newMember.roles.cache.has(this_role.id);
 				if (this_role.hexColor !== constants.colors.game_role) return;
+				const images = await this.client.methods.fetchImage(this_role.name);
 				if (isNew) {
 					// Handles manual role add by members with manage roles permissions
 					await this.client.database_manager.updateMemberGameRole(newMember.id, {
@@ -78,7 +89,8 @@ export default class GameManager {
 
 					await this.client.message_manager.sendToChannel(constants.interface.channels.game_events, new MessageEmbed({
 						author: { name: 'Quarantine Gaming: Game Manager' },
-						title: 'Game Add',
+						title: 'Member Game Add',
+						thumbnail: { url: images?.small },
 						description: [
 							`**Profile:** ${newMember}`,
 							`**Game:** ${this_role.name}`,
@@ -90,7 +102,8 @@ export default class GameManager {
 					await this.client.database_manager.deleteMemberGameRole(newMember.id, this_role.id);
 					await this.client.message_manager.sendToChannel(constants.interface.channels.game_events, new MessageEmbed({
 						author: { name: 'Quarantine Gaming: Game Manager' },
-						title: 'Game Remove',
+						title: 'Member Game Remove',
+						thumbnail: { url: images?.small },
 						description: [
 							`**Profile:** ${newMember}`,
 							`**Game:** ${this_role.name}`,
@@ -280,7 +293,7 @@ export default class GameManager {
 				}
 			}
 
-			const images = await fetchImage(game_role.name);
+			const images = await this.client.methods.fetchImage(game_role.name);
 			if (images.small) embed.setThumbnail(images.small);
 			if (images.large) embed.setImage(images.large);
 
