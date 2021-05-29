@@ -1,7 +1,7 @@
 import { MessageEmbed } from 'discord.js';
 import fetch from 'node-fetch';
 import { Color, FreeGame } from '../types/Base.js';
-import { ErrorTicketManager, fetchImage, parseHTML, compareDate, contains, constants } from '../utils/Base.js';
+import { ErrorTicketManager, parseHTML, compareDate, contains, constants } from '../utils/Base.js';
 
 /**
  * @typedef {import('../structures/Base').Client} Client
@@ -148,7 +148,7 @@ export default class FreeGameManager {
 			embed.setColor(color.toHex());
 
 			// Image
-			const image = await fetchImage(title);
+			const image = await this.client.methods.fetchImage(title);
 			if (image) {
 				if (image.small) embed.setThumbnail(image.small);
 				if (image.large) embed.setImage(image.large);
