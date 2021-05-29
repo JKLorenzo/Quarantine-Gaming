@@ -286,22 +286,11 @@ export default class GameManager {
 				content: `${inviter} is inviting you to play ${game_role}.`,
 				embed: embed,
 				allowedMentions: {
+					users: [],
 					roles: [game_role.id],
 				},
+				components: this.client.interaction_manager.components.get('gamebracket').getComponents(),
 			});
-			this.client.reaction_manager.add(invite, this.client.emojis.cache.filter(emoji => {
-				return [
-					'pika_hi',
-					'blob_game',
-					'knife_brean',
-					'amongus_shy',
-					'blob_nomparty',
-					'finger_wave',
-					'pinged_bean',
-					'poppop_cat',
-					'pepe_pewpew',
-				].includes(emoji.name);
-			}).array());
 			invite.delete({ timeout: 600000 }).catch(e => void e);
 			return invite;
 		} catch (error) {
@@ -349,7 +338,7 @@ export default class GameManager {
 				}
 
 				if (players.length === slots) {
-					message.reactions.removeAll();
+					message.components = [],
 					embed.setFooter('This limited bracket is now full.');
 					players.forEach(player => {
 						this.client.message_manager.sendToUser(player, {
@@ -366,7 +355,10 @@ export default class GameManager {
 				}));
 			}
 
-			await message.edit(embed);
+			await message.edit({
+				embed: embed,
+				components: message.components,
+			});
 		});
 	}
 }
