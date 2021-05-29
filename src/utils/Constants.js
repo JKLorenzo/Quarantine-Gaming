@@ -84,6 +84,7 @@ export default {
 	},
 	images: {
 		free_games_banner: 'https://media.playstation.com/is/image/SCEA/playstation-vue-hero-banner-desktop-01-us-22jan19?$native_nt$',
+		free_games_banner_1: 'https://th.bing.com/th/id/Refb29ff6809187d2cba9e340367d66f7?rik=16Td9AQg3LL7Cg&riu=http%3a%2f%2f2.bp.blogspot.com%2f-brXtJ3udkBk%2fUCnE_REJjsI%2fAAAAAAAACDU%2faDXC9brYZMo%2fs1600%2f46647-game-banner-full.png&ehk=4cYtiI0VSSFC8NdDjgGFDu97FcW%2fsYjKzsg4ILAB2W0%3d&risl=&pid=ImgRaw',
 		nsfw_banner: 'https://yesofcorsa.com/wp-content/uploads/2016/09/shokugeki_no_soma_wallpaper_download_3.png',
 		multiplayer_banner: 'https://playbingerepeat.files.wordpress.com/2018/05/fortnite-banner.png?w=1332&h=666&crop=1',
 		audio_control_thumbnail: 'http://www.extensions.in.th/amitiae/2013/prefs/images/sound_icon.png',
