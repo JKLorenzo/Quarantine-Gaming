@@ -68,7 +68,7 @@ export default class QGClient extends Client {
 
 			if (description.length > 1) {
 				this.message_manager.sendToChannel(constants.interface.channels.member_events, new MessageEmbed({
-					author: { name: member.displayName, icon_url: member.displayAvatarURL() },
+					author: { name: member.displayName, icon_url: oldUser.displayAvatarURL() },
 					description: description.join('\n'),
 					footer: { text: `Reference ID: ${member.id}` },
 					color: 'BLURPLE',
@@ -99,7 +99,7 @@ export default class QGClient extends Client {
 
 			if (description.length > 1) {
 				this.message_manager.sendToChannel(constants.interface.channels.member_events, new MessageEmbed({
-					author: { name: newMember.displayName, icon_url: newMember.displayAvatarURL() },
+					author: { name: newMember.displayName, icon_url: newMember.user.displayAvatarURL() },
 					description: description.join('\n'),
 					footer: { text: `Reference ID: ${newMember.id}` },
 					color: 'BLURPLE',
