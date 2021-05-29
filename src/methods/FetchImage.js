@@ -11,8 +11,9 @@ import { searchImage } from '../utils/Base.js';
  * @returns {{small?: String, large?: String}}
  */
 export default async function fetchImage(client, title) {
-	const images = client.database_manager.getImage(title) ?? {};
+	let images = client.database_manager.getImage(title);
 	if (!images) {
+		images = {};
 		const result = await Promise.all([
 			searchImage(`${title} game logo`, {
 				ratio: 1,
