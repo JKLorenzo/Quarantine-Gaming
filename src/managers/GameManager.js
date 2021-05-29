@@ -38,7 +38,7 @@ export default class GameManager {
 			await this.client.interaction_manager.loadCommands();
 
 			await this.client.message_manager.sendToChannel(constants.interface.channels.game_events, new MessageEmbed({
-				author: { name: 'Quarantine Gaming: Game Coordinator' },
+				author: { name: 'Quarantine Gaming: Game Manager' },
 				title: 'Game Create',
 				description: role.name,
 				footer: { text:`Reference ID: ${role.id}` },
@@ -53,7 +53,7 @@ export default class GameManager {
 			await this.client.interaction_manager.loadCommands();
 
 			await this.client.message_manager.sendToChannel(constants.interface.channels.game_events, new MessageEmbed({
-				author: { name: 'Quarantine Gaming: Game Coordinator' },
+				author: { name: 'Quarantine Gaming: Game Manager' },
 				title: 'Game Delete',
 				description: role.name,
 				footer: { text:`Reference ID: ${role.id}` },
@@ -77,7 +77,7 @@ export default class GameManager {
 					});
 
 					await this.client.message_manager.sendToChannel(constants.interface.channels.game_events, new MessageEmbed({
-						author: { name: 'Quarantine Gaming: Game Coordinator' },
+						author: { name: 'Quarantine Gaming: Game Manager' },
 						title: 'Game Add',
 						description: [
 							`**Profile:** ${newMember}`,
@@ -89,7 +89,7 @@ export default class GameManager {
 				} else {
 					await this.client.database_manager.deleteMemberGameRole(newMember.id, this_role.id);
 					await this.client.message_manager.sendToChannel(constants.interface.channels.game_events, new MessageEmbed({
-						author: { name: 'Quarantine Gaming: Game Coordinator' },
+						author: { name: 'Quarantine Gaming: Game Manager' },
 						title: 'Game Remove',
 						description: [
 							`**Profile:** ${newMember}`,
