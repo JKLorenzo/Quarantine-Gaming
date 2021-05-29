@@ -32,7 +32,7 @@ export default class GameManager {
 		});
 
 		this.client.on('roleCreate', async (role) => {
-			if (role.guild !== constants.guild) return;
+			if (role.guild.id !== constants.guild) return;
 			if (role.hexColor !== constants.colors.game_role) return;
 
 			await this.client.interaction_manager.loadCommands();
@@ -47,7 +47,7 @@ export default class GameManager {
 		});
 
 		this.client.on('roleDelete', async (role) => {
-			if (role.guild !== constants.guild) return;
+			if (role.guild.id !== constants.guild) return;
 			if (role.hexColor !== constants.colors.game_role) return;
 
 			await this.client.interaction_manager.loadCommands();
@@ -62,7 +62,7 @@ export default class GameManager {
 		});
 
 		this.client.on('guildMemberUpdate', async (oldMember, newMember) => {
-			if (newMember.guild !== constants.guild) return;
+			if (newMember.guild.id !== constants.guild) return;
 			const difference = newMember.roles.cache.difference(oldMember.roles.cache);
 			if (difference.size === 0) return;
 
