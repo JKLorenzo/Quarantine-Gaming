@@ -128,7 +128,7 @@ export default class Message extends SlashCommand {
 					`**${this.client.guild.emojis.cache.find(e => e.name === 'ubisoft')} - UPlay (${this.client.role(constants.roles.ubisoft)})**`,
 					'Notifies you with games that are currently free on UPlay.',
 				].join('\n'),
-				image: { url: constants.images.free_games_banner },
+				image: { url: constants.images.free_games_banner_1 },
 				footer: { text: 'Update your role by clicking the buttons below.' },
 				color: 'GREEN',
 			}),
