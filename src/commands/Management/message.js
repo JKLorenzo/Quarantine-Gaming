@@ -114,7 +114,7 @@ export default class Message extends SlashCommand {
 				author: { name: 'Quarantine Gaming: Free Game Updates' },
 				title: 'Subscribe to get Updated',
 				description: [
-					`All notifications will be made available on our ${this.client.channel(constants.channels.integrations.free_games)}.`,
+					`All free game notifications will be made available on our ${this.client.channel(constants.channels.integrations.free_games)} channel.`,
 					'',
 					`**${this.client.guild.emojis.cache.find(e => e.name === 'steam')} - Steam (${this.client.role(constants.roles.steam)})**`,
 					'Notifies you with games that are currently free on Steam.',
@@ -143,7 +143,7 @@ export default class Message extends SlashCommand {
 				author: { name: 'Quarantine Gaming: Free Game Updates' },
 				title: 'Subscribe to get Updated',
 				description: [
-					`All notifications will be made available on our ${this.client.channel(constants.channels.integrations.free_games)}.`,
+					`All free game notifications will be made available on our ${this.client.channel(constants.channels.integrations.free_games)} channel.`,
 					'',
 					`**${this.client.guild.emojis.cache.find(e => e.name === 'xbox')} - Xbox (${this.client.role(constants.roles.xbox)})**`,
 					'Notifies you with games that are currently free for Xbox One/360.',
@@ -169,7 +169,7 @@ export default class Message extends SlashCommand {
 				author: { name: 'Quarantine Gaming: NSFW Content' },
 				title: 'Unlock NSFW Bots and Channel',
 				description: [
-					`${this.client.role(constants.roles.nsfw_bot)} and ${this.client.channel(constants.channels.text.explicit)} channel will be unlocked after getting the role.`,
+					`The ${this.client.role(constants.roles.nsfw_bot)} and the ${this.client.channel(constants.channels.text.explicit)} channel will be unlocked after getting the role.`,
 					'',
 					`**🔴 - Not Safe For Work (${this.client.role(constants.roles.nsfw)})**`,
 					'The marked content may contain nudity, intense sexuality, profanity, violence or other potentially disturbing subject matter.',
