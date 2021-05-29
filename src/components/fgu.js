@@ -15,22 +15,41 @@ export default class FreeGameUpdate extends MessageComponent {
 					components: [
 						new MessageButton({
 							customID: 'steam',
+							label: 'Steam',
 							style: 'SECONDARY',
 						}),
 						new MessageButton({
 							customID: 'epic',
+							label: 'Epic Games',
 							style: 'SECONDARY',
 						}),
 						new MessageButton({
 							customID: 'gog',
+							label: 'GOG',
 							style: 'SECONDARY',
 						}),
 						new MessageButton({
 							customID: 'ubisoft',
+							label: 'UPlay',
+							style: 'SECONDARY',
+						}),
+					],
+				}),
+				new MessageActionRow({
+					components: [
+						new MessageButton({
+							customID: 'xbox',
+							label: 'Xbox',
 							style: 'SECONDARY',
 						}),
 						new MessageButton({
-							customID: 'console',
+							customID: 'playstation',
+							label: 'PlayStation',
+							style: 'SECONDARY',
+						}),
+						new MessageButton({
+							customID: 'wii',
+							label: 'Wii',
 							style: 'SECONDARY',
 						}),
 					],
@@ -46,14 +65,17 @@ export default class FreeGameUpdate extends MessageComponent {
 		this.options[0].components[1].setEmoji(this.client.guild.emojis.cache.find(e => e.name === 'epic_games'));
 		this.options[0].components[2].setEmoji(this.client.guild.emojis.cache.find(e => e.name === 'gog'));
 		this.options[0].components[3].setEmoji(this.client.guild.emojis.cache.find(e => e.name === 'ubisoft'));
-		this.options[0].components[4].setEmoji(this.client.guild.emojis.cache.find(e => e.name === 'controller'));
+
+		this.options[1].components[0].setEmoji(this.client.guild.emojis.cache.find(e => e.name === 'xbox'));
+		this.options[1].components[1].setEmoji(this.client.guild.emojis.cache.find(e => e.name === 'playstation'));
+		this.options[1].components[2].setEmoji(this.client.guild.emojis.cache.find(e => e.name === 'wii'));
 
 		return this;
 	}
 
 	/**
      * @param {MessageComponentInteraction} interaction
-     * @param {'steam' | 'epic' | 'gog' | 'ubisoft' | 'console'} customID
+     * @param {'steam' | 'epic' | 'gog' | 'ubisoft' | 'xbox' | 'playstation' | 'wii'} customID
      */
 	async exec(interaction, customID) {
 		const member = this.client.member(interaction.member);
@@ -80,9 +102,19 @@ export default class FreeGameUpdate extends MessageComponent {
 				: await this.client.role_manager.add(member, constants.roles.ubisoft);
 			break;
 		case 'xbox':
-			member.hasRole(constants.roles.console)
-				? await this.client.role_manager.remove(member, constants.roles.console)
-				: await this.client.role_manager.add(member, constants.roles.console);
+			member.hasRole(constants.roles.xbox)
+				? await this.client.role_manager.remove(member, constants.roles.xbox)
+				: await this.client.role_manager.add(member, constants.roles.xbox);
+			break;
+		case 'playstation':
+			member.hasRole(constants.roles.playstation)
+				? await this.client.role_manager.remove(member, constants.roles.playstation)
+				: await this.client.role_manager.add(member, constants.roles.playstation);
+			break;
+		case 'wii':
+			member.hasRole(constants.roles.wii)
+				? await this.client.role_manager.remove(member, constants.roles.wii)
+				: await this.client.role_manager.add(member, constants.roles.wii);
 			break;
 		}
 
