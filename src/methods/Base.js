@@ -1,3 +1,4 @@
+import fetchImage from './FetchImage.js';
 import loadMembers from './LoadMembers.js';
 import voiceChannelTransfer from './VoiceChannelTransfer.js';
 
@@ -12,6 +13,14 @@ export default class BaseMethods {
 	/** @param {Client} client */
 	constructor(client) {
 		this.client = client;
+	}
+
+	/**
+	 * Fetches an image online or from the database when it exists.
+	 * @param {String} title
+	 */
+	fetchImage(title) {
+		return fetchImage(this.client, title);
 	}
 
 	/**

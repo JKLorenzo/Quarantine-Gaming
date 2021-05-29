@@ -1,3 +1,4 @@
+import { Collection } from 'discord.js';
 import Firebase from 'firebase-admin';
 import { FreeGame, PartialMember, PartialRole } from '../types/Base.js';
 import { ErrorTicketManager, ProcessQueue, getPercentSimilarity } from '../utils/Base.js';
@@ -24,6 +25,7 @@ export default class DatabaseManager {
 			members: Firestore.collection('Members'),
 			free_games: Firestore.collection('FreeGames'),
 			game_overrides: Firestore.collection('GameOverrides'),
+			images: Firestore.collection('Images'),
 		};
 		/** @private */
 		this.data = {
@@ -40,6 +42,8 @@ export default class DatabaseManager {
 				list: new Array(),
 				index: 0,
 			},
+			/** @type {Collection<String, {small: String, large: String}>} */
+			images: new Collection(),
 		};
 		/** @private */
 		this.actions = {
@@ -92,6 +96,20 @@ export default class DatabaseManager {
 					await this.trimFreeGames();
 				} catch (error) {
 					this.client.error_manager.mark(ETM.create('loadFreeGames', error, 'actions'));
+				}
+			},
+			loadImages: async () => {
+				try {
+					this.data.images = new Collection();
+					const images_QueSnap = await this.collections.images.get();
+					for (const image_QueDocSnap of images_QueSnap.docs) {
+						this.data.images.set(image_QueDocSnap.id, {
+							small: image_QueDocSnap.data().small,
+							large: image_QueDocSnap.data().large,
+						});
+					}
+				} catch (error) {
+					this.client.error_manager.mark(ETM.create('loadImages', error, 'actions'));
 				}
 			},
 		};
@@ -153,7 +171,44 @@ export default class DatabaseManager {
 		await this.actions.loadMembers();
 		await this.actions.loadGameOverrides();
 		await this.actions.loadFreeGames();
+		await this.actions.loadImages();
 		this.listeners.game_overrides.start();
+	}
+
+	/**
+	 * Gets the images from the database.
+	 * @param {String} id
+	 */
+	getImage(id) {
+		try {
+			return this.data.images.get(id);
+		} catch (error) {
+			this.client.error_manager.mark(ETM.create('getImage', error));
+			throw error;
+		}
+	}
+
+	/**
+	 * Stores the images to the database.
+	 * @param {String} id
+	 * @param {{small?: String, large?: String}} data
+	 */
+	async updateImage(id, data) {
+		try {
+			const images = this.getImage(id);
+			if (images) {
+				await this.collections.images.doc(id).update(data);
+			} else {
+				await this.collections.images.doc(id).set(data);
+			}
+			this.data.images.set(id, {
+				small: data?.small ?? images?.small,
+				large: data?.large ?? images?.large,
+			});
+		} catch (error) {
+			this.client.error_manager.mark(ETM.create('setImage', error));
+			throw error;
+		}
 	}
 
 	/**

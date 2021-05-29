@@ -129,24 +129,15 @@ export function contains(base, part) {
 }
 
 /**
- * Search for images using Google Image Search.
- * @param {String} title
- * @returns {Promise<{large: String, small: String}>}
+ * Search for an image using Google Image Search.
+ * @param {String} name
+ * @param {{ratio: Number, minWidth: Number, minHeight: Number}} options
+ * @returns {Promise<String>}
  */
-export async function fetchImage(title) {
-	/**
-	 * @param {String} title
-	 * @param {{ratio: Number, minWidth: Number, minHeight: Number}} options
-	 * @returns {Promise<String>}
-	 */
-	function searchImage(name, options) {
-		let res, rej;
-		const promise = new Promise((resolve, reject) => {
-			res = resolve;
-			rej = reject;
-		});
+export function searchImage(name, options) {
+	return new Promise((resolve, reject) => {
 		gis(name, async (error, results) => {
-			if (error) rej(error);
+			if (error) reject(error);
 			for (const result of results) {
 				if (!result || !result.url) continue;
 				const probe_result = await probe(result.url, { timeout: 10000 }).catch(e => void e);
@@ -157,28 +148,10 @@ export async function fetchImage(title) {
 				if (options.minHeight && height < options.minHeight) continue;
 				const ratio = width / height;
 				if (options.ratio && (ratio > options.ratio + 0.2 || ratio < options.ratio - 0.2)) continue;
-				res(result.url);
+				resolve(result.url);
 			}
-			res();
 		});
-		return promise;
-	}
-
-	const gameIconReq = searchImage(`${title} game logo`, {
-		ratio: 1,
-		minWidth: 100,
-		minHeight: 100,
 	});
-	const gameBannerReq = searchImage(`${title} game background`, {
-		ratio: 1.7,
-		minWidth: 1000,
-		minHeight: 1000,
-	});
-
-	return {
-		small: await gameIconReq,
-		large: await gameBannerReq,
-	};
 }
 
 /**
