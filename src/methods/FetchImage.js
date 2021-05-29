@@ -8,7 +8,7 @@ import { searchImage } from '../utils/Base.js';
  * Fetches an image online or from the database when it exists.
  * @param {Client} client
  * @param {String} title
- * @returns
+ * @returns {{small?: String, large?: String}}
  */
 export default async function fetchImage(client, title) {
 	const images = client.database_manager.getImage(title) ?? {};
