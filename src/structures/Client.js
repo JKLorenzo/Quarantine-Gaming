@@ -1,4 +1,4 @@
-import { Client } from 'discord.js';
+import { Client, MessageEmbed } from 'discord.js';
 import BaseEvents from '../events/Base.js';
 import {
 	ChannelManager, DatabaseManager, DedicatedChannelManager, ErrorManager,	FreeGameManager, GameManager,
@@ -58,6 +58,24 @@ export default class QGClient extends Client {
 			this.message_manager.sendToChannel(constants.interface.channels.logs, '[ **INITIALIZED**  -------------------->');
 
 			console.log('Client initialized.');
+		});
+
+		this.on('userUpdate', async (oldUser, newUser) => {
+			const member = this.member(newUser);
+
+			const description = [`**Profile:** ${member}`];
+			if (oldUser.username != newUser.username) description.push(`**Username:** \nOld: ${oldUser.username} \nNew: ${newUser.username}`);
+			if (oldUser.tag != newUser.tag) description.push(`**Tagname:** \nOld: ${oldUser.tag} \nNew: ${newUser.tag}`);
+			if (oldUser.displayAvatarURL() != newUser.displayAvatarURL()) description.push(`**Avatar:** [New Avatar](${newUser.displayAvatarURL()})`);
+
+			if (description.length > 1) {
+				this.message_manager.sendToChannel(constants.interface.channels.member_events, new MessageEmbed({
+					author: { name: member.displayName, icon_url: member.displayAvatarURL() },
+					description: description.join('\n'),
+					footer: { text: `Reference ID: ${member.id}` },
+					color: 'BLURPLE',
+				}));
+			}
 		});
 	}
 

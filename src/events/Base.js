@@ -1,5 +1,4 @@
 import onGuildMemberUpdate from './GuildMemberUpdate.js';
-import onUserUpdate from './UserUpdate.js';
 import { ErrorTicketManager, ProcessQueue } from '../utils/Base.js';
 
 const ETM = new ErrorTicketManager('Base Events');
@@ -14,19 +13,6 @@ export default class BaseEvents {
 		this.client = client;
 
 		try {
-			this.onUserUpdate = {
-				queuer: new ProcessQueue(1000),
-				event:  this.client.on('userUpdate', (oldUser, newUser) => {
-					this.onUserUpdate.queuer.queue(async () => {
-						try {
-							await onUserUpdate(this.client, oldUser, newUser);
-						} catch(error) {
-							this.client.error_manager.mark(ETM.create('userUpdate', error));
-						}
-					});
-				}),
-			};
-
 			this.onGuildMemberUpdate = {
 				queuer: new ProcessQueue(1000),
 				event: this.client.on('guildMemberUpdate', (oldMember, newMember) => {
