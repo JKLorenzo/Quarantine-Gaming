@@ -25,7 +25,7 @@ export default class GatewayManager {
 		this.invites_queue = new Array();
 
 		client.on('inviteCreate', async invite => {
-			if (invite.guild !== constants.guild.id) return;
+			if (invite.guild.id !== constants.guild) return;
 			try {
 				this.data.cache.set(invite.code, invite);
 
@@ -53,7 +53,7 @@ export default class GatewayManager {
 		});
 
 		client.on('inviteDelete', async invite => {
-			if (invite.guild !== constants.guild.id) return;
+			if (invite.guild.id !== constants.guild) return;
 			try {
 				invite = this.data.cache.get(invite.code);
 
@@ -83,7 +83,7 @@ export default class GatewayManager {
 		});
 
 		client.on('guildMemberAdd', async member => {
-			if (member.guild !== constants.guild.id) return;
+			if (member.guild.id !== constants.guild) return;
 			try {
 				let invite_used = null;
 				const current_invites = await client.guild.fetchInvites();
@@ -122,7 +122,7 @@ export default class GatewayManager {
 		});
 
 		client.on('guildMemberUpdate', async (oldMember, newMember) => {
-			if (newMember.guild !== constants.guild.id) return;
+			if (newMember.guild.id !== constants.guild) return;
 			try {
 				if (newMember.pending || oldMember.pending === newMember.pending) return;
 
@@ -157,7 +157,7 @@ export default class GatewayManager {
 		});
 
 		client.on('guildMemberRemove', async member => {
-			if (member.guild !== constants.guild.id) return;
+			if (member.guild.id !== constants.guild) return;
 			try {
 				const created_day = member.joinedAt;
 				const created_day_formatted = created_day.toString().split('GMT')[0];
