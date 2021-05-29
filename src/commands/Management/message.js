@@ -101,6 +101,7 @@ export default class Message extends SlashCommand {
 
 		switch(message) {
 		case 'fgu': return this.freeGameUpdates();
+		case 'nsfw': return this.notSafeForWork();
 		default: return message;
 		}
 	}
@@ -134,6 +135,26 @@ export default class Message extends SlashCommand {
 				color: '#C4FF00',
 			}),
 			components: this.client.interaction_manager.components.get('fgu').getComponents(),
+		};
+	}
+
+	/** @private */
+	notSafeForWork() {
+		return {
+			embed: new MessageEmbed({
+				author: { name: 'Quarantine Gaming: NSFW Content' },
+				title: 'Unlock NSFW Bots and Channel',
+				description: [
+					`${this.client.role(constants.roles.nsfw_bot)} and ${this.client.channel(constants.channels.text.explicit)} channel will be unlocked after getting the role.`,
+					'',
+					`**🔴 - Not Safe For Work (${this.client.role(constants.roles.nsfw)})**`,
+					'The marked content may contain nudity, intense sexuality, profanity, violence or other potentially disturbing subject matter.',
+				].join('\n'),
+				image: { url: constants.images.nsfw_banner },
+				footer: { text: 'Update your role by clicking the button below.' },
+				color: 'FUCHSIA',
+			}),
+			components: this.client.interaction_manager.components.get('nsfw').getComponents(),
 		};
 	}
 }
