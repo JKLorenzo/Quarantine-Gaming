@@ -4,7 +4,7 @@ import {
 	InteractionManager, GatewayManager, MessageManager, ReactionManager, RoleManager, SpeechManager,
 } from '../managers/Base.js';
 import Methods from '../methods/Base.js';
-import { constants, parseMention } from '../utils/Base.js';
+import { ErrorTicketManager, constants, parseMention } from '../utils/Base.js';
 
 /**
  * @typedef {import('discord.js').ClientOptions} ClientOptions
@@ -18,6 +18,8 @@ import { constants, parseMention } from '../utils/Base.js';
  * @typedef {import('discord.js').UserResolvable} UserResolvable
  * @typedef {import('../structures/Base.js').ExtendedMember} ExtendedMember
  */
+
+const ETM = new ErrorTicketManager('QG Client');
 
 export default class QGClient extends Client {
 	/** @param {ClientOptions} clientOptions */
@@ -59,51 +61,59 @@ export default class QGClient extends Client {
 		});
 
 		this.on('userUpdate', async (oldUser, newUser) => {
-			const member = this.member(newUser);
+			try {
+				const member = this.member(newUser);
 
-			const description = [`**Profile:** ${member}`];
-			if (oldUser.username != newUser.username) description.push(`**Username:** \nOld: ${oldUser.username} \nNew: ${newUser.username}`);
-			if (oldUser.tag != newUser.tag) description.push(`**Tagname:** \nOld: ${oldUser.tag} \nNew: ${newUser.tag}`);
-			if (oldUser.displayAvatarURL() != newUser.displayAvatarURL()) description.push(`**Avatar:** [New Avatar](${newUser.displayAvatarURL()})`);
+				const description = [`**Profile:** ${member}`];
+				if (oldUser.username !== newUser.username) description.push(`**Username:** \nOld: ${oldUser.username} \nNew: ${newUser.username}`);
+				if (oldUser.tag !== newUser.tag) description.push(`**Tagname:** \nOld: ${oldUser.tag} \nNew: ${newUser.tag}`);
+				if (oldUser.displayAvatarURL() !== newUser.displayAvatarURL()) description.push(`**Avatar:** [New Avatar](${newUser.displayAvatarURL()})`);
 
-			if (description.length > 1) {
-				this.message_manager.sendToChannel(constants.interface.channels.member_events, new MessageEmbed({
-					author: { name: member.displayName, icon_url: oldUser.displayAvatarURL() },
-					description: description.join('\n'),
-					footer: { text: `Reference ID: ${member.id}` },
-					color: 'BLURPLE',
-				}));
+				if (description.length > 1) {
+					this.message_manager.sendToChannel(constants.interface.channels.member_events, new MessageEmbed({
+						author: { name: member.displayName, icon_url: oldUser.displayAvatarURL() },
+						description: description.join('\n'),
+						footer: { text: `Reference ID: ${member.id}` },
+						color: 'BLURPLE',
+					}));
+				}
+			} catch (error) {
+				this.error_manager.mark(ETM.create('userUpdate', error));
 			}
 		});
 
 		this.on('guildMemberUpdate', async (oldMember, newMember) => {
-			/** @type {Role[]} */
-			const role_add = new Array();
-			/** @type {Role[]} */
-			const role_removed = new Array();
-			if (newMember.roles.cache.size != oldMember.roles.cache.size) {
-				for (const this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
-					const isNew = newMember.roles.cache.has(this_role.id);
-					if (this_role.name.startsWith('Team 🔰')) continue;
-					if (this_role.id === constants.roles.streaming) continue;
-					if (this_role.hexColor === constants.colors.play_role) continue;
-					if (this_role.hexColor === constants.colors.game_role) continue;
-					isNew ? role_add.push(this_role) : role_removed.push(this_role);
+			try {
+				/** @type {Role[]} */
+				const role_add = new Array();
+				/** @type {Role[]} */
+				const role_removed = new Array();
+				if (newMember.roles.cache.size !== oldMember.roles.cache.size) {
+					for (const this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
+						const isNew = newMember.roles.cache.has(this_role.id);
+						if (this_role.name.startsWith('Team 🔰')) continue;
+						if (this_role.id === constants.roles.streaming) continue;
+						if (this_role.hexColor === constants.colors.play_role) continue;
+						if (this_role.hexColor === constants.colors.game_role) continue;
+						isNew ? role_add.push(this_role) : role_removed.push(this_role);
+					}
 				}
-			}
 
-			const description = [`**Profile:** ${newMember}`];
-			if (newMember.displayName !== oldMember.displayName) description.push(`**Nickname:** \nOld: ${oldMember.displayName} \nNew: ${newMember.displayName}`);
-			if (role_add.length) description.push(`**Role Added:** ${role_add.map(role => role.name).join(', ')}`);
-			if (role_removed.length) description.push(`**Role Removed:** ${role_removed.map(role => role.name).join(', ')}`);
+				const description = [`**Profile:** ${newMember}`];
+				if (newMember.displayName !== oldMember.displayName) description.push(`**Nickname:** \nOld: ${oldMember.displayName} \nNew: ${newMember.displayName}`);
+				if (role_add.length) description.push(`**Role Added:** ${role_add.map(role => role.name).join(', ')}`);
+				if (role_removed.length) description.push(`**Role Removed:** ${role_removed.map(role => role.name).join(', ')}`);
 
-			if (description.length > 1) {
-				this.message_manager.sendToChannel(constants.interface.channels.member_events, new MessageEmbed({
-					author: { name: newMember.displayName, icon_url: newMember.user.displayAvatarURL() },
-					description: description.join('\n'),
-					footer: { text: `Reference ID: ${newMember.id}` },
-					color: 'BLURPLE',
-				}));
+				if (description.length > 1) {
+					this.message_manager.sendToChannel(constants.interface.channels.member_events, new MessageEmbed({
+						author: { name: newMember.displayName, icon_url: newMember.user.displayAvatarURL() },
+						description: description.join('\n'),
+						footer: { text: `Reference ID: ${newMember.id}` },
+						color: 'BLURPLE',
+					}));
+				}
+			} catch (error) {
+				this.error_manager.mark(ETM.create('guildMemberUpdate', error));
 			}
 		});
 	}
