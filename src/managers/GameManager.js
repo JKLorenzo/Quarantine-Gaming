@@ -306,7 +306,7 @@ export default class GameManager {
 				},
 				components: this.client.interaction_manager.components.get('gamebracket').getComponents(),
 			});
-			invite.delete({ timeout: 600000 }).catch(e => void e);
+			invite.delete({ timeout: 1800000 }).catch(e => void e);
 			return invite;
 		} catch (error) {
 			this.client.error_manager.mark(ETM.create('createInvite', error));
