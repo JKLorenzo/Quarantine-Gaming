@@ -1,5 +1,5 @@
 import { Collection, MessageEmbed } from 'discord.js';
-import { ErrorTicketManager, ProcessQueue, contains, fetchImage, sleep, constants, generateColor, parseMention } from '../utils/Base.js';
+import { ErrorTicketManager, ProcessQueue, contains, fetchImage, constants, generateColor, parseMention } from '../utils/Base.js';
 
 /**
  * @typedef {import('discord.js').Role} Role
@@ -101,6 +101,10 @@ export default class GameManager {
 				}
 			}
 		});
+
+		setInterval(async () => {
+			await this.clearExpired();
+		}, 3600000);
 
 		await this.reload();
 		await this.clearExpired();
@@ -229,17 +233,15 @@ export default class GameManager {
 		try {
 			/** @type {ExtendedMember[]} */
 			const members = this.client.guild.members.cache.array();
-			const queuer = new ProcessQueue();
+			const promises = new Array();
 			for (const member of members) {
 				if (member.user.bot) continue;
 				const expired_game_roles_partial = await member.getExpiredGameRoles();
 				for (const expired_game_role_partial of expired_game_roles_partial) {
-					queuer.queue(async () => {
-						await this.client.role_manager.remove(member, expired_game_role_partial.id);
-					});
+					promises.push(this.client.role_manager.remove(member, expired_game_role_partial.id));
 				}
 			}
-			await queuer.queue(async () => await sleep(1000));
+			await Promise.all(promises);
 		} catch (error) {
 			this.client.error_manager.mark(ETM.create('clearExpired', error));
 		}
