@@ -4,8 +4,7 @@
   "description": "A Discord Bot for Quarantine Gaming Server.",
   "main": "./src/main.js",
   "engines": {
-    "node": ">=14.0.0",
-    "npm": ">=7.0.0"
+    "node": "14.x"
   },
   "scripts": {
     "lint": "eslint src",
