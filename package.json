@@ -26,7 +26,7 @@
     "@discordjs/opus": "^0.5.0",
     "axios": "^0.21.1",
     "common-tags": "^1.8.0",
-    "discord.js": "github:JKLorenzo/discord.js#quarantine-gaming",
+    "discord.js": "github:monbrey/discord.js#message-components",
     "ffmpeg-static": "^4.3.0",
     "firebase-admin": "^9.8.0",
     "g-i-s": "^2.1.6",
