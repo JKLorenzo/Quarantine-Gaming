@@ -25,7 +25,7 @@
     "@discordjs/opus": "^0.5.0",
     "axios": "^0.21.1",
     "common-tags": "^1.8.0",
-    "discord.js": "github:monbrey/discord.js#message-components",
+    "discord.js": "^13.0.0-dev.6567ba821a54d3dc97d07ce8ac55335fef2f346b",
     "ffmpeg-static": "^4.3.0",
     "firebase-admin": "^9.8.0",
     "g-i-s": "^2.1.6",
