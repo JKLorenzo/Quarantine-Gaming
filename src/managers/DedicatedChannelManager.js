@@ -28,14 +28,14 @@ async function displayInfo(client, text_channel, voice_channel, name) {
 			`\u200b 🔹 ${voice_channel} voice and ${text_channel} text channels will automatically be deleted once everyone is disconnected from these channels.`,
 			'\u200b 🔹 This channel will be renamed automatically depending on the game the members in this channel are playing. When multiple games are being played, the game with the highest number of players will be chosen.',
 			'**Useful Commands for Dedicated Channels:**\n' + [
-				'\u200b \u200b \u200b \u200b 📎 `/dedicate custon_name: <name>` to rename this channel to a custom name.',
+				'\u200b \u200b \u200b \u200b 📎 `/dedicate custom_name: <name>` to rename this channel to a custom name.',
 				'\u200b \u200b \u200b \u200b 🔒 `/dedicate lock: True` to lock this channel.',
 				'\u200b \u200b \u200b \u200b 🔓 `/dedicate lock: False` to unlock this channel.',
 				'\u200b \u200b \u200b \u200b 🚏 `/transfer <member>` to transfer members from other voice channel to this channel regardless whether this channel is locked or unlocked.',
 			].join('\n\n'),
 			`Note: ${client.role(constants.qg.roles.staff)}, ${client.role(constants.qg.roles.moderator)}, and ${client.role(constants.qg.roles.music_bot)} can interact with these channels.`,
 		].join('\n\n'),
-		color: '#7b00ff',
+		color: 'BLURPLE',
 	}));
 }
 
@@ -70,7 +70,7 @@ export default class DedicatedChannelManager {
 						description: `${oldState.member} left this channel.`,
 						footer: { text: `${member.user.tag} (${member.user.id})` },
 						timestamp: new Date(),
-						color: '#7b00ff',
+						color: 'RED',
 					}));
 				} else {
 					await this.client.role_manager.delete(team_role);
@@ -98,7 +98,7 @@ export default class DedicatedChannelManager {
 						thumbnail: { url: member.user.displayAvatarURL() },
 						description: 'Please observe proper behavior on your current voice channel.',
 						image: { url: 'https://pa1.narvii.com/6771/d33918fa87ad0d84b7dc854dcbf6a8545c73f94d_hq.gif' },
-						color: '#5dff00',
+						color: 'YELLOW',
 					}));
 				}
 
@@ -117,7 +117,7 @@ export default class DedicatedChannelManager {
 							description: `${newState.member} joined this channel.`,
 							footer: { text: `${newState.member.user.tag} (${newState.member.user.id})` },
 							timestamp: new Date(),
-							color: '#7b00ff',
+							color: 'GREEN',
 						}));
 					}
 				} else if (newState.channel.parent?.id == constants.qg.channels.category.voice && newState.channel.members.array().length == 5) {
