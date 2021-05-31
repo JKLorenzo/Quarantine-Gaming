@@ -26,6 +26,7 @@
     "axios": "^0.21.1",
     "common-tags": "^1.8.0",
     "discord.js": "github:monbrey/discord.js#message-components",
+    "express": "^4.17.1",
     "ffmpeg-static": "^4.3.0",
     "firebase-admin": "^9.8.0",
     "g-i-s": "^2.1.6",
