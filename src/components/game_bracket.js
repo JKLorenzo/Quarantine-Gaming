@@ -11,7 +11,7 @@ import { contains, parseMention, ProcessQueue } from '../utils/Base.js';
 export default class GameBracket extends MessageComponent {
 	constructor() {
 		super({
-			name: 'gamebracket',
+			name: 'game_bracket',
 			options: [
 				new MessageActionRow({
 					components: [
