@@ -130,14 +130,14 @@ export default class QGClient extends Client {
 	}
 
 	/**
-     * Gets the Control Server guild.
+     * Gets the  Quarantine Gaming guild.
      */
 	get qg() {
 		return this.guilds.cache.get(constants.qg.guild);
 	}
 
 	/**
-     * Gets the Quarantine Gaming guild.
+     * Gets the Control Server guild.
      */
 	get cs() {
 		return this.guilds.cache.get(constants.cs.guild);
