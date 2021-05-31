@@ -1,5 +1,5 @@
 name: Testing Cron
-on: 
+on:
   schedule:
     - cron: "0 16 * * 5"
 jobs:
