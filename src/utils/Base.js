@@ -138,6 +138,7 @@ export function searchImage(name, options) {
 	return new Promise((resolve, reject) => {
 		gis(name, async (error, results) => {
 			if (error) reject(error);
+			if (!Array.isArray(results)) resolve('');
 			for (const result of results) {
 				if (!result || !result.url) continue;
 				const probe_result = await probe(result.url, { timeout: 10000 }).catch(e => void e);
@@ -150,6 +151,7 @@ export function searchImage(name, options) {
 				if (options.ratio && (ratio > options.ratio + 0.2 || ratio < options.ratio - 0.2)) continue;
 				resolve(result.url);
 			}
+			resolve('');
 		});
 	});
 }
