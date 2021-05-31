@@ -3,9 +3,9 @@ import { SlashCommand } from '../../structures/Base.js';
 import { constants } from '../../utils/Base.js';
 
 /**
+ * @typedef {import('discord.js').GuildMember} GuildMember
  * @typedef {import('discord.js').GuildChannel} GuildChannel
  * @typedef {import('discord.js').CommandInteraction} CommandInteraction
- * @typedef {import('../../structures/Base.js').ExtendedMember} ExtendedMember
  */
 
 export default class CheckPerms extends SlashCommand {
@@ -67,8 +67,8 @@ export default class CheckPerms extends SlashCommand {
 			permissions: {
 				roles: {
 					allow: [
-						constants.roles.staff,
-						constants.roles.moderator,
+						constants.qg.roles.staff,
+						constants.qg.roles.moderator,
 					],
 				},
 			},
@@ -77,18 +77,18 @@ export default class CheckPerms extends SlashCommand {
 
 	/**
 	 * @param {CommandInteraction} interaction
-	 * @param {{userperms?: {user: ExtendedMember, channel: GuildChannel, advanced?: boolean}, roleperms?: {role: Role, channel: GuildChannel, advanced?: boolean}}} options
+	 * @param {{user?: GuildMember, role?: Role, channel: GuildChannel, advanced?: boolean}} options
 	 */
 	async exec(interaction, options) {
 		await interaction.defer({ ephemeral: true });
 
-		const args = options.userperms || options.roleperms;
-		const target = args.user || args.role;
-		const channel = args.channel;
-		const advanced = args.advanced;
+		options = options[Object.keys(options)[0]];
+
+		const target = options.user || options.role;
+		const channel = options.channel;
+		const advanced = options.advanced;
 
 		const entity_permissions = channel.permissionsFor(target);
-
 		const server_permissions = {
 			flags: [
 				'ADMINISTRATOR', 'BAN_MEMBERS', 'CHANGE_NICKNAME', 'KICK_MEMBERS', 'MANAGE_EMOJIS',

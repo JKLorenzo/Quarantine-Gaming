@@ -80,8 +80,8 @@ export default class InteractionManager {
 				}
 			}
 
-			const existingApplicationCommands = await this.client.guild.commands.fetch().then(application_commands => application_commands.array());
-			const existingApplicationCommandPermissions = await this.client.guild.commands.fetchPermissions();
+			const existingApplicationCommands = await this.client.qg.commands.fetch().then(application_commands => application_commands.array());
+			const existingApplicationCommandPermissions = await this.client.qg.commands.fetchPermissions();
 
 			// Delete commands
 			for (const this_application_command of existingApplicationCommands) {
@@ -91,7 +91,7 @@ export default class InteractionManager {
 					console.log(`InteractionManager: Deleting ${this_application_command.name}`);
 					try {
 						await this_application_command.delete();
-						this.client.message_manager.sendToChannel(constants.interface.channels.logs, `Command \`${this_application_command.name}\` deleted.`).catch(e => void e);
+						this.client.message_manager.sendToChannel(constants.cs.channels.logs, `Command \`${this_application_command.name}\` deleted.`).catch(e => void e);
 					} catch (error) {
 						this.client.error_manager.mark(ETM.create(`delete ${this_application_command.name}`, error, 'loadCommands'));
 					} finally {
@@ -107,8 +107,8 @@ export default class InteractionManager {
 				initQueuer.queue(async () => {
 					console.log(`InteractionManager: Creating ${this_command.name}`);
 					try {
-						await this.client.guild.commands.create(this_command.getApplicationCommandData());
-						this.client.message_manager.sendToChannel(constants.interface.channels.logs, `Command \`${this_command.name}\` created.`).catch(e => void e);
+						await this.client.qg.commands.create(this_command.getApplicationCommandData());
+						this.client.message_manager.sendToChannel(constants.cs.channels.logs, `Command \`${this_command.name}\` created.`).catch(e => void e);
 					} catch (error) {
 						this.client.error_manager.mark(ETM.create(`create ${this_command.name}`, error, 'loadCommands'));
 					} finally {
@@ -119,7 +119,7 @@ export default class InteractionManager {
 
 			// Update commands
 			for (const this_command of this.commands.array()) {
-				const this_application_command = this.client.guild.commands.cache.find(application_command => application_command.name == this_command.name);
+				const this_application_command = this.client.qg.commands.cache.find(application_command => application_command.name == this_command.name);
 				if (!this_application_command) continue;
 				const sameDescription = this_application_command.description === this_command.description;
 				const sameOptions = JSON.stringify(this_application_command.options) === JSON.stringify(this_command.getApplicationCommandOptions());
@@ -128,8 +128,8 @@ export default class InteractionManager {
 				initQueuer.queue(async () => {
 					console.log(`InteractionManager: Updating ${this_application_command.name}`);
 					try {
-						await this.client.guild.commands.edit(this_application_command, this_command.getApplicationCommandData());
-						this.client.message_manager.sendToChannel(constants.interface.channels.logs, `Command \`${this_application_command.name}\` updated.`).catch(e => void e);
+						await this.client.qg.commands.edit(this_application_command, this_command.getApplicationCommandData());
+						this.client.message_manager.sendToChannel(constants.cs.channels.logs, `Command \`${this_application_command.name}\` updated.`).catch(e => void e);
 					} catch (error) {
 						this.client.error_manager.mark(ETM.create(`update ${this_command.name}`, error, 'loadCommands'));
 					} finally {
@@ -143,7 +143,7 @@ export default class InteractionManager {
 
 			// Update command permissions
 			for (const this_command of this.commands.array()) {
-				const this_application_command = this.client.guild.commands.cache.find(application_command => application_command.name == this_command.name);
+				const this_application_command = this.client.qg.commands.cache.find(application_command => application_command.name == this_command.name);
 				if (!this_application_command) continue;
 				const this_application_command_permissions = existingApplicationCommandPermissions.get(this_application_command.id);
 				const this_command_permissions = this_command.getApplicationCommandPermissionData();
@@ -153,7 +153,7 @@ export default class InteractionManager {
 					console.log(`InteractionManager: Permission Updating ${this_application_command.name}`);
 					try {
 						await this_application_command.setPermissions(this_command.getApplicationCommandPermissionData());
-						this.client.message_manager.sendToChannel(constants.interface.channels.logs, `Command \`${this_application_command.name}\` permission updated.`).catch(e => void e);
+						this.client.message_manager.sendToChannel(constants.cs.channels.logs, `Command \`${this_application_command.name}\` permission updated.`).catch(e => void e);
 					} catch (error) {
 						this.client.error_manager.mark(ETM.create(`update permission ${this_command.name}`, error, 'loadCommands'));
 					} finally {
@@ -177,7 +177,7 @@ export default class InteractionManager {
 			const component = this.components.get(name);
 			if (component) {
 				await component.exec(componentInteraction, customID);
-				this.client.message_manager.sendToChannel(constants.interface.channels.logs, {
+				this.client.message_manager.sendToChannel(constants.cs.channels.logs, {
 					content: `${componentInteraction.user} interacted with the \`${componentInteraction.customID}\` component on **${componentInteraction.channel}** channel.`,
 					allowedMentions: {
 						parse: [],
@@ -200,7 +200,7 @@ export default class InteractionManager {
 			const command = this.commands.get(commandInteraction.commandName);
 			if (command) {
 				await command.exec(commandInteraction, this.transformCommandOptions(commandInteraction.options));
-				this.client.message_manager.sendToChannel(constants.interface.channels.logs, {
+				this.client.message_manager.sendToChannel(constants.cs.channels.logs, {
 					content: `${commandInteraction.user} executed the \`${commandInteraction.commandName}\` command on **${commandInteraction.channel}** channel.`,
 					allowedMentions: {
 						parse: [],

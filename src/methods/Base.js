@@ -1,12 +1,10 @@
 import fetchImage from './FetchImage.js';
-import loadMembers from './LoadMembers.js';
 import voiceChannelTransfer from './VoiceChannelTransfer.js';
 
 /**
  * @typedef {import('discord').GuildMember} GuildMember
  * @typedef {import('discord').VoiceChannel} VoiceChannel
  * @typedef {import('../structures/Base').Client} Client
- * @typedef {import('../structures/Base').ExtendedMember} ExtendedMember
  */
 
 export default class BaseMethods {
@@ -24,16 +22,9 @@ export default class BaseMethods {
 	}
 
 	/**
-	 * Loads all the members and connects them to the database.
-	 */
-	loadMembers() {
-		return loadMembers(this.client);
-	}
-
-	/**
 	 * Transfers a member to another voice channel.
  	 * @param {VoiceChannel} channel
- 	 * @param {ExtendedMember[]} members
+ 	 * @param {GuildMember[]} members
  	 */
 	voiceChannelTransfer(channel, member) {
 		return voiceChannelTransfer(channel, member);

@@ -39,10 +39,10 @@ export default class Dedicate extends SlashCommand {
 		let voice_channel = member.voice.channel;
 		if (!voice_channel) return interaction.editReply('You must be connected to any voice channels to create a dedicated channel.');
 
-		if ((options.custom_name && options.custom_name != voice_channel.name.substring(1)) || voice_channel.parentID != constants.channels.category.dedicated_voice) {
+		if ((options?.custom_name != voice_channel.name.substring(1)) || voice_channel.parentID != constants.qg.channels.category.dedicated_voice) {
 			if (!options.custom_name) options.custom_name = member.displayName;
 
-			if (voice_channel.parentID != constants.channels.category.dedicated_voice) {
+			if (voice_channel.parentID != constants.qg.channels.category.dedicated_voice) {
 				await interaction.editReply(`Got it! Please wait while I'm preparing **${options.custom_name}** voice and text channels.`);
 			} else {
 				await interaction.editReply(`Alright, renaming your dedicated channel to **${options.custom_name}**.`);
@@ -62,17 +62,17 @@ export default class Dedicate extends SlashCommand {
 			await interaction.editReply(`${options.lock ? 'Locking' : 'Unlocking'} ${voice_channel} dedicated channel.`);
 
 			if (options.lock) {
-				await voice_channel.updateOverwrite(constants.roles.member, {
+				await voice_channel.updateOverwrite(constants.qg.roles.member, {
 					'CONNECT': false,
 				});
 			} else {
-				await voice_channel.updateOverwrite(constants.roles.member, {
+				await voice_channel.updateOverwrite(constants.qg.roles.member, {
 					'CONNECT': true,
 				});
 			}
 
 			/** @type {CategoryChannel} */
-			const dedicated_text_channels_category = this.client.channel(constants.channels.category.dedicated);
+			const dedicated_text_channels_category = this.client.channel(constants.qg.channels.category.dedicated);
 			/** @type {Array<TextChannel>} */
 			const dedicated_text_channels = dedicated_text_channels_category.children.array();
 			const text_channel = dedicated_text_channels.find(channel => channel.topic && parseMention(channel.topic.split(' ')[0]) == voice_channel.id);

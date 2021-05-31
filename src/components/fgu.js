@@ -61,14 +61,14 @@ export default class FreeGameUpdate extends MessageComponent {
 	async init(client) {
 		this.client = client;
 
-		this.options[0].components[0].setEmoji(this.client.guild.emojis.cache.find(e => e.name === 'steam'));
-		this.options[0].components[1].setEmoji(this.client.guild.emojis.cache.find(e => e.name === 'epic_games'));
-		this.options[0].components[2].setEmoji(this.client.guild.emojis.cache.find(e => e.name === 'gog'));
-		this.options[0].components[3].setEmoji(this.client.guild.emojis.cache.find(e => e.name === 'ubisoft'));
+		this.options[0].components[0].setEmoji(this.client.qg.emojis.cache.find(e => e.name === 'steam'));
+		this.options[0].components[1].setEmoji(this.client.qg.emojis.cache.find(e => e.name === 'epic_games'));
+		this.options[0].components[2].setEmoji(this.client.qg.emojis.cache.find(e => e.name === 'gog'));
+		this.options[0].components[3].setEmoji(this.client.qg.emojis.cache.find(e => e.name === 'ubisoft'));
 
-		this.options[1].components[0].setEmoji(this.client.guild.emojis.cache.find(e => e.name === 'xbox'));
-		this.options[1].components[1].setEmoji(this.client.guild.emojis.cache.find(e => e.name === 'playstation'));
-		this.options[1].components[2].setEmoji(this.client.guild.emojis.cache.find(e => e.name === 'wii'));
+		this.options[1].components[0].setEmoji(this.client.qg.emojis.cache.find(e => e.name === 'xbox'));
+		this.options[1].components[1].setEmoji(this.client.qg.emojis.cache.find(e => e.name === 'playstation'));
+		this.options[1].components[2].setEmoji(this.client.qg.emojis.cache.find(e => e.name === 'wii'));
 
 		return this;
 	}
@@ -82,39 +82,39 @@ export default class FreeGameUpdate extends MessageComponent {
 
 		switch(customID) {
 		case 'steam':
-			member.hasRole(constants.roles.steam)
-				? await this.client.role_manager.remove(member, constants.roles.steam)
-				: await this.client.role_manager.add(member, constants.roles.steam);
+			member.roles.cache.has(constants.qg.roles.steam)
+				? await this.client.role_manager.remove(member, constants.qg.roles.steam)
+				: await this.client.role_manager.add(member, constants.qg.roles.steam);
 			break;
 		case 'epic':
-			member.hasRole(constants.roles.epic)
-				? await this.client.role_manager.remove(member, constants.roles.epic)
-				: await this.client.role_manager.add(member, constants.roles.epic);
+			member.roles.cache.has(constants.qg.roles.epic)
+				? await this.client.role_manager.remove(member, constants.qg.roles.epic)
+				: await this.client.role_manager.add(member, constants.qg.roles.epic);
 			break;
 		case 'gog':
-			member.hasRole(constants.roles.gog)
-				? await this.client.role_manager.remove(member, constants.roles.gog)
-				: await this.client.role_manager.add(member, constants.roles.gog);
+			member.roles.cache.has(constants.qg.roles.gog)
+				? await this.client.role_manager.remove(member, constants.qg.roles.gog)
+				: await this.client.role_manager.add(member, constants.qg.roles.gog);
 			break;
 		case 'ubisoft':
-			member.hasRole(constants.roles.ubisoft)
-				? await this.client.role_manager.remove(member, constants.roles.ubisoft)
-				: await this.client.role_manager.add(member, constants.roles.ubisoft);
+			member.roles.cache.has(constants.qg.roles.ubisoft)
+				? await this.client.role_manager.remove(member, constants.qg.roles.ubisoft)
+				: await this.client.role_manager.add(member, constants.qg.roles.ubisoft);
 			break;
 		case 'xbox':
-			member.hasRole(constants.roles.xbox)
-				? await this.client.role_manager.remove(member, constants.roles.xbox)
-				: await this.client.role_manager.add(member, constants.roles.xbox);
+			member.roles.cache.has(constants.qg.roles.xbox)
+				? await this.client.role_manager.remove(member, constants.qg.roles.xbox)
+				: await this.client.role_manager.add(member, constants.qg.roles.xbox);
 			break;
 		case 'playstation':
-			member.hasRole(constants.roles.playstation)
-				? await this.client.role_manager.remove(member, constants.roles.playstation)
-				: await this.client.role_manager.add(member, constants.roles.playstation);
+			member.roles.cache.has(constants.qg.roles.playstation)
+				? await this.client.role_manager.remove(member, constants.qg.roles.playstation)
+				: await this.client.role_manager.add(member, constants.qg.roles.playstation);
 			break;
 		case 'wii':
-			member.hasRole(constants.roles.wii)
-				? await this.client.role_manager.remove(member, constants.roles.wii)
-				: await this.client.role_manager.add(member, constants.roles.wii);
+			member.roles.cache.has(constants.qg.roles.wii)
+				? await this.client.role_manager.remove(member, constants.qg.roles.wii)
+				: await this.client.role_manager.add(member, constants.qg.roles.wii);
 			break;
 		}
 

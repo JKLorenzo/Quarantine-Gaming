@@ -6,7 +6,6 @@ import { constants } from '../../utils/Base.js';
  * @typedef {import('discord.js').TextChannel} TextChannel
  * @typedef {import('discord.js').VoiceChannel} VoiceChannel
  * @typedef {import('discord.js').CommandInteraction} CommandInteraction
- * @typedef {import('../../structures/Base.js').ExtendedMember} ExtendedMember
  */
 
 export default class Message extends SlashCommand {
@@ -58,8 +57,8 @@ export default class Message extends SlashCommand {
 			permissions: {
 				roles: {
 					allow: [
-						constants.roles.staff,
-						constants.roles.moderator,
+						constants.qg.roles.staff,
+						constants.qg.roles.moderator,
 					],
 				},
 			},
@@ -68,7 +67,7 @@ export default class Message extends SlashCommand {
 
 	/**
 	 * @param {CommandInteraction} interaction
-	 * @param {{option: 'channel' | 'dm', channel?: TextChannel | VoiceChannel, member?: ExtendedMember, message: String}} options
+	 * @param {{option: 'channel' | 'dm', channel?: TextChannel | VoiceChannel, member?: GuildMember, message: String}} options
 	 */
 	async exec(interaction, options) {
 		await interaction.defer({ ephemeral: true });
@@ -114,18 +113,18 @@ export default class Message extends SlashCommand {
 				author: { name: 'Quarantine Gaming: Free Game Updates' },
 				title: 'Subscribe to get Updated',
 				description: [
-					`All free game notifications will be made available on our ${this.client.channel(constants.channels.integrations.free_games)} channel.`,
+					`All free game notifications will be made available on our ${this.client.channel(constants.qg.channels.integrations.free_games)} channel.`,
 					'',
-					`**${this.client.guild.emojis.cache.find(e => e.name === 'steam')} - Steam (${this.client.role(constants.roles.steam)})**`,
+					`**${this.client.qg.emojis.cache.find(e => e.name === 'steam')} - Steam (${this.client.role(constants.qg.roles.steam)})**`,
 					'Notifies you with games that are currently free on Steam.',
 					'',
-					`**${this.client.guild.emojis.cache.find(e => e.name === 'epic_games')} - Epic Games (${this.client.role(constants.roles.epic)})**`,
+					`**${this.client.qg.emojis.cache.find(e => e.name === 'epic_games')} - Epic Games (${this.client.role(constants.qg.roles.epic)})**`,
 					'Notifies you with games that are currently free on Epic Games.',
 					'',
-					`**${this.client.guild.emojis.cache.find(e => e.name === 'gog')} - GOG (${this.client.role(constants.roles.gog)})**`,
+					`**${this.client.qg.emojis.cache.find(e => e.name === 'gog')} - GOG (${this.client.role(constants.qg.roles.gog)})**`,
 					'Notifies you with games that are currently free on GOG.',
 					'',
-					`**${this.client.guild.emojis.cache.find(e => e.name === 'ubisoft')} - UPlay (${this.client.role(constants.roles.ubisoft)})**`,
+					`**${this.client.qg.emojis.cache.find(e => e.name === 'ubisoft')} - UPlay (${this.client.role(constants.qg.roles.ubisoft)})**`,
 					'Notifies you with games that are currently free on UPlay.',
 				].join('\n'),
 				image: { url: constants.images.free_games_banner_1 },
@@ -143,15 +142,15 @@ export default class Message extends SlashCommand {
 				author: { name: 'Quarantine Gaming: Free Game Updates' },
 				title: 'Subscribe to get Updated',
 				description: [
-					`All free game notifications will be made available on our ${this.client.channel(constants.channels.integrations.free_games)} channel.`,
+					`All free game notifications will be made available on our ${this.client.channel(constants.qg.channels.integrations.free_games)} channel.`,
 					'',
-					`**${this.client.guild.emojis.cache.find(e => e.name === 'xbox')} - Xbox (${this.client.role(constants.roles.xbox)})**`,
+					`**${this.client.qg.emojis.cache.find(e => e.name === 'xbox')} - Xbox (${this.client.role(constants.qg.roles.xbox)})**`,
 					'Notifies you with games that are currently free for Xbox One/360.',
 					'',
-					`**${this.client.guild.emojis.cache.find(e => e.name === 'playstation')} - PlayStation (${this.client.role(constants.roles.playstation)})**`,
+					`**${this.client.qg.emojis.cache.find(e => e.name === 'playstation')} - PlayStation (${this.client.role(constants.qg.roles.playstation)})**`,
 					'Notifies you with games that are currently free for PlayStation 3/4/Vita.',
 					'',
-					`**${this.client.guild.emojis.cache.find(e => e.name === 'wii')} - Wii (${this.client.role(constants.roles.wii)})**`,
+					`**${this.client.qg.emojis.cache.find(e => e.name === 'wii')} - Wii (${this.client.role(constants.qg.roles.wii)})**`,
 					'Notifies you with games that are currently free for Wii U/3DS/Switch.',
 				].join('\n'),
 				image: { url: constants.images.free_games_banner },
@@ -169,9 +168,9 @@ export default class Message extends SlashCommand {
 				author: { name: 'Quarantine Gaming: NSFW Content' },
 				title: 'Unlock NSFW Bots and Channel',
 				description: [
-					`The ${this.client.role(constants.roles.nsfw_bot)} and the ${this.client.channel(constants.channels.text.explicit)} channel will be unlocked after getting the role.`,
+					`The ${this.client.role(constants.qg.roles.nsfw_bot)} and the ${this.client.channel(constants.qg.channels.text.explicit)} channel will be unlocked after getting the role.`,
 					'',
-					`**🔴 - Not Safe For Work (${this.client.role(constants.roles.nsfw)})**`,
+					`**🔴 - Not Safe For Work (${this.client.role(constants.qg.roles.nsfw)})**`,
 					'The marked content may contain nudity, intense sexuality, profanity, violence or other potentially disturbing subject matter.',
 				].join('\n'),
 				image: { url: constants.images.nsfw_banner },

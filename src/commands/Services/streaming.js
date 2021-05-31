@@ -21,7 +21,7 @@ export default class Streaming extends SlashCommand {
 		await interaction.defer({ ephemeral: true });
 
 		const member = interaction.member;
-		const streaming_role = this.client.role(constants.roles.streaming);
+		const streaming_role = this.client.role(constants.qg.roles.streaming);
 		const hasStreaming = member.roles.cache.has(streaming_role.id);
 
 		if (hasStreaming) {

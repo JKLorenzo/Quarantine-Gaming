@@ -25,8 +25,8 @@ export default class Purge extends SlashCommand {
 			permissions: {
 				roles: {
 					allow: [
-						constants.roles.staff,
-						constants.roles.moderator,
+						constants.qg.roles.staff,
+						constants.qg.roles.moderator,
 					],
 				},
 			},

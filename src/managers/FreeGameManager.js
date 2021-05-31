@@ -125,23 +125,23 @@ export default class FreeGameManager {
 			const searchables = url.toLowerCase() + ' ' + (description ? description.toLowerCase() : '*');
 
 			if (contains(searchables, 'steampowered.com')) {
-				mentionables.push(constants.roles.steam);
+				mentionables.push(constants.qg.roles.steam);
 				color.add({ red: 0, green: 157, blue: 255 });
 			}
 			if (contains(searchables, 'epicgames.com')) {
-				mentionables.push(constants.roles.epic);
+				mentionables.push(constants.qg.roles.epic);
 				color.add({ red: 157, green: 255, blue: 0 });
 			}
 			if (contains(searchables, 'gog.com')) {
-				mentionables.push(constants.roles.gog);
+				mentionables.push(constants.qg.roles.gog);
 				color.add({ red: 157, green: 0, blue: 255 });
 			}
 			if (contains(searchables, 'ubisoft.com')) {
-				mentionables.push(constants.roles.ubisoft);
+				mentionables.push(constants.qg.roles.ubisoft);
 				color.add({ red: 200, green: 120, blue: 255 });
 			}
 			if (contains(searchables, ['playstation.com', 'wii.com', 'xbox.com', 'microsoft.com'])) {
-				mentionables.push(constants.roles.console);
+				mentionables.push(constants.qg.roles.console);
 				color.add({ red: 200, green: 80, blue: 200 });
 			}
 			if (mentionables.length == 0) return 'Uh-oh! This free game doesn\'t belong to any supported platforms.';
@@ -160,7 +160,7 @@ export default class FreeGameManager {
 			embed.addField('Platforms', mentionable_roles.join(', '), true);
 
 			// Send
-			const message = await this.client.message_manager.sendToChannel(constants.channels.integrations.free_games, { content: embed.title + ' is now available on ' + mentionable_roles.join(' and ') + '.', embed: embed });
+			const message = await this.client.message_manager.sendToChannel(constants.qg.channels.integrations.free_games, { content: embed.title + ' is now available on ' + mentionable_roles.join(' and ') + '.', embed: embed });
 			free_game.title = embed.title;
 			free_game.id = message.id;
 			await this.client.database_manager.pushFreeGame(free_game);

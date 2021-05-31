@@ -1,8 +1,8 @@
 import { SlashCommand } from '../../structures/Base.js';
 
 /**
+ * @typedef {import('discord.js').GuildMember} GuildMember
  * @typedef {import('discord.js').CommandInteraction} CommandInteraction
- * @typedef {import('../../structures/Base.js').ExtendedMember} ExtendedMember
  */
 
 export default class Transfer extends SlashCommand {
@@ -51,7 +51,7 @@ export default class Transfer extends SlashCommand {
 
 		await interaction.defer({ ephemeral: true });
 
-		/** @type {ExtendedMember[]} */
+		/** @type {GuildMember[]} */
 		const members = Object.keys(options).map(name => options[name]);
 		const available = members.filter(m => m.voice.channel);
 

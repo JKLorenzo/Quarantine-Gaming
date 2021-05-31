@@ -1,13 +1,12 @@
 import { Intents, Structures } from 'discord.js';
 import express from 'express';
-import { Client, ExtendedMember, ExtendedMessage } from './structures/Base.js';
+import { Client, ExtendedMessage } from './structures/Base.js';
 
 const {
 	DIRECT_MESSAGES, GUILDS, GUILD_BANS, GUILD_EMOJIS, GUILD_INVITES, GUILD_MEMBERS,
 	GUILD_MESSAGES, GUILD_MESSAGE_REACTIONS, GUILD_PRESENCES, GUILD_VOICE_STATES,
 } = Intents.FLAGS;
 
-Structures.extend('GuildMember', () => ExtendedMember);
 Structures.extend('Message', () => ExtendedMessage);
 
 const app = express();

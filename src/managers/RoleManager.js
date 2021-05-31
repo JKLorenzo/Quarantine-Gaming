@@ -30,7 +30,7 @@ export default class RoleManager {
 		return this.queuer.queue(async () => {
 			let result, error;
 			try {
-				result = await this.client.guild.roles.create(options);
+				result = await this.client.qg.roles.create(options);
 			} catch (this_error) {
 				this.client.error_manager.mark(ETM.create('create', this_error));
 				error = this_error;

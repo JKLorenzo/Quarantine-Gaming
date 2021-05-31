@@ -27,7 +27,7 @@ export default class NotSafeForWork extends MessageComponent {
 	async init(client) {
 		this.client = client;
 
-		this.options[0].components[0].setEmoji(this.client.guild.emojis.cache.find(e => e.name === 'pepe_peek'));
+		this.options[0].components[0].setEmoji(this.client.qg.emojis.cache.find(e => e.name === 'pepe_peek'));
 
 		return this;
 	}
@@ -38,9 +38,9 @@ export default class NotSafeForWork extends MessageComponent {
 	async exec(interaction) {
 		const member = this.client.member(interaction.member);
 
-		member.hasRole(constants.roles.nsfw)
-			? await this.client.role_manager.remove(member, constants.roles.nsfw)
-			: await this.client.role_manager.add(member, constants.roles.nsfw);
+		member.roles.cache.has(constants.qg.roles.nsfw)
+			? await this.client.role_manager.remove(member, constants.qg.roles.nsfw)
+			: await this.client.role_manager.add(member, constants.qg.roles.nsfw);
 
 		await interaction.deferUpdate();
 	}

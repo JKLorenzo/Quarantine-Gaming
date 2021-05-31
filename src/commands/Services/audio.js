@@ -33,7 +33,7 @@ export default class Audio extends SlashCommand {
 
 		await this.client.message_manager.sendToChannel(interaction.channel, embed).then(async reply => {
 			await this.client.reaction_manager.add(reply, ['🟠', '🟢']);
-			if (reply && reply.deletable) reply.delete({ timeout: 1800000 }).catch(e => void e);
+			if (reply && reply.deletable) reply.delete({ timeout: 1800000 });
 		});
 
 		interaction.editReply('Done!');

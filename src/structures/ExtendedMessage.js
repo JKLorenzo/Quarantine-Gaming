@@ -10,13 +10,13 @@ export default class ExtendedMessage extends Message {
 	 * @returns {Promise<ExtendedMessage>}
      */
 	delete(options = {}) {
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve) => {
 			if (options.timeout > 0) {
 				setTimeout(() => {
-					super.delete().then(result => resolve(result)).catch(error => reject(error));
+					super.delete().then(result => resolve(result)).catch(e => void e);
 				}, options.timeout);
 			} else {
-				super.delete().then(result => resolve(result)).catch(error => reject(error));
+				super.delete().then(result => resolve(result)).catch(e => void e);
 			}
 		});
 	}

@@ -3,11 +3,11 @@ import { ErrorTicketManager, ProcessQueue, parseMention, sleep, constants } from
 
 /**
  * @typedef {import('discord.js').Role} Role
+ * @typedef {import('discord.js').GuildMember} GuildMember
  * @typedef {import('discord.js').TextChannel} TextChannel
  * @typedef {import('discord.js').VoiceChannel} VoiceChannel
  * @typedef {import('discord.js').CategoryChannel} CategoryChannel
  * @typedef {import('../structures/Base').Client} Client
- * @typedef {import('../structures/Base').ExtendedMember} ExtendedMember
  */
 
 const ETM = new ErrorTicketManager('Dedicated Channel Manager');
@@ -33,7 +33,7 @@ async function displayInfo(client, text_channel, voice_channel, name) {
 				'\u200b \u200b \u200b \u200b 🔓 `/dedicate lock: False` to unlock this channel.',
 				'\u200b \u200b \u200b \u200b 🚏 `/transfer <member>` to transfer members from other voice channel to this channel regardless whether this channel is locked or unlocked.',
 			].join('\n\n'),
-			`Note: ${client.role(constants.roles.staff)}, ${client.role(constants.roles.moderator)}, and ${client.role(constants.roles.music_bot)} can interact with these channels.`,
+			`Note: ${client.role(constants.qg.roles.staff)}, ${client.role(constants.qg.roles.moderator)}, and ${client.role(constants.qg.roles.music_bot)} can interact with these channels.`,
 		].join('\n\n'),
 		color: '#7b00ff',
 	}));
@@ -56,8 +56,8 @@ export default class DedicatedChannelManager {
 			const member = newState.member;
 			if (newState.channelID === oldState.channelID) return;
 
-			if (oldState.channel?.parent?.id === constants.channels.category.dedicated_voice) {
-				const text_channel = this.client.channel(constants.channels.category.dedicated).children.find(channel => channel.type == 'text' && channel.topic && parseMention(channel.topic.split(' ')[0]) == oldState.channelID);
+			if (oldState.channel?.parent?.id === constants.qg.channels.category.dedicated_voice) {
+				const text_channel = this.client.channel(constants.qg.channels.category.dedicated).children.find(channel => channel.type == 'text' && channel.topic && parseMention(channel.topic.split(' ')[0]) == oldState.channelID);
 				const linked_data = text_channel.topic.split(' ');
 				const team_role = this.client.role(linked_data[1]);
 
@@ -83,7 +83,7 @@ export default class DedicatedChannelManager {
 				// Check if members are streaming
 				const streamers = new Array();
 				for (const this_member of newState.channel.members.array()) {
-					if (member.user.id != this_member.user.id && this_member.roles.cache.has(constants.roles.streaming)) {
+					if (member.user.id != this_member.user.id && this_member.roles.cache.has(constants.qg.roles.streaming)) {
 						streamers.push(this_member);
 					}
 				}
@@ -102,8 +102,8 @@ export default class DedicatedChannelManager {
 					}));
 				}
 
-				if (newState.channel.parent?.id == constants.channels.category.dedicated_voice) {
-					const text_channel = this.client.channel(constants.channels.category.dedicated).children.find(channel => channel.topic && parseMention(channel.topic.split(' ')[0]) == newState.channelID);
+				if (newState.channel.parent?.id == constants.qg.channels.category.dedicated_voice) {
+					const text_channel = this.client.channel(constants.qg.channels.category.dedicated).children.find(channel => channel.topic && parseMention(channel.topic.split(' ')[0]) == newState.channelID);
 					const linked_data = text_channel.topic.split(' ');
 					const team_role = this.client.role(linked_data[1]);
 
@@ -120,12 +120,12 @@ export default class DedicatedChannelManager {
 							color: '#7b00ff',
 						}));
 					}
-				} else if (newState.channel.parent?.id == constants.channels.category.voice && newState.channel.members.array().length == 5) {
+				} else if (newState.channel.parent?.id == constants.qg.channels.category.voice && newState.channel.members.array().length == 5) {
 					// Dedicate this channel
 					await this.client.dedicated_channel_manager.create(newState.channel, newState.channel.members.array()[0].displayName);
 				}
-			} else if (member.roles.cache.has(constants.roles.streaming)) {
-				this.client.role_manager.remove(member, constants.roles.streaming);
+			} else if (member.roles.cache.has(constants.qg.roles.streaming)) {
+				this.client.role_manager.remove(member, constants.qg.roles.streaming);
 			}
 		});
 	}
@@ -136,7 +136,7 @@ export default class DedicatedChannelManager {
 	async autoDedicate() {
 		try {
 			/** @type {CategoryChannel} */
-			const dedicated_voice_channels_category = this.client.channel(constants.channels.category.dedicated_voice);
+			const dedicated_voice_channels_category = this.client.channel(constants.qg.channels.category.dedicated_voice);
 			/** @type {VoiceChannel[]} */
 			const channels_for_dedication = dedicated_voice_channels_category.children.array();
 			for (const this_channel of channels_for_dedication) {
@@ -180,11 +180,11 @@ export default class DedicatedChannelManager {
 		return this.queuer.queue(async () => {
 			try {
 				const channel_name = '🔰' + name;
-				if (channel_origin.parentID == constants.channels.category.dedicated_voice) {
+				if (channel_origin.parentID == constants.qg.channels.category.dedicated_voice) {
 					// Rename
 					await channel_origin.setName(channel_name);
 					/** @type {CategoryChannel} */
-					const dedicated_text_channels_category = this.client.channel(constants.channels.category.dedicated);
+					const dedicated_text_channels_category = this.client.channel(constants.qg.channels.category.dedicated);
 					/** @type {Array<TextChannel>} */
 					const dedicated_text_channels = dedicated_text_channels_category.children.array();
 					const dedicated_text_channel = dedicated_text_channels.find(channel => channel.topic && parseMention(channel.topic.split(' ')[0]) == channel_origin.id);
@@ -205,29 +205,29 @@ export default class DedicatedChannelManager {
 
 					const team_role = await this.client.role_manager.create({
 						name: `Team ${channel_name}`,
-						position: this.client.role(constants.roles.streaming).position + 1,
+						position: this.client.role(constants.qg.roles.streaming).position + 1,
 						hoist: true,
 					});
 
 					const dedicated_voice_channel = await this.client.channel_manager.create({
 						name: channel_name,
 						type: 'voice',
-						parent: constants.channels.category.dedicated_voice,
+						parent: constants.qg.channels.category.dedicated_voice,
 						permissionOverwrites: [
 							{
-								id: constants.roles.everyone,
+								id: constants.qg.roles.everyone,
 								deny: [
 									PFlags.VIEW_CHANNEL,
 								],
 							},
 							{
-								id: constants.roles.member,
+								id: constants.qg.roles.member,
 								allow: [
 									PFlags.VIEW_CHANNEL,
 								],
 							},
 							{
-								id: constants.roles.music_bot,
+								id: constants.qg.roles.music_bot,
 								allow: [
 									PFlags.VIEW_CHANNEL,
 								],
@@ -239,16 +239,16 @@ export default class DedicatedChannelManager {
 					const dedicated_text_channel = await this.client.channel_manager.create({
 						name: channel_name,
 						type: 'text',
-						parent: constants.channels.category.dedicated,
+						parent: constants.qg.channels.category.dedicated,
 						permissionOverwrites: [
 							{
-								id: constants.roles.everyone,
+								id: constants.qg.roles.everyone,
 								deny: [
 									PFlags.VIEW_CHANNEL,
 								],
 							},
 							{
-								id: constants.roles.music_bot,
+								id: constants.qg.roles.music_bot,
 								allow: [
 									PFlags.VIEW_CHANNEL,
 								],
@@ -270,7 +270,7 @@ export default class DedicatedChannelManager {
 					await sleep(5000);
 
 					// Sort streamers from members and transfer
-					const [streamers, members] = channel_origin.members.partition(this_member => this_member.roles.cache.has(constants.roles.streaming));
+					const [streamers, members] = channel_origin.members.partition(this_member => this_member.roles.cache.has(constants.qg.roles.streaming));
 					const transferProcess = this.client.methods.voiceChannelTransfer(dedicated_voice_channel, [...streamers.array(), ...members.array()]);
 					return {
 						team_role: team_role,
@@ -292,9 +292,9 @@ export default class DedicatedChannelManager {
 	clean() {
 		return this.queuer.queue(async () => {
 			try {
-				for (const team_role of this.client.guild.roles.cache.array().filter(role => role.name.startsWith('Team'))) {
+				for (const team_role of this.client.qg.roles.cache.array().filter(role => role.name.startsWith('Team'))) {
 					/** @type {CategoryChannel} */
-					const dedicated_text_category = this.client.guild.channels.cache.get(constants.channels.category.dedicated);
+					const dedicated_text_category = this.client.qg.channels.cache.get(constants.qg.channels.category.dedicated);
 					/** @type {TextChannel} */
 					const dedicated_text_channel = dedicated_text_category.children.array().find(channel => {
 						/** @type {TextChannel} */

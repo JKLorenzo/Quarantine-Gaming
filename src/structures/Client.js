@@ -7,16 +7,16 @@ import Methods from '../methods/Base.js';
 import { ErrorTicketManager, constants, parseMention } from '../utils/Base.js';
 
 /**
- * @typedef {import('discord.js').ClientOptions} ClientOptions
- * @typedef {import('discord.js').GuildChannel} GuildChannel
- * @typedef {import('discord.js').GuildChannelResolvable} GuildChannelResolvable
- * @typedef {import('discord.js').Message} Message
- * @typedef {import('discord.js').MessageResolvable} MessageResolvable
  * @typedef {import('discord.js').Role} Role
- * @typedef {import('discord.js').RoleResolvable} RoleResolvable
+ * @typedef {import('discord.js').Message} Message
  * @typedef {import('discord.js').TextChannel} TextChannel
+ * @typedef {import('discord.js').GuildMember} GuildMember
+ * @typedef {import('discord.js').GuildChannel} GuildChannel
+ * @typedef {import('discord.js').ClientOptions} ClientOptions
+ * @typedef {import('discord.js').RoleResolvable} RoleResolvable
  * @typedef {import('discord.js').UserResolvable} UserResolvable
- * @typedef {import('../structures/Base.js').ExtendedMember} ExtendedMember
+ * @typedef {import('discord.js').MessageResolvable} MessageResolvable
+ * @typedef {import('discord.js').GuildChannelResolvable} GuildChannelResolvable
  */
 
 const ETM = new ErrorTicketManager('QG Client');
@@ -43,19 +43,24 @@ export default class QGClient extends Client {
 
 		this.once('ready', async () => {
 			console.log('Client logged in. Initializing...');
-			this.message_manager.sendToChannel(constants.interface.channels.logs, '[ **ONLINE**  -------------------------->');
+			this.message_manager.sendToChannel(constants.cs.channels.logs, '[ **ONLINE**  -------------------------->');
 
 			await this.database_manager.init();
 			await this.gateway_manager.init();
 			await this.interaction_manager.init();
-
-			await this.methods.loadMembers();
 			await this.game_manager.init();
 			await this.dedicated_channel_manager.init();
 
+			// Check for streaming members
+			const streaming_role = this.role(constants.qg.roles.streaming);
+			for (const member of streaming_role.members.array()) {
+				if (member.voice.channelID) continue;
+				await this.role_manager.remove(member, streaming_role);
+			}
+
 			this.free_game_manager.actions.start();
 
-			this.message_manager.sendToChannel(constants.interface.channels.logs, '[ **INITIALIZED**  -------------------->');
+			this.message_manager.sendToChannel(constants.cs.channels.logs, '[ **INITIALIZED**  -------------------->');
 
 			console.log('Client initialized.');
 		});
@@ -70,7 +75,7 @@ export default class QGClient extends Client {
 				if (oldUser.displayAvatarURL() !== newUser.displayAvatarURL()) description.push(`**Avatar:** [New Avatar](${newUser.displayAvatarURL()})`);
 
 				if (description.length > 1) {
-					this.message_manager.sendToChannel(constants.interface.channels.member_events, new MessageEmbed({
+					this.message_manager.sendToChannel(constants.cs.channels.member_events, new MessageEmbed({
 						author: { name: 'Quarantine Gaming: User Update' },
 						title: member.displayName,
 						thumbnail: { url: newUser.displayAvatarURL() },
@@ -86,7 +91,7 @@ export default class QGClient extends Client {
 
 		this.on('guildMemberUpdate', async (oldMember, newMember) => {
 			try {
-				if (newMember.guild.id !== constants.guild) return;
+				if (newMember.guild.id !== constants.qg.guild) return;
 
 				/** @type {Role[]} */
 				const role_add = new Array();
@@ -96,7 +101,7 @@ export default class QGClient extends Client {
 					for (const this_role of newMember.roles.cache.difference(oldMember.roles.cache).array()) {
 						const isNew = newMember.roles.cache.has(this_role.id);
 						if (this_role.name.startsWith('Team 🔰')) continue;
-						if (this_role.id === constants.roles.streaming) continue;
+						if (this_role.id === constants.qg.roles.streaming) continue;
 						if (this_role.hexColor === constants.colors.play_role) continue;
 						if (this_role.hexColor === constants.colors.game_role) continue;
 						isNew ? role_add.push(this_role) : role_removed.push(this_role);
@@ -109,7 +114,7 @@ export default class QGClient extends Client {
 				if (role_removed.length) description.push(`**Role Removed:** ${role_removed.map(role => role.name).join(', ')}`);
 
 				if (description.length > 1) {
-					this.message_manager.sendToChannel(constants.interface.channels.member_events, new MessageEmbed({
+					this.message_manager.sendToChannel(constants.cs.channels.member_events, new MessageEmbed({
 						author: { name: 'Quarantine Gaming: Member Update' },
 						title: newMember.displayName,
 						thumbnail: { url: newMember.user.displayAvatarURL() },
@@ -125,10 +130,17 @@ export default class QGClient extends Client {
 	}
 
 	/**
+     * Gets the Control Server guild.
+     */
+	get qg() {
+		return this.guilds.cache.get(constants.qg.guild);
+	}
+
+	/**
      * Gets the Quarantine Gaming guild.
      */
-	get guild() {
-		return this.guilds.cache.get(constants.guild);
+	get cs() {
+		return this.guilds.cache.get(constants.cs.guild);
 	}
 
 	/**
@@ -137,20 +149,22 @@ export default class QGClient extends Client {
  	 * @returns {GuildChannel}
  	 */
 	channel(channel) {
-		return this.guild.channels.resolve(channel)
-			?? this.guild.channels.resolve(parseMention(channel))
-			?? this.guilds.cache.get(constants.interface.guild).channels.resolve(channel)
-			?? this.guilds.cache.get(constants.interface.guild).channels.resolve(parseMention(channel));
+		return this.qg.channels.resolve(channel)
+			?? this.qg.channels.resolve(parseMention(channel))
+			?? this.cs.channels.resolve(channel)
+			?? this.cs.channels.resolve(parseMention(channel));
 	}
 
 	/**
  	 * Resolves a User Resolvable to an Extended Member object.
  	 * @param {UserResolvable} user
- 	 * @returns {ExtendedMember}
+ 	 * @returns {GuildMember}
  	 */
 	member(user) {
-		return this.guild.members.resolve(user)
-			?? this.guild.members.resolve(parseMention(user));
+		return this.qg.members.resolve(user)
+			?? this.qg.members.resolve(parseMention(user))
+			?? this.cs.members.resolve(user)
+			?? this.cs.members.resolve(parseMention(user));
 	}
 
 	/**
@@ -159,8 +173,10 @@ export default class QGClient extends Client {
 	 * @returns {Role}
 	 */
 	role(role) {
-		return this.guild.roles.resolve(role)
-			?? this.guild.roles.resolve(parseMention(role));
+		return this.qg.roles.resolve(role)
+			?? this.qg.roles.resolve(parseMention(role))
+			?? this.cs.roles.resolve(role)
+			?? this.cs.roles.resolve(parseMention(role));
 	}
 
 	/**

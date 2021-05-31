@@ -23,10 +23,10 @@ export default class MessageManager {
 		client.on('message', (message) => {
 			try {
 				// Game Invites Channel Blocking
-				if (message.channel && message.channel.id == constants.channels.integrations.game_invites && (message.embeds.length == 0 || (message.embeds.length > 0 && message.embeds[0].author.name != 'Quarantine Gaming: Game Coordinator'))) {
+				if (message.channel && message.channel.id == constants.qg.channels.integrations.game_invites && (message.embeds.length == 0 || (message.embeds.length > 0 && message.embeds[0].author.name != 'Quarantine Gaming: Game Coordinator'))) {
 					client.message_manager.sendToUser(message.author, 'Hello there! You can\'t send any messages in ' + message.channel + ' channel.').then(async reply => {
-						message.delete({ timeout: 2500 }).catch(e => void e);
-						reply.delete({ timeout: 2500 }).catch(e => void e);
+						message.delete({ timeout: 2500 });
+						reply.delete({ timeout: 2500 });
 					});
 				}
 
@@ -42,7 +42,7 @@ export default class MessageManager {
 						embed.addField('Message:', message.content);
 						embed.setFooter(`To reply, do: !message dm ${this_member.user.id} <message>`);
 						embed.setColor('#00ff6f');
-						client.message_manager.sendToChannel(constants.interface.channels.dm, embed);
+						client.message_manager.sendToChannel(constants.cs.channels.dm, embed);
 					}
 				}
 			} catch (error) {
@@ -89,7 +89,7 @@ export default class MessageManager {
 			let result, error;
 			try {
 				result = await member.send(content);
-				result.delete({ timeout:3600000 }).catch(e => void e);
+				result.delete({ timeout:3600000 });
 			} catch (this_error) {
 				this.client.error_manager.mark(ETM.create('sendToUser', this_error));
 				error = this_error;

@@ -28,7 +28,7 @@ export default class ChannelManager {
 		return this.queuer.queue(async () => {
 			let result, error;
 			try {
-				result = await this.client.guild.channels.create(options.name, options);
+				result = await this.client.qg.channels.create(options.name, options);
 			} catch (this_error) {
 				this.client.error_manager.mark(ETM.create('create', this_error));
 				error = this_error;
@@ -78,7 +78,7 @@ export default class ChannelManager {
 				if (!text_channel && !text_channel.isText()) continue;
 				text_channel.messages.fetch().then(messages => messages.array()).then(async messages => {
 					for (const message of messages) {
-						message.delete({ timeout: 900000 }).catch(e => void e);
+						message.delete({ timeout: 900000 });
 						await sleep(5000);
 					}
 				});

@@ -31,7 +31,7 @@ export default class GameBracket extends MessageComponent {
 	async init(client) {
 		this.client = client;
 
-		this.options[0].components[0].setEmoji(this.client.guild.emojis.cache.find(e => e.name === 'blob_game'));
+		this.options[0].components[0].setEmoji(this.client.qg.emojis.cache.find(e => e.name === 'blob_game'));
 
 		return this;
 	}

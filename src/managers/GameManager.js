@@ -6,8 +6,8 @@ import { ErrorTicketManager, ProcessQueue, contains, constants, parseMention } f
  * @typedef {import('discord.js').Message} Message
  * @typedef {import('discord.js').Presence} Presence
  * @typedef {import('discord.js').Activity} Activity
+ * @typedef {import('discord.js').GuildMember} GuildMember
  * @typedef {import('../structures/Base').Client} Client
- * @typedef {import('../structures/Base').ExtendedMember} ExtendedMember
  */
 
 /**
@@ -28,23 +28,23 @@ export default class GameManager {
 
 	async init() {
 		this.client.on('presenceUpdate', (oldPresence, newPresence) => {
-			if (newPresence.guild.id == constants.guild) return this.processPresenceUpdate(oldPresence, newPresence);
+			if (newPresence.guild.id == constants.qg.guild) return this.processPresenceUpdate(oldPresence, newPresence);
 		});
 
 		this.client.on('roleCreate', async (role) => {
-			if (role.guild.id !== constants.guild) return;
+			if (role.guild.id !== constants.qg.guild) return;
 			if (role.hexColor !== constants.colors.game_role) return;
 
 			await this.client.interaction_manager.loadCommands();
 
 			const images = await this.client.methods.fetchImage(role.name);
-			await this.client.message_manager.sendToChannel(constants.interface.channels.game_events, new MessageEmbed({
+			await this.client.message_manager.sendToChannel(constants.cs.channels.game_events, new MessageEmbed({
 				author: { name: 'Quarantine Gaming: Game Manager' },
 				title: 'Server Game Created',
 				thumbnail: { url: images?.small },
 				description: [
 					`**Game:** ${role.name}`,
-				],
+				].join('\n'),
 				image: { url: images?.large },
 				footer: { text:`Reference ID: ${role.id}` },
 				color: 'GREEN',
@@ -52,19 +52,19 @@ export default class GameManager {
 		});
 
 		this.client.on('roleDelete', async (role) => {
-			if (role.guild.id !== constants.guild) return;
+			if (role.guild.id !== constants.qg.guild) return;
 			if (role.hexColor !== constants.colors.game_role) return;
 
 			await this.client.interaction_manager.loadCommands();
 
 			const images = await this.client.methods.fetchImage(role.name);
-			await this.client.message_manager.sendToChannel(constants.interface.channels.game_events, new MessageEmbed({
+			await this.client.message_manager.sendToChannel(constants.cs.channels.game_events, new MessageEmbed({
 				author: { name: 'Quarantine Gaming: Game Manager' },
 				title: 'Server Game Deleted',
 				thumbnail: { url: images?.small },
 				description: [
 					`**Game:** ${role.name}`,
-				],
+				].join('\n'),
 				image: { url: images?.large },
 				footer: { text:`Reference ID: ${role.id}` },
 				color: 'RED',
@@ -72,7 +72,7 @@ export default class GameManager {
 		});
 
 		this.client.on('guildMemberUpdate', async (oldMember, newMember) => {
-			if (newMember.guild.id !== constants.guild) return;
+			if (newMember.guild.id !== constants.qg.guild) return;
 			const difference = newMember.roles.cache.difference(oldMember.roles.cache);
 			if (difference.size === 0) return;
 
@@ -87,7 +87,7 @@ export default class GameManager {
 						name: this_role.name,
 					});
 
-					await this.client.message_manager.sendToChannel(constants.interface.channels.game_events, new MessageEmbed({
+					await this.client.message_manager.sendToChannel(constants.cs.channels.game_events, new MessageEmbed({
 						author: { name: 'Quarantine Gaming: Game Manager' },
 						title: 'Member Game Add',
 						thumbnail: { url: images?.small },
@@ -100,7 +100,7 @@ export default class GameManager {
 					}));
 				} else {
 					await this.client.database_manager.deleteMemberGameRole(newMember.id, this_role.id);
-					await this.client.message_manager.sendToChannel(constants.interface.channels.game_events, new MessageEmbed({
+					await this.client.message_manager.sendToChannel(constants.cs.channels.game_events, new MessageEmbed({
 						author: { name: 'Quarantine Gaming: Game Manager' },
 						title: 'Member Game Remove',
 						thumbnail: { url: images?.small },
@@ -128,8 +128,7 @@ export default class GameManager {
 	 */
 	async reload() {
 		try {
-			/** @type {ExtendedMember[]} */
-			const members = this.client.guild.members.cache.array();
+			const members = this.client.qg.members.cache.array();
 
 			// Add and create game roles and play roles
 			for (const member of members.filter(this_member => !this_member.user.bot)) {
@@ -139,16 +138,16 @@ export default class GameManager {
 					if (this.client.database_manager.gameBlacklisted(game_name)) continue;
 					if (!(game_activity.applicationID || this.client.database_manager.gameWhitelisted(game_name))) continue;
 					// Game Role
-					const game_role = this.client.guild.roles.cache.find(role => role.name == game_name)
+					const game_role = this.client.qg.roles.cache.find(role => role.name == game_name)
 						?? await this.client.role_manager.create({ name: game_name, color: constants.colors.game_role });
 					// Game Role Mentionable
-					if (!this.client.guild.roles.cache.find(role => role.name == game_name + ' ⭐')) {
+					if (!this.client.qg.roles.cache.find(role => role.name == game_name + ' ⭐')) {
 						await this.client.role_manager.create({ name: game_name + ' ⭐', color: constants.colors.game_role_mentionable, mentionable: true });
 					}
 					await this.client.role_manager.add(member, game_role);
 					// Play Role
-					const streaming_role = this.client.role(constants.roles.streaming);
-					const play_role = this.client.guild.roles.cache.find(role => role.name == 'Play ' + game_name)
+					const streaming_role = this.client.role(constants.qg.roles.streaming);
+					const play_role = this.client.qg.roles.cache.find(role => role.name == 'Play ' + game_name)
 						?? await this.client.role_manager.create({ name: 'Play ' + game_name, color: constants.colors.play_role, position: streaming_role.position, hoist: true });
 					if (member.roles.cache.has(play_role.id)) continue;
 					await this.client.role_manager.add(member, play_role);
@@ -157,26 +156,26 @@ export default class GameManager {
 			}
 
 			// Delete unused game roles
-			for (const game_role of this.client.guild.roles.cache.array().filter(role => role.hexColor == constants.colors.game_role)) {
+			for (const game_role of this.client.qg.roles.cache.array().filter(role => role.hexColor == constants.colors.game_role)) {
 				if (game_role.members.array().length > 0 && !this.client.database_manager.gameBlacklisted(game_role.name)) continue;
 				await this.client.role_manager.delete(game_role);
 			}
 
 			// Delete unused game role mentionables
-			for (const game_role_mentionable of this.client.guild.roles.cache.array().filter(role => role.hexColor == constants.colors.game_role_mentionable)) {
-				if (this.client.guild.roles.cache.find(role => role.hexColor == constants.colors.game_role && game_role_mentionable.name.startsWith(role.name))) continue;
+			for (const game_role_mentionable of this.client.qg.roles.cache.array().filter(role => role.hexColor == constants.colors.game_role_mentionable)) {
+				if (this.client.qg.roles.cache.find(role => role.hexColor == constants.colors.game_role && game_role_mentionable.name.startsWith(role.name))) continue;
 				await this.client.role_manager.delete(game_role_mentionable);
 			}
 
 			// Delete unused play roles
-			for (const play_role of this.client.guild.roles.cache.array().filter(role => role.hexColor == constants.colors.play_role)) {
+			for (const play_role of this.client.qg.roles.cache.array().filter(role => role.hexColor == constants.colors.play_role)) {
 				const game_name = play_role.name.substring(5);
 				for (const member of play_role.members.array()) {
 					const games_playing = member.presence.activities.filter(activity => activity.type == 'PLAYING').map(activity => activity.name.trim());
 					if (games_playing.includes(game_name)) continue;
 					await this.client.role_manager.remove(member, play_role);
 				}
-				if (play_role.members.array().length > 0 && this.client.guild.roles.cache.find(role => role.hexColor == constants.colors.game_role && contains(play_role.name, role.name))) continue;
+				if (play_role.members.array().length > 0 && this.client.qg.roles.cache.find(role => role.hexColor == constants.colors.game_role && contains(play_role.name, role.name))) continue;
 				await this.client.role_manager.delete(play_role);
 			}
 		} catch (error) {
@@ -190,7 +189,6 @@ export default class GameManager {
  	 */
 	async processPresenceUpdate(newPresence, oldPresence) {
 		try {
-			/** @type {ExtendedMember} */
 			const member = newPresence ? newPresence.member : oldPresence.member;
 
 			/** @type {Collection<String, ActivityData>} */
@@ -211,11 +209,11 @@ export default class GameManager {
 				const not_blacklisted = !this.client.database_manager.gameBlacklisted(game_name);
 				const valid = activity.applicationID || this.client.database_manager.gameWhitelisted(game_name);
 				if (not_blacklisted && valid) {
-					const streaming_role = this.client.role(constants.roles.streaming);
-					const game_role = this.client.guild.roles.cache.find(role => role.name == game_name)
+					const streaming_role = this.client.role(constants.qg.roles.streaming);
+					const game_role = this.client.qg.roles.cache.find(role => role.name == game_name)
 						?? await this.client.role_manager.create({ name: game_name, color: constants.colors.game_role });
-					let play_role = this.client.guild.roles.cache.find(role => role.name == 'Play ' + game_name);
-					if (!this.client.guild.roles.cache.some(role => role.name == game_name + ' ⭐')) await this.client.role_manager.create({ name: game_name + ' ⭐', color: constants.colors.game_role_mentionable, mentionable: true });
+					let play_role = this.client.qg.roles.cache.find(role => role.name == 'Play ' + game_name);
+					if (!this.client.qg.roles.cache.some(role => role.name == game_name + ' ⭐')) await this.client.role_manager.create({ name: game_name + ' ⭐', color: constants.colors.game_role_mentionable, mentionable: true });
 
 					switch (status) {
 					case 'NEW':
@@ -230,7 +228,7 @@ export default class GameManager {
 						]);
 						break;
 					case 'OLD':
-						if (play_role && member.hasRole(play_role)) {
+						if (play_role && member.roles.cache.has(play_role)) {
 							await this.client.role_manager.remove(member, play_role);
 						}
 						break;
@@ -244,14 +242,16 @@ export default class GameManager {
 
 	async clearExpired() {
 		try {
-			/** @type {ExtendedMember[]} */
-			const members = this.client.guild.members.cache.array();
+			const members = this.client.qg.members.cache.array();
 			const promises = new Array();
 			for (const member of members) {
 				if (member.user.bot) continue;
-				const expired_game_roles_partial = await member.getExpiredGameRoles();
-				for (const expired_game_role_partial of expired_game_roles_partial) {
-					promises.push(this.client.role_manager.remove(member, expired_game_role_partial.id));
+				const game_roles = member.roles.cache.filter(r => r.hexColor === constants.colors.game_role);
+				if (!game_roles?.size) continue;
+				const expired_games = await this.client.database_manager.getMemberExpiredGameRoles(member.id);
+				if (!expired_games?.length) continue;
+				for (const expired_game of expired_games) {
+					promises.push(this.client.role_manager.remove(member, expired_game.id));
 				}
 			}
 			await Promise.all(promises);
@@ -262,9 +262,9 @@ export default class GameManager {
 
 	/**
 	 * Sends a game invite to the game invites channel.
-	 * @param {ExtendedMember} inviter
+	 * @param {GuildMember} inviter
 	 * @param {Role} game_role
-	 * @param {{description?: String, needed?: Number, reserved: ExtendedMember[]}} options
+	 * @param {{description?: String, needed?: Number, reserved: GuildMember[]}} options
 	 * @returns {Message}
 	 */
 	async createInvite(inviter, game_role, options = {}) {
@@ -297,7 +297,7 @@ export default class GameManager {
 			if (images.small) embed.setThumbnail(images.small);
 			if (images.large) embed.setImage(images.large);
 
-			const invite = await this.client.message_manager.sendToChannel(constants.channels.integrations.game_invites, {
+			const invite = await this.client.message_manager.sendToChannel(constants.qg.channels.integrations.game_invites, {
 				content: `${inviter} is inviting you to play ${game_role}.`,
 				embed: embed,
 				allowedMentions: {
@@ -306,7 +306,7 @@ export default class GameManager {
 				},
 				components: this.client.interaction_manager.components.get('gamebracket').getComponents(),
 			});
-			invite.delete({ timeout: 1800000 }).catch(e => void e);
+			invite.delete({ timeout: 1800000 });
 			return invite;
 		} catch (error) {
 			this.client.error_manager.mark(ETM.create('createInvite', error));
@@ -316,7 +316,7 @@ export default class GameManager {
 	/**
 	 * @param {Message} message
 	 * @param {'join' | 'leave'} type
-	 * @param {ExtendedMember} member
+	 * @param {GuildMember} member
 	 */
 	processBracket(message, type, member) {
 		this.gameBracketQueuer.queue(async () => {

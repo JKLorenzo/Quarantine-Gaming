@@ -4,8 +4,8 @@ import { ErrorTicketManager, ProcessQueue, compareDate, constants } from '../uti
 /**
  * @typedef {import('discord.js').Invite} Invite
  * @typedef {import('discord.js').Collection} Collection
+ * @typedef {import('discord.js').GuildMember} GuildMember
  * @typedef {import('../structures/Base').Client} Client
- * @typedef {import('../structures/Base').ExtendedMember} ExtendedMember
  */
 
 const ETM = new ErrorTicketManager('Gateway Manager');
@@ -20,7 +20,7 @@ export default class GatewayManager {
 		this.data = new Collection();
 
 		client.on('inviteCreate', async invite => {
-			if (invite.guild.id !== constants.guild) return;
+			if (invite.guild.id !== constants.qg.guild) return;
 			try {
 				this.invites.set(invite.code, invite);
 
@@ -34,7 +34,7 @@ export default class GatewayManager {
 				if (typeof invite.maxUses === 'number') description.push(`**Max Uses:** ${invite.maxUses ? invite.maxUses : 'Infinite'}`);
 				if (invite.expiresAt) description.push(`**Expires:** ${expire_date_formatted} (${expire_date_difference.estimate})`);
 
-				await client.message_manager.sendToChannel(constants.interface.channels.gateway_events, new MessageEmbed({
+				await client.message_manager.sendToChannel(constants.cs.channels.gateway_events, new MessageEmbed({
 					author: { name: 'Quarantine Gaming: Server Gateway' },
 					title: 'Invite Created',
 					description: description.join('\n'),
@@ -48,7 +48,7 @@ export default class GatewayManager {
 		});
 
 		client.on('inviteDelete', async invite => {
-			if (invite.guild.id !== constants.guild) return;
+			if (invite.guild.id !== constants.qg.guild) return;
 			try {
 				invite = this.invites.get(invite.code);
 
@@ -62,7 +62,7 @@ export default class GatewayManager {
 				if (typeof invite.maxUses === 'number') description.push(`**Max Uses:** ${invite.maxUses ? invite.maxUses : 'Infinite'}`);
 				if (invite.expiresAt) description.push(`**Expires:** ${expire_date_formatted} (${expire_date_difference.estimate})`);
 
-				await client.message_manager.sendToChannel(constants.interface.channels.gateway_events, new MessageEmbed({
+				await client.message_manager.sendToChannel(constants.cs.channels.gateway_events, new MessageEmbed({
 					author: { name: 'Quarantine Gaming: Server Gateway' },
 					title: 'Invite Deleted',
 					description: description.join('\n'),
@@ -78,10 +78,10 @@ export default class GatewayManager {
 		});
 
 		client.on('guildMemberAdd', async member => {
-			if (member.guild.id !== constants.guild) return;
+			if (member.guild.id !== constants.qg.guild) return;
 			try {
 				let invite_used = null;
-				const current_invites = await client.guild.fetchInvites();
+				const current_invites = await client.qg.fetchInvites();
 				const diff = current_invites.difference(this.invites).filter(i => i.expiresTimestamp > Date.now() && i.maxUses == 1);
 				if (diff.size == 1) {
 					invite_used = diff.first();
@@ -100,7 +100,7 @@ export default class GatewayManager {
 				const created_day_formatted = created_day.toString().split('GMT')[0];
 				const created_day_difference = compareDate(created_day);
 
-				await client.message_manager.sendToChannel(constants.interface.channels.gateway_events, new MessageEmbed({
+				await client.message_manager.sendToChannel(constants.cs.channels.gateway_events, new MessageEmbed({
 					author: { name: 'Quarantine Gaming: Server Gateway' },
 					title: 'Member Join',
 					description: [
@@ -117,12 +117,12 @@ export default class GatewayManager {
 		});
 
 		client.on('guildMemberUpdate', async (oldMember, newMember) => {
-			if (newMember.guild.id !== constants.guild) return;
+			if (newMember.guild.id !== constants.qg.guild) return;
 			try {
 				if (newMember.pending || oldMember.pending === newMember.pending) return;
 
 				/** @type {TextChannel} */
-				const management_channel = client.channel(constants.interface.channels.gateway);
+				const management_channel = client.channel(constants.cs.channels.gateway);
 				const messages = await management_channel.messages.fetch();
 				const member_approval_requests = messages.filter(message => message.embeds.length && message.embeds[0].title == 'Member Approval Request');
 				const this_member_approval_request = member_approval_requests.find(message => {
@@ -152,13 +152,13 @@ export default class GatewayManager {
 		});
 
 		client.on('guildMemberRemove', async member => {
-			if (member.guild.id !== constants.guild) return;
+			if (member.guild.id !== constants.qg.guild) return;
 			try {
 				const created_day = member.joinedAt;
 				const created_day_formatted = created_day.toString().split('GMT')[0];
 				const created_day_difference = compareDate(created_day);
 
-				await client.message_manager.sendToChannel(constants.interface.channels.gateway_events, new MessageEmbed({
+				await client.message_manager.sendToChannel(constants.cs.channels.gateway_events, new MessageEmbed({
 					author: { name: 'Quarantine Gaming: Server Gateway' },
 					title: 'Member Leave',
 					description: [
@@ -184,7 +184,7 @@ export default class GatewayManager {
 				if (!embed || (embed.author?.name !== 'Quarantine Gaming: Server Gateway')) return;
 				const member = client.member(user);
 
-				if (member.hasRole([constants.roles.staff, constants.roles.moderator, constants.roles.booster]) && embed.fields[3].value == 'Action Required') {
+				if (member.roles.cache.some(role => [constants.qg.roles.staff, constants.qg.roles.moderator, constants.qg.roles.booster].includes(role.id)) && embed.fields[3].value == 'Action Required') {
 					const this_member = client.member(embed.fields[0].value);
 					const inviter = client.member(embed.fields[1].value);
 					embed.setFooter(new Date());
@@ -192,9 +192,11 @@ export default class GatewayManager {
 						switch (emoji) {
 						case '✅':
 							await message.reactions.removeAll();
-							await client.role_manager.add(this_member, constants.roles.member);
-							if (inviter) await this_member.setInviter(inviter);
-							if (member) await this_member.setModerator(member);
+							await client.role_manager.add(this_member, constants.qg.roles.member);
+							await this.client.database_manager.updateMemberData(this_member.id, {
+								inviter: inviter.id,
+								moderator: member.id,
+							});
 							embed.fields[3].value = `Approved by ${user}`;
 							await message.edit({ content: '', embed: embed });
 							await client.message_manager.sendToUser(this_member, 'Hooraaay! 🥳 Your membership request has been approved! You will now have access to all the features of this server!');
@@ -226,7 +228,7 @@ export default class GatewayManager {
 
 	async init() {
 		try {
-			this.invites = await this.client.guild.fetchInvites();
+			this.invites = await this.client.qg.fetchInvites();
 		} catch (error) {
 			this.client.error_manager.mark(ETM.create('init', error));
 		}
@@ -234,7 +236,7 @@ export default class GatewayManager {
 
 	/**
 	 * @private
-	 * @param {ExtendedMember} member
+	 * @param {GuildMember} member
 	 * @param {Invite} invite
 	 * @returns
 	 */
@@ -257,7 +259,7 @@ export default class GatewayManager {
 				color: '#53FF00',
 			});
 
-			return await this.client.message_manager.sendToChannel(constants.interface.channels.gateway, embed);
+			return await this.client.message_manager.sendToChannel(constants.cs.channels.gateway, embed);
 		} catch (error) {
 			this.client.error_manager.mark(ETM.create('ScreenMember', error));
 		}

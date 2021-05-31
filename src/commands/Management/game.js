@@ -3,9 +3,9 @@ import { SlashCommand } from '../../structures/Base.js';
 import { getPercentSimilarity, constants } from '../../utils/Base.js';
 
 /**
+ * @typedef {import('discord.js').GuildMember} GuildMember
  * @typedef {import('discord.js').GuildChannel} GuildChannel
  * @typedef {import('discord.js').CommandInteraction} CommandInteraction
- * @typedef {import('../../structures/Base.js').ExtendedMember} ExtendedMember
  */
 
 export default class Game extends SlashCommand {
@@ -41,9 +41,9 @@ export default class Game extends SlashCommand {
 			permissions: {
 				roles: {
 					allow: [
-						constants.roles.staff,
-						constants.roles.moderator,
-						constants.roles.booster,
+						constants.qg.roles.staff,
+						constants.qg.roles.moderator,
+						constants.qg.roles.booster,
 					],
 				},
 			},
@@ -62,7 +62,7 @@ export default class Game extends SlashCommand {
 		let game_name = this.client.role(raw_name)?.name ?? '';
 
 		if (!game_name) {
-			checkRole: for (const this_role of this.client.guild.roles.cache.array()) {
+			checkRole: for (const this_role of this.client.qg.roles.cache.array()) {
 				if (this_role.hexColor != constants.colors.game_role) continue;
 				if (getPercentSimilarity(this_role.name.trim().toLowerCase(), safe_name) >= 75) {
 					game_name = this_role.name.trim();
@@ -71,7 +71,7 @@ export default class Game extends SlashCommand {
 			}
 		}
 		if (!game_name) {
-			checkPresence: for (const this_member of this.client.guild.members.cache.array()) {
+			checkPresence: for (const this_member of this.client.qg.members.cache.array()) {
 				for (const this_activity of this_member.presence.activities) {
 					if (this_activity.type !== 'PLAYING') continue;
 					if (getPercentSimilarity(this_activity.name.trim().toLowerCase(), safe_name) >= 75) {

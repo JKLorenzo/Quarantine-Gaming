@@ -15,7 +15,7 @@ export default class ErrorManager {
 		this.errors = new Array();
 
 		this.client.on('rateLimit', data => {
-			this.client.message_manager.sendToChannel(constants.interface.channels.telemetry, new MessageEmbed({
+			this.client.message_manager.sendToChannel(constants.cs.channels.telemetry, new MessageEmbed({
 				author: { name: 'Quarantine Gaming: Telemetry' },
 				title: 'Client Rate Limit',
 				thumbnail: { url: constants.images.ratelimit_thumbnail },
@@ -30,7 +30,7 @@ export default class ErrorManager {
 		});
 
 		this.client.on('warn', message => {
-			this.client.message_manager.sendToChannel(constants.interface.channels.telemetry, new MessageEmbed({
+			this.client.message_manager.sendToChannel(constants.cs.channels.telemetry, new MessageEmbed({
 				author: { name: 'Quarantine Gaming: Telemetry' },
 				title: 'Client Warning',
 				thumbnail: { url: constants.images.warning_thumbnail },
@@ -40,7 +40,7 @@ export default class ErrorManager {
 		});
 
 		this.client.on('error', error => {
-			this.client.message_manager.sendToChannel(constants.interface.channels.telemetry, new MessageEmbed({
+			this.client.message_manager.sendToChannel(constants.cs.channels.telemetry, new MessageEmbed({
 				author: { name: 'Quarantine Gaming: Telemetry' },
 				title: 'Client Error',
 				thumbnail: { url: constants.images.error_thumbnail },
@@ -92,7 +92,7 @@ export default class ErrorManager {
 				if (error_ticket.error) embed.fields[3].value = error_ticket.error;
 				if (error_ticket.error?.code) embed.fields[2].value = error_ticket.error.code;
 
-				return this.client.message_manager.sendToChannel(constants.interface.channels.telemetry, embed);
+				return this.client.message_manager.sendToChannel(constants.cs.channels.telemetry, embed);
 			} catch (error) {
 				console.error(`ErrorManager: ${error}`);
 			} finally {
