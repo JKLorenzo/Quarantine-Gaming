@@ -1,5 +1,5 @@
 name: Deploy Release
-on: [release]
+on: release
 
 jobs:
   deploy:
@@ -7,10 +7,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-      - uses: actions/checkout@v2
+        uses: actions/checkout@v2
 
       - name: Deploy
-      - uses: akhileshns/heroku-deploy@v3.12.12
+        uses: akhileshns/heroku-deploy@v3.12.12
         with:
           heroku_app_name: "quarantine-gaming"
           heroku_email: ${{secrets.HEROKU_EMAIL}}
