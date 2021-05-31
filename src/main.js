@@ -1,5 +1,5 @@
 import { Intents, Structures } from 'discord.js';
-import * as express from 'express';
+import express from 'express';
 import { Client, ExtendedMember, ExtendedMessage } from './structures/Base.js';
 
 const {
