@@ -1,11 +1,16 @@
 import { Intents, Structures } from 'discord.js';
+import * as express from 'express';
 import { Client, ExtendedMember, ExtendedMessage } from './structures/Base.js';
+
+const {
+	DIRECT_MESSAGES, GUILDS, GUILD_BANS, GUILD_EMOJIS, GUILD_INVITES, GUILD_MEMBERS,
+	GUILD_MESSAGES, GUILD_MESSAGE_REACTIONS, GUILD_PRESENCES, GUILD_VOICE_STATES,
+} = Intents.FLAGS;
 
 Structures.extend('GuildMember', () => ExtendedMember);
 Structures.extend('Message', () => ExtendedMessage);
 
-const FLAGS = Intents.FLAGS;
-
+const app = express();
 const client = new Client({
 	allowedMentions: {
 		parse: [
@@ -14,16 +19,16 @@ const client = new Client({
 		repliedUser: true,
 	},
 	intents: [
-		FLAGS.DIRECT_MESSAGES,
-		FLAGS.GUILDS,
-		FLAGS.GUILD_BANS,
-		FLAGS.GUILD_EMOJIS,
-		FLAGS.GUILD_INVITES,
-		FLAGS.GUILD_MEMBERS,
-		FLAGS.GUILD_MESSAGES,
-		FLAGS.GUILD_MESSAGE_REACTIONS,
-		FLAGS.GUILD_PRESENCES,
-		FLAGS.GUILD_VOICE_STATES,
+		DIRECT_MESSAGES,
+		GUILDS,
+		GUILD_BANS,
+		GUILD_EMOJIS,
+		GUILD_INVITES,
+		GUILD_MEMBERS,
+		GUILD_MESSAGES,
+		GUILD_MESSAGE_REACTIONS,
+		GUILD_PRESENCES,
+		GUILD_VOICE_STATES,
 	],
 	partials: [
 		'MESSAGE', 'CHANNEL', 'REACTION',
@@ -40,5 +45,11 @@ const client = new Client({
 	},
 });
 
-client.login(process.env.BOT_TOKEN);
-console.log('Logging in...');
+app.get('/', (req, res) => {
+	res.send(client?.ws?.ping ? 'online' : 'offline');
+});
+
+app.listen(process.env.PORT || 3000, () => {
+	console.log('Server is running...');
+	client.login(process.env.BOT_TOKEN);
+});
