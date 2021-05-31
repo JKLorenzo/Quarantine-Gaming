@@ -1,5 +1,5 @@
 import { Collection, MessageEmbed } from 'discord.js';
-import { ErrorTicketManager, ProcessQueue, contains, constants, parseMention } from '../utils/Base.js';
+import { ErrorTicketManager, contains, constants } from '../utils/Base.js';
 
 /**
  * @typedef {import('discord.js').Role} Role
@@ -22,8 +22,6 @@ export default class GameManager {
 	/** @param {Client} client */
 	constructor(client) {
 		this.client = client;
-
-		this.gameBracketQueuer = new ProcessQueue();
 	}
 
 	async init() {
@@ -311,69 +309,5 @@ export default class GameManager {
 		} catch (error) {
 			this.client.error_manager.mark(ETM.create('createInvite', error));
 		}
-	}
-
-	/**
-	 * @param {Message} message
-	 * @param {'join' | 'leave'} type
-	 * @param {GuildMember} member
-	 */
-	processBracket(message, type, member) {
-		this.gameBracketQueuer.queue(async () => {
-			const embed = message.embeds[0];
-			const bracket_name = embed.title;
-			const slots = embed.fields.length;
-			const isLimited = contains(embed.footer.text, 'limited');
-			const inviter = this.client.member(embed.fields[0].value);
-			const players = embed.fields.map(field => field.value).filter(p => p !== 'Slot Available');
-
-			if (inviter.id === member.id) return;
-			if (contains(embed.footer.text, 'bracket is now full')) return;
-
-			switch (type) {
-			case 'join':
-				if (players.includes(member.toString())) return;
-				players.forEach(player => {
-					this.client.message_manager.sendToUser(player, `${member} joined your ${bracket_name} bracket.`);
-				});
-				players.push(member);
-				break;
-			case 'leave':
-				if (!players.includes(member.toString())) return;
-				players.splice(players.indexOf(member.toString()), 1);
-				players.forEach(player => {
-					this.client.message_manager.sendToUser(player, `${member} left your ${bracket_name} bracket.`);
-				});
-				break;
-			}
-
-			if (isLimited) {
-				for (let slot = 1; slot < slots; slot++) {
-					embed.fields[slot].value = players[slot] ?? 'Slot Available';
-				}
-
-				if (players.length === slots) {
-					message.components = [],
-					embed.setFooter('This limited bracket is now full.');
-					players.forEach(player => {
-						this.client.message_manager.sendToUser(player, {
-							content: `Your ${bracket_name} bracket is now full.`,
-							embed: embed,
-						});
-					});
-				}
-			} else {
-				embed.spliceFields(1, slots - 1 > 0 ? slots - 1 : 0, players.filter(p => parseMention(p) !== inviter.id).map((value, index) => {
-					return {
-						name: `Player ${index + 2}`, value: value,
-					};
-				}));
-			}
-
-			await message.edit({
-				embed: embed,
-				components: message.components,
-			});
-		});
 	}
 }
