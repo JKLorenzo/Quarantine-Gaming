@@ -16,18 +16,13 @@ export default class GatewayManager {
 		this.client = client;
 		this.queuer = new ProcessQueue(1000);
 
-		this.data = {
-			/** @type {Collection<String, Invite>} */
-			cache: new Collection(),
-		};
-
-		/** @type {Invite[]} */
-		this.invites_queue = new Array();
+		/** @type {Collection<String, Invite>} */
+		this.data = new Collection();
 
 		client.on('inviteCreate', async invite => {
 			if (invite.guild.id !== constants.guild) return;
 			try {
-				this.data.cache.set(invite.code, invite);
+				this.invites.set(invite.code, invite);
 
 				const expire_date = invite.expiresAt;
 				const expire_date_formatted = expire_date.toString().split('GMT')[0];
@@ -40,7 +35,7 @@ export default class GatewayManager {
 				if (invite.expiresAt) description.push(`**Expires:** ${expire_date_formatted} (${expire_date_difference.estimate})`);
 
 				await client.message_manager.sendToChannel(constants.interface.channels.gateway_events, new MessageEmbed({
-					author: { name: 'Quarantine Gaming: Server Gateway Events' },
+					author: { name: 'Quarantine Gaming: Server Gateway' },
 					title: 'Invite Created',
 					description: description.join('\n'),
 					thumbnail: { url: invite.inviter.displayAvatarURL() },
@@ -55,7 +50,7 @@ export default class GatewayManager {
 		client.on('inviteDelete', async invite => {
 			if (invite.guild.id !== constants.guild) return;
 			try {
-				invite = this.data.cache.get(invite.code);
+				invite = this.invites.get(invite.code);
 
 				const expire_date = invite.expiresAt;
 				const expire_date_formatted = expire_date.toString().split('GMT')[0];
@@ -68,7 +63,7 @@ export default class GatewayManager {
 				if (invite.expiresAt) description.push(`**Expires:** ${expire_date_formatted} (${expire_date_difference.estimate})`);
 
 				await client.message_manager.sendToChannel(constants.interface.channels.gateway_events, new MessageEmbed({
-					author: { name: 'Quarantine Gaming: Server Gateway Events' },
+					author: { name: 'Quarantine Gaming: Server Gateway' },
 					title: 'Invite Deleted',
 					description: description.join('\n'),
 					thumbnail: { url: invite.inviter.displayAvatarURL() },
@@ -76,7 +71,7 @@ export default class GatewayManager {
 					color: '#25c081',
 				}));
 
-				this.data.cache.delete(invite.code);
+				this.invites.delete(invite.code);
 			} catch (error) {
 				this.client.error_manager.mark(ETM.create('inviteDelete', error));
 			}
@@ -87,12 +82,12 @@ export default class GatewayManager {
 			try {
 				let invite_used = null;
 				const current_invites = await client.guild.fetchInvites();
-				const diff = current_invites.difference(this.data.cache).filter(i => i.expiresTimestamp > Date.now() && i.maxUses == 1);
+				const diff = current_invites.difference(this.invites).filter(i => i.expiresTimestamp > Date.now() && i.maxUses == 1);
 				if (diff.size == 1) {
 					invite_used = diff.first();
 				} else {
 					for (const current_invite of current_invites.array()) {
-						const this_invite = this.data.cache.get(current_invite.code);
+						const this_invite = this.invites.get(current_invite.code);
 						if (!this_invite || (this_invite && Date.now() > this_invite.expiresTimestamp)) continue;
 						if (current_invite.uses <= this_invite.uses) continue;
 						invite_used = current_invite;
@@ -106,7 +101,7 @@ export default class GatewayManager {
 				const created_day_difference = compareDate(created_day);
 
 				await client.message_manager.sendToChannel(constants.interface.channels.gateway_events, new MessageEmbed({
-					author: { name: 'Quarantine Gaming: Server Gateway Events' },
+					author: { name: 'Quarantine Gaming: Server Gateway' },
 					title: 'Member Join',
 					description: [
 						`**Profile:** ${member}`,
@@ -164,7 +159,7 @@ export default class GatewayManager {
 				const created_day_difference = compareDate(created_day);
 
 				await client.message_manager.sendToChannel(constants.interface.channels.gateway_events, new MessageEmbed({
-					author: { name: 'Quarantine Gaming: Server Gateway Events' },
+					author: { name: 'Quarantine Gaming: Server Gateway' },
 					title: 'Member Leave',
 					description: [
 						`**Profile:** ${member}`,
@@ -186,7 +181,7 @@ export default class GatewayManager {
 				if (message.embeds.length) return;
 				const emoji = reaction.emoji.name;
 				const embed = message.embeds[0];
-				if (!embed || (embed.author?.name !== 'Quarantine Gaming: Server Gateway Administrative')) return;
+				if (!embed || (embed.author?.name !== 'Quarantine Gaming: Server Gateway')) return;
 				const member = client.member(user);
 
 				if (member.hasRole([constants.roles.staff, constants.roles.moderator, constants.roles.booster]) && embed.fields[3].value == 'Action Required') {
@@ -231,7 +226,7 @@ export default class GatewayManager {
 
 	async init() {
 		try {
-			this.data.cache = await this.client.guild.fetchInvites();
+			this.invites = await this.client.guild.fetchInvites();
 		} catch (error) {
 			this.client.error_manager.mark(ETM.create('init', error));
 		}
