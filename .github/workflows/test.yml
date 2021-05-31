@@ -22,7 +22,7 @@ jobs:
         run: npm ci
 
       - name: Run ESLint
-        uses: npm run lint
+        run: npm run lint
 
   analyze:
     name: CodeQL Analysis
