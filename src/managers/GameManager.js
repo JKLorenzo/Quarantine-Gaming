@@ -229,7 +229,7 @@ export default class GameManager {
 						]);
 						break;
 					case 'OLD':
-						if (play_role && member.roles.cache.has(play_role)) {
+						if (play_role && member.roles.cache.has(play_role.id)) {
 							await this.client.role_manager.remove(member, play_role);
 						}
 						break;
