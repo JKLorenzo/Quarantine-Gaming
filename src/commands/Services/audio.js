@@ -1,6 +1,5 @@
 import { MessageEmbed } from 'discord.js';
 import { SlashCommand } from '../../structures/Base.js';
-import { constants } from '../../utils/Base.js';
 
 /**
  * @typedef {import('discord.js').CommandInteraction} CommandInteraction
@@ -22,20 +21,13 @@ export default class Audio extends SlashCommand {
 			author: { name: 'Quarantine Gaming: Experience' },
 			title: 'Audio Control Extension for Voice Channels',
 			description: 'Mute or unmute all members on your current voice channel.',
-			thumbnail: { url: constants.images.audio_control_thumbnail },
-			fields: [
-				{ name: 'Actions:', value: '🟠 - Mute', inline: true },
-				{ name: '\u200b', value: '🟢 - Unmute', inline: true },
-			],
-			color: '#ffff00',
-			footer: { text: 'Apply selected actions by reacting below.' },
+			color: 'BLURPLE',
+			footer: { text: 'Apply actions by clicking the buttons below.' },
 		});
 
-		await this.client.message_manager.sendToChannel(interaction.channel, embed).then(async reply => {
-			await this.client.reaction_manager.add(reply, ['🟠', '🟢']);
-			if (reply && reply.deletable) reply.delete({ timeout: 1800000 });
+		await interaction.editReply({
+			embeds: [embed],
+			components: this.client.interaction_manager.components.get('audio_control').getComponents(),
 		});
-
-		interaction.editReply('Done!');
 	}
 }
