@@ -194,6 +194,40 @@ export default class GatewayManager {
 				this.client.error_manager.mark(ETM.create('guildMemberRemove', error));
 			}
 		});
+
+		client.on('guildBanAdd', async (ban) => {
+			if (ban.guild.id !== constants.qg.guild) return;
+
+			await client.message_manager.sendToChannel(constants.cs.channels.gateway_events, new MessageEmbed({
+				author: { name: 'Quarantine Gaming: Server Gateway' },
+				title: 'Ban Implemented',
+				description: [
+					`**Profile:** ${ban.user}`,
+					`**Username:** ${ban.user.username}`,
+					`**Reason:** ${ban.reason ?? 'No reason given'}`,
+				].join('\n'),
+				thumbnail: { url: ban.user.displayAvatarURL() },
+				footer: { text: `Reference ID: ${ban.user.id}` },
+				color: 'DARK_RED',
+			}));
+		});
+
+		client.on('guildBanRemove', async (ban) => {
+			if (ban.guild.id !== constants.qg.guild) return;
+
+			await client.message_manager.sendToChannel(constants.cs.channels.gateway_events, new MessageEmbed({
+				author: { name: 'Quarantine Gaming: Server Gateway' },
+				title: 'Ban Lifted',
+				description: [
+					`**Profile:** ${ban.user}`,
+					`**Username:** ${ban.user.username}`,
+					`**Ban Reason:** ${ban.reason ?? 'No reason given'}`,
+				].join('\n'),
+				thumbnail: { url: ban.user.displayAvatarURL() },
+				footer: { text: `Reference ID: ${ban.user.id}` },
+				color: 'AQUA',
+			}));
+		});
 	}
 
 	async init() {
