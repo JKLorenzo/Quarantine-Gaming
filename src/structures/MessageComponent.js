@@ -46,7 +46,7 @@ export default class MessageComponent {
 					switch(component.type) {
 					case 'BUTTON': return new MessageButton({
 						...component,
-						customID: `${this.name}_${component.customID}`,
+						customID: `${this.name}__${component.customID}`,
 					});
 					default: return undefined;
 					}

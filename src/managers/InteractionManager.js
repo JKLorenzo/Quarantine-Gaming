@@ -172,8 +172,9 @@ export default class InteractionManager {
      */
 	async processMessageComponent(componentInteraction) {
 		try {
-			const name = componentInteraction.customID.split('_')[0];
-			const customID = componentInteraction.customID.split('_').slice(1).join('_');
+			const data = componentInteraction.customID.split('__');
+			const name = data[0];
+			const customID = data[1];
 			const component = this.components.get(name);
 			if (component) {
 				await component.exec(componentInteraction, customID);
