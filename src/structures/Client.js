@@ -46,10 +46,11 @@ export default class QGClient extends Client {
 			this.message_manager.sendToChannel(constants.cs.channels.logs, '[ **ONLINE**  -------------------------->');
 
 			await this.database_manager.init();
-			await this.gateway_manager.init();
 			await this.interaction_manager.init();
-			await this.game_manager.init();
-			await this.dedicated_channel_manager.init();
+			await this.gateway_manager.init();
+
+			this.game_manager.init();
+			this.dedicated_channel_manager.init();
 
 			// Check for streaming members
 			const streaming_role = this.role(constants.qg.roles.streaming);
