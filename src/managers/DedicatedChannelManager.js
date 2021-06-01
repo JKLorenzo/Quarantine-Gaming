@@ -248,6 +248,12 @@ export default class DedicatedChannelManager {
 								],
 							},
 							{
+								id: constants.qg.roles.moderator,
+								allow: [
+									PFlags.VIEW_CHANNEL,
+								],
+							},
+							{
 								id: constants.qg.roles.music_bot,
 								allow: [
 									PFlags.VIEW_CHANNEL,
