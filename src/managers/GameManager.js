@@ -129,6 +129,7 @@ export default class GameManager {
 			const members = this.client.qg.members.cache.array();
 
 			// Add and create game roles and play roles
+			let promises = new Array();
 			for (const member of members.filter(this_member => !this_member.user.bot)) {
 				const game_activities = member.presence.activities.filter(activity => activity.type == 'PLAYING');
 				for (const game_activity of game_activities) {
@@ -139,42 +140,48 @@ export default class GameManager {
 					const game_role = this.client.qg.roles.cache.find(role => role.name == game_name)
 						?? await this.client.role_manager.create({ name: game_name, color: constants.colors.game_role });
 					// Game Role Mentionable
-					if (!this.client.qg.roles.cache.find(role => role.name == game_name + ' ⭐')) {
+					if (!this.client.qg.roles.cache.some(role => role.name == game_name + ' ⭐')) {
 						await this.client.role_manager.create({ name: game_name + ' ⭐', color: constants.colors.game_role_mentionable, mentionable: true });
 					}
-					await this.client.role_manager.add(member, game_role);
+					promises.push(this.client.role_manager.add(member, game_role));
 					// Play Role
 					const streaming_role = this.client.role(constants.qg.roles.streaming);
 					const play_role = this.client.qg.roles.cache.find(role => role.name == 'Play ' + game_name)
 						?? await this.client.role_manager.create({ name: 'Play ' + game_name, color: constants.colors.play_role, position: streaming_role.position, hoist: true });
 					if (member.roles.cache.has(play_role.id)) continue;
-					await this.client.role_manager.add(member, play_role);
-					await play_role.setPosition(streaming_role.position - 1);
+					promises.push(this.client.role_manager.add(member, play_role));
 				}
 			}
+			await Promise.all(promises);
 
 			// Delete unused game roles
+			promises = new Array();
 			for (const game_role of this.client.qg.roles.cache.array().filter(role => role.hexColor == constants.colors.game_role)) {
 				if (game_role.members.array().length > 0 && !this.client.database_manager.gameBlacklisted(game_role.name)) continue;
-				await this.client.role_manager.delete(game_role);
+				promises.push(this.client.role_manager.delete(game_role));
 			}
+			await Promise.all(promises);
 
 			// Delete unused game role mentionables
+			promises = new Array();
 			for (const game_role_mentionable of this.client.qg.roles.cache.array().filter(role => role.hexColor == constants.colors.game_role_mentionable)) {
 				if (this.client.qg.roles.cache.find(role => role.hexColor == constants.colors.game_role && game_role_mentionable.name.startsWith(role.name))) continue;
-				await this.client.role_manager.delete(game_role_mentionable);
+				promises.push(this.client.role_manager.delete(game_role_mentionable));
 			}
+			await Promise.all(promises);
 
 			// Delete unused play roles
 			for (const play_role of this.client.qg.roles.cache.array().filter(role => role.hexColor == constants.colors.play_role)) {
 				const game_name = play_role.name.substring(5);
+				promises = new Array();
 				for (const member of play_role.members.array()) {
 					const games_playing = member.presence.activities.filter(activity => activity.type == 'PLAYING').map(activity => activity.name.trim());
 					if (games_playing.includes(game_name)) continue;
-					await this.client.role_manager.remove(member, play_role);
+					promises.push(this.client.role_manager.remove(member, play_role));
 				}
-				if (play_role.members.array().length > 0 && this.client.qg.roles.cache.find(role => role.hexColor == constants.colors.game_role && contains(play_role.name, role.name))) continue;
-				await this.client.role_manager.delete(play_role);
+				await Promise.all(promises);
+				if (play_role.members.array().length > 0 && this.client.qg.roles.cache.some(role => role.hexColor == constants.colors.game_role && contains(play_role.name, role.name))) continue;
+				this.client.role_manager.delete(play_role);
 			}
 		} catch (error) {
 			this.client.error_manager.mark(ETM.create('reload', error));
