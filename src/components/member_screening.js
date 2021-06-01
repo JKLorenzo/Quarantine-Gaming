@@ -78,7 +78,9 @@ export default class MemberScreening extends MessageComponent {
 				embed.setColor('FUCHSIA');
 				break;
 			case 'ban':
-				await member.ban();
+				await member.ban({
+					reason: `Gateway Ban by ${moderator.displayName}.`,
+				});
 				embed.setColor('RED');
 				embed.fields[3].value = `Banned by ${moderator}`;
 				break;
