@@ -185,7 +185,7 @@ export default class GameManager {
  	 * @param {Presence} oldPresence
  	 * @param {Presence} newPresence
  	 */
-	async processPresenceUpdate(newPresence, oldPresence) {
+	async processPresenceUpdate(oldPresence, newPresence) {
 		try {
 			const member = newPresence ? newPresence.member : oldPresence.member;
 
@@ -195,10 +195,10 @@ export default class GameManager {
 			const newGames = new Collection();
 
 			oldPresence?.activities.filter(activity => activity.type === 'PLAYING').forEach(activity => {
-				oldGames.set(activity.name.trim(), { activity: activity, status: 'NEW' });
+				oldGames.set(activity.name.trim(), { activity: activity, status: 'OLD' });
 			});
 			newPresence?.activities.filter(activity => activity.type === 'PLAYING').forEach(activity => {
-				newGames.set(activity.name.trim(), { activity: activity, status: 'OLD' });
+				newGames.set(activity.name.trim(), { activity: activity, status: 'NEW' });
 			});
 
 			const difference = oldGames.difference(newGames);
