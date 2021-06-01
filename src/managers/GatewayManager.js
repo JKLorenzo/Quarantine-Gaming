@@ -121,6 +121,11 @@ export default class GatewayManager {
 					}
 				}
 				await this.ScreenMember(member, invite_used);
+				await this.client.database_manager.setMemberData({
+					id: member.id,
+					name: member.displayName,
+					tagname: member.user.tag,
+				});
 			} catch (error) {
 				this.client.error_manager.mark(ETM.create('guildMemberAdd', error));
 			}
