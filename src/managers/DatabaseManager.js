@@ -173,6 +173,26 @@ export default class DatabaseManager {
 		await this.actions.loadFreeGames();
 		await this.actions.loadImages();
 		this.listeners.game_overrides.start();
+
+		// Add and update members on the database
+		for (const member of this.client.qg.members.cache.array()) {
+			if (member.user.bot) continue;
+			const existing_data = this.getMemberData(member.id);
+			if (existing_data) {
+				// Update member
+				const data = {};
+				if (existing_data.name !== member.displayName) data.name = member.displayName;
+				if (existing_data.tagname !== member.user.tag) data.tagname = member.user.tag;
+				if (Object.keys(data).length) await this.updateMemberData(member.id, data);
+			} else {
+				// Add member to database
+				await this.setMemberData({
+					id: member.id,
+					name: member.displayName,
+					tagname: member.user.tag,
+				});
+			}
+		}
 	}
 
 	/**
@@ -228,6 +248,7 @@ export default class DatabaseManager {
 	/**
 	 * Registers the member on the database.
 	 * @param {{id: String, name: String, tagname: String}} data
+	 * @returns {Promise<PartialMember>}
 	 */
 	async setMemberData(data) {
 		try {
