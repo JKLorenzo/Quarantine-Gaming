@@ -98,9 +98,24 @@ export default class MemberScreening extends MessageComponent {
 		const ping_message = messages.find(msg => msg.content === `${this.client.cs.roles.everyone}, ${member} wants to join the server.`);
 		if (ping_message) await ping_message.delete();
 
+		if (!member) return;
+
+		// Send screening result to user
+		let feedback = null;
 		if (customID === 'approve') {
+			feedback = [
+				'Hooraaay! 🥳 Your membership request has been approved!',
+				'You will now have access to all the features of this server!',
+				'',
+				'You can view the commands supported by this server by typing `/` in any of the server\'s text channels. (Ex. `/ping`)',
+			].join('\n');
 			const games = member.presence.activities.filter(activity => activity.type === 'PLAYING');
 			if (games.length) await this.client.game_manager.reload();
+		} else if (customID === 'kick') {
+			feedback = 'Sorry, it seemed like your request to join this server was denied.';
+		} else if (customID === 'ban') {
+			feedback = 'Sorry, it seemed like your request to join this server was denied indefinitely.';
 		}
+		if (feedback) await this.client.message_manager.sendToUser(member, feedback);
 	}
 }
