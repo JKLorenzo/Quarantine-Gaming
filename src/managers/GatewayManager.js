@@ -26,7 +26,7 @@ export default class GatewayManager {
 				const expire_date = invite.expiresAt;
 				const formatted_date = [
 					`\`${(new Date(expire_date)).toString().split(' ').splice(0, 5).join(' ')}\``,
-					`(${compareDate(expire_date).estimate} ago)`,
+					`(${compareDate(expire_date).estimate})`,
 				].join(' ');
 
 				const description = [`**Created By:** ${invite.inviter}`];
@@ -56,7 +56,7 @@ export default class GatewayManager {
 				const expire_date = invite.expiresAt;
 				const formatted_date = [
 					`\`${(new Date(expire_date)).toString().split(' ').splice(0, 5).join(' ')}\``,
-					`(${compareDate(expire_date).estimate} ago)`,
+					`(${compareDate(expire_date).estimate})`,
 				].join(' ');
 
 				const description = [`**Created By:** ${invite.inviter}`];
