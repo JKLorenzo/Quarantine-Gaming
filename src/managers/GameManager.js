@@ -189,6 +189,9 @@ export default class GameManager {
 		try {
 			const member = newPresence ? newPresence.member : oldPresence.member;
 
+			// Disable game role add to not override member verification
+			if (!member.roles.cache.has(constants.qg.roles.member)) return;
+
 			/** @type {Collection<String, ActivityData>} */
 			const oldGames = new Collection();
 			/** @type {Collection<String, ActivityData>} */
