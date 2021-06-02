@@ -31,7 +31,7 @@
     "discord.js": "github:monbrey/discord.js#message-components",
     "express": "^4.17.1",
     "ffmpeg-static": "^4.3.0",
-    "firebase-admin": "^9.8.0",
+    "firebase-admin": "^9.9.0",
     "g-i-s": "^2.1.6",
     "humanize-duration": "^3.26.0",
     "jsdom": "^16.6.0",
