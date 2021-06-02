@@ -8,7 +8,9 @@
   },
   "scripts": {
     "lint": "eslint src",
-    "lint:fix": "eslint src --fix"
+    "lint:fix": "eslint src --fix",
+    "prettier": "prettier --check src/**/*.js",
+    "prettier:fix": "prettier --write src/**/*.js"
   },
   "type": "module",
   "repository": {
@@ -39,6 +41,16 @@
   },
   "devDependencies": {
     "eslint": "^7.27.0",
-    "eslint-plugin-import": "^2.23.3"
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.23.3",
+    "eslint-plugin-prettier": "^3.4.0",
+    "prettier": "^2.3.0"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "printWidth": 120,
+    "trailingComma": "all",
+    "endOfLine": "lf",
+    "arrowParens": "avoid"
   }
 }
