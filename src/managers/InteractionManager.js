@@ -80,7 +80,7 @@ export default class InteractionManager {
           const component = new component_class.default();
           this.components.set(
             component.name,
-            await component.init(this.client),
+            await Promise.race([component.init(this.client)]),
           );
         } catch (error) {
           this.client.error_manager.mark(
@@ -101,7 +101,10 @@ export default class InteractionManager {
           const command_class = await import(pathToFileURL(command_path));
           /** @type {SlashCommand} */
           const command = new command_class.default();
-          this.commands.set(command.name, await command.init(this.client));
+          this.commands.set(
+            command.name,
+            await Promise.race([command.init(this.client)]),
+          );
         } catch (error) {
           this.client.error_manager.mark(
             ETM.create(command_path, error, 'loadCommands'),
