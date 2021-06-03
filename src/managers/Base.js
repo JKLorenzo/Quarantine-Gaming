@@ -12,16 +12,16 @@ import RoleManager from './RoleManager.js';
 import SpeechManager from './SpeechManager.js';
 
 export {
-	ChannelManager,
-	DatabaseManager,
-	ErrorManager,
-	InteractionManager,
-	GatewayManager,
-	MessageManager,
-	ReactionManager,
-	RoleManager,
-	SpeechManager,
-	FreeGameManager,
-	GameManager,
-	DedicatedChannelManager,
+  ChannelManager,
+  DatabaseManager,
+  ErrorManager,
+  InteractionManager,
+  GatewayManager,
+  MessageManager,
+  ReactionManager,
+  RoleManager,
+  SpeechManager,
+  FreeGameManager,
+  GameManager,
+  DedicatedChannelManager,
 };
