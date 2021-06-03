@@ -493,7 +493,7 @@ export default class GameManager {
             roles: [game_role.id],
           },
           components: this.client.interaction_manager.components
-            .get('gamebracket')
+            .get('game_bracket')
             .getComponents(),
         },
       );
