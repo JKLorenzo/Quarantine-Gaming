@@ -117,10 +117,10 @@ export default class ErrorManager {
         });
 
         if (error_ticket.name) {
-          embed.fields[0].value = error_ticket.name;
+          embed.fields[0].value = error_ticket.location;
         }
         if (error_ticket.location) {
-          embed.fields[1].value = error_ticket.location;
+          embed.fields[1].value = error_ticket.name;
         }
         if (error_ticket.error) {
           embed.fields[3].value = String(error_ticket.error);
