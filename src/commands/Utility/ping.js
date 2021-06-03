@@ -5,15 +5,25 @@ import { SlashCommand } from '../../structures/Base.js';
  */
 
 export default class Ping extends SlashCommand {
-	constructor() {
-		super({
-			name: 'ping',
-			description: 'Check the ping of this bot from the discord server.',
-		});
-	}
+  constructor() {
+    super({
+      name: 'ping',
+      description: 'Check the ping of this bot from the discord server.',
+    });
+  }
 
-	/** @param {CommandInteraction} interaction */
-	async exec(interaction) {
-		await interaction.reply(`My current ping to the discord server is ${Math.round(interaction.client.ws.ping)}ms.`, { ephemeral: true });
-	}
+  /**
+   * Execute this command.
+   * @param {CommandInteraction} interaction The interaction that triggered this command
+   */
+  async exec(interaction) {
+    await interaction.reply(
+      `My current ping to the discord server is ${Math.round(
+        interaction.client.ws.ping,
+      )}ms.`,
+      {
+        ephemeral: true,
+      },
+    );
+  }
 }

@@ -6,28 +6,33 @@ import { SlashCommand } from '../../structures/Base.js';
  */
 
 export default class Audio extends SlashCommand {
-	constructor() {
-		super({
-			name: 'audio',
-			description: 'Summon the audio control extension for voice channels.',
-		});
-	}
+  constructor() {
+    super({
+      name: 'audio',
+      description: 'Summon the audio control extension for voice channels.',
+    });
+  }
 
-	/** @param {CommandInteraction} interaction */
-	async exec(interaction) {
-		await interaction.defer({ ephemeral: true });
+  /**
+   * Execute this command.
+   * @param {CommandInteraction} interaction The interaction that triggered this command
+   */
+  async exec(interaction) {
+    await interaction.defer({ ephemeral: true });
 
-		const embed = new MessageEmbed({
-			author: { name: 'Quarantine Gaming: Experience' },
-			title: 'Audio Control Extension for Voice Channels',
-			description: 'Mute or unmute all members on your current voice channel.',
-			color: 'BLURPLE',
-			footer: { text: 'Apply actions by clicking the buttons below.' },
-		});
+    const embed = new MessageEmbed({
+      author: { name: 'Quarantine Gaming: Experience' },
+      title: 'Audio Control Extension for Voice Channels',
+      description: 'Mute or unmute all members on your current voice channel.',
+      color: 'BLURPLE',
+      footer: { text: 'Apply actions by clicking the buttons below.' },
+    });
 
-		await interaction.editReply({
-			embeds: [embed],
-			components: this.client.interaction_manager.components.get('audio_control').getComponents(),
-		});
-	}
+    await interaction.editReply({
+      embeds: [embed],
+      components: this.client.interaction_manager.components
+        .get('audio_control')
+        .getComponents(),
+    });
+  }
 }

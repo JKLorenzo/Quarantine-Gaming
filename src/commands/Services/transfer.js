@@ -6,60 +6,78 @@ import { SlashCommand } from '../../structures/Base.js';
  */
 
 export default class Transfer extends SlashCommand {
-	constructor() {
-		super({
-			name: 'transfer',
-			description: 'Transfers a member from another voice channel to your current voice channel.',
-			options: [
-				{
-					name: 'member_1',
-					description: 'Select the member you\'d like to transfer.',
-					type: 'USER',
-					required: true,
-				},
-				{
-					name: 'member_2',
-					description: 'Select the member you\'d like to transfer.',
-					type: 'USER',
-				},
-				{
-					name: 'member_3',
-					description: 'Select the member you\'d like to transfer.',
-					type: 'USER',
-				},
-				{
-					name: 'member_4',
-					description: 'Select the member you\'d like to transfer.',
-					type: 'USER',
-				},
-				{
-					name: 'member_5',
-					description: 'Select the member you\'d like to transfer.',
-					type: 'USER',
-				},
-			],
-		});
-	}
+  constructor() {
+    super({
+      name: 'transfer',
+      description:
+        'Transfers a member from another voice channel to your current voice channel.',
+      options: [
+        {
+          name: 'member_1',
+          description: "Select the member you'd like to transfer.",
+          type: 'USER',
+          required: true,
+        },
+        {
+          name: 'member_2',
+          description: "Select the member you'd like to transfer.",
+          type: 'USER',
+        },
+        {
+          name: 'member_3',
+          description: "Select the member you'd like to transfer.",
+          type: 'USER',
+        },
+        {
+          name: 'member_4',
+          description: "Select the member you'd like to transfer.",
+          type: 'USER',
+        },
+        {
+          name: 'member_5',
+          description: "Select the member you'd like to transfer.",
+          type: 'USER',
+        },
+      ],
+    });
+  }
 
-	/**
-     * @param {CommandInteraction} interaction
-     * @param {*} options
-     */
-	async exec(interaction, options) {
-		const voice_channel = this.client.member(interaction.member)?.voice.channel;
-		if (!voice_channel) interaction.reply('You must be active on a voice channel to use this command.');
+  /**
+   * @typedef {Object} Options
+   * @property {GuildMember} member_1
+   * @property {GuildMember} [member_2]
+   * @property {GuildMember} [member_3]
+   * @property {GuildMember} [member_4]
+   * @property {GuildMember} [member_5]
+   */
 
-		await interaction.defer({ ephemeral: true });
+  /**
+   * Execute this command.
+   * @param {CommandInteraction} interaction The interaction that triggered this command
+   * @param {Options} options The options used by this command
+   */
+  async exec(interaction, options) {
+    const voice_channel = this.client.member(interaction.member)?.voice.channel;
+    if (!voice_channel) {
+      return interaction.reply(
+        'You must be active on a voice channel to use this command.',
+      );
+    }
+    await interaction.defer({ ephemeral: true });
 
-		/** @type {GuildMember[]} */
-		const members = Object.keys(options).map(name => options[name]);
-		const available = members.filter(m => m.voice.channel);
+    /** @type {GuildMember[]} */
+    const members = Object.keys(options).map(name => options[name]);
+    const available = members.filter(m => m.voice.channel);
 
-		for (const member of available) {
-			this.client.message_manager.sendToUser(member, `You have been transferred to ${voice_channel} by ${interaction.member}.`);
-		}
-		await this.client.methods.voiceChannelTransfer(voice_channel, available);
+    const transfer_message = `You have been transferred to ${voice_channel} by ${interaction.member}.`;
+    await this.client.methods.voiceChannelTransfer(
+      voice_channel,
+      available,
+      transfer_message,
+    );
 
-		interaction.editReply(`Successfully transferred ${available.join(', ')} to ${voice_channel}.`);
-	}
+    return interaction.editReply(
+      `Successfully transferred ${available.join(', ')} to ${voice_channel}.`,
+    );
+  }
 }
