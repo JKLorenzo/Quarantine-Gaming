@@ -1,34 +1,22 @@
+/**
+ * @typedef {Object} PartialMemberData
+ * @property {String} id
+ * @property {String} name
+ * @property {String} tagname
+ * @property {String} [inviter]
+ * @property {String} [moderator]
+ */
+
 /** A Member Object represented on the database. */
 export default class PartialMember {
-	/**
-     * Initializes this member.
-     * @param {{id: String, name: String, tagname: String, inviter?: String, moderator?: String}} data
-     */
-	constructor(data = {}) {
-		/**
-		 * @readonly
-		 * @type {String}
-		 */
-		this.id = data.id;
-		/**
-		 * @readonly
-		 * @type {String}
-		 */
-		this.name = data.name;
-		/**
-		 * @readonly
-		 * @type {String}
-		 */
-		this.tagname = data.tagname;
-		/**
-		 * @readonly
-		 * @type {String}
-		 */
-		this.inviter = data.inviter;
-		/**
-		 * @readonly
-		 * @type {String}
-		 */
-		this.moderator = data.moderator;
-	}
+  /**
+   * @param {PartialMemberData} data The partial member data
+   */
+  constructor(data = {}) {
+    this.id = data.id;
+    this.name = data.name;
+    this.tagname = data.tagname;
+    this.inviter = data.inviter;
+    this.moderator = data.moderator;
+  }
 }

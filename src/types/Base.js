@@ -4,10 +4,4 @@ import FreeGame from './FreeGame.js';
 import PartialMember from './PartialMember.js';
 import PartialRole from './PartialRole.js';
 
-export {
-	PartialMember,
-	PartialRole,
-	ErrorTicket,
-	FreeGame,
-	Color,
-};
+export { PartialMember, PartialRole, ErrorTicket, FreeGame, Color };
