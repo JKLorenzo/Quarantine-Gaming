@@ -52,10 +52,10 @@ export default class ChannelManager {
   /**
    * Deletes a guild channel.
    * @param {GuildChannelResolvable} channel The channel to delete
-   * @param {string} reason The reason for deleting this channel
+   * @param {string} [reason] The reason for deleting this channel
    * @returns {Promise<Channel>}
    */
-  delete(channel, reason = '') {
+  delete(channel, reason) {
     const this_channel = this.client.channel(channel);
     console.log(
       `ChannelDelete: Queueing ${this.queuer.totalID} (${

@@ -51,10 +51,10 @@ export default class RoleManager {
   /**
    * Deletes a role from the guild.
    * @param {RoleResolvable} role The role to delete
-   * @param {string} reason The reason for deleting this role
+   * @param {string} [reason] The reason for deleting this role
    * @returns {Promise<Role>}
    */
-  delete(role, reason = '') {
+  delete(role, reason) {
     const this_role = this.client.role(role);
     console.log(
       `RoleDelete: Queueing ${this.queuer.totalID} (${
@@ -84,10 +84,10 @@ export default class RoleManager {
    * Adds the role to the target user.
    * @param {UserResolvable} user The user where the role will be added
    * @param {RoleResolvable} role The role to be added
-   * @param {string} reason The reason for adding the role
+   * @param {string} [reason] The reason for adding the role
    * @returns {Promise<GuildMember>}
    */
-  add(user, role, reason = '') {
+  add(user, role, reason) {
     const this_member = this.client.member(user);
     const this_role = this.client.role(role);
     console.log(
@@ -127,10 +127,10 @@ export default class RoleManager {
    * Removes the role from the target user.
    * @param {UserResolvable} user The user where the role will be removed
    * @param {RoleResolvable} role The role to be removed
-   * @param {string} reason The reason for removing the role
+   * @param {string} [reason] The reason for removing the role
    * @returns {Promise<GuildMember>}
    */
-  remove(user, role, reason = '') {
+  remove(user, role, reason) {
     const this_member = this.client.member(user);
     const this_role = this.client.role(role);
     console.log(

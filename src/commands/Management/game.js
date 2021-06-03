@@ -67,7 +67,7 @@ export default class Game extends SlashCommand {
 
     const raw_name = options.game.trim();
     const safe_name = raw_name.toLowerCase();
-    let game_name = this.client.role(raw_name)?.name ?? '';
+    let game_name = this.client.role(raw_name)?.name;
 
     if (!game_name) {
       checkRole: for (const this_role of this.client.qg.roles.cache.array()) {
