@@ -13,45 +13,55 @@ import { MessageActionRow, MessageButton } from 'discord.js';
  */
 
 export default class MessageComponent {
-	/** @param {ComponentData} data */
-	constructor(data) {
-		this.name = data.name;
-		this.options = data.options;
-	}
+  /**
+   * @param {ComponentData} data The message component data
+   */
+  constructor(data) {
+    this.name = data.name;
+    this.options = data.options;
+  }
 
-	/**
-	 * Initializes this message component.
-	 * @param {Client} client
-	 */
-	async init(client) {
-		this.client = client;
-		return this;
-	}
+  /**
+   * Initializes this message component.
+   * @param {Client} client The QG Client
+   * @returns {ComponentData}
+   */
+  init(client) {
+    this.client = client;
+    return this;
+  }
 
-	/**
-     * @param {MessageComponentInteraction} interaction
-     * @param {String} customID
-     */
-	async exec(interaction, customID) {
-		console.log({ interaction, customID });
-	}
+  /**
+   * Executes this component
+   * @param {MessageComponentInteraction} interaction The interaction that triggered this component
+   * @param {string} customID The customID of the component
+   */
+  exec(interaction, customID) {
+    console.log({ interaction, customID });
+  }
 
-	/**
-	 * Transforms this component options to message action row options.
-	 */
-	getComponents() {
-		return this.options?.map(action_row => {
-			return new MessageActionRow({
-				components: action_row.components?.map(component => {
-					switch(component.type) {
-					case 'BUTTON': return new MessageButton({
-						...component,
-						customID: `${this.name}__${component.customID}`,
-					});
-					default: return undefined;
-					}
-				}).filter(component => typeof component !== 'undefined'),
-			});
-		});
-	}
+  /**
+   * Transforms this component options into message action rows.
+   * @returns {MessageActionRow[]}
+   */
+  getComponents() {
+    return this.options?.map(
+      action_row =>
+        new MessageActionRow({
+          components: action_row.components
+            ?.map(component => {
+              switch (component.type) {
+                case 'BUTTON':
+                  return new MessageButton({
+                    ...component,
+                    customID: `${this.name}__${component.customID}`,
+                  });
+                default:
+                  return undefined;
+              }
+            })
+            .filter(component => typeof component !== 'undefined'),
+        }),
+    );
+  }
 }
