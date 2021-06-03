@@ -83,7 +83,7 @@ export default class GameBracket extends MessageComponent {
               `${member} joined your ${bracket_name} bracket.`,
             );
           });
-          players.push(member);
+          players.push(member.toString());
           break;
         case 'leave':
           if (!players.includes(member.toString())) return;
