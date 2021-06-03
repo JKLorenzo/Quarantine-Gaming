@@ -100,9 +100,11 @@ export default class Game extends SlashCommand {
       }
     }
 
+    const images = await this.client.methods.fetchImage(game_name ?? raw_name);
     const embed = new MessageEmbed({
       author: { name: 'Quarantine Gaming: Game Role Manager' },
-      title: game_name ? game_name : raw_name,
+      title: game_name ?? raw_name,
+      thumbnail: { url: images?.small },
       description: `Game ${options.mode} requested by ${interaction.member}.`,
       fields: [{ name: 'Status', value: 'Failed' }],
       color: '#FFFF00',
@@ -127,6 +129,6 @@ export default class Game extends SlashCommand {
       embed,
     );
 
-    interaction.editReply('Request sent!');
+    await interaction.editReply(embed.fields[0].value);
   }
 }
