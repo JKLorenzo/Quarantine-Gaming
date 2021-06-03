@@ -71,7 +71,8 @@ export default class ProcessQueue {
     while (this.array.length > 0) {
       const data = this.array.shift();
       try {
-        data.promise.resolve(await Promise.all([data.function()]));
+        const this_promise = await Promise.race([data.function()]);
+        data.promise.resolve(this_promise);
       } catch (error) {
         data.promise.reject(error);
       }
