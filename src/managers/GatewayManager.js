@@ -228,7 +228,7 @@ export default class GatewayManager {
         embed.setColor('YELLOW');
 
         const action_message = await message.edit({
-          content: '** **',
+          content: null,
           embed: embed.setFooter(
             'Apply actions by clicking one of the buttons below.',
           ),
@@ -398,7 +398,7 @@ export default class GatewayManager {
 
       return message
         ? await message.edit({
-            content: '** **',
+            content: null,
             embed: embed,
             components: [],
           })
