@@ -289,8 +289,8 @@ export default class InteractionManager {
         this.client.message_manager
           .sendToChannel(constants.cs.channels.logs, {
             content:
-              `${componentInteraction.user} interacted with the \`${componentInteraction.customID}\` ` +
-              `component on **${componentInteraction.channel}** channel.`,
+              `**${componentInteraction.user.username}** interacted with the \`${componentInteraction.customID}\` ` +
+              `component on **${componentInteraction.channel.name}** channel.`,
             allowedMentions: {
               parse: [],
             },
@@ -328,8 +328,8 @@ export default class InteractionManager {
         this.client.message_manager
           .sendToChannel(constants.cs.channels.logs, {
             content:
-              `${commandInteraction.user} executed the \`${commandInteraction.commandName}\` ` +
-              `command on **${commandInteraction.channel}** channel.`,
+              `**${commandInteraction.user.username}** executed the \`${commandInteraction.commandName}\` ` +
+              `command on **${commandInteraction.channel.name}** channel.`,
             allowedMentions: {
               parse: [],
             },
