@@ -35,14 +35,14 @@ async function displayInfo(client, text_channel, voice_channel, name) {
         '\u200b 🔹 Only members who are in this voice channel can view this text channel.',
         `\u200b 🔹 ${voice_channel} voice and ${text_channel} text channels will automatically be ` +
           `deleted once everyone is disconnected from these channels.`,
-        `\u200b 🔹 This channel will be renamed automatically depending on the game the members in` +
-          `this channel are playing. When multiple games are being played, the game with the highest` +
+        `\u200b 🔹 This channel will be renamed automatically depending on the game the members in ` +
+          `this channel are playing. When multiple games are being played, the game with the highest ` +
           `number of players will be chosen.`,
         `**Useful Commands for Dedicated Channels:**\n${[
           '\u200b \u200b \u200b \u200b 📎 `/dedicate custom_name: <name>` to rename this channel to a custom name.',
           '\u200b \u200b \u200b \u200b 🔒 `/dedicate lock: True` to lock this channel.',
           '\u200b \u200b \u200b \u200b 🔓 `/dedicate lock: False` to unlock this channel.',
-          '\u200b \u200b \u200b \u200b 🚏 `/transfer <member>` to transfer members from other voice channel' +
+          '\u200b \u200b \u200b \u200b 🚏 `/transfer <member>` to transfer members from other voice channel ' +
             'to this channel regardless whether this channel is locked or unlocked.',
         ].join('\n\n')}`,
         `Note: ${client.role(constants.qg.roles.staff)}, ${client.role(
