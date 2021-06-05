@@ -61,9 +61,9 @@ export default class QGClient extends Client {
       );
 
       await this.database_manager.init();
+      await this.game_manager.init();
       await this.interaction_manager.init();
       await this.gateway_manager.init();
-      await this.game_manager.init();
       this.dedicated_channel_manager.init();
       this.free_game_manager.init();
 
