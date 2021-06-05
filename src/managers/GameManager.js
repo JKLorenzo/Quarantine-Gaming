@@ -91,11 +91,10 @@ export default class GameManager {
           constants.cs.channels.game_events,
           new MessageEmbed({
             author: { name: 'Quarantine Gaming: Game Manager' },
-            title: 'Server Game Created',
+            title: role.name,
             thumbnail: { url: images?.small },
-            description: [`**Game:** ${role.name}`].join('\n'),
             image: { url: images?.large },
-            footer: { text: `Reference ID: ${role.id}` },
+            footer: { text: `Game Create • Reference ID: ${role.id}` },
             color: 'GREEN',
           }),
         );
@@ -116,11 +115,10 @@ export default class GameManager {
           constants.cs.channels.game_events,
           new MessageEmbed({
             author: { name: 'Quarantine Gaming: Game Manager' },
-            title: 'Server Game Deleted',
+            title: role.name,
             thumbnail: { url: images?.small },
-            description: [`**Game:** ${role.name}`].join('\n'),
             image: { url: images?.large },
-            footer: { text: `Reference ID: ${role.id}` },
+            footer: { text: `Game Delete • Reference ID: ${role.id}` },
             color: 'RED',
           }),
         );
@@ -155,15 +153,11 @@ export default class GameManager {
               constants.cs.channels.game_events,
               new MessageEmbed({
                 author: { name: 'Quarantine Gaming: Game Manager' },
-                title: 'Member Game Add',
+                title: this_role.name,
                 thumbnail: { url: images?.small },
-                description: [
-                  `**Username:** ${newMember.user.username}`,
-                  `**Discriminator:** ${newMember.user.discriminator}`,
-                  `**Game:** ${this_role.name}`,
-                ].join('\n'),
+                description: `**User:** ${newMember.user.username}`,
                 footer: {
-                  text: `Reference ID: ${newMember.id} | ${this_role.id}`,
+                  text: `Game Add • Reference ID: ${newMember.id} | ${this_role.id}`,
                 },
                 color: 'YELLOW',
               }),
@@ -177,15 +171,11 @@ export default class GameManager {
               constants.cs.channels.game_events,
               new MessageEmbed({
                 author: { name: 'Quarantine Gaming: Game Manager' },
-                title: 'Member Game Remove',
+                title: this_role.name,
                 thumbnail: { url: images?.small },
-                description: [
-                  `**username:** ${newMember.user.username}`,
-                  `**Discriminator:** ${newMember.user.discriminator}`,
-                  `**Game:** ${this_role.name}`,
-                ].join('\n'),
+                description: `**User:** ${newMember.user.username}`,
                 footer: {
-                  text: `Reference ID: ${newMember.id} | ${this_role.id}`,
+                  text: `Game Remove • Reference ID: ${newMember.id} | ${this_role.id}`,
                 },
                 color: 'FUCHSIA',
               }),
