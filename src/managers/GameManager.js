@@ -34,21 +34,6 @@ export default class GameManager {
   }
 
   async init() {
-    try {
-      await this.reload();
-
-      this.client.message_manager.sendToChannel(
-        constants.cs.channels.logs,
-        '✅ - Game Manager',
-      );
-    } catch (error) {
-      this.client.message_manager.sendToChannel(
-        constants.cs.channels.logs,
-        '❌ - Game Manager',
-      );
-      throw error;
-    }
-
     // Remove expired game roles
     setInterval(() => {
       this.queuer.queue(async () => {
@@ -190,6 +175,21 @@ export default class GameManager {
         this.client.error_manager.mark(ETM.create('guildMemberUpdate', error));
       }
     });
+
+    try {
+      await this.reload();
+
+      this.client.message_manager.sendToChannel(
+        constants.cs.channels.logs,
+        '✅ - Game Manager',
+      );
+    } catch (error) {
+      this.client.message_manager.sendToChannel(
+        constants.cs.channels.logs,
+        '❌ - Game Manager',
+      );
+      throw error;
+    }
   }
 
   /**
