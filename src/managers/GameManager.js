@@ -51,7 +51,9 @@ export default class GameManager {
 
     // Remove expired game roles
     setInterval(() => {
-      this.queuer.queue(this.clearExpired());
+      this.queuer.queue(async () => {
+        await this.clearExpired();
+      });
     }, 3600000);
 
     // Delete empty play roles
@@ -73,7 +75,9 @@ export default class GameManager {
     this.client.on('presenceUpdate', (oldPresence, newPresence) => {
       try {
         if (newPresence.guild.id !== constants.qg.guild) return;
-        this.queuer.queue(this.processPresenceUpdate(oldPresence, newPresence));
+        this.queuer.queue(() => {
+          this.processPresenceUpdate(oldPresence, newPresence);
+        });
       } catch (error) {
         this.client.error_manager.mark(ETM.create('presenceUpdate', error));
       }
