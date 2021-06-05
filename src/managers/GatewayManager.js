@@ -138,14 +138,13 @@ export default class GatewayManager {
           constants.cs.channels.gateway_events,
           new MessageEmbed({
             author: { name: 'Quarantine Gaming: Server Gateway' },
-            title: 'Member Join',
+            title: member.user.tag,
             description: [
-              `**Username:** ${member.user.username}`,
-              `**Discriminator:** ${member.user.discriminator}`,
+              `**Profile:** ${member}`,
               `**Created:** ${formatted_date}`,
             ].join('\n'),
             thumbnail: { url: member.user.displayAvatarURL() },
-            footer: { text: `Reference ID: ${member.user.id}` },
+            footer: { text: `Member Join • Reference ID: ${member.user.id}` },
             color: 'GREEN',
           }),
         );
@@ -233,7 +232,7 @@ export default class GatewayManager {
             .getComponents(),
         });
         await action_message.reply(
-          `${this.client.cs.roles.everyone}, ${newMember} wants to join the server.`,
+          `${newMember} wants to join the server, ${this.client.cs.roles.everyone}.`,
         );
       } catch (error) {
         this.client.error_manager.mark(ETM.create('guildMemberUpdate', error));
@@ -257,14 +256,13 @@ export default class GatewayManager {
           constants.cs.channels.gateway_events,
           new MessageEmbed({
             author: { name: 'Quarantine Gaming: Server Gateway' },
-            title: 'Member Leave',
+            title: member.user.tag,
             description: [
-              `**Username:** ${member.user.username}`,
-              `**Discriminator:** ${member.user.discriminator}`,
+              `**Profile:** ${member}`,
               `**Joined:** ${formatted_date}`,
             ].join('\n'),
             thumbnail: { url: member.user.displayAvatarURL() },
-            footer: { text: `Reference ID: ${member.user.id}` },
+            footer: { text: `Member Leave • Reference ID: ${member.user.id}` },
             color: 'RED',
           }),
         );
@@ -280,14 +278,13 @@ export default class GatewayManager {
         constants.cs.channels.gateway_events,
         new MessageEmbed({
           author: { name: 'Quarantine Gaming: Server Gateway' },
-          title: 'Ban Implemented',
+          title: ban.user.tag,
           description: [
-            `**Username:** ${ban.user.username}`,
-            `**Discriminator:** ${ban.user.discriminator}`,
+            `**Profile:** ${ban.user}`,
             `**Reason:** ${ban.reason ?? 'No reason given'}`,
           ].join('\n'),
           thumbnail: { url: ban.user.displayAvatarURL() },
-          footer: { text: `Reference ID: ${ban.user.id}` },
+          footer: { text: `Member Ban • Reference ID: ${ban.user.id}` },
           color: 'DARK_RED',
         }),
       );
@@ -300,14 +297,13 @@ export default class GatewayManager {
         constants.cs.channels.gateway_events,
         new MessageEmbed({
           author: { name: 'Quarantine Gaming: Server Gateway' },
-          title: 'Ban Lifted',
+          title: ban.user.tag,
           description: [
-            `**Username:** ${ban.user.username}`,
-            `**Discriminator:** ${ban.user.discriminator}`,
+            `**Profile:** ${ban.user}`,
             `**Ban Reason:** ${ban.reason ?? 'No reason given'}`,
           ].join('\n'),
           thumbnail: { url: ban.user.displayAvatarURL() },
-          footer: { text: `Reference ID: ${ban.user.id}` },
+          footer: { text: `Member Unban • Reference ID: ${ban.user.id}` },
           color: 'AQUA',
         }),
       );
