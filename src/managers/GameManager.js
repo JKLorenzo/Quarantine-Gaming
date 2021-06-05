@@ -1,5 +1,10 @@
 import { Collection, MessageEmbed } from 'discord.js';
-import { ErrorTicketManager, contains, constants } from '../utils/Base.js';
+import {
+  ErrorTicketManager,
+  contains,
+  constants,
+  ProcessQueue,
+} from '../utils/Base.js';
 
 /**
  * @typedef {import('discord.js').Role} Role
@@ -24,15 +29,13 @@ export default class GameManager {
    */
   constructor(client) {
     this.client = client;
+
+    this.queuer = new ProcessQueue();
   }
 
   async init() {
     try {
       await this.reload();
-
-      setInterval(async () => {
-        await this.clearExpired();
-      }, 3600000);
 
       this.client.message_manager.sendToChannel(
         constants.cs.channels.logs,
@@ -46,10 +49,31 @@ export default class GameManager {
       throw error;
     }
 
+    // Remove expired game roles
+    setInterval(() => {
+      this.queuer.queue(this.clearExpired());
+    }, 3600000);
+
+    // Delete empty play roles
+    setInterval(() => {
+      this.queuer.queue(async () => {
+        const promises = [];
+        const play_roles = this.client.qg.roles.cache.filter(
+          r => r.hexColor === constants.colors.play_role,
+        );
+
+        for (const play_role of play_roles.array()) {
+          if (!play_role.members.size) continue;
+          promises.push(this.client.role_manager.delete(play_role));
+        }
+        await Promise.all(promises);
+      });
+    }, 1800000);
+
     this.client.on('presenceUpdate', (oldPresence, newPresence) => {
       try {
         if (newPresence.guild.id !== constants.qg.guild) return;
-        this.processPresenceUpdate(oldPresence, newPresence);
+        this.queuer.queue(this.processPresenceUpdate(oldPresence, newPresence));
       } catch (error) {
         this.client.error_manager.mark(ETM.create('presenceUpdate', error));
       }
