@@ -27,7 +27,7 @@ export default class ReactionManager {
   add(message, emoji) {
     console.log(
       `ReactionAdd: Queueing ${this.queuer.totalID} (${message.channel.id} | ${
-        emoji.name ? emoji.name : emoji
+        emoji?.name ?? emoji
       }})`,
     );
     return this.queuer.queue(async () => {
@@ -49,7 +49,7 @@ export default class ReactionManager {
         console.log(
           `ReactionAdd: Finished ${this.queuer.currentID} (${
             message.channel.id
-          } | ${emoji.name ? emoji.name : emoji}})`,
+          } | ${emoji?.name ?? emoji}})`,
         );
       }
       if (error) throw error;

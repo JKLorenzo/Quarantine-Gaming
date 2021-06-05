@@ -86,33 +86,30 @@ export default class QGClient extends Client {
       try {
         const member = this.member(newUser);
 
-        const description = [`**Profile:** ${member}`];
+        const changes = [];
         if (oldUser.username !== newUser.username) {
-          description.push(
+          changes.push(
             `**Username:** \nOld: ${oldUser.username} \nNew: ${newUser.username}\n`,
           );
         }
-        if (
-          oldUser.username === newUser.username &&
-          oldUser.tag !== newUser.tag
-        ) {
-          description.push(
-            `**Tagname:** \nOld: ${oldUser.tag} \nNew: ${newUser.tag}\n`,
+        if (oldUser.discriminator !== newUser.discriminator) {
+          changes.push(
+            `**Discriminator:** \nOld: ${oldUser.discriminator} \nNew: ${newUser.discriminator}\n`,
           );
         }
         if (oldUser.displayAvatarURL() !== newUser.displayAvatarURL()) {
-          description.push(
+          changes.push(
             `**Avatar:** [New Avatar](${newUser.displayAvatarURL()})`,
           );
         }
-        if (description.length > 1) {
+        if (changes.length) {
           this.message_manager.sendToChannel(
             constants.cs.channels.member_events,
             new MessageEmbed({
               author: { name: 'Quarantine Gaming: User Update' },
               title: member.displayName,
               thumbnail: { url: newUser.displayAvatarURL() },
-              description: description.join('\n'),
+              description: changes.join('\n'),
               footer: { text: `Reference ID: ${newUser.id}` },
               color: 'BLURPLE',
             }),
@@ -128,7 +125,7 @@ export default class QGClient extends Client {
         if (newMember.guild.id !== constants.qg.guild) return;
 
         /** @type {Role[]} */
-        const role_add = [];
+        const role_added = [];
         /** @type {Role[]} */
         const role_removed = [];
         if (newMember.roles.cache.size !== oldMember.roles.cache.size) {
@@ -141,40 +138,40 @@ export default class QGClient extends Client {
             if (this_role.hexColor === constants.colors.play_role) continue;
             if (this_role.hexColor === constants.colors.game_role) continue;
             if (isNew) {
-              role_add.push(this_role);
+              role_added.push(this_role);
             } else {
               role_removed.push(this_role);
             }
           }
         }
 
-        const description = [`**Profile:** ${newMember}`];
+        const changes = [];
         if (newMember.displayName !== oldMember.displayName) {
-          description.push(
+          changes.push(
             `**Nickname:** \nOld: ${oldMember.displayName} \nNew: ${newMember.displayName}\n`,
           );
         }
-        if (role_add.length) {
-          description.push(
-            `**Role Added:** ${role_add.map(role => role.name).join(', ')}\n`,
+        if (role_added.length) {
+          changes.push(
+            `**Role Added:** ${role_added.map(role => role.name).join(', ')}\n`,
           );
         }
         if (role_removed.length) {
-          description.push(
+          changes.push(
             `**Role Removed:** ${role_removed
               .map(role => role.name)
-              .join(', ')}`,
+              .join(', ')}\n`,
           );
         }
 
-        if (description.length > 1) {
+        if (changes.length) {
           this.message_manager.sendToChannel(
             constants.cs.channels.member_events,
             new MessageEmbed({
               author: { name: 'Quarantine Gaming: Member Update' },
               title: newMember.displayName,
               thumbnail: { url: newMember.user.displayAvatarURL() },
-              description: description.join('\n'),
+              description: changes.join('\n'),
               footer: { text: `Reference ID: ${newMember.id}` },
               color: 'BLURPLE',
             }),

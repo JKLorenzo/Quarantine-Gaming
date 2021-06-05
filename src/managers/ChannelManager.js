@@ -59,7 +59,7 @@ export default class ChannelManager {
     const this_channel = this.client.channel(channel);
     console.log(
       `ChannelDelete: Queueing ${this.queuer.totalID} (${
-        this_channel ? this_channel.name : channel
+        this_channel?.name ?? channel
       })`,
     );
     return this.queuer.queue(async () => {
@@ -72,7 +72,7 @@ export default class ChannelManager {
       } finally {
         console.log(
           `ChannelDelete: Finished ${this.queuer.totalID} (${
-            this_channel ? this_channel.name : channel
+            this_channel?.name ?? channel
           })`,
         );
       }

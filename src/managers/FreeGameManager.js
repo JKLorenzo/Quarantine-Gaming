@@ -46,7 +46,7 @@ export default class FreeGameManager {
       )
         .then(data => data.json())
         .then(entry => entry.data.children.map(child => child.data));
-      if (!response) return;
+      if (!response) return 'No response received.';
       const responses = [];
       for (const data of response) {
         const free_game = new FreeGame({
@@ -70,7 +70,8 @@ export default class FreeGameManager {
             safe_url === free_game.permalink.trim().toLowerCase()
           ) {
             if (!this_free_game) {
-              return await this.post(free_game);
+              const result = await this.post(free_game);
+              return result;
             }
             return 'This entry is already posted on the free games channel.';
           }
@@ -85,7 +86,8 @@ export default class FreeGameManager {
             elapsedMinutes >= 30 &&
             elapsedMinutes <= 300
           ) {
-            return await this.post(free_game);
+            const result = await this.post(free_game);
+            return result;
           }
         }
       }
@@ -138,7 +140,7 @@ export default class FreeGameManager {
       const safe_title = words
         .filter(word => !contains(word, filtered_title))
         .join(' ');
-      embed.setTitle(`**${safe_title ? safe_title : title}**`);
+      embed.setTitle(`**${safe_title ?? title}**`);
 
       if (flair) {
         if (
@@ -157,7 +159,7 @@ export default class FreeGameManager {
       /** @type {String[]} */
       const mentionables = [];
       const searchables = `${url.toLowerCase()} ${
-        description ? description.toLowerCase() : '*'
+        description?.toLowerCase() ?? '*'
       }`;
 
       if (contains(searchables, 'steampowered.com')) {
@@ -176,16 +178,17 @@ export default class FreeGameManager {
         mentionables.push(constants.qg.roles.ubisoft);
         color.add({ red: 200, green: 120, blue: 255 });
       }
-      if (
-        contains(searchables, [
-          'playstation.com',
-          'wii.com',
-          'xbox.com',
-          'microsoft.com',
-        ])
-      ) {
-        mentionables.push(constants.qg.roles.console);
-        color.add({ red: 200, green: 80, blue: 200 });
+      if (contains(searchables, ['microsoft.com', 'xbox.com'])) {
+        mentionables.push(constants.qg.roles.xbox);
+        color.add({ red: 77, green: 222, blue: 31 });
+      }
+      if (contains(searchables, 'playstation.com')) {
+        mentionables.push(constants.qg.roles.playstation);
+        color.add({ red: 178, green: 54, blue: 255 });
+      }
+      if (contains(searchables, 'wii.com')) {
+        mentionables.push(constants.qg.roles.wii);
+        color.add({ red: 43, green: 228, blue: 255 });
       }
       if (mentionables.length === 0) {
         return "Uh-oh! This free game doesn't belong to any supported platforms.";
@@ -204,7 +207,7 @@ export default class FreeGameManager {
       const mentionable_roles = mentionables.map(mentionable =>
         this.client.role(mentionable),
       );
-      embed.addField('Platforms', mentionable_roles.join(', '), true);
+      embed.addField('Platforms', mentionable_roles.join(', ') ?? 'None', true);
 
       // Send
       const message = await this.client.message_manager.sendToChannel(
@@ -221,7 +224,7 @@ export default class FreeGameManager {
       await this.client.database_manager.pushFreeGame(free_game);
       return `Done! Reference ID: \`${message.id}\``;
     } catch (error) {
-      this.client.error_manager.mark(ETM.create('fetch', error));
+      this.client.error_manager.mark(ETM.create('post', error));
       return 'An error has occured while performing post.';
     }
   }

@@ -21,11 +21,6 @@ const __dirname = path.dirname(__filename);
  * @typedef {import('../structures/Base').MessageComponent} MessageComponent
  */
 
-/**
- * @typedef {Collection<String, SlashCommand} SlashCommandCollection
- * @typedef {Collection<String, MessageComponent>} MessageComponentCollection
- */
-
 const ETM = new ErrorTicketManager('Interaction Manager');
 const initQueuer = new ProcessQueue(1000);
 
@@ -36,10 +31,10 @@ export default class InteractionManager {
   constructor(client) {
     this.client = client;
 
-    /** @type {SlashCommandCollection} */
+    /** @type {Collection<String, SlashCommand>} */
     this.commands = new Collection();
 
-    /** @type {MessageComponentCollection} */
+    /** @type {Collection<String, MessageComponent>} */
     this.components = new Collection();
 
     this.client.on('interaction', interaction => {

@@ -1,4 +1,3 @@
-import { MessageEmbed } from 'discord.js';
 import { ErrorTicketManager, ProcessQueue, constants } from '../utils/Base.js';
 
 /**
@@ -24,45 +23,20 @@ export default class MessageManager {
 
     client.on('message', message => {
       try {
-        // Game Invites Channel Blocking
-        if (
-          message.channel &&
-          message.channel.id ===
-            constants.qg.channels.integrations.game_invites &&
-          (message.embeds.length === 0 ||
-            (message.embeds.length > 0 &&
-              message.embeds[0].author.name !==
-                'Quarantine Gaming: Game Coordinator'))
-        ) {
-          client.message_manager
-            .sendToUser(
-              message.author,
-              `Hello there! You can't send any messages in ${message.channel} channel.`,
-            )
-            .then(reply => {
-              message.delete({ timeout: 2500 });
-              reply.delete({ timeout: 2500 });
-            });
-        }
-
         // DM
         if (message.guild === null) {
           const this_member = client.member(message.author);
           if (this_member && !this_member.user.bot) {
-            const embed = new MessageEmbed();
-            embed.setAuthor('Quarantine Gaming: Direct Message Handler');
-            embed.setTitle('New Message');
-            embed.setThumbnail(message.author.displayAvatarURL());
-            embed.addField('Sender:', this_member.toString());
-            embed.addField('Message:', message.content);
-            embed.setFooter(
-              `To reply, do: !message dm ${this_member.user.id} <message>`,
-            );
-            embed.setColor('#00ff6f');
-            client.message_manager.sendToChannel(
-              constants.cs.channels.dm,
-              embed,
-            );
+            this.sendToChannel(constants.cs.channels.dm, {
+              content: `**${this_member.displayName}**:\n${
+                message.content ?? ''
+              }`,
+              files: message.attachments?.map(file => ({
+                attachment: file.attachment,
+                name: file.name,
+                data: file.data,
+              })),
+            });
           }
         }
       } catch (error) {
@@ -82,7 +56,7 @@ export default class MessageManager {
     const this_channel = this.client.channel(channel);
     console.log(
       `MessageChannelSend: Queueing ${this.queuer.totalID} (${
-        this_channel ? this_channel.name : channel
+        this_channel?.name ?? channel
       })`,
     );
     return this.queuer.queue(async () => {
@@ -95,7 +69,7 @@ export default class MessageManager {
       } finally {
         console.log(
           `MessageChannelSend: Finished ${this.queuer.currentID} (${
-            this_channel ? this_channel.name : channel
+            this_channel?.name ?? channel
           })`,
         );
       }
@@ -114,7 +88,7 @@ export default class MessageManager {
     const member = this.client.member(user);
     console.log(
       `MessageUserSend: Queueing ${this.queuer.totalID} (${
-        member ? member.displayName : user
+        member?.displayName ?? user
       })`,
     );
     return this.queuer.queue(async () => {
@@ -128,7 +102,7 @@ export default class MessageManager {
       } finally {
         console.log(
           `MessageUserSend: Finished ${this.queuer.currentID} (${
-            member ? member.displayName : user
+            member?.displayName ?? user
           })`,
         );
       }

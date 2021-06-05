@@ -58,7 +58,7 @@ export default class RoleManager {
     const this_role = this.client.role(role);
     console.log(
       `RoleDelete: Queueing ${this.queuer.totalID} (${
-        this_role ? this_role.name : role
+        this_role?.name ?? role
       })`,
     );
     return this.queuer.queue(async () => {
@@ -71,7 +71,7 @@ export default class RoleManager {
       } finally {
         console.log(
           `RoleDelete: Finished ${this.queuer.currentID} (${
-            this_role ? this_role.name : role
+            this_role?.name ?? role
           })`,
         );
       }
@@ -92,8 +92,8 @@ export default class RoleManager {
     const this_role = this.client.role(role);
     console.log(
       `RoleAdd: Queueing ${this.queuer.totalID} (${
-        this_member ? this_member.displayName : user
-      } | ${this_role ? this_role.name : role})`,
+        this_member?.displayName ?? user
+      } | ${this_role?.name ?? role})`,
     );
     return this.queuer.queue(async () => {
       let result, error;
@@ -114,8 +114,8 @@ export default class RoleManager {
       } finally {
         console.log(
           `RoleAdd: Finished ${this.queuer.currentID} (${
-            this_member ? this_member.displayName : user
-          } | ${this_role ? this_role.name : role})`,
+            this_member?.displayName ?? user
+          } | ${this_role?.name ?? role})`,
         );
       }
       if (error) throw error;
@@ -135,8 +135,8 @@ export default class RoleManager {
     const this_role = this.client.role(role);
     console.log(
       `RoleRemove: Queueing ${this.queuer.totalID} (${
-        this_member ? this_member.displayName : user
-      } | ${this_role ? this_role.name : role})`,
+        this_member?.displayName ?? user
+      } | ${this_role?.name ?? role})`,
     );
     return this.queuer.queue(async () => {
       let result, error;
@@ -148,8 +148,8 @@ export default class RoleManager {
       } finally {
         console.log(
           `RoleRemove: Finished ${this.queuer.currentID} (${
-            this_member ? this_member.displayName : user
-          } | ${this_role ? this_role.name : role})`,
+            this_member?.displayName ?? user
+          } | ${this_role?.name ?? role})`,
         );
       }
       if (error) throw error;

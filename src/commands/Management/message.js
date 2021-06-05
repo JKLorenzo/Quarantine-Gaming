@@ -125,11 +125,11 @@ export default class Message extends SlashCommand {
     if (typeof message !== 'string') return message;
 
     switch (message) {
-      case 'fgu_pc':
+      case 'rr fgu_pc':
         return this.freeGameUpdatesPC();
-      case 'fgu_cs':
+      case 'rr fgu_cs':
         return this.freeGameUpdatesCS();
-      case 'nsfw':
+      case 'rr nsfw':
         return this.notSafeForWork();
       default:
         return message;
@@ -204,8 +204,9 @@ export default class Message extends SlashCommand {
           '',
           `**${emojis.find(
             e => e.name === 'playstation',
-          )} - PlayStation (${this.client.role(constants.qg.roles.playstation)}
-          )**`,
+          )} - PlayStation (${this.client.role(
+            constants.qg.roles.playstation,
+          )})**`,
           'Notifies you with games that are currently free for PlayStation 3/4/Vita.',
           '',
           `**${emojis.find(e => e.name === 'wii')} - Wii (${this.client.role(

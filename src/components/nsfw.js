@@ -40,6 +40,7 @@ export default class NotSafeForWork extends MessageComponent {
    * @param {MessageComponentInteraction} interaction The interaction that triggered this component
    */
   async exec(interaction) {
+    await interaction.deferUpdate();
     const member = this.client.member(interaction.member);
 
     if (member.roles.cache.has(constants.qg.roles.nsfw)) {
@@ -47,7 +48,5 @@ export default class NotSafeForWork extends MessageComponent {
     } else {
       await this.client.role_manager.add(member, constants.qg.roles.nsfw);
     }
-
-    await interaction.deferUpdate();
   }
 }

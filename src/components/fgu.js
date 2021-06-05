@@ -99,6 +99,7 @@ export default class FreeGameUpdate extends MessageComponent {
    * @param {CustomIDs} customID The customID of the component
    */
   async exec(interaction, customID) {
+    await interaction.deferUpdate();
     const member = this.client.member(interaction.member);
 
     switch (customID) {
@@ -173,7 +174,5 @@ export default class FreeGameUpdate extends MessageComponent {
         }
         break;
     }
-
-    await interaction.deferUpdate();
   }
 }

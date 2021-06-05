@@ -57,7 +57,7 @@ export default class Purge extends SlashCommand {
           if (this_message.deletable) {
             messages_to_delete.push(this_message);
             authors_id[this_message.id] = [
-              this_message.author ? this_message.author : 'Unavailable',
+              this_message?.author ?? 'Unavailable',
             ];
           }
           if (messages_to_delete.length >= options.message_count) break;

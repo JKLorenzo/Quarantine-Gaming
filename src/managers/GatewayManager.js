@@ -46,9 +46,7 @@ export default class GatewayManager {
           );
         }
         if (typeof invite.maxUses === 'number') {
-          description.push(
-            `**Max Uses:** ${invite.maxUses ? invite.maxUses : 'Infinite'}`,
-          );
+          description.push(`**Max Uses:** ${invite.maxUses ?? 'Infinite'}`);
         }
         if (invite.expiresAt) {
           description.push(`**Expires:** ${formatted_date}`);
@@ -95,9 +93,7 @@ export default class GatewayManager {
           );
         }
         if (typeof invite.maxUses === 'number') {
-          description.push(
-            `**Max Uses:** ${invite.maxUses ? invite.maxUses : 'Infinite'}`,
-          );
+          description.push(`**Max Uses:** ${invite.maxUses ?? 'Infinite'}`);
         }
         if (invite.expiresAt) {
           description.push(`**Expires:** ${formatted_date}`);
@@ -144,8 +140,8 @@ export default class GatewayManager {
             author: { name: 'Quarantine Gaming: Server Gateway' },
             title: 'Member Join',
             description: [
-              `**Profile:** ${member}`,
               `**Username:** ${member.user.username}`,
+              `**Discriminator:** ${member.user.discriminator}`,
               `**Created:** ${formatted_date}`,
             ].join('\n'),
             thumbnail: { url: member.user.displayAvatarURL() },
@@ -263,8 +259,8 @@ export default class GatewayManager {
             author: { name: 'Quarantine Gaming: Server Gateway' },
             title: 'Member Leave',
             description: [
-              `**Profile:** ${member}`,
               `**Username:** ${member.user.username}`,
+              `**Discriminator:** ${member.user.discriminator}`,
               `**Joined:** ${formatted_date}`,
             ].join('\n'),
             thumbnail: { url: member.user.displayAvatarURL() },
@@ -286,8 +282,8 @@ export default class GatewayManager {
           author: { name: 'Quarantine Gaming: Server Gateway' },
           title: 'Ban Implemented',
           description: [
-            `**Profile:** ${ban.user}`,
             `**Username:** ${ban.user.username}`,
+            `**Discriminator:** ${ban.user.discriminator}`,
             `**Reason:** ${ban.reason ?? 'No reason given'}`,
           ].join('\n'),
           thumbnail: { url: ban.user.displayAvatarURL() },
@@ -306,8 +302,8 @@ export default class GatewayManager {
           author: { name: 'Quarantine Gaming: Server Gateway' },
           title: 'Ban Lifted',
           description: [
-            `**Profile:** ${ban.user}`,
             `**Username:** ${ban.user.username}`,
+            `**Discriminator:** ${ban.user.discriminator}`,
             `**Ban Reason:** ${ban.reason ?? 'No reason given'}`,
           ].join('\n'),
           thumbnail: { url: ban.user.displayAvatarURL() },
@@ -362,15 +358,15 @@ export default class GatewayManager {
         thumbnail: { url: member.user.displayAvatarURL() },
         fields: [
           {
-            name: `Profile (${member.user.username}):`,
+            name: `Profile: (${member.user.username})`,
             value: member.toString(),
           },
           {
-            name: `Inviter Profile (${invite?.inviter?.username ?? 'N\\A'}):`,
-            value: invite ? invite.inviter.toString() : 'No information',
+            name: `Inviter Profile: (${invite?.inviter?.username ?? 'N\\A'})`,
+            value: invite?.inviter?.toString() ?? 'No information',
           },
           {
-            name: `Account Created (${compareDate(created_day).estimate} ago):`,
+            name: `Account Created: (${compareDate(created_day).estimate} ago)`,
             value: new Date(created_day).toString(),
           },
           { name: 'Status:', value: 'Pending' },

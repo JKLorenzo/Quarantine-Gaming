@@ -10,7 +10,6 @@ const {
   GUILD_INVITES,
   GUILD_MEMBERS,
   GUILD_MESSAGES,
-  GUILD_MESSAGE_REACTIONS,
   GUILD_PRESENCES,
   GUILD_VOICE_STATES,
 } = Intents.FLAGS;
@@ -31,11 +30,10 @@ const client = new Client({
     GUILD_INVITES,
     GUILD_MEMBERS,
     GUILD_MESSAGES,
-    GUILD_MESSAGE_REACTIONS,
     GUILD_PRESENCES,
     GUILD_VOICE_STATES,
   ],
-  partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
+  partials: ['MESSAGE', 'CHANNEL'],
   presence: {
     activities: [
       {

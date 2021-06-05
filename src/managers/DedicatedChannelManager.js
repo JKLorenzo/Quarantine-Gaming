@@ -182,16 +182,6 @@ export default class DedicatedChannelManager {
               }),
             );
           }
-        } else if (
-          newState.channel.parent?.id ===
-            constants.qg.channels.category.voice &&
-          newState.channel.members.array().length === 5
-        ) {
-          // Dedicate this channel
-          await this.client.dedicated_channel_manager.create(
-            newState.channel,
-            newState.channel.members.array()[0].displayName,
-          );
         }
       } else if (member.roles.cache.has(constants.qg.roles.streaming)) {
         this.client.role_manager.remove(member, constants.qg.roles.streaming);
@@ -251,15 +241,24 @@ export default class DedicatedChannelManager {
       const dedicated_voice_channels_category = this.client.channel(
         constants.qg.channels.category.dedicated_voice,
       );
+      /** @type {CategoryChannel} */
+      const public_voice_channels_category = this.client.channel(
+        constants.qg.channels.category.voice,
+      );
       /** @type {VoiceChannel[]} */
-      const channels_for_dedication =
-        dedicated_voice_channels_category.children.array();
+      const channels_for_dedication = [
+        ...dedicated_voice_channels_category.children.array(),
+        ...public_voice_channels_category.children.array(),
+      ];
       for (const this_channel of channels_for_dedication) {
-        if (!this_channel.members.size) continue;
         const members = this_channel.members.array();
+        if (!members.length) continue;
 
         const game = this.getMostPlayedGame(members);
-        if (game && !game.substring(5).startsWith(game.substring(2))) {
+        if (
+          game &&
+          !this_channel.name.substring(2).startsWith(game.substring(5))
+        ) {
           this.create(this_channel, game.substring(5));
         }
       }

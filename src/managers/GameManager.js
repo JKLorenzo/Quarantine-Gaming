@@ -134,7 +134,8 @@ export default class GameManager {
                 title: 'Member Game Add',
                 thumbnail: { url: images?.small },
                 description: [
-                  `**Profile:** ${newMember}`,
+                  `**Username:** ${newMember.user.username}`,
+                  `**Discriminator:** ${newMember.user.discriminator}`,
                   `**Game:** ${this_role.name}`,
                 ].join('\n'),
                 footer: {
@@ -155,7 +156,8 @@ export default class GameManager {
                 title: 'Member Game Remove',
                 thumbnail: { url: images?.small },
                 description: [
-                  `**Profile:** ${newMember}`,
+                  `**username:** ${newMember.user.username}`,
+                  `**Discriminator:** ${newMember.user.discriminator}`,
                   `**Game:** ${this_role.name}`,
                 ].join('\n'),
                 footer: {
@@ -205,18 +207,6 @@ export default class GameManager {
               name: game_name,
               color: constants.colors.game_role,
             }));
-          // Game Role Mentionable
-          if (
-            !this.client.qg.roles.cache.some(
-              role => role.name === `${game_name} ⭐`,
-            )
-          ) {
-            await this.client.role_manager.create({
-              name: `${game_name} ⭐`,
-              color: constants.colors.game_role_mentionable,
-              mentionable: true,
-            });
-          }
           promises.push(this.client.role_manager.add(member, game_role));
           // Play Role
           const streaming_role = this.client.role(constants.qg.roles.streaming);
@@ -248,26 +238,6 @@ export default class GameManager {
           continue;
         }
         promises.push(this.client.role_manager.delete(game_role));
-      }
-      await Promise.all(promises);
-
-      // Delete unused game role mentionables
-      promises = [];
-      for (const game_role_mentionable of this.client.qg.roles.cache
-        .array()
-        .filter(
-          role => role.hexColor === constants.colors.game_role_mentionable,
-        )) {
-        if (
-          this.client.qg.roles.cache.some(role => {
-            if (role.hexColor !== constants.colors.game_role) return false;
-            if (!game_role_mentionable.name.startsWith(role.name)) return false;
-            return true;
-          })
-        ) {
-          continue;
-        }
-        promises.push(this.client.role_manager.delete(game_role_mentionable));
       }
       await Promise.all(promises);
 
@@ -309,7 +279,7 @@ export default class GameManager {
    * @param {Presence} newPresence The new presence data
    */
   async processPresenceUpdate(oldPresence, newPresence) {
-    const member = newPresence ? newPresence.member : oldPresence.member;
+    const member = newPresence?.member ?? oldPresence?.member;
 
     // Disable game role add to not override member verification
     if (!member.roles.cache.has(constants.qg.roles.member)) return;
@@ -355,17 +325,6 @@ export default class GameManager {
         let play_role = this.client.qg.roles.cache.find(
           role => role.name === `Play ${game_name}`,
         );
-        if (
-          !this.client.qg.roles.cache.some(
-            role => role.name === `${game_name} ⭐`,
-          )
-        ) {
-          await this.client.role_manager.create({
-            name: `${game_name} ⭐`,
-            color: constants.colors.game_role_mentionable,
-            mentionable: true,
-          });
-        }
 
         switch (status) {
           case 'NEW':

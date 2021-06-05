@@ -23,7 +23,6 @@ export default {
       steam: '722645979248984084',
       epic: '722691589813829672',
       gog: '722691679542312970',
-      console: '722691724572491776',
       ubisoft: '750517524738605087',
       xbox: '848035837533880322',
       playstation: '848036062336778273',
@@ -38,8 +37,6 @@ export default {
         integrations: '778541774154891264',
         dedicated: '822083041086275645',
         dedicated_voice: '749231470396309535',
-        qg: '771646102252027904',
-        archives: '749661721014042774',
       },
       server: {
         announcements: '759920653146652682',
@@ -47,8 +44,6 @@ export default {
         roles: '700134489170378872',
         guides: '716710573471039519',
         suggestions: '700126421682618389',
-        management: '749763548090990613',
-        logs: '722760285622108210',
       },
       staff: {
         general: '774785123866247228',
@@ -107,6 +102,5 @@ export default {
   colors: {
     play_role: '#7b00ff',
     game_role: '#00ffff',
-    game_role_mentionable: '#00fffe',
   },
 };

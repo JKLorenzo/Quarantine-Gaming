@@ -13,8 +13,8 @@ export default class ErrorTicketManager {
    * Creates an Error Ticket for the Error Manager.
    * @param {string} method The name of the method that throwed the error.
    * @param {string | Object} error The error message or object.
-   * @param {string} base The base method of the method that throwed the error.
-   * @returns {ErrorTicket} Error Ticket
+   * @param {string} [base] The base method of the method that throwed the error.
+   * @returns {ErrorTicket}
    */
   create(method, error, base = '') {
     return new ErrorTicket(this.location, method, error, base);
