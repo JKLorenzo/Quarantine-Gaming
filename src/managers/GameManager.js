@@ -50,7 +50,7 @@ export default class GameManager {
         );
 
         for (const play_role of play_roles.array()) {
-          if (!play_role.members.size) continue;
+          if (play_role.members.size) continue;
           promises.push(this.client.role_manager.delete(play_role));
         }
         await Promise.all(promises);
