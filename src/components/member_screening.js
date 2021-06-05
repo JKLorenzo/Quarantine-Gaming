@@ -109,10 +109,8 @@ export default class MemberScreening extends MessageComponent {
     });
 
     const messages = await message.channel.messages.fetch();
-    const ping_messages = messages.filter(
-      msg =>
-        msg.content ===
-        `${this.client.cs.roles.everyone}, ${member} wants to join the server.`,
+    const ping_messages = messages.filter(msg =>
+      msg.content.startsWith(member.toString()),
     );
     await message.channel.bulkDelete(ping_messages);
 
