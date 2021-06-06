@@ -18,6 +18,14 @@ import {
  * @property {string} [large]
  */
 
+/**
+ * @typedef {Object} Game
+ * @property {string} name
+ * @property {'Pending' | 'Approved' | 'Denied'} status
+ * @property {string} icon
+ * @property {string} banner
+ */
+
 const ETM = new ErrorTicketManager('Database Manager');
 
 export default class DatabaseManager {
@@ -43,20 +51,16 @@ export default class DatabaseManager {
     /** @private */
     this.collections = {
       members: Firestore.collection('Members'),
+      games: Firestore.collection('Games'),
       free_games: Firestore.collection('FreeGames'),
-      game_overrides: Firestore.collection('GameOverrides'),
       images: Firestore.collection('Images'),
     };
     /** @private */
     this.data = {
       /** @type {PartialMember[]} */
       members: [],
-      game_overrides: {
-        /** @type {String[]} */
-        whitelisted: [],
-        /** @type {String[]} */
-        blacklisted: [],
-      },
+      /** @type {Collection<String, Game>} */
+      games: new Collection(),
       free_games: {
         /** @type {FreeGame[]} */
         list: [],
@@ -84,29 +88,17 @@ export default class DatabaseManager {
           );
         }
       },
-      loadGameOverrides: async () => {
+      loadGames: async () => {
         try {
-          this.data.game_overrides.whitelisted = [];
-          this.data.game_overrides.blacklisted = [];
-          const game_overrides_QueSnap =
-            await this.collections.game_overrides.get();
-          for (const game_override_QueDocSnap of game_overrides_QueSnap.docs) {
-            switch (game_override_QueDocSnap.data().category) {
-              case 'whitelist':
-                this.data.game_overrides.whitelisted.push(
-                  game_override_QueDocSnap.id,
-                );
-                break;
-              case 'blacklist':
-                this.data.game_overrides.blacklisted.push(
-                  game_override_QueDocSnap.id,
-                );
-                break;
-            }
+          this.data.games = new Collection();
+          const games = await this.collections.games.get();
+          for (const game of games.docs) {
+            const data = game.data();
+            this.data.games.set(data.name, data);
           }
         } catch (error) {
           this.client.error_manager.mark(
-            ETM.create('loadGameOverrides', error, 'actions'),
+            ETM.create('loadGames', error, 'actions'),
           );
         }
       },
@@ -157,7 +149,7 @@ export default class DatabaseManager {
   async init() {
     try {
       await this.actions.loadMembers();
-      await this.actions.loadGameOverrides();
+      await this.actions.loadGames();
       await this.actions.loadFreeGames();
       await this.actions.loadImages();
 
@@ -366,99 +358,45 @@ export default class DatabaseManager {
   }
 
   /**
-   * Adds this game to the whitelisted games.
+   * Gets the game from the database.
    * @param {string} game_name The name of the game
+   * @returns {Game}
    */
-  async gameWhitelist(game_name) {
+  getGame(game_name) {
     try {
-      game_name = game_name.toLowerCase();
-      const reference = this.collections.game_overrides.doc(game_name);
-      const snapshot = await reference.get();
-      if (snapshot.exists) {
-        await reference.update({
-          category: 'whitelist',
-        });
-      } else {
-        await reference.set({
-          category: 'whitelist',
-        });
-      }
-      if (this.gameBlacklisted(game_name)) {
-        this.data.game_overrides.blacklisted.splice(
-          this.data.game_overrides.blacklisted.indexOf(game_name),
-          1,
-        );
-      }
-      this.data.game_overrides.whitelisted.push(game_name);
-      await this.client.game_manager.reload();
-      return true;
+      return this.data.games.get(game_name);
     } catch (error) {
-      this.client.error_manager.mark(new ETM.create('gameWhitelist', error));
-      return false;
-    }
-  }
-
-  /**
-   * Adds this game to the blacklisted games.
-   * @param {string} game_name The name of the game
-   */
-  async gameBlacklist(game_name) {
-    try {
-      game_name = game_name.toLowerCase();
-      const reference = this.collections.game_overrides.doc(game_name);
-      const snapshot = await reference.get();
-      if (snapshot.exists) {
-        await reference.update({
-          category: 'blacklist',
-        });
-      } else {
-        await reference.set({
-          category: 'blacklist',
-        });
-      }
-      if (this.gameWhitelisted(game_name)) {
-        this.data.game_overrides.whitelisted.splice(
-          this.data.game_overrides.whitelisted.indexOf(game_name),
-          1,
-        );
-      }
-      this.data.game_overrides.blacklisted.push(game_name);
-      await this.client.game_manager.reload();
-      return true;
-    } catch (error) {
-      this.client.error_manager.mark(new ETM.create('gameBlacklist', error));
-      return false;
-    }
-  }
-
-  /**
-   * Checks if a game is whitelisted.
-   * @param {string} game_name The name of the game
-   * @returns {boolean}
-   */
-  gameWhitelisted(game_name) {
-    try {
-      return this.data.game_overrides.whitelisted.includes(
-        game_name.toLowerCase(),
-      );
-    } catch (error) {
-      this.client.error_manager.mark(ETM.create('gameWhitelisted', error));
+      this.client.error_manager.mark(ETM.create('getGame', error));
       throw error;
     }
   }
 
   /**
-   * Checks if a game is blacklisted.
+   * Updates the game on the database.
    * @param {string} game_name The name of the game
-   * @returns {boolean}
+   * @param {Game} [data] The data to update
+   * @returns {Promise<Game>}
    */
-  gameBlacklisted(game_name) {
+  async updateGame(game_name, data) {
     try {
-      return this.data.game_overrides.blacklisted.includes(
-        game_name.toLowerCase(),
-      );
+      let this_game = this.getGame(game_name);
+
+      if (!this_game) {
+        this_game = { name: game_name, status: 'Pending' };
+        await this.collections.games.doc(game_name).set(this_game);
+      }
+
+      if (data) {
+        if ('status' in data) this_game.status = data.status;
+        if ('icon' in data) this_game.icon = data.icon;
+        if ('banner' in data) this_game.banner = data.banner;
+        await this.collections.games.doc(game_name).update(this_game);
+      }
+
+      this.data.games.set(game_name, this_game);
+      return this_game;
     } catch (error) {
-      this.client.error_manager.mark(ETM.create('gameBlacklisted', error));
+      this.client.error_manager.mark(ETM.create('updateGame', error));
       throw error;
     }
   }
