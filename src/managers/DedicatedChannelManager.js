@@ -5,6 +5,7 @@ import {
   parseMention,
   sleep,
   constants,
+  generateColor,
 } from '../utils/Base.js';
 
 /**
@@ -332,7 +333,7 @@ export default class DedicatedChannelManager {
             position:
               this.client.role(constants.qg.roles.streaming).position + 1,
             hoist: true,
-            color: 'RANDOM',
+            color: generateColor({ min: 100 }).toHex(),
           });
 
           const dedicated_voice_channel =
