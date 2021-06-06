@@ -75,14 +75,13 @@ export default class GameManager {
 
         await this.client.interaction_manager.loadCommands();
 
-        const images = await this.client.methods.fetchImage(role.name);
+        const this_game = await this.client.database_manager.getGame(role.name);
         await this.client.message_manager.sendToChannel(
           constants.cs.channels.game_events,
           new MessageEmbed({
             author: { name: 'Quarantine Gaming: Game Manager' },
             title: role.name,
-            thumbnail: { url: images?.small },
-            image: { url: images?.large },
+            thumbnail: { url: this_game?.icon },
             footer: { text: `Game Create • Reference ID: ${role.id}` },
             color: 'GREEN',
           }),
@@ -99,14 +98,13 @@ export default class GameManager {
 
         await this.client.interaction_manager.loadCommands();
 
-        const images = await this.client.methods.fetchImage(role.name);
+        const this_game = await this.client.database_manager.getGame(role.name);
         await this.client.message_manager.sendToChannel(
           constants.cs.channels.game_events,
           new MessageEmbed({
             author: { name: 'Quarantine Gaming: Game Manager' },
             title: role.name,
-            thumbnail: { url: images?.small },
-            image: { url: images?.large },
+            thumbnail: { url: this_game?.icon },
             footer: { text: `Game Delete • Reference ID: ${role.id}` },
             color: 'RED',
           }),
@@ -127,7 +125,9 @@ export default class GameManager {
         for (const this_role of difference.array()) {
           const isNew = newMember.roles.cache.has(this_role.id);
           if (this_role.hexColor !== constants.colors.game_role) return;
-          const images = await this.client.methods.fetchImage(this_role.name);
+          const this_game = await this.client.database_manager.getGame(
+            this_role.name,
+          );
           if (isNew) {
             // Handles manual role add by members with manage roles permissions
             await this.client.database_manager.updateMemberGameRole(
@@ -143,7 +143,7 @@ export default class GameManager {
               new MessageEmbed({
                 author: { name: 'Quarantine Gaming: Game Manager' },
                 title: this_role.name,
-                thumbnail: { url: images?.small },
+                thumbnail: { url: this_game?.icon },
                 description: [
                   `**User:** ${newMember.user.username}`,
                   `**Profile:** ${newMember}`,
@@ -164,7 +164,7 @@ export default class GameManager {
               new MessageEmbed({
                 author: { name: 'Quarantine Gaming: Game Manager' },
                 title: this_role.name,
-                thumbnail: { url: images?.small },
+                thumbnail: { url: this_game?.icon },
                 description: [
                   `**User:** ${newMember.user.username}`,
                   `**Profile:** ${newMember}`,
@@ -203,10 +203,27 @@ export default class GameManager {
    */
   async reload() {
     try {
-      const members = this.client.qg.members.cache.array();
+      let promises = [];
+      // Remove all denied games
+      const roles = this.client.qg.roles.cache.array();
+      for (const role of roles) {
+        if (
+          role.hexColor !== constants.colors.game_role &&
+          role.hexColor !== constants.colors.play_role
+        ) {
+          continue;
+        }
+
+        const this_game = this.client.database_manager.getGame(role.name);
+        if (this_game?.status === 'Denied') {
+          promises.push(this.client.role_manager.delete(role));
+        }
+      }
+      await Promise.all(promises);
 
       // Add and create game roles and play roles
-      let promises = [];
+      promises = [];
+      const members = this.client.qg.members.cache.array();
       for (const member of members.filter(
         this_member => !this_member.user.bot,
       )) {
@@ -215,37 +232,38 @@ export default class GameManager {
         );
         for (const game_activity of game_activities) {
           const game_name = game_activity.name.trim();
-          if (this.client.database_manager.gameBlacklisted(game_name)) continue;
-          if (
-            !(
-              game_activity.applicationID ||
-              this.client.database_manager.gameWhitelisted(game_name)
-            )
-          ) {
-            continue;
+          const this_game = this.client.database_manager.getGame(game_name);
+
+          if (!this_game) {
+            await this.ScreenGame(game_name, game_activity);
+          } else if (this_game.status === 'Approved') {
+            // Game Role
+            const game_role =
+              this.client.qg.roles.cache.find(
+                role => role.name === game_name,
+              ) ??
+              (await this.client.role_manager.create({
+                name: game_name,
+                color: constants.colors.game_role,
+              }));
+            promises.push(this.client.role_manager.add(member, game_role));
+            // Play Role
+            const streaming_role = this.client.role(
+              constants.qg.roles.streaming,
+            );
+            const play_role =
+              this.client.qg.roles.cache.find(
+                role => role.name === `Play ${game_name}`,
+              ) ??
+              (await this.client.role_manager.create({
+                name: `Play ${game_name}`,
+                color: constants.colors.play_role,
+                position: streaming_role.position,
+                hoist: true,
+              }));
+            if (member.roles.cache.has(play_role.id)) continue;
+            promises.push(this.client.role_manager.add(member, play_role));
           }
-          // Game Role
-          const game_role =
-            this.client.qg.roles.cache.find(role => role.name === game_name) ??
-            (await this.client.role_manager.create({
-              name: game_name,
-              color: constants.colors.game_role,
-            }));
-          promises.push(this.client.role_manager.add(member, game_role));
-          // Play Role
-          const streaming_role = this.client.role(constants.qg.roles.streaming);
-          const play_role =
-            this.client.qg.roles.cache.find(
-              role => role.name === `Play ${game_name}`,
-            ) ??
-            (await this.client.role_manager.create({
-              name: `Play ${game_name}`,
-              color: constants.colors.play_role,
-              position: streaming_role.position,
-              hoist: true,
-            }));
-          if (member.roles.cache.has(play_role.id)) continue;
-          promises.push(this.client.role_manager.add(member, play_role));
         }
       }
       await Promise.all(promises);
@@ -255,12 +273,7 @@ export default class GameManager {
       for (const game_role of this.client.qg.roles.cache
         .array()
         .filter(role => role.hexColor === constants.colors.game_role)) {
-        if (
-          game_role.members.array().length > 0 &&
-          !this.client.database_manager.gameBlacklisted(game_role.name)
-        ) {
-          continue;
-        }
+        if (game_role.members.array().length > 0) continue;
         promises.push(this.client.role_manager.delete(game_role));
       }
       await Promise.all(promises);
@@ -333,12 +346,10 @@ export default class GameManager {
     const difference = oldGames.difference(newGames);
 
     for (const [game_name, { activity, status }] of difference) {
-      const not_blacklisted =
-        !this.client.database_manager.gameBlacklisted(game_name);
-      const valid =
-        activity.applicationID ||
-        this.client.database_manager.gameWhitelisted(game_name);
-      if (not_blacklisted && valid) {
+      const this_game = this.client.database_manager.getGame(game_name);
+      if (!this_game) {
+        await this.ScreenGame(game_name, activity);
+      } else if (this_game.status === 'Approved') {
         const streaming_role = this.client.role(constants.qg.roles.streaming);
         const game_role =
           this.client.qg.roles.cache.find(role => role.name === game_name) ??
@@ -375,6 +386,53 @@ export default class GameManager {
         }
       }
     }
+  }
+
+  /**
+   * @private Screens this game
+   * @param {string} game_name The name of the game to screen
+   * @param {Activity} activity The activity representing this game
+   */
+  async ScreenGame(game_name, activity) {
+    const images = await this.client.methods.fetchImage(game_name);
+    await this.client.message_manager.sendToChannel(
+      constants.cs.channels.game,
+      {
+        embed: new MessageEmbed({
+          author: { name: 'Quarantine Gaming: Game Manager' },
+          title: 'Game Screening',
+          thumbnail: { url: images?.small },
+          fields: [
+            {
+              name: 'Name',
+              value: game_name,
+            },
+            {
+              name: 'Verification',
+              value: activity.applicationID
+                ? 'Verified by Discord'
+                : 'Unverified',
+            },
+            {
+              name: 'Status',
+              value: 'Pending',
+            },
+          ],
+          image: { url: images?.large },
+          footer: {
+            text: 'Apply actions by clicking one of the buttons below.',
+          },
+          color: 'BLURPLE',
+        }),
+        components: this.client.interaction_manager.components
+          .get('game_screening')
+          .getComponents(),
+      },
+    );
+    await this.client.database_manager.updateGame(game_name, {
+      icon: images?.small,
+      banner: images?.large,
+    });
   }
 
   async clearExpired() {
@@ -425,13 +483,19 @@ export default class GameManager {
    */
   async createInvite(inviter, game_role, options = {}) {
     try {
+      const this_game = await this.client.database_manager.getGame(
+        game_role.name,
+      );
       const embed = new MessageEmbed({
         author: { name: 'Quarantine Gaming: Game Coordinator' },
         title: game_role.name,
+        thumbnail: { url: this_game?.icon },
         description:
           options.description ?? `${inviter} wants to play ${game_role}.`,
         fields: [{ name: 'Player 1', value: inviter.toString() }],
-        image: { url: constants.images.multiplayer_banner },
+        image: {
+          url: this_game?.banner ?? constants.images.multiplayer_banner,
+        },
         footer: {
           text: `Join this ${
             options.player_count ? 'limited' : 'open'
@@ -461,10 +525,6 @@ export default class GameManager {
           }
         }
       }
-
-      const images = await this.client.methods.fetchImage(game_role.name);
-      if (images.small) embed.setThumbnail(images.small);
-      if (images.large) embed.setImage(images.large);
 
       const invite = await this.client.message_manager.sendToChannel(
         constants.qg.channels.integrations.game_invites,
