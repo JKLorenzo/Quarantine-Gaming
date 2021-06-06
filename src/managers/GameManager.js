@@ -144,7 +144,10 @@ export default class GameManager {
                 author: { name: 'Quarantine Gaming: Game Manager' },
                 title: this_role.name,
                 thumbnail: { url: images?.small },
-                description: `**User:** ${newMember.user.username}`,
+                description: [
+                  `**User:** ${newMember.user.username}`,
+                  `**Profile:** ${newMember}`,
+                ].join('\n'),
                 footer: {
                   text: `Game Add • Reference ID: ${newMember.id} | ${this_role.id}`,
                 },
@@ -162,7 +165,10 @@ export default class GameManager {
                 author: { name: 'Quarantine Gaming: Game Manager' },
                 title: this_role.name,
                 thumbnail: { url: images?.small },
-                description: `**User:** ${newMember.user.username}`,
+                description: [
+                  `**User:** ${newMember.user.username}`,
+                  `**Profile:** ${newMember}`,
+                ].join('\n'),
                 footer: {
                   text: `Game Remove • Reference ID: ${newMember.id} | ${this_role.id}`,
                 },
