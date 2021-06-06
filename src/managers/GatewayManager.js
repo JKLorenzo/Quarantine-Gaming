@@ -36,7 +36,7 @@ export default class GatewayManager {
           `(${compareDate(expire_date).estimate})`,
         ].join(' ');
 
-        const description = [`**Created By:** ${invite.inviter}`];
+        const description = [`**Profile:** ${invite.inviter}`];
         if (invite.targetUser) {
           description.push(`**Target User:** ${invite.targetUser}`);
         }
@@ -46,7 +46,9 @@ export default class GatewayManager {
           );
         }
         if (typeof invite.maxUses === 'number') {
-          description.push(`**Max Uses:** ${invite.maxUses ?? 'Infinite'}`);
+          description.push(
+            `**Max Uses:** ${invite.maxUses ? invite.maxUses : 'Infinite'}`,
+          );
         }
         if (invite.expiresAt) {
           description.push(`**Expires:** ${formatted_date}`);
@@ -56,10 +58,10 @@ export default class GatewayManager {
           constants.cs.channels.gateway_events,
           new MessageEmbed({
             author: { name: 'Quarantine Gaming: Server Gateway' },
-            title: 'Invite Created',
+            title: invite.inviter.tag,
             description: description.join('\n'),
             thumbnail: { url: invite.inviter.displayAvatarURL() },
-            footer: { text: `Reference ID: ${invite.code}` },
+            footer: { text: `Invite Create • Reference ID: ${invite.code}` },
             color: 'BLURPLE',
           }),
         );
@@ -83,7 +85,7 @@ export default class GatewayManager {
           `(${compareDate(expire_date).estimate})`,
         ].join(' ');
 
-        const description = [`**Created By:** ${invite.inviter}`];
+        const description = [`**Profile:** ${invite.inviter}`];
         if (invite.targetUser) {
           description.push(`**Target User:** ${invite.targetUser}`);
         }
@@ -93,7 +95,9 @@ export default class GatewayManager {
           );
         }
         if (typeof invite.maxUses === 'number') {
-          description.push(`**Max Uses:** ${invite.maxUses ?? 'Infinite'}`);
+          description.push(
+            `**Max Uses:** ${invite.maxUses ? invite.maxUses : 'Infinite'}`,
+          );
         }
         if (invite.expiresAt) {
           description.push(`**Expires:** ${formatted_date}`);
@@ -103,10 +107,10 @@ export default class GatewayManager {
           constants.cs.channels.gateway_events,
           new MessageEmbed({
             author: { name: 'Quarantine Gaming: Server Gateway' },
-            title: 'Invite Deleted',
+            title: invite.inviter.tag,
             description: description.join('\n'),
             thumbnail: { url: invite.inviter.displayAvatarURL() },
-            footer: { text: `Reference ID: ${invite.code}` },
+            footer: { text: `Invite Delete • Reference ID: ${invite.code}` },
             color: 'BLURPLE',
           }),
         );
