@@ -404,17 +404,17 @@ export default class GameManager {
           thumbnail: { url: images?.small },
           fields: [
             {
-              name: 'Name',
+              name: 'Name:',
               value: game_name,
             },
             {
-              name: 'Verification',
+              name: 'Verification:',
               value: activity.applicationID
                 ? 'Verified by Discord'
                 : 'Unverified',
             },
             {
-              name: 'Status',
+              name: 'Status:',
               value: 'Pending',
             },
           ],
