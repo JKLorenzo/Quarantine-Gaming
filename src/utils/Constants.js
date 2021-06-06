@@ -100,7 +100,7 @@ export default {
       'https://pa1.narvii.com/6771/d33918fa87ad0d84b7dc854dcbf6a8545c73f94d_hq.gif',
   },
   colors: {
-    play_role: '#7b00ff',
+    play_role: '#5865f2',
     game_role: '#00ffff',
   },
 };
