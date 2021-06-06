@@ -86,7 +86,7 @@ export default class QGClient extends Client {
       try {
         const member = this.member(newUser);
 
-        const changes = [];
+        const changes = [`**Profile:** ${newUser}`];
         if (oldUser.username !== newUser.username) {
           changes.push(
             `**Username:** \nOld: ${oldUser.username} \nNew: ${newUser.username}\n`,
@@ -102,7 +102,8 @@ export default class QGClient extends Client {
             `**Avatar:** [New Avatar](${newUser.displayAvatarURL()})`,
           );
         }
-        if (changes.length) {
+
+        if (changes.length > 1) {
           this.message_manager.sendToChannel(
             constants.cs.channels.member_events,
             new MessageEmbed({
@@ -145,7 +146,7 @@ export default class QGClient extends Client {
           }
         }
 
-        const changes = [];
+        const changes = [`**Profile:** ${newMember}`];
         if (newMember.displayName !== oldMember.displayName) {
           changes.push(
             `**Nickname:** \nOld: ${oldMember.displayName} \nNew: ${newMember.displayName}\n`,
@@ -164,7 +165,7 @@ export default class QGClient extends Client {
           );
         }
 
-        if (changes.length) {
+        if (changes.length > 1) {
           this.message_manager.sendToChannel(
             constants.cs.channels.member_events,
             new MessageEmbed({
