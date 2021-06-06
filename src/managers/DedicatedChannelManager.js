@@ -332,6 +332,7 @@ export default class DedicatedChannelManager {
             position:
               this.client.role(constants.qg.roles.streaming).position + 1,
             hoist: true,
+            color: 'RANDOM',
           });
 
           const dedicated_voice_channel =
