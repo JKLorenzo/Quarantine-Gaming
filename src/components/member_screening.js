@@ -128,10 +128,6 @@ export default class MemberScreening extends MessageComponent {
           "in any of the server's text channels. (Ex. `/ping`)",
         ].join(' '),
       ].join('\n');
-      const games = member.presence.activities.filter(
-        activity => activity.type === 'PLAYING',
-      );
-      if (games.length) await this.client.game_manager.reload();
     } else if (customID === 'kick') {
       feedback =
         'Sorry, it seemed like your request to join this server was denied.';
