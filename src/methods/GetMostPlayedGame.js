@@ -1,4 +1,4 @@
-import { constants } from '../utils/Base';
+import { constants } from '../utils/Base.js';
 
 /**
  * @typedef {import('discord.js').GuildMember} GuildMember
