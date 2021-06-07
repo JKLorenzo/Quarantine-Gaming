@@ -41,33 +41,43 @@ export default class Dedicate extends SlashCommand {
    */
   async exec(interaction, options) {
     await interaction.defer({ ephemeral: true });
+    const reply_message = [];
 
     const member = this.client.member(interaction.user);
     let voice_channel = member.voice.channel;
     if (!voice_channel) {
-      return interaction.editReply(
+      reply_message.push(
         'You must be connected to any voice channels to create a dedicated channel.',
       );
+      return interaction.editReply(reply_message.join('\n'));
     }
 
     if (
       options?.custom_name !== voice_channel.name.substring(1) ||
       voice_channel.parentID !== constants.qg.channels.category.dedicated_voice
     ) {
-      if (!options.custom_name) options.custom_name = member.displayName;
+      if (!options.custom_name) {
+        const game_name = this.client.methods.getMostPlayedGame(
+          voice_channel.members.array(),
+        );
+        options.custom_name = game_name?.length
+          ? game_name
+          : member.displayName;
+      }
 
       if (
         voice_channel.parentID !==
         constants.qg.channels.category.dedicated_voice
       ) {
-        await interaction.editReply(
+        reply_message.push(
           `Got it! Please wait while I'm preparing **${options.custom_name}** voice and text channels.`,
         );
       } else {
-        await interaction.editReply(
+        reply_message.push(
           `Alright, renaming your dedicated channel to **${options.custom_name}**.`,
         );
       }
+      await interaction.editReply(reply_message.join('\n'));
 
       const data = await this.client.dedicated_channel_manager.create(
         voice_channel,
@@ -75,24 +85,27 @@ export default class Dedicate extends SlashCommand {
       );
       voice_channel = data.voice_channel;
       if (data.transfer_process) {
-        await interaction.editReply(
+        reply_message.push(
           `You will be transfered to ${data.voice_channel} dedicated channel momentarily.`,
         );
+        await interaction.editReply(reply_message.join('\n'));
         await data.transfer_process;
-        await interaction.editReply(
+        reply_message.push(
           `Transfer complete! Here are your dedicated ${data.voice_channel} ` +
             `voice and ${data.text_channel} text channels.`,
         );
+        await interaction.editReply(reply_message.join('\n'));
       }
       await sleep(2500);
     }
 
     if (typeof options.lock === 'boolean') {
-      await interaction.editReply(
+      reply_message.push(
         `${
           options.lock ? 'Locking' : 'Unlocking'
         } ${voice_channel} dedicated channel.`,
       );
+      await interaction.editReply(reply_message.join('\n'));
 
       if (options.lock) {
         await voice_channel.updateOverwrite(constants.qg.roles.member, {
@@ -129,6 +142,7 @@ export default class Dedicate extends SlashCommand {
       await sleep(2500);
     }
 
-    return interaction.editReply('Done!');
+    reply_message.push('Done!');
+    return interaction.editReply(reply_message.join('\n'));
   }
 }
