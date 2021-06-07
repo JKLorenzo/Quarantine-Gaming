@@ -155,7 +155,7 @@ export default class Play extends SlashCommand {
         options.reserved_3,
         options.reserved_4,
         options.reserved_5,
-      ],
+      ].filter(r => r?.toString() !== interaction.member.toString()),
     };
     const invite = await this.client.game_manager.createInvite(
       interaction.member,
