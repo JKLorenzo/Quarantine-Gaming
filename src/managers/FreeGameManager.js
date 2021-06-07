@@ -30,6 +30,7 @@ export default class FreeGameManager {
   }
 
   init() {
+    this.fetch();
     setInterval(() => {
       this.fetch();
     }, 600000);
@@ -54,6 +55,7 @@ export default class FreeGameManager {
           url: data.url,
           author: data.author,
           description: parseHTML(data.selftext),
+          created: new Date(data.created_utc * 1000),
           flair: data.link_flair_text,
           score: data.score,
           validity: data.upvote_ratio * 100,
@@ -76,9 +78,7 @@ export default class FreeGameManager {
             return 'This entry is already posted on the free games channel.';
           }
         } else {
-          const elapsedMinutes = compareDate(
-            new Date(free_game.createdAt * 1000),
-          ).totalMinutes;
+          const elapsedMinutes = compareDate(free_game.created).totalMinutes;
           if (
             !this_free_game &&
             free_game.score >= 100 &&
@@ -86,8 +86,7 @@ export default class FreeGameManager {
             elapsedMinutes >= 30 &&
             elapsedMinutes <= 300
           ) {
-            const result = await this.post(free_game);
-            return result;
+            this.post(free_game);
           }
         }
       }
@@ -105,8 +104,16 @@ export default class FreeGameManager {
    */
   async post(free_game) {
     try {
-      const { author, title, description, flair, permalink, url, validity } =
-        free_game;
+      const {
+        author,
+        title,
+        description,
+        flair,
+        permalink,
+        url,
+        score,
+        validity,
+      } = free_game;
 
       const embed = new MessageEmbed({
         author: { name: 'Quarantine Gaming: Free Game/DLC Notification' },
@@ -114,7 +121,8 @@ export default class FreeGameManager {
         description: parseHTML(description),
         fields: [{ name: 'Author', value: author, inline: true }],
         footer: {
-          text: `You will be redirected to \`${new URL(url).hostname}\`.`,
+          iconURL: this.client.emojis.cache.find(e => e.name === 'reddit'),
+          text: `Stats: ${score} upvotes with ${validity}% upvote ratio.`,
         },
       });
 
@@ -151,8 +159,6 @@ export default class FreeGameManager {
         } else {
           embed.addField('Flair', String(flair), true);
         }
-      } else {
-        embed.addField('Validity', String(validity), true);
       }
 
       const color = new Color();
