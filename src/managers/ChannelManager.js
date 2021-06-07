@@ -4,13 +4,24 @@ import { ErrorTicketManager, ProcessQueue, sleep } from '../utils/Base.js';
  * @typedef {import('discord.js').Channel} Channel
  * @typedef {import('discord.js').TextChannel} TextChannel
  * @typedef {import('discord.js').GuildChannel} GuildChannel
+ * @typedef {import('discord.js').OverwriteResolvable} OverwriteResolvable
  * @typedef {import('discord.js').GuildChannelResolvable} GuildChannelResolvable
- * @typedef {import('discord.js').GuildCreateChannelOptions} GuildCreateChannelOptions
  * @typedef {import('../structures/Base').Client} Client
  */
 
 /**
  * @typedef {Object} createOptions
+ * @property {'qg' | 'cs'} [guild] Defaults to Quarantine Gaming
+ * @property {'text' | 'voice' | 'category' | 'news' | 'store' | 'stage'} [type]
+ * @property {string} [topic]
+ * @property {boolean} [nsfw]
+ * @property {number} [bitrate]
+ * @property {number} [userLimit]
+ * @property {GuildChannelResolvable} [parent]
+ * @property {OverwriteResolvable[] | import('discord.js').Collection<string, OverwriteResolvable>} [PermissionOverwrites]
+ * @property {number} [position]
+ * @property {number} [rateLimitPerUser]
+ * @property {string} [reason]
  */
 
 const ETM = new ErrorTicketManager('Channel Manager');
@@ -27,7 +38,7 @@ export default class ChannelManager {
   /**
    * Creates a new channel in the guild.
    * @param {string} name The name of the channel to create
-   * @param {GuildCreateChannelOptions} options The options of this channel
+   * @param {createOptions} [options] The options of this channel
    * @returns {Promise<GuildChannel>}
    */
   create(name, options) {
@@ -35,7 +46,11 @@ export default class ChannelManager {
     return this.queuer.queue(async () => {
       let result, error;
       try {
-        result = await this.client.qg.channels.create(name, options);
+        if (options?.guild === 'cs') {
+          result = await this.client.cs.channels.create(name, options);
+        } else {
+          result = await this.client.qg.channels.create(name, options);
+        }
       } catch (this_error) {
         this.client.error_manager.mark(ETM.create('create', this_error));
         error = this_error;
