@@ -4,6 +4,7 @@
  * @property {string} url
  * @property {string} author
  * @property {string} description
+ * @property {Date} created
  * @property {number} validity
  * @property {string} score
  * @property {string} flair
@@ -20,6 +21,7 @@ export default class FreeGame {
     this.url = data.url;
     this.author = data.author;
     this.description = data.description;
+    this.created = data.created;
     this.validity = data.validity;
     this.score = data.score;
     this.flair = data.flair;
