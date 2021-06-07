@@ -6,6 +6,7 @@ import {
   sleep,
   constants,
   generateColor,
+  contains,
 } from '../utils/Base.js';
 
 /**
@@ -222,7 +223,19 @@ export default class DedicatedChannelManager {
           game &&
           !this_channel.name.substring(2).startsWith(game.substring(5))
         ) {
-          this.create(this_channel, game.substring(5));
+          if (this_channel.name.startsWith('🔰')) {
+            if (
+              this.client.qg.roles.cache.some(
+                r =>
+                  r.hexColor === constants.colors.game_role &&
+                  contains(this_channel.name, r.name),
+              )
+            ) {
+              this.create(this_channel, game.substring(5));
+            }
+          } else {
+            this.create(this_channel, game.substring(5));
+          }
         }
       }
     } catch (error) {
@@ -251,17 +264,8 @@ export default class DedicatedChannelManager {
           constants.qg.channels.category.dedicated_voice
         ) {
           // Block renaming of channel with the same or custom name
-          if (
-            channel_origin.name === channel_name ||
-            (channel_origin.name.startsWith('🔰') &&
-              !this.client.qg.roles.cache.some(
-                r =>
-                  r.hexColor === constants.colors.game_role &&
-                  r.name === channel_origin.name.substring(2),
-              ))
-          ) {
-            return;
-          }
+          if (channel_origin.name === channel_name) return;
+
           // Rename
           await channel_origin.setName(channel_name);
           /** @type {CategoryChannel} */
