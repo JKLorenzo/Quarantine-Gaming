@@ -196,44 +196,6 @@ export default class DedicatedChannelManager {
   }
 
   /**
-   * @private Gets the most played game from these members.
-   * @param {GuildMember[]} members The members to check
-   * @returns {string}
-   */
-  getMostPlayedGame(members) {
-    const members_games = members
-      .map(member =>
-        member.roles.cache
-          .array()
-          .filter(r => r.hexColor === constants.colors.play_role),
-      )
-      .filter(r => r.length);
-
-    const game_count = {};
-    for (const member_games of members_games) {
-      for (const game of member_games) {
-        if (game_count[game.name]) {
-          game_count[game.name] += 1;
-        } else {
-          game_count[game.name] = 1;
-        }
-      }
-    }
-
-    let highest = { name: '', count: 0 };
-    for (const [game_name, players] of Object.entries(game_count)) {
-      if (players > highest.count) {
-        highest = {
-          name: game_name,
-          count: players,
-        };
-      }
-    }
-
-    return highest.name;
-  }
-
-  /**
    * Automatically dedicates all channels.
    */
   autoDedicate() {
@@ -255,7 +217,7 @@ export default class DedicatedChannelManager {
         const members = this_channel.members.array();
         if (!members.length) continue;
 
-        const game = this.getMostPlayedGame(members);
+        const game = this.client.methods.getMostPlayedGame(members);
         if (
           game &&
           !this_channel.name.substring(2).startsWith(game.substring(5))
@@ -288,7 +250,18 @@ export default class DedicatedChannelManager {
           channel_origin.parentID ===
           constants.qg.channels.category.dedicated_voice
         ) {
-          if (channel_origin.name === channel_name) return;
+          // Block renaming of channel with the same or custom name
+          if (
+            channel_origin.name === channel_name ||
+            (channel_origin.name.startsWith('🔰') &&
+              !this.client.qg.roles.cache.some(
+                r =>
+                  r.hexColor === constants.colors.game_role &&
+                  r.name === channel_origin.name.substring(2),
+              ))
+          ) {
+            return;
+          }
           // Rename
           await channel_origin.setName(channel_name);
           /** @type {CategoryChannel} */
