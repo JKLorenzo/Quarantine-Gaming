@@ -1,9 +1,10 @@
 import fetchImage from './FetchImage.js';
+import getMostPlayedGame from './GetMostPlayedGame.js';
 import voiceChannelTransfer from './VoiceChannelTransfer.js';
 
 /**
- * @typedef {import('discord').GuildMember} GuildMember
- * @typedef {import('discord').VoiceChannel} VoiceChannel
+ * @typedef {import('discord.js').GuildMember} GuildMember
+ * @typedef {import('discord.js').VoiceChannel} VoiceChannel
  * @typedef {import('../structures/Base').Client} Client
  */
 
@@ -25,6 +26,15 @@ export default class BaseMethods {
    */
   fetchImage(title) {
     return fetchImage(this.client, title);
+  }
+
+  /**
+   * Gets the most played game from these members.
+   * @param {GuildMember[]} members The members to check the activities.
+   * @returns {string}
+   */
+  getMostPlayedGame(members) {
+    return getMostPlayedGame(members);
   }
 
   /**
