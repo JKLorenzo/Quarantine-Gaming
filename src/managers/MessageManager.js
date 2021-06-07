@@ -1,10 +1,16 @@
-import { ErrorTicketManager, ProcessQueue, constants } from '../utils/Base.js';
+import {
+  ErrorTicketManager,
+  ProcessQueue,
+  constants,
+  contains,
+} from '../utils/Base.js';
 
 /**
  * @typedef {import('discord.js').Message} Message
  * @typedef {import('discord.js').TextChannel} TextChannel
  * @typedef {import('discord.js').UserResolvable} UserResolvable
  * @typedef {import('discord.js').MessageOptions} MessageOptions
+ * @typedef {import('discord.js').CategoryChannel} CategoryChannel
  * @typedef {import('discord.js').MessageAdditions} MessageAdditions
  * @typedef {import('discord.js').GuildChannelResolvable} GuildChannelResolvable
  * @typedef {import('discord.js').APIMessageContentResolvable} APIMessageContentResolvable
@@ -21,23 +27,17 @@ export default class MessageManager {
     this.client = client;
     this.queuer = new ProcessQueue(1000);
 
-    client.on('message', message => {
+    client.on('message', async message => {
       try {
-        // DM
+        if (message.author.bot) return;
+
         if (message.guild === null) {
-          const this_member = client.member(message.author);
-          if (this_member && !this_member.user.bot) {
-            this.sendToChannel(constants.cs.channels.dm, {
-              content: `**${this_member.displayName}**:\n${
-                message.content ?? ''
-              }`,
-              files: message.attachments?.map(file => ({
-                attachment: file.attachment,
-                name: file.name,
-                data: file.data,
-              })),
-            });
-          }
+          await this.processIncomingDM(message);
+        } else if (
+          message.guild.id === constants.cs.guild &&
+          message.channel.parentID === constants.cs.channels.category.dm
+        ) {
+          await this.processOutgoingDM(message);
         }
       } catch (error) {
         this.client.error_manager.mark(ETM.create('message', error));
@@ -109,5 +109,87 @@ export default class MessageManager {
       if (error) throw error;
       return result;
     });
+  }
+
+  /**
+   * @private
+   * @param {Message} message The message received
+   */
+  async processIncomingDM(message) {
+    const this_member = this.client.member(message.author);
+    if (!this_member) return;
+
+    /** @type {CategoryChannel} */
+    const dm_category = this.client.channel(constants.cs.channels.category.dm);
+
+    /** @type {TextChannel} */
+    const dm_channel =
+      dm_category.children.find(
+        c => c.isText() && contains(c.topic, this_member.toString()),
+      ) ??
+      (await this.client.channel_manager.create(this_member.displayName, {
+        guild: 'cs',
+        parent: dm_category,
+        topic:
+          `Direct message handler for ${this_member}. ` +
+          'You can reply to this user by sending a message to this channel.',
+      }));
+
+    if (dm_channel.name !== this_member.displayName) {
+      await dm_channel.setName(this_member.displayName);
+    }
+
+    if (dm_channel.position !== 0) {
+      await dm_channel.setPosition(0);
+    }
+
+    // Max of 5 dm channels
+    if (dm_category.children.size > 5) {
+      dm_category.children
+        .filter(c => c.position > 4)
+        .forEach(c => {
+          // eslint-disable-next-line no-empty-function
+          this.client.channel_manager.delete(c).catch(() => {});
+        });
+    }
+
+    await this.sendToChannel(dm_channel, {
+      content: message.content?.length ? message.content : null,
+      files: message.attachments?.map(file => ({
+        attachment: file.attachment,
+        name: file.name,
+        data: file.data,
+      })),
+    });
+  }
+
+  /**
+   * @private
+   * @param {Message} message The message sent
+   */
+  async processOutgoingDM(message) {
+    /** @type {string} */
+    const topic = message.channel.topic;
+    const this_member = this.client.member(
+      topic.split(' ').find(w => this.client.member(w)),
+    );
+    if (!this_member) return;
+
+    const reply = await this.sendToUser(this_member, {
+      content: message.content?.length ? message.content : null,
+      files: message.attachments?.map(file => ({
+        attachment: file.attachment,
+        name: file.name,
+        data: file.data,
+      })),
+    });
+
+    if (reply) {
+      const emojis = this.client.emojis.cache;
+      await this.client.reaction_manager.add(
+        message,
+        emojis.find(e => e.name === 'checkgreen'),
+      );
+    }
   }
 }
