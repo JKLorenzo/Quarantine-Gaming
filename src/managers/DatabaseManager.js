@@ -116,6 +116,7 @@ export default class DatabaseManager {
             }
             this.data.free_games.list.push(
               new FreeGame({
+                id: free_game.id,
                 ...data,
               }),
             );
@@ -430,11 +431,11 @@ export default class DatabaseManager {
    */
   async pushFreeGame(free_game) {
     try {
-      this.data.free_games.list.push(free_game);
       await this.collections.free_games.doc(free_game.id).set({
         ...free_game,
         index: ++this.data.free_games.index,
       });
+      this.data.free_games.list.push(free_game);
       await this.trimFreeGames();
     } catch (error) {
       this.client.error_manager.mark(ETM.create('pushFreeGame', error));
@@ -446,7 +447,9 @@ export default class DatabaseManager {
     while (this.data.free_games.list.length > 5) {
       try {
         const expired_freegame = this.data.free_games.list.shift();
-        await this.collections.free_games.doc(expired_freegame.id).delete();
+        if (expired_freegame) {
+          await this.collections.free_games.doc(expired_freegame.id).delete();
+        }
       } catch (error) {
         this.client.error_manager.mark(ETM.create('trimFreeGames', error));
         throw error;
