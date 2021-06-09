@@ -202,12 +202,9 @@ export default class FreeGameManager {
       embed.setColor(color.toHex());
 
       // Image
-      const image = await this.client.methods.fetchImage(title);
-      if (image) {
-        if (image.small) embed.setThumbnail(image.small);
-        if (image.large) embed.setImage(image.large);
-      }
-      if (!embed.image.url) embed.setImage(constants.images.free_games_banner);
+      const image = await this.client.methods.fetchImage(safe_title ?? title);
+      if (image?.small) embed.setThumbnail(image.small);
+      embed.setImage(image?.large ?? constants.images.free_games_banner);
 
       // Mentionable Roles
       const mentionable_roles = mentionables.map(mentionable =>
