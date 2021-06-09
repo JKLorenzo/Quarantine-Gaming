@@ -1,23 +1,8 @@
 name: Testing Cron
-on: 
+on:
   schedule:
     - cron: "0 16 * * 5"
 jobs:
-  dependency:
-    name: Continuous Integration
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Install Node v14
-        uses: actions/setup-node@v1
-        with:
-          node-version: 14
-
-      - name: Install dependencies
-        run: npm ci
-
   lint:
     name: ESLint
     runs-on: ubuntu-latest
@@ -34,7 +19,7 @@ jobs:
         run: npm ci
 
       - name: Run ESLint
-        uses: icrawl/action-eslint@v1
+        run: npm run lint
 
   analyze:
     name: CodeQL Analysis

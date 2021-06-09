@@ -1,7 +1,7 @@
 name: Testing
-on: 
+on:
   push:
-    branches: 
+    branches:
       - master
   pull_request:
 
@@ -22,7 +22,7 @@ jobs:
         run: npm ci
 
       - name: Run ESLint
-        uses: icrawl/action-eslint@v1
+        run: npm run lint
 
   analyze:
     name: CodeQL Analysis

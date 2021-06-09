@@ -1,14 +1,21 @@
 {
   "name": "quarantine-gaming",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "A Discord Bot for Quarantine Gaming Server.",
-  "main": "./src/index.js",
+  "main": "./src/main.js",
   "engines": {
     "node": "14.x"
   },
+  "scripts": {
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "prettier": "prettier --check src/**/*.js",
+    "prettier:fix": "prettier --write src/**/*.js"
+  },
+  "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/JKLorenzo/Quarantine-Gaming.git"
+    "url": "https://github.com/JKLorenzo/Quarantine-Gaming"
   },
   "author": "Juruel Keanu Lorenzo",
   "license": "GPL-3.0-only",
@@ -19,15 +26,31 @@
   "dependencies": {
     "@discordjs/opus": "^0.5.0",
     "axios": "^0.21.1",
-    "discord.js": "^12.5.3",
-    "discord.js-commando": "^0.12.3",
-    "eslint": "^7.25.0",
+    "common-tags": "^1.8.0",
+    "discord-api-types": "^0.18.1",
+    "discord.js": "^13.0.0-dev.cbd7f2b9aa44a9240947ed716d0e72257ac499f7",
+    "express": "^4.17.1",
     "ffmpeg-static": "^4.3.0",
-    "firebase-admin": "^9.7.0",
+    "firebase-admin": "^9.9.0",
     "g-i-s": "^2.1.6",
-    "jsdom": "^16.5.3",
+    "humanize-duration": "^3.26.0",
+    "jsdom": "^16.6.0",
     "node-fetch": "^2.6.1",
     "node-google-tts-api": "^1.1.1",
-    "probe-image-size": "^7.1.0"
+    "probe-image-size": "^7.1.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.27.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-prettier": "^3.4.0",
+    "prettier": "^2.3.0"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "printWidth": 80,
+    "trailingComma": "all",
+    "endOfLine": "lf",
+    "arrowParens": "avoid"
   }
 }

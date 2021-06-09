@@ -1,0 +1,25 @@
+name: Deploy Release
+on: release
+
+jobs:
+  deploy:
+    name: Heroku Deployment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Deploy
+        uses: akhileshns/heroku-deploy@v3.12.12
+        with:
+          heroku_app_name: "quarantine-gaming"
+          heroku_email: ${{secrets.HEROKU_EMAIL}}
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          buildpack: "https://github.com/heroku/heroku-buildpack-nodejs.git"
+          healthcheck: "https://quarantine-gaming.herokuapp.com"
+          rollbackonhealthcheckfailed: true
+          checkstring: "online"
+          delay: 180
+        env:
+          HD_BOT_TOKEN: ${{secrets.BOT_TOKEN}}
+          HD_FIREBASE_CREDENTIALS: ${{secrets.FIREBASE_CREDENTIALS}}
