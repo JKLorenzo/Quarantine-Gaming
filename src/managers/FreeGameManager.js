@@ -121,7 +121,7 @@ export default class FreeGameManager {
         description: parseHTML(description),
         fields: [{ name: 'Author', value: author, inline: true }],
         footer: {
-          iconURL: this.client.emojis.cache.find(e => e.name === 'reddit'),
+          icon_url: this.client.emojis.cache.find(e => e.name === 'reddit').url,
           text: `Stats: ${score} upvotes with ${validity}% upvote ratio.`,
         },
       });
