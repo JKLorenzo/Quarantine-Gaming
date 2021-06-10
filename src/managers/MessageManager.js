@@ -30,14 +30,19 @@ export default class MessageManager {
     client.on('message', async message => {
       try {
         if (message.author.bot) return;
-
         if (message.guild === null) {
           await this.processIncomingDM(message);
-        } else if (
-          message.guild.id === constants.cs.guild &&
-          message.channel.parentID === constants.cs.channels.category.dm
-        ) {
-          await this.processOutgoingDM(message);
+        }
+
+        if (message.guild.id !== constants.cs.guild) return;
+        switch (message.channel.parentID) {
+          case constants.cs.channels.category.dm:
+            await this.processOutgoingDM(message);
+            break;
+
+          case constants.cs.channels.category.dc:
+            await this.processDirectChannels(message);
+            break;
         }
       } catch (error) {
         this.client.error_manager.mark(ETM.create('message', error));
@@ -190,6 +195,44 @@ export default class MessageManager {
         message,
         emojis.find(e => e.name === 'checkgreen'),
       );
+    }
+  }
+
+  /**
+   * @private
+   * @param {Message} message The message sent
+   */
+  async processDirectChannels(message) {
+    const message_data = {
+      content: message.content?.length ? message.content : null,
+      files: message.attachments?.map(file => ({
+        attachment: file.attachment,
+        name: file.name,
+        data: file.data,
+      })),
+    };
+
+    let channel = '';
+    switch (message.channel.id) {
+      case constants.cs.channels.dc_announcements:
+        channel = constants.qg.channels.server.announcements;
+        break;
+      case constants.cs.channels.dc_rules:
+        channel = constants.qg.channels.server.rules;
+        break;
+      case constants.cs.channels.dc_roles:
+        channel = constants.qg.channels.server.roles;
+        break;
+      case constants.cs.channels.dc_guides:
+        channel = constants.qg.channels.server.guides;
+        break;
+      case constants.cs.channels.dc_suggestions:
+        channel = constants.qg.channels.server.suggestions;
+        break;
+    }
+
+    if (channel) {
+      await this.client.message_manager.sendToChannel(channel, message_data);
     }
   }
 }
