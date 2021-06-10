@@ -118,11 +118,10 @@ export default class FreeGameManager {
       const embed = new MessageEmbed({
         author: { name: 'Quarantine Gaming: Free Game/DLC Notification' },
         url: url,
-        description: parseHTML(description),
         fields: [{ name: 'Author', value: author, inline: true }],
         footer: {
           icon_url: this.client.emojis.cache.find(e => e.name === 'reddit').url,
-          text: `Stats: ${score} upvotes with ${validity}% upvote ratio.`,
+          text: `Free Game Statistics: Accumulated ${score} upvotes with ${validity}% upvote ratio.`,
         },
       });
 
@@ -155,9 +154,9 @@ export default class FreeGameManager {
           flair.toLowerCase().indexOf('comment') !== -1 ||
           flair.toLowerCase().indexOf('issue') !== -1
         ) {
-          embed.addField('Flair', `[${flair}](${permalink})`, true);
+          embed.setDescription(`Flair: [${flair}](${permalink})`);
         } else {
-          embed.addField('Flair', String(flair), true);
+          embed.setDescription(`Flair: ${flair}`);
         }
       }
 
@@ -210,7 +209,18 @@ export default class FreeGameManager {
       const mentionable_roles = mentionables.map(mentionable =>
         this.client.role(mentionable),
       );
-      embed.addField('Platforms', mentionable_roles.join(', ') ?? 'None', true);
+      embed.addField(
+        'Platforms',
+        mentionable_roles.map(r => r.name).join(', ') ?? 'None',
+        true,
+      );
+
+      if (description) {
+        embed.addField(
+          'Extended info (author-specified):',
+          parseHTML(description),
+        );
+      }
 
       // Send
       const message = await this.client.message_manager.sendToChannel(
