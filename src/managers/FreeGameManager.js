@@ -46,7 +46,7 @@ export default class FreeGameManager {
         'https://www.reddit.com/r/FreeGameFindings/new/.json?limit=25&sort=new',
       )
         .then(data => data.json())
-        .then(entry => entry.data.children.map(child => child.data));
+        .then(entry => entry?.data?.children?.map(child => child.data));
       if (!response) return 'No response received.';
       const responses = [];
       for (const data of response) {
