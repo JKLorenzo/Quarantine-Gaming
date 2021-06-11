@@ -264,7 +264,7 @@ export default class DedicatedChannelManager {
           constants.qg.channels.category.dedicated_voice
         ) {
           // Block renaming of channel with the same or custom name
-          if (channel_origin.name === channel_name) return;
+          if (!name || channel_origin.name === channel_name) return;
 
           // Rename
           await channel_origin.setName(channel_name);
