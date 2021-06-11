@@ -51,7 +51,7 @@ export default class SpeechManager {
         });
         fs.writeFileSync('tts.mp3', data);
 
-        connection.on(VoiceConnectionStatus.Ready, () => {
+        connection.on(VoiceConnectionStatus.Ready, async () => {
           player.play(createAudioResource('tts.mp3'));
         });
         await entersState(player, AudioPlayerStatus.Playing, 10e3);
