@@ -11,6 +11,7 @@ import {
 
 /**
  * @typedef {import('discord.js').Role} Role
+ * @typedef {import('discord.js').VoiceState} VoiceState
  * @typedef {import('discord.js').GuildMember} GuildMember
  * @typedef {import('discord.js').TextChannel} TextChannel
  * @typedef {import('discord.js').VoiceChannel} VoiceChannel
@@ -69,125 +70,10 @@ export default class DedicatedChannelManager {
   }
 
   init() {
-    this.client.on('voiceStateUpdate', async (oldState, newState) => {
-      const member = newState.member;
+    this.client.on('voiceStateUpdate', (oldState, newState) => {
+      // Block updates on the same channel
       if (newState.channelID === oldState.channelID) return;
-
-      if (
-        oldState.channel?.parent?.id ===
-        constants.qg.channels.category.dedicated_voice
-      ) {
-        const text_channel = this.client
-          .channel(constants.qg.channels.category.dedicated)
-          .children.find(
-            channel =>
-              channel.type === 'text' &&
-              channel.topic &&
-              parseMention(channel.topic.split(' ')[0]) === oldState.channelID,
-          );
-        const linked_data = text_channel.topic.split(' ');
-        const team_role = this.client.role(linked_data[1]);
-
-        if (
-          oldState.channel.members.size > 0 &&
-          !(
-            oldState.channel.members.size === 1 &&
-            oldState.channel.members.first().user.bot
-          )
-        ) {
-          this.client.role_manager.remove(member, team_role);
-          this.client.message_manager.sendToChannel(
-            text_channel,
-            new MessageEmbed({
-              author: { name: 'Quarantine Gaming: Dedicated Channels' },
-              title: oldState.channel.name,
-              thumbnail: { url: member.user.displayAvatarURL() },
-              description: `${oldState.member} left this channel.`,
-              footer: { text: `${member.user.tag} (${member.user.id})` },
-              timestamp: new Date(),
-              color: 'RED',
-            }),
-          );
-        } else {
-          await this.client.role_manager.delete(team_role);
-          await this.client.channel_manager.delete(oldState.channel);
-          await this.client.channel_manager.delete(text_channel);
-        }
-      }
-
-      if (newState.channel) {
-        // Check if members are streaming
-        const streamers = [];
-        for (const this_member of newState.channel.members.array()) {
-          if (
-            member.user.id !== this_member.user.id &&
-            this_member.roles.cache.has(constants.qg.roles.streaming)
-          ) {
-            streamers.push(this_member);
-          }
-        }
-
-        // Notify member
-        if (streamers.length > 0) {
-          this.client.message_manager.sendToUser(
-            member,
-            new MessageEmbed({
-              author: { name: 'Quarantine Gaming: Information' },
-              title: `${
-                streamers.length > 1
-                  ? `${streamers
-                      .map(this_member => this_member.displayName)
-                      .join(' and ')} are`
-                  : `${streamers.map(
-                      this_member => this_member.displayName,
-                    )} is`
-              } currently Streaming`,
-              thumbnail: { url: member.user.displayAvatarURL() },
-              description:
-                'Please observe proper behavior on your current voice channel.',
-              image: { url: constants.images.streaming_banner },
-              color: 'YELLOW',
-            }),
-          );
-        }
-
-        if (
-          newState.channel.parent?.id ===
-          constants.qg.channels.category.dedicated_voice
-        ) {
-          const text_channel = this.client
-            .channel(constants.qg.channels.category.dedicated)
-            .children.find(
-              channel =>
-                channel.topic &&
-                parseMention(channel.topic.split(' ')[0]) ===
-                  newState.channelID,
-            );
-          const linked_data = text_channel.topic.split(' ');
-          const team_role = this.client.role(linked_data[1]);
-
-          // Add Text Role
-          if (!member.roles.cache.has(team_role.id)) {
-            this.client.role_manager.add(member, team_role);
-            this.client.message_manager.sendToChannel(
-              text_channel,
-              new MessageEmbed({
-                author: { name: 'Quarantine Gaming: Dedicated Channels' },
-                title: newState.channel.name,
-                thumbnail: { url: newState.member.user.displayAvatarURL() },
-                description: `${newState.member} joined this channel.`,
-                footer: {
-                  text: `${newState.member.user.tag} (${newState.member.user.id})`,
-                },
-                timestamp: new Date(),
-                color: 'GREEN',
-              }),
-            );
-          }
-        }
-      } else if (member.roles.cache.has(constants.qg.roles.streaming)) {
-        this.client.role_manager.remove(member, constants.qg.roles.streaming);
-      }
+      this.processVoiceStateUpdate(oldState, newState);
     });
 
     // Auto dedicate every 5 minutes
@@ -459,5 +345,135 @@ export default class DedicatedChannelManager {
         this.client.error_manager.mark(ETM.create('load', error));
       }
     });
+  }
+
+  /**
+   * @private
+   * @param {VoiceState} oldState The old voice state
+   * @param {VoiceState} newState The new voice state
+   */
+  async processVoiceStateUpdate(oldState, newState) {
+    const member = newState.member;
+    try {
+      if (
+        oldState.channel?.parent?.id ===
+        constants.qg.channels.category.dedicated_voice
+      ) {
+        const text_channel = this.client
+          .channel(constants.qg.channels.category.dedicated)
+          .children.find(
+            channel =>
+              channel.type === 'text' &&
+              channel.topic &&
+              parseMention(channel.topic.split(' ')[0]) === oldState.channelID,
+          );
+        const linked_data = text_channel.topic.split(' ');
+        const team_role = this.client.role(linked_data[1]);
+
+        if (
+          oldState.channel.members.size > 0 &&
+          !(
+            oldState.channel.members.size === 1 &&
+            oldState.channel.members.first().user.bot
+          )
+        ) {
+          this.client.role_manager.remove(member, team_role);
+          this.client.message_manager.sendToChannel(
+            text_channel,
+            new MessageEmbed({
+              author: { name: 'Quarantine Gaming: Dedicated Channels' },
+              title: oldState.channel.name,
+              thumbnail: { url: member.user.displayAvatarURL() },
+              description: `${oldState.member} left this channel.`,
+              footer: { text: `${member.user.tag} (${member.user.id})` },
+              timestamp: new Date(),
+              color: 'RED',
+            }),
+          );
+        } else {
+          await this.client.role_manager.delete(team_role);
+          await this.client.channel_manager.delete(oldState.channel);
+          await this.client.channel_manager.delete(text_channel);
+        }
+      }
+
+      if (newState.channel) {
+        // Check if members are streaming
+        const streamers = [];
+        for (const this_member of newState.channel.members.array()) {
+          if (
+            member.user.id !== this_member.user.id &&
+            this_member.roles.cache.has(constants.qg.roles.streaming)
+          ) {
+            streamers.push(this_member);
+          }
+        }
+
+        // Notify member
+        if (streamers.length > 0) {
+          this.client.message_manager.sendToUser(
+            member,
+            new MessageEmbed({
+              author: { name: 'Quarantine Gaming: Information' },
+              title: `${
+                streamers.length > 1
+                  ? `${streamers
+                      .map(this_member => this_member.displayName)
+                      .join(' and ')} are`
+                  : `${streamers.map(
+                      this_member => this_member.displayName,
+                    )} is`
+              } currently Streaming`,
+              thumbnail: { url: member.user.displayAvatarURL() },
+              description:
+                'Please observe proper behavior on your current voice channel.',
+              image: { url: constants.images.streaming_banner },
+              color: 'YELLOW',
+            }),
+          );
+        }
+
+        if (
+          newState.channel.parent?.id ===
+          constants.qg.channels.category.dedicated_voice
+        ) {
+          const text_channel = this.client
+            .channel(constants.qg.channels.category.dedicated)
+            .children.find(
+              channel =>
+                channel.topic &&
+                parseMention(channel.topic.split(' ')[0]) ===
+                  newState.channelID,
+            );
+          const linked_data = text_channel.topic.split(' ');
+          const team_role = this.client.role(linked_data[1]);
+
+          // Add Text Role
+          if (!member.roles.cache.has(team_role.id)) {
+            this.client.role_manager.add(member, team_role);
+            this.client.message_manager.sendToChannel(
+              text_channel,
+              new MessageEmbed({
+                author: { name: 'Quarantine Gaming: Dedicated Channels' },
+                title: newState.channel.name,
+                thumbnail: { url: newState.member.user.displayAvatarURL() },
+                description: `${newState.member} joined this channel.`,
+                footer: {
+                  text: `${newState.member.user.tag} (${newState.member.user.id})`,
+                },
+                timestamp: new Date(),
+                color: 'GREEN',
+              }),
+            );
+          }
+        }
+      } else if (member.roles.cache.has(constants.qg.roles.streaming)) {
+        this.client.role_manager.remove(member, constants.qg.roles.streaming);
+      }
+    } catch (error) {
+      this.client.error_manager.mark(
+        ETM.create('processVoiceStateUpdate', error),
+      );
+    }
   }
 }
