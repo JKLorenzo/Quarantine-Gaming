@@ -78,15 +78,13 @@ export default class GameManager {
         const this_game = await this.client.database_manager.getGame(role.name);
         await this.client.message_manager.sendToChannel(
           constants.cs.channels.game_events,
-          {
-            embed: new MessageEmbed({
-              author: { name: 'Quarantine Gaming: Game Manager' },
-              title: role.name,
-              thumbnail: { url: this_game?.icon },
-              footer: { text: `Game Create • Reference ID: ${role.id}` },
-              color: 'GREEN',
-            }),
-          },
+          new MessageEmbed({
+            author: { name: 'Quarantine Gaming: Game Manager' },
+            title: role.name,
+            thumbnail: { url: this_game?.icon },
+            footer: { text: `Game Create • Reference ID: ${role.id}` },
+            color: 'GREEN',
+          }),
         );
       } catch (error) {
         this.client.error_manager.mark(ETM.create('roleCreate', error));
@@ -103,15 +101,13 @@ export default class GameManager {
         const this_game = await this.client.database_manager.getGame(role.name);
         await this.client.message_manager.sendToChannel(
           constants.cs.channels.game_events,
-          {
-            embed: new MessageEmbed({
-              author: { name: 'Quarantine Gaming: Game Manager' },
-              title: role.name,
-              thumbnail: { url: this_game?.icon },
-              footer: { text: `Game Delete • Reference ID: ${role.id}` },
-              color: 'RED',
-            }),
-          },
+          new MessageEmbed({
+            author: { name: 'Quarantine Gaming: Game Manager' },
+            title: role.name,
+            thumbnail: { url: this_game?.icon },
+            footer: { text: `Game Delete • Reference ID: ${role.id}` },
+            color: 'RED',
+          }),
         );
       } catch (error) {
         this.client.error_manager.mark(ETM.create('roleDelete', error));
@@ -144,21 +140,19 @@ export default class GameManager {
 
             await this.client.message_manager.sendToChannel(
               constants.cs.channels.game_events,
-              {
-                embed: new MessageEmbed({
-                  author: { name: 'Quarantine Gaming: Game Manager' },
-                  title: this_role.name,
-                  thumbnail: { url: this_game?.icon },
-                  description: [
-                    `**User:** ${newMember.user.username}`,
-                    `**Profile:** ${newMember}`,
-                  ].join('\n'),
-                  footer: {
-                    text: `Game Add • Reference ID: ${newMember.id} | ${this_role.id}`,
-                  },
-                  color: 'YELLOW',
-                }),
-              },
+              new MessageEmbed({
+                author: { name: 'Quarantine Gaming: Game Manager' },
+                title: this_role.name,
+                thumbnail: { url: this_game?.icon },
+                description: [
+                  `**User:** ${newMember.user.username}`,
+                  `**Profile:** ${newMember}`,
+                ].join('\n'),
+                footer: {
+                  text: `Game Add • Reference ID: ${newMember.id} | ${this_role.id}`,
+                },
+                color: 'YELLOW',
+              }),
             );
           } else {
             await this.client.database_manager.deleteMemberGameRole(
@@ -167,21 +161,19 @@ export default class GameManager {
             );
             await this.client.message_manager.sendToChannel(
               constants.cs.channels.game_events,
-              {
-                embed: new MessageEmbed({
-                  author: { name: 'Quarantine Gaming: Game Manager' },
-                  title: this_role.name,
-                  thumbnail: { url: this_game?.icon },
-                  description: [
-                    `**User:** ${newMember.user.username}`,
-                    `**Profile:** ${newMember}`,
-                  ].join('\n'),
-                  footer: {
-                    text: `Game Remove • Reference ID: ${newMember.id} | ${this_role.id}`,
-                  },
-                  color: 'FUCHSIA',
-                }),
-              },
+              new MessageEmbed({
+                author: { name: 'Quarantine Gaming: Game Manager' },
+                title: this_role.name,
+                thumbnail: { url: this_game?.icon },
+                description: [
+                  `**User:** ${newMember.user.username}`,
+                  `**Profile:** ${newMember}`,
+                ].join('\n'),
+                footer: {
+                  text: `Game Remove • Reference ID: ${newMember.id} | ${this_role.id}`,
+                },
+                color: 'FUCHSIA',
+              }),
             );
           }
         }

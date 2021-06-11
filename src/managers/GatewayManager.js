@@ -56,16 +56,14 @@ export default class GatewayManager {
 
         await client.message_manager.sendToChannel(
           constants.cs.channels.gateway_events,
-          {
-            embed: new MessageEmbed({
-              author: { name: 'Quarantine Gaming: Server Gateway' },
-              title: invite.inviter.tag,
-              description: description.join('\n'),
-              thumbnail: { url: invite.inviter.displayAvatarURL() },
-              footer: { text: `Invite Create • Reference ID: ${invite.code}` },
-              color: 'BLURPLE',
-            }),
-          },
+          new MessageEmbed({
+            author: { name: 'Quarantine Gaming: Server Gateway' },
+            title: invite.inviter.tag,
+            description: description.join('\n'),
+            thumbnail: { url: invite.inviter.displayAvatarURL() },
+            footer: { text: `Invite Create • Reference ID: ${invite.code}` },
+            color: 'BLURPLE',
+          }),
         );
       } catch (error) {
         this.client.error_manager.mark(ETM.create('inviteCreate', error));
@@ -107,16 +105,14 @@ export default class GatewayManager {
 
         await client.message_manager.sendToChannel(
           constants.cs.channels.gateway_events,
-          {
-            embed: new MessageEmbed({
-              author: { name: 'Quarantine Gaming: Server Gateway' },
-              title: invite.inviter.tag,
-              description: description.join('\n'),
-              thumbnail: { url: invite.inviter.displayAvatarURL() },
-              footer: { text: `Invite Delete • Reference ID: ${invite.code}` },
-              color: 'BLURPLE',
-            }),
-          },
+          new MessageEmbed({
+            author: { name: 'Quarantine Gaming: Server Gateway' },
+            title: invite.inviter.tag,
+            description: description.join('\n'),
+            thumbnail: { url: invite.inviter.displayAvatarURL() },
+            footer: { text: `Invite Delete • Reference ID: ${invite.code}` },
+            color: 'BLURPLE',
+          }),
         );
 
         if (invite.maxUses !== 1 || Date.now() >= invite.expiresTimestamp) {
@@ -144,19 +140,17 @@ export default class GatewayManager {
 
         await client.message_manager.sendToChannel(
           constants.cs.channels.gateway_events,
-          {
-            embed: new MessageEmbed({
-              author: { name: 'Quarantine Gaming: Server Gateway' },
-              title: member.user.tag,
-              description: [
-                `**Profile:** ${member}`,
-                `**Created:** ${formatted_date}`,
-              ].join('\n'),
-              thumbnail: { url: member.user.displayAvatarURL() },
-              footer: { text: `Member Join • Reference ID: ${member.user.id}` },
-              color: 'GREEN',
-            }),
-          },
+          new MessageEmbed({
+            author: { name: 'Quarantine Gaming: Server Gateway' },
+            title: member.user.tag,
+            description: [
+              `**Profile:** ${member}`,
+              `**Created:** ${formatted_date}`,
+            ].join('\n'),
+            thumbnail: { url: member.user.displayAvatarURL() },
+            footer: { text: `Member Join • Reference ID: ${member.user.id}` },
+            color: 'GREEN',
+          }),
         );
 
         if (member.user.bot) return;
@@ -264,21 +258,17 @@ export default class GatewayManager {
 
         await client.message_manager.sendToChannel(
           constants.cs.channels.gateway_events,
-          {
-            embed: new MessageEmbed({
-              author: { name: 'Quarantine Gaming: Server Gateway' },
-              title: member.user.tag,
-              description: [
-                `**Profile:** ${member}`,
-                `**Joined:** ${formatted_date}`,
-              ].join('\n'),
-              thumbnail: { url: member.user.displayAvatarURL() },
-              footer: {
-                text: `Member Leave • Reference ID: ${member.user.id}`,
-              },
-              color: 'RED',
-            }),
-          },
+          new MessageEmbed({
+            author: { name: 'Quarantine Gaming: Server Gateway' },
+            title: member.user.tag,
+            description: [
+              `**Profile:** ${member}`,
+              `**Joined:** ${formatted_date}`,
+            ].join('\n'),
+            thumbnail: { url: member.user.displayAvatarURL() },
+            footer: { text: `Member Leave • Reference ID: ${member.user.id}` },
+            color: 'RED',
+          }),
         );
       } catch (error) {
         this.client.error_manager.mark(ETM.create('guildMemberRemove', error));
@@ -290,19 +280,17 @@ export default class GatewayManager {
 
       await client.message_manager.sendToChannel(
         constants.cs.channels.gateway_events,
-        {
-          embed: new MessageEmbed({
-            author: { name: 'Quarantine Gaming: Server Gateway' },
-            title: ban.user.tag,
-            description: [
-              `**Profile:** ${ban.user}`,
-              `**Reason:** ${ban.reason ?? 'No reason given'}`,
-            ].join('\n'),
-            thumbnail: { url: ban.user.displayAvatarURL() },
-            footer: { text: `Member Ban • Reference ID: ${ban.user.id}` },
-            color: 'DARK_RED',
-          }),
-        },
+        new MessageEmbed({
+          author: { name: 'Quarantine Gaming: Server Gateway' },
+          title: ban.user.tag,
+          description: [
+            `**Profile:** ${ban.user}`,
+            `**Reason:** ${ban.reason ?? 'No reason given'}`,
+          ].join('\n'),
+          thumbnail: { url: ban.user.displayAvatarURL() },
+          footer: { text: `Member Ban • Reference ID: ${ban.user.id}` },
+          color: 'DARK_RED',
+        }),
       );
     });
 
@@ -311,19 +299,17 @@ export default class GatewayManager {
 
       await client.message_manager.sendToChannel(
         constants.cs.channels.gateway_events,
-        {
-          embed: new MessageEmbed({
-            author: { name: 'Quarantine Gaming: Server Gateway' },
-            title: ban.user.tag,
-            description: [
-              `**Profile:** ${ban.user}`,
-              `**Ban Reason:** ${ban.reason ?? 'No reason given'}`,
-            ].join('\n'),
-            thumbnail: { url: ban.user.displayAvatarURL() },
-            footer: { text: `Member Unban • Reference ID: ${ban.user.id}` },
-            color: 'AQUA',
-          }),
-        },
+        new MessageEmbed({
+          author: { name: 'Quarantine Gaming: Server Gateway' },
+          title: ban.user.tag,
+          description: [
+            `**Profile:** ${ban.user}`,
+            `**Ban Reason:** ${ban.reason ?? 'No reason given'}`,
+          ].join('\n'),
+          thumbnail: { url: ban.user.displayAvatarURL() },
+          footer: { text: `Member Unban • Reference ID: ${ban.user.id}` },
+          color: 'AQUA',
+        }),
       );
     });
   }
@@ -414,7 +400,7 @@ export default class GatewayManager {
           })
         : await this.client.message_manager.sendToChannel(
             constants.cs.channels.gateway,
-            { embed },
+            embed,
           );
     } catch (error) {
       this.client.error_manager.mark(ETM.create('ScreenMember', error));

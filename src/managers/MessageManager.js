@@ -7,11 +7,11 @@ import {
 
 /**
  * @typedef {import('discord.js').Message} Message
- * @typedef {import('discord.js').APIMessage} APIMessage
  * @typedef {import('discord.js').TextChannel} TextChannel
  * @typedef {import('discord.js').UserResolvable} UserResolvable
  * @typedef {import('discord.js').MessageOptions} MessageOptions
  * @typedef {import('discord.js').CategoryChannel} CategoryChannel
+ * @typedef {import('discord.js').MessageAdditions} MessageAdditions
  * @typedef {import('discord.js').GuildChannelResolvable} GuildChannelResolvable
  * @typedef {import('discord.js').APIMessageContentResolvable} APIMessageContentResolvable
  * @typedef {import('../structures/Base').Client} Client
@@ -46,10 +46,10 @@ export default class MessageManager {
   /**
    * Sends a message to a channel.
    * @param {GuildChannelResolvable} channel The channel where the message will be sent
-   * @param {string | APIMessage | MessageOptions} options The message object to send
+   * @param {MessageOptions | MessageAdditions} message The message object to send
    * @returns {Promise<Message>}
    */
-  sendToChannel(channel, options) {
+  sendToChannel(channel, message) {
     /** @type {TextChannel} */
     const this_channel = this.client.channel(channel);
     console.log(
@@ -60,7 +60,7 @@ export default class MessageManager {
     return this.queuer.queue(async () => {
       let result, error;
       try {
-        result = await this_channel.send(options);
+        result = await this_channel.send(message);
       } catch (this_error) {
         this.client.error_manager.mark(ETM.create('sendToChannel', this_error));
         error = this_error;
@@ -79,10 +79,10 @@ export default class MessageManager {
   /**
    * Sends a message to a user then deletes it after some time.
    * @param {UserResolvable} user The user where the message will be sent
-   * @param {string | APIMessage | MessageOptions} options The message object to send
+   * @param {MessageOptions | MessageAdditions} content The message object to send
    * @returns {Promise<Message>}
    */
-  sendToUser(user, options) {
+  sendToUser(user, content) {
     const member = this.client.member(user);
     console.log(
       `MessageUserSend: Queueing ${this.queuer.totalID} (${
@@ -92,7 +92,7 @@ export default class MessageManager {
     return this.queuer.queue(async () => {
       let result, error;
       try {
-        result = await member.send(options);
+        result = await member.send(content);
         result.delete({ timeout: 3600000 });
       } catch (this_error) {
         this.client.error_manager.mark(ETM.create('sendToUser', this_error));
