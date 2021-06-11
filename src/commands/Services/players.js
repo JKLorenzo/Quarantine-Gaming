@@ -191,6 +191,6 @@ export default class Players extends SlashCommand {
       );
     }
 
-    return interaction.editReply(embed);
+    return interaction.editReply({ embeds: [embed] });
   }
 }

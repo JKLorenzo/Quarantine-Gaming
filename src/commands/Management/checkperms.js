@@ -274,6 +274,6 @@ export default class CheckPerms extends SlashCommand {
       );
     }
 
-    interaction.editReply(embed);
+    interaction.editReply({ embeds: [embed] });
   }
 }
