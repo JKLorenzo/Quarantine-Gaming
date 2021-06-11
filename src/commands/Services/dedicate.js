@@ -1,6 +1,6 @@
 import { MessageEmbed } from 'discord.js';
 import { SlashCommand } from '../../structures/Base.js';
-import { parseMention, sleep, constants } from '../../utils/Base.js';
+import { parseMention, constants } from '../../utils/Base.js';
 
 /**
  * @typedef {import('discord.js').TextChannel} TextChannel
@@ -52,10 +52,28 @@ export default class Dedicate extends SlashCommand {
       return interaction.editReply(reply_message.join('\n'));
     }
 
+    // Format custom name if it is mentionable
+    if (options.custom_name) {
+      options.custom_name =
+        this.client.member(options.custom_name)?.displayName ??
+        this.client.role(options.custom_name)?.name ??
+        this.client.channel(options.custom_name)?.name ??
+        options.custom_name;
+    }
+
     if (
-      options?.custom_name !== voice_channel.name.substring(1) ||
-      voice_channel.parentID !== constants.qg.channels.category.dedicated_voice
+      voice_channel.parentID === constants.qg.channels.category.dedicated_voice
     ) {
+      if (
+        options.custom_name &&
+        options.custom_name !== voice_channel.name.substring(1)
+      ) {
+        reply_message.push(
+          `Alright, renaming your dedicated channel to **${options.custom_name}**.`,
+        );
+        await interaction.editReply(reply_message.join('\n'));
+      }
+    } else {
       if (!options.custom_name) {
         const game_name = this.client.methods.getMostPlayedGame(
           voice_channel.members.array(),
@@ -65,24 +83,17 @@ export default class Dedicate extends SlashCommand {
           : member.displayName;
       }
 
-      if (
-        voice_channel.parentID !==
-        constants.qg.channels.category.dedicated_voice
-      ) {
-        reply_message.push(
-          `Got it! Please wait while I'm preparing **${options.custom_name}** voice and text channels.`,
-        );
-      } else {
-        reply_message.push(
-          `Alright, renaming your dedicated channel to **${options.custom_name}**.`,
-        );
-      }
-      await interaction.editReply(reply_message.join('\n'));
-
-      const data = await this.client.dedicated_channel_manager.create(
-        voice_channel,
-        options.custom_name,
+      reply_message.push(
+        `Got it! Please wait while I'm preparing **${options.custom_name}** voice and text channels.`,
       );
+      await interaction.editReply(reply_message.join('\n'));
+    }
+
+    const data = await this.client.dedicated_channel_manager.create(
+      voice_channel,
+      options.custom_name,
+    );
+    if (data) {
       voice_channel = data.voice_channel;
       if (data.transfer_process) {
         reply_message.push(
@@ -96,7 +107,6 @@ export default class Dedicate extends SlashCommand {
         );
         await interaction.editReply(reply_message.join('\n'));
       }
-      await sleep(2500);
     }
 
     if (typeof options.lock === 'boolean') {
@@ -139,10 +149,9 @@ export default class Dedicate extends SlashCommand {
         timestamp: new Date(),
       });
       await this.client.message_manager.sendToChannel(text_channel, embed);
-      await sleep(2500);
     }
 
-    reply_message.push('Done!');
-    return interaction.editReply(reply_message.join('\n'));
+    reply_message.push('All done!');
+    await interaction.editReply(reply_message.join('\n'));
   }
 }
