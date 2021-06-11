@@ -148,7 +148,7 @@ export default class Dedicate extends SlashCommand {
         color: '#FFE500',
         timestamp: new Date(),
       });
-      await this.client.message_manager.sendToChannel(text_channel, embed);
+      await this.client.message_manager.sendToChannel(text_channel, { embed });
     }
 
     reply_message.push('All done!');

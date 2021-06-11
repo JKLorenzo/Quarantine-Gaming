@@ -17,13 +17,11 @@ export default class Ping extends SlashCommand {
    * @param {CommandInteraction} interaction The interaction that triggered this command
    */
   async exec(interaction) {
-    await interaction.reply(
-      `My current ping to the discord server is ${Math.round(
+    await interaction.reply({
+      content: `My current ping to the discord server is ${Math.round(
         interaction.client.ws.ping,
       )}ms.`,
-      {
-        ephemeral: true,
-      },
-    );
+      ephemeral: true,
+    });
   }
 }

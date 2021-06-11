@@ -29,9 +29,8 @@ const { VIEW_CHANNEL, CONNECT } = Permissions.FLAGS;
  * @param {string} name The name of the channel
  */
 async function displayInfo(client, text_channel, voice_channel, name) {
-  await client.message_manager.sendToChannel(
-    text_channel,
-    new MessageEmbed({
+  await client.message_manager.sendToChannel(text_channel, {
+    embed: new MessageEmbed({
       author: { name: 'Quarantine Gaming: Dedicated Channels' },
       title: `Voice and Text Channels for ${name}`,
       description: [
@@ -57,7 +56,7 @@ async function displayInfo(client, text_channel, voice_channel, name) {
       ].join('\n\n'),
       color: 'BLURPLE',
     }),
-  );
+  });
 }
 
 export default class DedicatedChannelManager {
@@ -385,9 +384,8 @@ export default class DedicatedChannelManager {
           )
         ) {
           this.client.role_manager.remove(member, team_role);
-          this.client.message_manager.sendToChannel(
-            text_channel,
-            new MessageEmbed({
+          this.client.message_manager.sendToChannel(text_channel, {
+            embed: new MessageEmbed({
               author: { name: 'Quarantine Gaming: Dedicated Channels' },
               title: oldState.channel.name,
               thumbnail: { url: member.user.displayAvatarURL() },
@@ -396,7 +394,7 @@ export default class DedicatedChannelManager {
               timestamp: new Date(),
               color: 'RED',
             }),
-          );
+          });
         } else {
           await this.client.role_manager.delete(team_role);
           await this.client.channel_manager.delete(oldState.channel);
@@ -418,9 +416,8 @@ export default class DedicatedChannelManager {
 
         // Notify member
         if (streamers.length > 0) {
-          this.client.message_manager.sendToUser(
-            member,
-            new MessageEmbed({
+          this.client.message_manager.sendToUser(member, {
+            embed: new MessageEmbed({
               author: { name: 'Quarantine Gaming: Information' },
               title: `${
                 streamers.length > 1
@@ -437,7 +434,7 @@ export default class DedicatedChannelManager {
               image: { url: constants.images.streaming_banner },
               color: 'YELLOW',
             }),
-          );
+          });
         }
 
         if (
@@ -458,9 +455,8 @@ export default class DedicatedChannelManager {
           // Add Text Role
           if (!member.roles.cache.has(team_role.id)) {
             this.client.role_manager.add(member, team_role);
-            this.client.message_manager.sendToChannel(
-              text_channel,
-              new MessageEmbed({
+            this.client.message_manager.sendToChannel(text_channel, {
+              embed: new MessageEmbed({
                 author: { name: 'Quarantine Gaming: Dedicated Channels' },
                 title: newState.channel.name,
                 thumbnail: { url: newState.member.user.displayAvatarURL() },
@@ -471,7 +467,7 @@ export default class DedicatedChannelManager {
                 timestamp: new Date(),
                 color: 'GREEN',
               }),
-            );
+            });
           }
         }
       } else if (member.roles.cache.has(constants.qg.roles.streaming)) {

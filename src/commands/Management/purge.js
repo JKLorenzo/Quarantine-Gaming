@@ -96,6 +96,6 @@ export default class Purge extends SlashCommand {
       color: '#FFFF00',
     });
 
-    await interaction.editReply(embed);
+    await interaction.editReply({ embeds: [embed] });
   }
 }
