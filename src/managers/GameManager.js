@@ -495,7 +495,7 @@ export default class GameManager {
         footer: {
           text: `Join this ${
             options.player_count ? 'limited' : 'open'
-          } bracket by reacting below.`,
+          } bracket by clicking the button below.`,
         },
         color: 'BLURPLE',
       });
