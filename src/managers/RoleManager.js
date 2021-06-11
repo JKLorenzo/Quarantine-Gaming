@@ -64,7 +64,7 @@ export default class RoleManager {
     return this.queuer.queue(async () => {
       let result, error;
       try {
-        result = await this_role.delete(reason);
+        if (this_role) result = await this_role.delete(reason);
       } catch (this_error) {
         this.client.error_manager.mark(ETM.create('delete', this_error));
         error = this_error;
