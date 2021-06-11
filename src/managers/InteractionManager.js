@@ -346,7 +346,10 @@ export default class InteractionManager {
       if (commandInteraction.deferred || commandInteraction.replied) {
         commandInteraction.editReply(message);
       } else {
-        commandInteraction.reply(message);
+        commandInteraction.reply({
+          content: message,
+          ephemeral: true,
+        });
       }
       this.client.error_manager.mark(
         ETM.create(commandInteraction.commandName, error, 'processCommand'),

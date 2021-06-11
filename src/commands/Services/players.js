@@ -98,10 +98,10 @@ export default class Players extends SlashCommand {
 
     const game_role = this.client.role(options.game);
     if (!game_role) {
-      return interaction.reply(
-        'Commmand failed. The game you specified no longer exists.',
-        { ephemeral: true },
-      );
+      return interaction.reply({
+        content: 'Commmand failed. The game you specified no longer exists.',
+        ephemeral: true,
+      });
     }
 
     await interaction.defer({ ephemeral: true });
