@@ -19,7 +19,7 @@ import {
  */
 
 const ETM = new ErrorTicketManager('Dedicated Channel Manager');
-const PFlags = Permissions.FLAGS;
+const { VIEW_CHANNEL, CONNECT } = Permissions.FLAGS;
 
 /**
  * @param {Client} client The QG Client
@@ -320,15 +320,19 @@ export default class DedicatedChannelManager {
               permissionOverwrites: [
                 {
                   id: constants.qg.roles.everyone,
-                  deny: [PFlags.VIEW_CHANNEL],
+                  deny: [VIEW_CHANNEL],
                 },
                 {
                   id: constants.qg.roles.member,
-                  allow: [PFlags.VIEW_CHANNEL],
+                  allow: [VIEW_CHANNEL],
+                },
+                {
+                  id: constants.qg.roles.moderator,
+                  allow: [CONNECT],
                 },
                 {
                   id: constants.qg.roles.music_bot,
-                  allow: [PFlags.VIEW_CHANNEL],
+                  allow: [VIEW_CHANNEL],
                 },
               ],
               bitrate: 128000,
@@ -341,19 +345,19 @@ export default class DedicatedChannelManager {
               permissionOverwrites: [
                 {
                   id: constants.qg.roles.everyone,
-                  deny: [PFlags.VIEW_CHANNEL],
+                  deny: [VIEW_CHANNEL],
                 },
                 {
                   id: constants.qg.roles.moderator,
-                  allow: [PFlags.VIEW_CHANNEL],
+                  allow: [VIEW_CHANNEL],
                 },
                 {
                   id: constants.qg.roles.music_bot,
-                  allow: [PFlags.VIEW_CHANNEL],
+                  allow: [VIEW_CHANNEL],
                 },
                 {
                   id: team_role.id,
-                  allow: [PFlags.VIEW_CHANNEL],
+                  allow: [VIEW_CHANNEL],
                 },
               ],
               topic: `${dedicated_voice_channel} ${team_role}`,
