@@ -11,6 +11,7 @@ import {
 
 /**
  * @typedef {import('discord.js').Role} Role
+ * @typedef {import('discord.js').VoiceState} VoiceState
  * @typedef {import('discord.js').GuildMember} GuildMember
  * @typedef {import('discord.js').TextChannel} TextChannel
  * @typedef {import('discord.js').VoiceChannel} VoiceChannel
@@ -19,7 +20,7 @@ import {
  */
 
 const ETM = new ErrorTicketManager('Dedicated Channel Manager');
-const PFlags = Permissions.FLAGS;
+const { VIEW_CHANNEL, CONNECT } = Permissions.FLAGS;
 
 /**
  * @param {Client} client The QG Client
@@ -69,10 +70,343 @@ export default class DedicatedChannelManager {
   }
 
   init() {
-    this.client.on('voiceStateUpdate', async (oldState, newState) => {
-      const member = newState.member;
+    this.client.on('voiceStateUpdate', (oldState, newState) => {
+      // Block updates on the same channel
       if (newState.channelID === oldState.channelID) return;
+      this.processVoiceStateUpdate(oldState, newState);
+    });
 
+    // Auto dedicate every 5 minutes
+    setInterval(() => {
+      this.autoDedicate();
+    }, 300000);
+
+    // Delete unused roles
+    const team_roles = this.client.qg.roles.cache.filter(r => {
+      if (r.name.startsWith('Team 🔰')) {
+        if (r.members.size === 0) return true;
+        /** @type {CategoryChannel} */
+        const dedicated_text_category = this.client.channel(
+          constants.qg.channels.category.dedicated,
+        );
+        return !dedicated_text_category.children?.some(c => {
+          if (c.isText()) {
+            const data = c.topic.split(' ');
+            return this.client.role(data[1])?.id === r.id;
+          }
+          return false;
+        });
+      }
+      return false;
+    });
+    for (const team_role of team_roles.array()) {
+      this.client.role_manager.delete(team_role);
+    }
+
+    // Delete unused voice channels
+    /** @type {CategoryChannel} */
+    const voice_channel_category = this.client.channel(
+      constants.qg.channels.category.dedicated_voice,
+    );
+    const voice_channels = voice_channel_category.children.filter(
+      c => c.members.size === 0,
+    );
+    for (const voice_channel of voice_channels.array()) {
+      this.client.channel_manager.delete(voice_channel);
+    }
+
+    // Delete unused text channels
+    /** @type {CategoryChannel} */
+    const text_channel_category = this.client.channel(
+      constants.qg.channels.category.dedicated,
+    );
+    const text_channels = text_channel_category.children.filter(c => {
+      if (c.isText()) {
+        if (!c.topic) return true;
+        const data = c.topic.split(' ');
+        if (!this.client.channel(data[0])) return true;
+        if (!this.client.role(data[1])) return true;
+      }
+      return false;
+    });
+    for (const text_channel of text_channels.array()) {
+      this.client.channel_manager.delete(text_channel);
+    }
+  }
+
+  /**
+   * Automatically dedicates all channels.
+   */
+  autoDedicate() {
+    try {
+      /** @type {CategoryChannel} */
+      const dedicated_voice_channels_category = this.client.channel(
+        constants.qg.channels.category.dedicated_voice,
+      );
+      /** @type {CategoryChannel} */
+      const public_voice_channels_category = this.client.channel(
+        constants.qg.channels.category.voice,
+      );
+      /** @type {VoiceChannel[]} */
+      const channels_for_dedication = [
+        ...dedicated_voice_channels_category.children.array(),
+        ...public_voice_channels_category.children.array(),
+      ];
+      for (const this_channel of channels_for_dedication) {
+        const members = this_channel.members.array();
+        if (!members.length) continue;
+
+        const game = this.client.methods.getMostPlayedGame(members);
+        if (
+          game &&
+          !this_channel.name.substring(2).startsWith(game.substring(5))
+        ) {
+          if (this_channel.name.startsWith('🔰')) {
+            if (
+              this.client.qg.roles.cache.some(
+                r =>
+                  r.hexColor === constants.colors.game_role &&
+                  contains(this_channel.name, r.name),
+              )
+            ) {
+              this.create(this_channel, game.substring(5));
+            }
+          } else {
+            this.create(this_channel, game.substring(5));
+          }
+        }
+      }
+    } catch (error) {
+      this.client.error_manager.mark(ETM.create('autoDedicate', error));
+    }
+  }
+
+  /**
+   * Creates a dedicated channel.
+   * @param {VoiceChannel} channel_origin The channel to dedicate
+   * @param {string} name The name of the channel to create
+   * @typedef {Object} DedicateData
+   * @property {Role} team_role
+   * @property {TextChannel} text_channel
+   * @property {VoiceChannel} voice_channel
+   * @property {Promise<void>} transfer_process
+   * @returns {Promise<DedicateData>}
+   */
+  create(channel_origin, name) {
+    return this.queuer.queue(async () => {
+      if (!channel_origin?.members.size) return;
+      try {
+        const channel_name = `🔰${name}`;
+        if (
+          channel_origin.parentID ===
+          constants.qg.channels.category.dedicated_voice
+        ) {
+          // Block renaming of channel with the same or custom name
+          if (!name || channel_origin.name === channel_name) return;
+
+          // Rename
+          await channel_origin.setName(channel_name);
+          /** @type {CategoryChannel} */
+          const dedicated_text_channels_category = this.client.channel(
+            constants.qg.channels.category.dedicated,
+          );
+          /** @type {Array<TextChannel>} */
+          const dedicated_text_channels =
+            dedicated_text_channels_category.children.array();
+          const dedicated_text_channel = dedicated_text_channels.find(
+            channel =>
+              channel.topic &&
+              parseMention(channel.topic.split(' ')[0]) === channel_origin.id,
+          );
+          await dedicated_text_channel.setName(channel_name);
+          const team_role = this.client.role(
+            dedicated_text_channel.topic.split(' ')[1],
+          );
+          await team_role.setName(`Team ${channel_name}`);
+
+          displayInfo(
+            this.client,
+            dedicated_text_channel,
+            channel_origin,
+            channel_name,
+          );
+
+          return {
+            team_role: team_role,
+            text_channel: dedicated_text_channel,
+            voice_channel: channel_origin,
+          };
+        } else {
+          // Notify
+          const this_speech = this.client.speech_manager.say(
+            channel_origin,
+            `You will be transferred to ${name} dedicated channel. Please wait.`,
+          );
+
+          const team_role = await this.client.role_manager.create({
+            name: `Team ${channel_name}`,
+            position:
+              this.client.role(constants.qg.roles.streaming).position + 1,
+            hoist: true,
+            color: generateColor({ min: 100 }).toHex(),
+          });
+
+          const dedicated_voice_channel =
+            await this.client.channel_manager.create(channel_name, {
+              type: 'voice',
+              parent: constants.qg.channels.category.dedicated_voice,
+              permissionOverwrites: [
+                {
+                  id: constants.qg.roles.everyone,
+                  deny: [VIEW_CHANNEL],
+                },
+                {
+                  id: constants.qg.roles.member,
+                  allow: [VIEW_CHANNEL],
+                },
+                {
+                  id: constants.qg.roles.moderator,
+                  allow: [CONNECT],
+                },
+                {
+                  id: constants.qg.roles.music_bot,
+                  allow: [VIEW_CHANNEL],
+                },
+              ],
+              bitrate: 128000,
+            });
+
+          const dedicated_text_channel =
+            await this.client.channel_manager.create(channel_name, {
+              type: 'text',
+              parent: constants.qg.channels.category.dedicated,
+              permissionOverwrites: [
+                {
+                  id: constants.qg.roles.everyone,
+                  deny: [VIEW_CHANNEL],
+                },
+                {
+                  id: constants.qg.roles.moderator,
+                  allow: [VIEW_CHANNEL],
+                },
+                {
+                  id: constants.qg.roles.music_bot,
+                  allow: [VIEW_CHANNEL],
+                },
+                {
+                  id: team_role.id,
+                  allow: [VIEW_CHANNEL],
+                },
+              ],
+              topic: `${dedicated_voice_channel} ${team_role}`,
+            });
+
+          displayInfo(
+            this.client,
+            dedicated_text_channel,
+            dedicated_voice_channel,
+            channel_name,
+          );
+
+          // Delay for ~5 seconds
+          await this_speech;
+          await sleep(5000);
+
+          // Sort streamers from members and transfer
+          const [streamers, members] = channel_origin.members.partition(
+            this_member =>
+              this_member.roles.cache.has(constants.qg.roles.streaming),
+          );
+          const transferProcess = this.client.methods.voiceChannelTransfer(
+            dedicated_voice_channel,
+            [...streamers.array(), ...members.array()],
+          );
+          return {
+            team_role: team_role,
+            text_channel: dedicated_text_channel,
+            voice_channel: dedicated_voice_channel,
+            transfer_process: transferProcess,
+          };
+        }
+      } catch (error) {
+        return this.client.error_manager.mark(ETM.create('create', error));
+      }
+    });
+  }
+
+  /**
+   * Removes unused dedicated channel.
+   * @returns {Promise<null>}
+   */
+  clean() {
+    return this.queuer.queue(async () => {
+      try {
+        for (const team_role of this.client.qg.roles.cache
+          .array()
+          .filter(role => role.name.startsWith('Team'))) {
+          /** @type {CategoryChannel} */
+          const dedicated_text_category = this.client.qg.channels.cache.get(
+            constants.qg.channels.category.dedicated,
+          );
+          /** @type {TextChannel} */
+          const dedicated_text_channel = dedicated_text_category.children
+            .array()
+            .find(channel => {
+              /** @type {TextChannel} */
+              const text_channel = channel;
+              if (
+                text_channel.topic &&
+                parseMention(text_channel.topic.split(' ')[1]) === team_role.id
+              ) {
+                return true;
+              }
+              return false;
+            });
+          if (!dedicated_text_channel) {
+            await this.client.role_manager.delete(team_role);
+            continue;
+          }
+          /** @type {VoiceChannel} */
+          const dedicated_voice_channel = this.client.channel(
+            parseMention(dedicated_text_channel.topic.split(' ')[0]),
+          );
+          if (!dedicated_voice_channel) {
+            await this.client.role_manager.delete(team_role);
+            await this.client.channel_manager.delete(dedicated_text_channel);
+            continue;
+          }
+          const team_members = team_role.members
+            .array()
+            .filter(member => !member.user.bot);
+          if (team_members.length === 0) {
+            await this.client.role_manager.delete(team_role);
+            await this.client.channel_manager.delete(dedicated_text_channel);
+            await this.client.channel_manager.delete(dedicated_voice_channel);
+            continue;
+          }
+          for (const this_member of team_members) {
+            // Add or remove team role
+            if (dedicated_voice_channel.members.array().includes(this_member)) {
+              await this.client.role_manager.add(this_member, team_role);
+            } else {
+              await this.client.role_manager.remove(this_member, team_role);
+            }
+          }
+        }
+      } catch (error) {
+        this.client.error_manager.mark(ETM.create('load', error));
+      }
+    });
+  }
+
+  /**
+   * @private
+   * @param {VoiceState} oldState The old voice state
+   * @param {VoiceState} newState The new voice state
+   */
+  async processVoiceStateUpdate(oldState, newState) {
+    const member = newState.member;
+    try {
       if (
         oldState.channel?.parent?.id ===
         constants.qg.channels.category.dedicated_voice
@@ -188,272 +522,10 @@ export default class DedicatedChannelManager {
       } else if (member.roles.cache.has(constants.qg.roles.streaming)) {
         this.client.role_manager.remove(member, constants.qg.roles.streaming);
       }
-    });
-
-    // Auto dedicate every 5 minutes
-    setInterval(() => {
-      this.autoDedicate();
-    }, 300000);
-  }
-
-  /**
-   * Automatically dedicates all channels.
-   */
-  autoDedicate() {
-    try {
-      /** @type {CategoryChannel} */
-      const dedicated_voice_channels_category = this.client.channel(
-        constants.qg.channels.category.dedicated_voice,
-      );
-      /** @type {CategoryChannel} */
-      const public_voice_channels_category = this.client.channel(
-        constants.qg.channels.category.voice,
-      );
-      /** @type {VoiceChannel[]} */
-      const channels_for_dedication = [
-        ...dedicated_voice_channels_category.children.array(),
-        ...public_voice_channels_category.children.array(),
-      ];
-      for (const this_channel of channels_for_dedication) {
-        const members = this_channel.members.array();
-        if (!members.length) continue;
-
-        const game = this.client.methods.getMostPlayedGame(members);
-        if (
-          game &&
-          !this_channel.name.substring(2).startsWith(game.substring(5))
-        ) {
-          if (this_channel.name.startsWith('🔰')) {
-            if (
-              this.client.qg.roles.cache.some(
-                r =>
-                  r.hexColor === constants.colors.game_role &&
-                  contains(this_channel.name, r.name),
-              )
-            ) {
-              this.create(this_channel, game.substring(5));
-            }
-          } else {
-            this.create(this_channel, game.substring(5));
-          }
-        }
-      }
     } catch (error) {
-      this.client.error_manager.mark(ETM.create('autoDedicate', error));
+      this.client.error_manager.mark(
+        ETM.create('processVoiceStateUpdate', error),
+      );
     }
-  }
-
-  /**
-   * Creates a dedicated channel.
-   * @param {VoiceChannel} channel_origin The channel to dedicate
-   * @param {string} name The name of the channel to create
-   * @typedef {Object} DedicateData
-   * @property {Role} team_role
-   * @property {TextChannel} text_channel
-   * @property {VoiceChannel} voice_channel
-   * @property {Promise<void>} transfer_process
-   * @returns {Promise<DedicateData>}
-   */
-  create(channel_origin, name) {
-    return this.queuer.queue(async () => {
-      if (!channel_origin?.members.size) return;
-      try {
-        const channel_name = `🔰${name}`;
-        if (
-          channel_origin.parentID ===
-          constants.qg.channels.category.dedicated_voice
-        ) {
-          // Block renaming of channel with the same or custom name
-          if (channel_origin.name === channel_name) return;
-
-          // Rename
-          await channel_origin.setName(channel_name);
-          /** @type {CategoryChannel} */
-          const dedicated_text_channels_category = this.client.channel(
-            constants.qg.channels.category.dedicated,
-          );
-          /** @type {Array<TextChannel>} */
-          const dedicated_text_channels =
-            dedicated_text_channels_category.children.array();
-          const dedicated_text_channel = dedicated_text_channels.find(
-            channel =>
-              channel.topic &&
-              parseMention(channel.topic.split(' ')[0]) === channel_origin.id,
-          );
-          await dedicated_text_channel.setName(channel_name);
-          const team_role = this.client.role(
-            dedicated_text_channel.topic.split(' ')[1],
-          );
-          await team_role.setName(`Team ${channel_name}`);
-
-          displayInfo(
-            this.client,
-            dedicated_text_channel,
-            channel_origin,
-            channel_name,
-          );
-
-          return {
-            team_role: team_role,
-            text_channel: dedicated_text_channel,
-            voice_channel: channel_origin,
-          };
-        } else {
-          // Notify
-          const this_speech = this.client.speech_manager.say(
-            channel_origin,
-            `You will be transferred to ${name} dedicated channel. Please wait.`,
-          );
-
-          const team_role = await this.client.role_manager.create({
-            name: `Team ${channel_name}`,
-            position:
-              this.client.role(constants.qg.roles.streaming).position + 1,
-            hoist: true,
-            color: generateColor({ min: 100 }).toHex(),
-          });
-
-          const dedicated_voice_channel =
-            await this.client.channel_manager.create(channel_name, {
-              type: 'voice',
-              parent: constants.qg.channels.category.dedicated_voice,
-              permissionOverwrites: [
-                {
-                  id: constants.qg.roles.everyone,
-                  deny: [PFlags.VIEW_CHANNEL],
-                },
-                {
-                  id: constants.qg.roles.member,
-                  allow: [PFlags.VIEW_CHANNEL],
-                },
-                {
-                  id: constants.qg.roles.music_bot,
-                  allow: [PFlags.VIEW_CHANNEL],
-                },
-              ],
-              bitrate: 128000,
-            });
-
-          const dedicated_text_channel =
-            await this.client.channel_manager.create(channel_name, {
-              type: 'text',
-              parent: constants.qg.channels.category.dedicated,
-              permissionOverwrites: [
-                {
-                  id: constants.qg.roles.everyone,
-                  deny: [PFlags.VIEW_CHANNEL],
-                },
-                {
-                  id: constants.qg.roles.moderator,
-                  allow: [PFlags.VIEW_CHANNEL],
-                },
-                {
-                  id: constants.qg.roles.music_bot,
-                  allow: [PFlags.VIEW_CHANNEL],
-                },
-                {
-                  id: team_role.id,
-                  allow: [PFlags.VIEW_CHANNEL],
-                },
-              ],
-              topic: `${dedicated_voice_channel} ${team_role}`,
-            });
-
-          displayInfo(
-            this.client,
-            dedicated_text_channel,
-            dedicated_voice_channel,
-            channel_name,
-          );
-
-          // Delay for ~5 seconds
-          await this_speech;
-          await sleep(5000);
-
-          // Sort streamers from members and transfer
-          const [streamers, members] = channel_origin.members.partition(
-            this_member =>
-              this_member.roles.cache.has(constants.qg.roles.streaming),
-          );
-          const transferProcess = this.client.methods.voiceChannelTransfer(
-            dedicated_voice_channel,
-            [...streamers.array(), ...members.array()],
-          );
-          return {
-            team_role: team_role,
-            text_channel: dedicated_text_channel,
-            voice_channel: dedicated_voice_channel,
-            transfer_process: transferProcess,
-          };
-        }
-      } catch (error) {
-        return this.client.error_manager.mark(ETM.create('create', error));
-      }
-    });
-  }
-
-  /**
-   * Removes unused dedicated channel.
-   * @returns {Promise<null>}
-   */
-  clean() {
-    return this.queuer.queue(async () => {
-      try {
-        for (const team_role of this.client.qg.roles.cache
-          .array()
-          .filter(role => role.name.startsWith('Team'))) {
-          /** @type {CategoryChannel} */
-          const dedicated_text_category = this.client.qg.channels.cache.get(
-            constants.qg.channels.category.dedicated,
-          );
-          /** @type {TextChannel} */
-          const dedicated_text_channel = dedicated_text_category.children
-            .array()
-            .find(channel => {
-              /** @type {TextChannel} */
-              const text_channel = channel;
-              if (
-                text_channel.topic &&
-                parseMention(text_channel.topic.split(' ')[1]) === team_role.id
-              ) {
-                return true;
-              }
-              return false;
-            });
-          if (!dedicated_text_channel) {
-            await this.client.role_manager.delete(team_role);
-            continue;
-          }
-          /** @type {VoiceChannel} */
-          const dedicated_voice_channel = this.client.channel(
-            parseMention(dedicated_text_channel.topic.split(' ')[0]),
-          );
-          if (!dedicated_voice_channel) {
-            await this.client.role_manager.delete(team_role);
-            await this.client.channel_manager.delete(dedicated_text_channel);
-            continue;
-          }
-          const team_members = team_role.members
-            .array()
-            .filter(member => !member.user.bot);
-          if (team_members.length === 0) {
-            await this.client.role_manager.delete(team_role);
-            await this.client.channel_manager.delete(dedicated_text_channel);
-            await this.client.channel_manager.delete(dedicated_voice_channel);
-            continue;
-          }
-          for (const this_member of team_members) {
-            // Add or remove team role
-            if (dedicated_voice_channel.members.array().includes(this_member)) {
-              await this.client.role_manager.add(this_member, team_role);
-            } else {
-              await this.client.role_manager.remove(this_member, team_role);
-            }
-          }
-        }
-      } catch (error) {
-        this.client.error_manager.mark(ETM.create('load', error));
-      }
-    });
   }
 }
