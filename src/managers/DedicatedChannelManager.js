@@ -70,6 +70,8 @@ export default class DedicatedChannelManager {
   }
 
   init() {
+    this.clean();
+
     this.client.on('voiceStateUpdate', (oldState, newState) => {
       // Block updates on the same channel
       if (newState.channelID === oldState.channelID) return;
@@ -80,58 +82,6 @@ export default class DedicatedChannelManager {
     setInterval(() => {
       this.autoDedicate();
     }, 300000);
-
-    // Delete unused roles
-    const team_roles = this.client.qg.roles.cache.filter(r => {
-      if (r.name.startsWith('Team 🔰')) {
-        if (r.members.size === 0) return true;
-        /** @type {CategoryChannel} */
-        const dedicated_text_category = this.client.channel(
-          constants.qg.channels.category.dedicated,
-        );
-        return !dedicated_text_category.children?.some(c => {
-          if (c.isText()) {
-            const data = c.topic.split(' ');
-            return this.client.role(data[1])?.id === r.id;
-          }
-          return false;
-        });
-      }
-      return false;
-    });
-    for (const team_role of team_roles.array()) {
-      this.client.role_manager.delete(team_role);
-    }
-
-    // Delete unused voice channels
-    /** @type {CategoryChannel} */
-    const voice_channel_category = this.client.channel(
-      constants.qg.channels.category.dedicated_voice,
-    );
-    const voice_channels = voice_channel_category.children.filter(
-      c => c.members.size === 0,
-    );
-    for (const voice_channel of voice_channels.array()) {
-      this.client.channel_manager.delete(voice_channel);
-    }
-
-    // Delete unused text channels
-    /** @type {CategoryChannel} */
-    const text_channel_category = this.client.channel(
-      constants.qg.channels.category.dedicated,
-    );
-    const text_channels = text_channel_category.children.filter(c => {
-      if (c.isText()) {
-        if (!c.topic) return true;
-        const data = c.topic.split(' ');
-        if (!this.client.channel(data[0])) return true;
-        if (!this.client.role(data[1])) return true;
-      }
-      return false;
-    });
-    for (const text_channel of text_channels.array()) {
-      this.client.channel_manager.delete(text_channel);
-    }
   }
 
   /**
@@ -341,58 +291,63 @@ export default class DedicatedChannelManager {
   clean() {
     return this.queuer.queue(async () => {
       try {
-        for (const team_role of this.client.qg.roles.cache
-          .array()
-          .filter(role => role.name.startsWith('Team'))) {
-          /** @type {CategoryChannel} */
-          const dedicated_text_category = this.client.qg.channels.cache.get(
-            constants.qg.channels.category.dedicated,
-          );
-          /** @type {TextChannel} */
-          const dedicated_text_channel = dedicated_text_category.children
-            .array()
-            .find(channel => {
-              /** @type {TextChannel} */
-              const text_channel = channel;
-              if (
-                text_channel.topic &&
-                parseMention(text_channel.topic.split(' ')[1]) === team_role.id
-              ) {
-                return true;
+        // Delete unused roles
+        let promises = [];
+        const team_roles = this.client.qg.roles.cache.filter(r => {
+          if (r.name.startsWith('Team 🔰')) {
+            if (r.members.size === 0) return true;
+            /** @type {CategoryChannel} */
+            const dedicated_text_category = this.client.channel(
+              constants.qg.channels.category.dedicated,
+            );
+            return !dedicated_text_category.children?.some(c => {
+              if (c.isText()) {
+                const data = c.topic.split(' ');
+                return this.client.role(data[1])?.id === r.id;
               }
               return false;
             });
-          if (!dedicated_text_channel) {
-            await this.client.role_manager.delete(team_role);
-            continue;
           }
-          /** @type {VoiceChannel} */
-          const dedicated_voice_channel = this.client.channel(
-            parseMention(dedicated_text_channel.topic.split(' ')[0]),
-          );
-          if (!dedicated_voice_channel) {
-            await this.client.role_manager.delete(team_role);
-            await this.client.channel_manager.delete(dedicated_text_channel);
-            continue;
-          }
-          const team_members = team_role.members
-            .array()
-            .filter(member => !member.user.bot);
-          if (team_members.length === 0) {
-            await this.client.role_manager.delete(team_role);
-            await this.client.channel_manager.delete(dedicated_text_channel);
-            await this.client.channel_manager.delete(dedicated_voice_channel);
-            continue;
-          }
-          for (const this_member of team_members) {
-            // Add or remove team role
-            if (dedicated_voice_channel.members.array().includes(this_member)) {
-              await this.client.role_manager.add(this_member, team_role);
-            } else {
-              await this.client.role_manager.remove(this_member, team_role);
-            }
-          }
+          return false;
+        });
+        for (const team_role of team_roles.array()) {
+          promises.push(this.client.role_manager.delete(team_role));
         }
+        await Promise.all(promises);
+
+        // Delete unused voice channels
+        promises = [];
+        /** @type {CategoryChannel} */
+        const voice_channel_category = this.client.channel(
+          constants.qg.channels.category.dedicated_voice,
+        );
+        const voice_channels = voice_channel_category.children.filter(
+          c => c.members.size === 0,
+        );
+        for (const voice_channel of voice_channels.array()) {
+          promises.push(this.client.channel_manager.delete(voice_channel));
+        }
+        await Promise.all(promises);
+
+        // Delete unused text channels
+        promises = [];
+        /** @type {CategoryChannel} */
+        const text_channel_category = this.client.channel(
+          constants.qg.channels.category.dedicated,
+        );
+        const text_channels = text_channel_category.children.filter(c => {
+          if (c.isText()) {
+            if (!c.topic) return true;
+            const data = c.topic.split(' ');
+            if (!this.client.channel(data[0])) return true;
+            if (!this.client.role(data[1])) return true;
+          }
+          return false;
+        });
+        for (const text_channel of text_channels.array()) {
+          promises.push(this.client.channel_manager.delete(text_channel));
+        }
+        await Promise.all(promises);
       } catch (error) {
         this.client.error_manager.mark(ETM.create('load', error));
       }
