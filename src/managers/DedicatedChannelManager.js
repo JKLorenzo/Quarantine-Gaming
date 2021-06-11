@@ -80,6 +80,58 @@ export default class DedicatedChannelManager {
     setInterval(() => {
       this.autoDedicate();
     }, 300000);
+
+    // Delete unused roles
+    const team_roles = this.client.qg.roles.cache.filter(r => {
+      if (r.name.startsWith('Team 🔰')) {
+        if (r.members.size === 0) return true;
+        /** @type {CategoryChannel} */
+        const dedicated_text_category = this.client.channel(
+          constants.qg.channels.category.dedicated,
+        );
+        return !dedicated_text_category.children?.some(c => {
+          if (c.isText()) {
+            const data = c.topic.split(' ');
+            return this.client.role(data[1])?.id === r.id;
+          }
+          return false;
+        });
+      }
+      return false;
+    });
+    for (const team_role of team_roles.array()) {
+      this.client.role_manager.delete(team_role);
+    }
+
+    // Delete unused voice channels
+    /** @type {CategoryChannel} */
+    const voice_channel_category = this.client.channel(
+      constants.qg.channels.category.dedicated_voice,
+    );
+    const voice_channels = voice_channel_category.children.filter(
+      c => c.members.size === 0,
+    );
+    for (const voice_channel of voice_channels.array()) {
+      this.client.channel_manager.delete(voice_channel);
+    }
+
+    // Delete unused text channels
+    /** @type {CategoryChannel} */
+    const text_channel_category = this.client.channel(
+      constants.qg.channels.category.dedicated,
+    );
+    const text_channels = text_channel_category.children.filter(c => {
+      if (c.isText()) {
+        if (!c.topic) return true;
+        const data = c.topic.split(' ');
+        if (!this.client.channel(data[0])) return true;
+        if (!this.client.role(data[1])) return true;
+      }
+      return false;
+    });
+    for (const text_channel of text_channels.array()) {
+      this.client.channel_manager.delete(text_channel);
+    }
   }
 
   /**
