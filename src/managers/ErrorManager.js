@@ -21,18 +21,20 @@ export default class ErrorManager {
       this.client.message_manager.sendToChannel(
         constants.cs.channels.telemetry,
         {
-          embed: new MessageEmbed({
-            author: { name: 'Quarantine Gaming: Telemetry' },
-            title: 'Client Rate Limit',
-            thumbnail: { url: constants.images.ratelimit_thumbnail },
-            description: [
-              `**Method:** ${data.method}`,
-              `**Limit:** ${data.limit}`,
-              `**Timeout:** ${data.timeout}`,
-            ].join('\n'),
-            footer: { text: data.route },
-            color: '#1F85DE',
-          }),
+          embeds: [
+            new MessageEmbed({
+              author: { name: 'Quarantine Gaming: Telemetry' },
+              title: 'Client Rate Limit',
+              thumbnail: { url: constants.images.ratelimit_thumbnail },
+              description: [
+                `**Method:** ${data.method}`,
+                `**Limit:** ${data.limit}`,
+                `**Timeout:** ${data.timeout}`,
+              ].join('\n'),
+              footer: { text: data.route },
+              color: '#1F85DE',
+            }),
+          ],
         },
       );
     });
@@ -41,13 +43,15 @@ export default class ErrorManager {
       this.client.message_manager.sendToChannel(
         constants.cs.channels.telemetry,
         {
-          embed: new MessageEmbed({
-            author: { name: 'Quarantine Gaming: Telemetry' },
-            title: 'Client Warning',
-            thumbnail: { url: constants.images.warning_thumbnail },
-            description: `**Message:** ${message}`,
-            color: '#FFA721',
-          }),
+          embeds: [
+            new MessageEmbed({
+              author: { name: 'Quarantine Gaming: Telemetry' },
+              title: 'Client Warning',
+              thumbnail: { url: constants.images.warning_thumbnail },
+              description: `**Message:** ${message}`,
+              color: '#FFA721',
+            }),
+          ],
         },
       );
     });
@@ -56,16 +60,18 @@ export default class ErrorManager {
       this.client.message_manager.sendToChannel(
         constants.cs.channels.telemetry,
         {
-          embed: new MessageEmbed({
-            author: { name: 'Quarantine Gaming: Telemetry' },
-            title: 'Client Error',
-            thumbnail: { url: constants.images.error_thumbnail },
-            description: [
-              `**Name:** ${error.name}`,
-              `**Message:** ${error.message}`,
-            ].join('\n'),
-            color: '#FF0A0A',
-          }),
+          embeds: [
+            new MessageEmbed({
+              author: { name: 'Quarantine Gaming: Telemetry' },
+              title: 'Client Error',
+              thumbnail: { url: constants.images.error_thumbnail },
+              description: [
+                `**Name:** ${error.name}`,
+                `**Message:** ${error.message}`,
+              ].join('\n'),
+              color: '#FF0A0A',
+            }),
+          ],
         },
       );
     });
@@ -137,7 +143,7 @@ export default class ErrorManager {
 
         return this.client.message_manager.sendToChannel(
           constants.cs.channels.telemetry,
-          { embed },
+          { embeds: [embed] },
         );
       } catch (error) {
         console.error(`ErrorManager: ${error}`);

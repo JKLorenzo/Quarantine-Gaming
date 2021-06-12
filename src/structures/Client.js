@@ -107,14 +107,16 @@ export default class QGClient extends Client {
           this.message_manager.sendToChannel(
             constants.cs.channels.member_events,
             {
-              embed: new MessageEmbed({
-                author: { name: 'Quarantine Gaming: User Update' },
-                title: member.displayName,
-                thumbnail: { url: newUser.displayAvatarURL() },
-                description: changes.join('\n'),
-                footer: { text: `Reference ID: ${newUser.id}` },
-                color: 'BLURPLE',
-              }),
+              embeds: [
+                new MessageEmbed({
+                  author: { name: 'Quarantine Gaming: User Update' },
+                  title: member.displayName,
+                  thumbnail: { url: newUser.displayAvatarURL() },
+                  description: changes.join('\n'),
+                  footer: { text: `Reference ID: ${newUser.id}` },
+                  color: 'BLURPLE',
+                }),
+              ],
             },
           );
         }
@@ -171,14 +173,16 @@ export default class QGClient extends Client {
           this.message_manager.sendToChannel(
             constants.cs.channels.member_events,
             {
-              embed: new MessageEmbed({
-                author: { name: 'Quarantine Gaming: Member Update' },
-                title: newMember.displayName,
-                thumbnail: { url: newMember.user.displayAvatarURL() },
-                description: changes.join('\n'),
-                footer: { text: `Reference ID: ${newMember.id}` },
-                color: 'BLURPLE',
-              }),
+              embeds: [
+                new MessageEmbed({
+                  author: { name: 'Quarantine Gaming: Member Update' },
+                  title: newMember.displayName,
+                  thumbnail: { url: newMember.user.displayAvatarURL() },
+                  description: changes.join('\n'),
+                  footer: { text: `Reference ID: ${newMember.id}` },
+                  color: 'BLURPLE',
+                }),
+              ],
             },
           );
         }

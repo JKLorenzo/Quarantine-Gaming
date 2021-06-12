@@ -108,7 +108,7 @@ export default class GameBracket extends MessageComponent {
           players.forEach(player => {
             this.client.message_manager.sendToUser(player, {
               content: `Your ${bracket_name} bracket is now full.`,
-              embed: embed,
+              embeds: [embed],
             });
           });
         }

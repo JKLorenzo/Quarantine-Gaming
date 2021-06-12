@@ -229,7 +229,7 @@ export default class FreeGameManager {
           content: `${embed.title} is now available on ${mentionable_roles.join(
             ' and ',
           )}.`,
-          embed: embed,
+          embeds: [embed],
         },
       );
       free_game.title = embed.title;

@@ -143,38 +143,40 @@ export default class Message extends SlashCommand {
    */
   freeGameUpdatesPC() {
     return {
-      embed: new MessageEmbed({
-        author: { name: 'Quarantine Gaming: Free Game Updates' },
-        title: 'Subscribe to get Updated',
-        description: [
-          `All free game notifications will be made available on our ${this.client.channel(
-            constants.qg.channels.integrations.free_games,
-          )} channel.`,
-          '',
-          `**${this.client.qg.emojis.cache.find(
-            e => e.name === 'steam',
-          )} - Steam (${this.client.role(constants.qg.roles.steam)})**`,
-          'Notifies you with games that are currently free on Steam.',
-          '',
-          `**${this.client.qg.emojis.cache.find(
-            e => e.name === 'epic_games',
-          )} - Epic Games (${this.client.role(constants.qg.roles.epic)})**`,
-          'Notifies you with games that are currently free on Epic Games.',
-          '',
-          `**${this.client.qg.emojis.cache.find(
-            e => e.name === 'gog',
-          )} - GOG (${this.client.role(constants.qg.roles.gog)})**`,
-          'Notifies you with games that are currently free on GOG.',
-          '',
-          `**${this.client.qg.emojis.cache.find(
-            e => e.name === 'ubisoft',
-          )} - UPlay (${this.client.role(constants.qg.roles.ubisoft)})**`,
-          'Notifies you with games that are currently free on UPlay.',
-        ].join('\n'),
-        image: { url: constants.images.free_games_banner_1 },
-        footer: { text: 'Update your role by clicking the buttons below.' },
-        color: 'GREEN',
-      }),
+      embeds: [
+        new MessageEmbed({
+          author: { name: 'Quarantine Gaming: Free Game Updates' },
+          title: 'Subscribe to get Updated',
+          description: [
+            `All free game notifications will be made available on our ${this.client.channel(
+              constants.qg.channels.integrations.free_games,
+            )} channel.`,
+            '',
+            `**${this.client.qg.emojis.cache.find(
+              e => e.name === 'steam',
+            )} - Steam (${this.client.role(constants.qg.roles.steam)})**`,
+            'Notifies you with games that are currently free on Steam.',
+            '',
+            `**${this.client.qg.emojis.cache.find(
+              e => e.name === 'epic_games',
+            )} - Epic Games (${this.client.role(constants.qg.roles.epic)})**`,
+            'Notifies you with games that are currently free on Epic Games.',
+            '',
+            `**${this.client.qg.emojis.cache.find(
+              e => e.name === 'gog',
+            )} - GOG (${this.client.role(constants.qg.roles.gog)})**`,
+            'Notifies you with games that are currently free on GOG.',
+            '',
+            `**${this.client.qg.emojis.cache.find(
+              e => e.name === 'ubisoft',
+            )} - UPlay (${this.client.role(constants.qg.roles.ubisoft)})**`,
+            'Notifies you with games that are currently free on UPlay.',
+          ].join('\n'),
+          image: { url: constants.images.free_games_banner_1 },
+          footer: { text: 'Update your role by clicking the buttons below.' },
+          color: 'GREEN',
+        }),
+      ],
       components: [
         this.client.interaction_manager.components
           .get('fgu')
@@ -190,35 +192,37 @@ export default class Message extends SlashCommand {
   freeGameUpdatesCS() {
     const emojis = this.client.emojis.cache;
     return {
-      embed: new MessageEmbed({
-        author: { name: 'Quarantine Gaming: Free Game Updates' },
-        title: 'Subscribe to get Updated',
-        description: [
-          `All free game notifications will be made available on our ${this.client.channel(
-            constants.qg.channels.integrations.free_games,
-          )} channel.`,
-          '',
-          `**${emojis.find(e => e.name === 'xbox')} - Xbox (${this.client.role(
-            constants.qg.roles.xbox,
-          )})**`,
-          'Notifies you with games that are currently free for Xbox One/360.',
-          '',
-          `**${emojis.find(
-            e => e.name === 'playstation',
-          )} - PlayStation (${this.client.role(
-            constants.qg.roles.playstation,
-          )})**`,
-          'Notifies you with games that are currently free for PlayStation 3/4/Vita.',
-          '',
-          `**${emojis.find(e => e.name === 'wii')} - Wii (${this.client.role(
-            constants.qg.roles.wii,
-          )})**`,
-          'Notifies you with games that are currently free for Wii U/3DS/Switch.',
-        ].join('\n'),
-        image: { url: constants.images.free_games_banner },
-        footer: { text: 'Update your role by clicking the buttons below.' },
-        color: 'GREEN',
-      }),
+      embeds: [
+        new MessageEmbed({
+          author: { name: 'Quarantine Gaming: Free Game Updates' },
+          title: 'Subscribe to get Updated',
+          description: [
+            `All free game notifications will be made available on our ${this.client.channel(
+              constants.qg.channels.integrations.free_games,
+            )} channel.`,
+            '',
+            `**${emojis.find(
+              e => e.name === 'xbox',
+            )} - Xbox (${this.client.role(constants.qg.roles.xbox)})**`,
+            'Notifies you with games that are currently free for Xbox One/360.',
+            '',
+            `**${emojis.find(
+              e => e.name === 'playstation',
+            )} - PlayStation (${this.client.role(
+              constants.qg.roles.playstation,
+            )})**`,
+            'Notifies you with games that are currently free for PlayStation 3/4/Vita.',
+            '',
+            `**${emojis.find(e => e.name === 'wii')} - Wii (${this.client.role(
+              constants.qg.roles.wii,
+            )})**`,
+            'Notifies you with games that are currently free for Wii U/3DS/Switch.',
+          ].join('\n'),
+          image: { url: constants.images.free_games_banner },
+          footer: { text: 'Update your role by clicking the buttons below.' },
+          color: 'GREEN',
+        }),
+      ],
       components: [
         this.client.interaction_manager.components
           .get('fgu')
@@ -233,26 +237,28 @@ export default class Message extends SlashCommand {
    */
   notSafeForWork() {
     return {
-      embed: new MessageEmbed({
-        author: { name: 'Quarantine Gaming: NSFW Content' },
-        title: 'Unlock NSFW Bots and Channel',
-        description: [
-          `The ${this.client.role(
-            constants.qg.roles.nsfw_bot,
-          )} and the ${this.client.channel(
-            constants.qg.channels.text.explicit,
-          )} channel will be unlocked after getting the role.`,
-          '',
-          `**🔴 - Not Safe For Work (${this.client.role(
-            constants.qg.roles.nsfw,
-          )})**`,
-          'The marked content may contain nudity, intense sexuality, profanity, ' +
-            'violence or other potentially disturbing subject matter.',
-        ].join('\n'),
-        image: { url: constants.images.nsfw_banner },
-        footer: { text: 'Update your role by clicking the button below.' },
-        color: 'FUCHSIA',
-      }),
+      embeds: [
+        new MessageEmbed({
+          author: { name: 'Quarantine Gaming: NSFW Content' },
+          title: 'Unlock NSFW Bots and Channel',
+          description: [
+            `The ${this.client.role(
+              constants.qg.roles.nsfw_bot,
+            )} and the ${this.client.channel(
+              constants.qg.channels.text.explicit,
+            )} channel will be unlocked after getting the role.`,
+            '',
+            `**🔴 - Not Safe For Work (${this.client.role(
+              constants.qg.roles.nsfw,
+            )})**`,
+            'The marked content may contain nudity, intense sexuality, profanity, ' +
+              'violence or other potentially disturbing subject matter.',
+          ].join('\n'),
+          image: { url: constants.images.nsfw_banner },
+          footer: { text: 'Update your role by clicking the button below.' },
+          color: 'FUCHSIA',
+        }),
+      ],
       components: this.client.interaction_manager.components
         .get('nsfw')
         .getComponents(),
