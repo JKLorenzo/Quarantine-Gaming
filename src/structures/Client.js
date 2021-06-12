@@ -106,14 +106,18 @@ export default class QGClient extends Client {
         if (changes.length > 1) {
           this.message_manager.sendToChannel(
             constants.cs.channels.member_events,
-            new MessageEmbed({
-              author: { name: 'Quarantine Gaming: User Update' },
-              title: member.displayName,
-              thumbnail: { url: newUser.displayAvatarURL() },
-              description: changes.join('\n'),
-              footer: { text: `Reference ID: ${newUser.id}` },
-              color: 'BLURPLE',
-            }),
+            {
+              embeds: [
+                new MessageEmbed({
+                  author: { name: 'Quarantine Gaming: User Update' },
+                  title: member.displayName,
+                  thumbnail: { url: newUser.displayAvatarURL() },
+                  description: changes.join('\n'),
+                  footer: { text: `Reference ID: ${newUser.id}` },
+                  color: 'BLURPLE',
+                }),
+              ],
+            },
           );
         }
       } catch (error) {
@@ -168,14 +172,18 @@ export default class QGClient extends Client {
         if (changes.length > 1) {
           this.message_manager.sendToChannel(
             constants.cs.channels.member_events,
-            new MessageEmbed({
-              author: { name: 'Quarantine Gaming: Member Update' },
-              title: newMember.displayName,
-              thumbnail: { url: newMember.user.displayAvatarURL() },
-              description: changes.join('\n'),
-              footer: { text: `Reference ID: ${newMember.id}` },
-              color: 'BLURPLE',
-            }),
+            {
+              embeds: [
+                new MessageEmbed({
+                  author: { name: 'Quarantine Gaming: Member Update' },
+                  title: newMember.displayName,
+                  thumbnail: { url: newMember.user.displayAvatarURL() },
+                  description: changes.join('\n'),
+                  footer: { text: `Reference ID: ${newMember.id}` },
+                  color: 'BLURPLE',
+                }),
+              ],
+            },
           );
         }
       } catch (error) {

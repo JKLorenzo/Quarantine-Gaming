@@ -1,6 +1,14 @@
 import fs from 'fs';
+import {
+  joinVoiceChannel,
+  createAudioResource,
+  createAudioPlayer,
+  entersState,
+  AudioPlayerStatus,
+  VoiceConnectionStatus,
+} from '@discordjs/voice';
 import gtts from 'node-google-tts-api';
-import { ErrorTicketManager, ProcessQueue, sleep } from '../utils/Base.js';
+import { ErrorTicketManager, ProcessQueue } from '../utils/Base.js';
 
 /**
  * @typedef {import('discord.js').VoiceChannel} VoiceChannel
@@ -28,36 +36,34 @@ export default class SpeechManager {
   say(channel, message) {
     console.log(`Speech: Queueing ${this.queuer.totalID} (${channel.name})`);
     return this.queuer.queue(async () => {
+      let connection;
       try {
-        // Join channel
-        const connection = await channel.join();
-        // TTS
+        const player = createAudioPlayer();
+        connection = joinVoiceChannel({
+          adapterCreator: channel.guild.voiceAdapterCreator,
+          guildId: channel.guild.id,
+          channelId: channel.id,
+        });
+        connection.subscribe(player);
+
         const data = await tts.get({
           text: message,
           lang: 'en',
         });
         fs.writeFileSync('tts.mp3', data);
-        // Speak to channel
-        const speak = new Promise((resolve, reject) => {
-          const dispatcher = connection.play('tts.mp3');
-          dispatcher.on('finish', async () => {
-            await sleep(2500);
-            await channel.leave();
-            console.log(
-              `Speech: Finished ${this.queuer.currentID} (${channel.name})`,
-            );
-            resolve();
-          });
-          dispatcher.on('error', error => {
-            reject(error);
-          });
+
+        connection.on(VoiceConnectionStatus.Ready, () => {
+          player.play(createAudioResource('tts.mp3'));
         });
-        await speak;
+        await entersState(player, AudioPlayerStatus.Playing, 10e3);
+        await entersState(player, AudioPlayerStatus.Idle, 30e3);
       } catch (this_error) {
+        this.client.error_manager.mark(ETM.create('say', this_error));
+      } finally {
+        if (connection) connection.destroy();
         console.log(
           `Speech: Finished ${this.queuer.currentID} (${channel.name})`,
         );
-        this.client.error_manager.mark(ETM.create('say', this_error));
       }
     });
   }

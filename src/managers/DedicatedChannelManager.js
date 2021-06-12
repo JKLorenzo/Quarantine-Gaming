@@ -29,35 +29,36 @@ const { VIEW_CHANNEL, CONNECT } = Permissions.FLAGS;
  * @param {string} name The name of the channel
  */
 async function displayInfo(client, text_channel, voice_channel, name) {
-  await client.message_manager.sendToChannel(
-    text_channel,
-    new MessageEmbed({
-      author: { name: 'Quarantine Gaming: Dedicated Channels' },
-      title: `Voice and Text Channels for ${name}`,
-      description: [
-        '\u200b 🔹 Only members who are in this voice channel can view this text channel.',
-        `\u200b 🔹 ${voice_channel} voice and ${text_channel} text channels will automatically be ` +
-          `deleted once everyone is disconnected from these channels.`,
-        `\u200b 🔹 This channel will be renamed automatically depending on the game the members in ` +
-          `this channel are playing. When multiple games are being played, the game with the highest ` +
-          `number of players will be chosen.`,
-        `**Useful Commands for Dedicated Channels:**\n${[
-          '\u200b \u200b \u200b \u200b 📎 `/dedicate custom_name: <name>` to rename this channel to a custom name.',
-          '\u200b \u200b \u200b \u200b 🔒 `/dedicate lock: True` to lock this channel.',
-          '\u200b \u200b \u200b \u200b 🔓 `/dedicate lock: False` to unlock this channel.',
-          '\u200b \u200b \u200b \u200b 🚏 `/transfer <member>` to transfer members from other voice channel ' +
-            'to this channel regardless whether this channel is locked or unlocked.',
-        ].join('\n\n')}`,
-        `Note: ${client.role(constants.qg.roles.staff)}, ${client.role(
-          constants.qg.roles.moderator,
-        )}, ` +
-          `and ${client.role(
-            constants.qg.roles.music_bot,
-          )} can interact with these channels.`,
-      ].join('\n\n'),
-      color: 'BLURPLE',
-    }),
-  );
+  await client.message_manager.sendToChannel(text_channel, {
+    embeds: [
+      new MessageEmbed({
+        author: { name: 'Quarantine Gaming: Dedicated Channels' },
+        title: `Voice and Text Channels for ${name}`,
+        description: [
+          '\u200b 🔹 Only members who are in this voice channel can view this text channel.',
+          `\u200b 🔹 ${voice_channel} voice and ${text_channel} text channels will automatically be ` +
+            `deleted once everyone is disconnected from these channels.`,
+          `\u200b 🔹 This channel will be renamed automatically depending on the game the members in ` +
+            `this channel are playing. When multiple games are being played, the game with the highest ` +
+            `number of players will be chosen.`,
+          `**Useful Commands for Dedicated Channels:**\n${[
+            '\u200b \u200b \u200b \u200b 📎 `/dedicate custom_name: <name>` to rename this channel to a custom name.',
+            '\u200b \u200b \u200b \u200b 🔒 `/dedicate lock: True` to lock this channel.',
+            '\u200b \u200b \u200b \u200b 🔓 `/dedicate lock: False` to unlock this channel.',
+            '\u200b \u200b \u200b \u200b 🚏 `/transfer <member>` to transfer members from other voice channel ' +
+              'to this channel regardless whether this channel is locked or unlocked.',
+          ].join('\n\n')}`,
+          `Note: ${client.role(constants.qg.roles.staff)}, ${client.role(
+            constants.qg.roles.moderator,
+          )}, ` +
+            `and ${client.role(
+              constants.qg.roles.music_bot,
+            )} can interact with these channels.`,
+        ].join('\n\n'),
+        color: 'BLURPLE',
+      }),
+    ],
+  });
 }
 
 export default class DedicatedChannelManager {
@@ -386,18 +387,19 @@ export default class DedicatedChannelManager {
           )
         ) {
           this.client.role_manager.remove(member, team_role);
-          this.client.message_manager.sendToChannel(
-            text_channel,
-            new MessageEmbed({
-              author: { name: 'Quarantine Gaming: Dedicated Channels' },
-              title: oldState.channel.name,
-              thumbnail: { url: member.user.displayAvatarURL() },
-              description: `${oldState.member} left this channel.`,
-              footer: { text: `${member.user.tag} (${member.user.id})` },
-              timestamp: new Date(),
-              color: 'RED',
-            }),
-          );
+          this.client.message_manager.sendToChannel(text_channel, {
+            embeds: [
+              new MessageEmbed({
+                author: { name: 'Quarantine Gaming: Dedicated Channels' },
+                title: oldState.channel.name,
+                thumbnail: { url: member.user.displayAvatarURL() },
+                description: `${oldState.member} left this channel.`,
+                footer: { text: `${member.user.tag} (${member.user.id})` },
+                timestamp: new Date(),
+                color: 'RED',
+              }),
+            ],
+          });
         } else {
           await this.client.role_manager.delete(team_role);
           await this.client.channel_manager.delete(oldState.channel);
@@ -419,26 +421,27 @@ export default class DedicatedChannelManager {
 
         // Notify member
         if (streamers.length > 0) {
-          this.client.message_manager.sendToUser(
-            member,
-            new MessageEmbed({
-              author: { name: 'Quarantine Gaming: Information' },
-              title: `${
-                streamers.length > 1
-                  ? `${streamers
-                      .map(this_member => this_member.displayName)
-                      .join(' and ')} are`
-                  : `${streamers.map(
-                      this_member => this_member.displayName,
-                    )} is`
-              } currently Streaming`,
-              thumbnail: { url: member.user.displayAvatarURL() },
-              description:
-                'Please observe proper behavior on your current voice channel.',
-              image: { url: constants.images.streaming_banner },
-              color: 'YELLOW',
-            }),
-          );
+          this.client.message_manager.sendToUser(member, {
+            embeds: [
+              new MessageEmbed({
+                author: { name: 'Quarantine Gaming: Information' },
+                title: `${
+                  streamers.length > 1
+                    ? `${streamers
+                        .map(this_member => this_member.displayName)
+                        .join(' and ')} are`
+                    : `${streamers.map(
+                        this_member => this_member.displayName,
+                      )} is`
+                } currently Streaming`,
+                thumbnail: { url: member.user.displayAvatarURL() },
+                description:
+                  'Please observe proper behavior on your current voice channel.',
+                image: { url: constants.images.streaming_banner },
+                color: 'YELLOW',
+              }),
+            ],
+          });
         }
 
         if (
@@ -459,20 +462,21 @@ export default class DedicatedChannelManager {
           // Add Text Role
           if (!member.roles.cache.has(team_role.id)) {
             this.client.role_manager.add(member, team_role);
-            this.client.message_manager.sendToChannel(
-              text_channel,
-              new MessageEmbed({
-                author: { name: 'Quarantine Gaming: Dedicated Channels' },
-                title: newState.channel.name,
-                thumbnail: { url: newState.member.user.displayAvatarURL() },
-                description: `${newState.member} joined this channel.`,
-                footer: {
-                  text: `${newState.member.user.tag} (${newState.member.user.id})`,
-                },
-                timestamp: new Date(),
-                color: 'GREEN',
-              }),
-            );
+            this.client.message_manager.sendToChannel(text_channel, {
+              embeds: [
+                new MessageEmbed({
+                  author: { name: 'Quarantine Gaming: Dedicated Channels' },
+                  title: newState.channel.name,
+                  thumbnail: { url: newState.member.user.displayAvatarURL() },
+                  description: `${newState.member} joined this channel.`,
+                  footer: {
+                    text: `${newState.member.user.tag} (${newState.member.user.id})`,
+                  },
+                  timestamp: new Date(),
+                  color: 'GREEN',
+                }),
+              ],
+            });
           }
         }
       } else if (member.roles.cache.has(constants.qg.roles.streaming)) {

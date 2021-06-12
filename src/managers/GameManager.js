@@ -78,13 +78,17 @@ export default class GameManager {
         const this_game = await this.client.database_manager.getGame(role.name);
         await this.client.message_manager.sendToChannel(
           constants.cs.channels.game_events,
-          new MessageEmbed({
-            author: { name: 'Quarantine Gaming: Game Manager' },
-            title: role.name,
-            thumbnail: { url: this_game?.icon },
-            footer: { text: `Game Create • Reference ID: ${role.id}` },
-            color: 'GREEN',
-          }),
+          {
+            embeds: [
+              new MessageEmbed({
+                author: { name: 'Quarantine Gaming: Game Manager' },
+                title: role.name,
+                thumbnail: { url: this_game?.icon },
+                footer: { text: `Game Create • Reference ID: ${role.id}` },
+                color: 'GREEN',
+              }),
+            ],
+          },
         );
       } catch (error) {
         this.client.error_manager.mark(ETM.create('roleCreate', error));
@@ -101,13 +105,17 @@ export default class GameManager {
         const this_game = await this.client.database_manager.getGame(role.name);
         await this.client.message_manager.sendToChannel(
           constants.cs.channels.game_events,
-          new MessageEmbed({
-            author: { name: 'Quarantine Gaming: Game Manager' },
-            title: role.name,
-            thumbnail: { url: this_game?.icon },
-            footer: { text: `Game Delete • Reference ID: ${role.id}` },
-            color: 'RED',
-          }),
+          {
+            embeds: [
+              new MessageEmbed({
+                author: { name: 'Quarantine Gaming: Game Manager' },
+                title: role.name,
+                thumbnail: { url: this_game?.icon },
+                footer: { text: `Game Delete • Reference ID: ${role.id}` },
+                color: 'RED',
+              }),
+            ],
+          },
         );
       } catch (error) {
         this.client.error_manager.mark(ETM.create('roleDelete', error));
@@ -140,19 +148,23 @@ export default class GameManager {
 
             await this.client.message_manager.sendToChannel(
               constants.cs.channels.game_events,
-              new MessageEmbed({
-                author: { name: 'Quarantine Gaming: Game Manager' },
-                title: this_role.name,
-                thumbnail: { url: this_game?.icon },
-                description: [
-                  `**User:** ${newMember.user.username}`,
-                  `**Profile:** ${newMember}`,
-                ].join('\n'),
-                footer: {
-                  text: `Game Add • Reference ID: ${newMember.id} | ${this_role.id}`,
-                },
-                color: 'YELLOW',
-              }),
+              {
+                embeds: [
+                  new MessageEmbed({
+                    author: { name: 'Quarantine Gaming: Game Manager' },
+                    title: this_role.name,
+                    thumbnail: { url: this_game?.icon },
+                    description: [
+                      `**User:** ${newMember.user.username}`,
+                      `**Profile:** ${newMember}`,
+                    ].join('\n'),
+                    footer: {
+                      text: `Game Add • Reference ID: ${newMember.id} | ${this_role.id}`,
+                    },
+                    color: 'YELLOW',
+                  }),
+                ],
+              },
             );
           } else {
             await this.client.database_manager.deleteMemberGameRole(
@@ -161,19 +173,23 @@ export default class GameManager {
             );
             await this.client.message_manager.sendToChannel(
               constants.cs.channels.game_events,
-              new MessageEmbed({
-                author: { name: 'Quarantine Gaming: Game Manager' },
-                title: this_role.name,
-                thumbnail: { url: this_game?.icon },
-                description: [
-                  `**User:** ${newMember.user.username}`,
-                  `**Profile:** ${newMember}`,
-                ].join('\n'),
-                footer: {
-                  text: `Game Remove • Reference ID: ${newMember.id} | ${this_role.id}`,
-                },
-                color: 'FUCHSIA',
-              }),
+              {
+                embeds: [
+                  new MessageEmbed({
+                    author: { name: 'Quarantine Gaming: Game Manager' },
+                    title: this_role.name,
+                    thumbnail: { url: this_game?.icon },
+                    description: [
+                      `**User:** ${newMember.user.username}`,
+                      `**Profile:** ${newMember}`,
+                    ].join('\n'),
+                    footer: {
+                      text: `Game Remove • Reference ID: ${newMember.id} | ${this_role.id}`,
+                    },
+                    color: 'FUCHSIA',
+                  }),
+                ],
+              },
             );
           }
         }
@@ -394,32 +410,34 @@ export default class GameManager {
     await this.client.message_manager.sendToChannel(
       constants.cs.channels.game,
       {
-        embed: new MessageEmbed({
-          author: { name: 'Quarantine Gaming: Game Manager' },
-          title: 'Game Screening',
-          thumbnail: { url: images?.small },
-          fields: [
-            {
-              name: 'Name:',
-              value: game_name,
+        embeds: [
+          new MessageEmbed({
+            author: { name: 'Quarantine Gaming: Game Manager' },
+            title: 'Game Screening',
+            thumbnail: { url: images?.small },
+            fields: [
+              {
+                name: 'Name:',
+                value: game_name,
+              },
+              {
+                name: 'Verification:',
+                value: activity.applicationID
+                  ? 'Verified by Discord'
+                  : 'Unverified',
+              },
+              {
+                name: 'Status:',
+                value: 'Pending',
+              },
+            ],
+            image: { url: images?.large },
+            footer: {
+              text: 'Apply actions by clicking one of the buttons below.',
             },
-            {
-              name: 'Verification:',
-              value: activity.applicationID
-                ? 'Verified by Discord'
-                : 'Unverified',
-            },
-            {
-              name: 'Status:',
-              value: 'Pending',
-            },
-          ],
-          image: { url: images?.large },
-          footer: {
-            text: 'Apply actions by clicking one of the buttons below.',
-          },
-          color: 'BLURPLE',
-        }),
+            color: 'BLURPLE',
+          }),
+        ],
         components: this.client.interaction_manager.components
           .get('game_screening')
           .getComponents(),
@@ -526,7 +544,7 @@ export default class GameManager {
         constants.qg.channels.integrations.game_invites,
         {
           content: `${inviter} is inviting you to play ${game_role}.`,
-          embed: embed,
+          embeds: [embed],
           allowedMentions: {
             users: [],
             roles: [game_role.id],

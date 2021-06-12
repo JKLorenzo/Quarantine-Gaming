@@ -23,7 +23,9 @@ export default async function voiceChannelTransfer(
   for (const this_member of members) {
     if (!this_member.voice || this_member.user.id === constants.me) continue;
     await this_member.voice.setChannel(channel);
-    if (message) client.message_manager.sendToUser(this_member, message);
+    if (message && !this_member.user.bot) {
+      client.message_manager.sendToUser(this_member, message);
+    }
     await sleep(500);
   }
 }
