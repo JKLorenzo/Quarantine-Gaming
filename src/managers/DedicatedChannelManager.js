@@ -299,7 +299,8 @@ export default class DedicatedChannelManager {
             const dedicated_text_category = this.client.channel(
               constants.qg.channels.category.dedicated,
             );
-            return !dedicated_text_category.children?.some(c => {
+            if (!dedicated_text_category.children.size) return true;
+            return !dedicated_text_category.children.some(c => {
               if (c.isText()) {
                 const data = c.topic.split(' ');
                 return this.client.role(data[1])?.id === r.id;

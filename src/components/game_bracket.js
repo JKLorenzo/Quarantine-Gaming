@@ -17,7 +17,7 @@ export default class GameBracket extends MessageComponent {
           components: [
             new MessageButton({
               customID: 'join',
-              label: 'Join this Bracket',
+              label: 'Join this bracket',
               style: 'PRIMARY',
             }),
             new MessageButton({

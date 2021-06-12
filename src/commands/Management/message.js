@@ -101,7 +101,8 @@ export default class Message extends SlashCommand {
                 this.client.member(word)?.displayName ??
                 this.client.role(word)?.name ??
                 word,
-            ),
+            )
+            .join(' '),
         );
       }
     } else {

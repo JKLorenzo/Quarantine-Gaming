@@ -359,38 +359,34 @@ export default class GameManager {
         await this.ScreenGame(game_name, activity);
       } else if (this_game.status === 'Approved') {
         const streaming_role = this.client.role(constants.qg.roles.streaming);
-        const game_role =
-          this.client.qg.roles.cache.find(role => role.name === game_name) ??
-          (await this.client.role_manager.create({
-            name: game_name,
-            color: constants.colors.game_role,
-          }));
         let play_role = this.client.qg.roles.cache.find(
           role => role.name === `Play ${game_name}`,
         );
 
-        switch (status) {
-          case 'NEW':
-            if (play_role) {
-              await play_role.setPosition(streaming_role.position - 1);
-            } else {
-              play_role = await this.client.role_manager.create({
-                name: `Play ${game_name}`,
-                color: constants.colors.play_role,
-                position: streaming_role.position,
-                hoist: true,
-              });
-            }
-            await Promise.all([
-              this.client.role_manager.add(member, game_role),
-              this.client.role_manager.add(member, play_role),
-            ]);
-            break;
-          case 'OLD':
-            if (play_role && member.roles.cache.has(play_role.id)) {
-              await this.client.role_manager.remove(member, play_role);
-            }
-            break;
+        if (status === 'NEW') {
+          const game_role =
+            this.client.qg.roles.cache.find(role => role.name === game_name) ??
+            (await this.client.role_manager.create({
+              name: game_name,
+              color: constants.colors.game_role,
+            }));
+
+          if (play_role) {
+            await play_role.setPosition(streaming_role.position - 1);
+          } else {
+            play_role = await this.client.role_manager.create({
+              name: `Play ${game_name}`,
+              color: constants.colors.play_role,
+              position: streaming_role.position,
+              hoist: true,
+            });
+          }
+          await Promise.all([
+            this.client.role_manager.add(member, game_role),
+            this.client.role_manager.add(member, play_role),
+          ]);
+        } else if (play_role && member.roles.cache.has(play_role.id)) {
+          await this.client.role_manager.remove(member, play_role);
         }
       }
     }
@@ -507,7 +503,7 @@ export default class GameManager {
         footer: {
           text: `Join this ${
             options.player_count ? 'limited' : 'open'
-          } bracket by reacting below.`,
+          } bracket by clicking the button below.`,
         },
         color: 'BLURPLE',
       });
