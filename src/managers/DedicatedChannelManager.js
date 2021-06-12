@@ -292,31 +292,7 @@ export default class DedicatedChannelManager {
   clean() {
     return this.queuer.queue(async () => {
       try {
-        // Delete unused roles
         let promises = [];
-        const team_roles = this.client.qg.roles.cache.filter(r => {
-          if (r.name.startsWith('Team 🔰')) {
-            if (r.members.size === 0) return true;
-            /** @type {CategoryChannel} */
-            const dedicated_text_category = this.client.channel(
-              constants.qg.channels.category.dedicated,
-            );
-            if (!dedicated_text_category.children.size) return true;
-            return !dedicated_text_category.children.some(c => {
-              if (c.isText()) {
-                const data = c.topic.split(' ');
-                return this.client.role(data[1])?.id === r.id;
-              }
-              return false;
-            });
-          }
-          return false;
-        });
-        for (const team_role of team_roles.array()) {
-          promises.push(this.client.role_manager.delete(team_role));
-        }
-        await Promise.all(promises);
-
         // Delete unused voice channels
         promises = [];
         /** @type {CategoryChannel} */
@@ -348,6 +324,30 @@ export default class DedicatedChannelManager {
         });
         for (const text_channel of text_channels.array()) {
           promises.push(this.client.channel_manager.delete(text_channel));
+        }
+        await Promise.all(promises);
+
+        // Delete unused roles
+        const team_roles = this.client.qg.roles.cache.filter(r => {
+          if (r.name.startsWith('Team 🔰')) {
+            if (r.members.size === 0) return true;
+            /** @type {CategoryChannel} */
+            const dedicated_text_category = this.client.channel(
+              constants.qg.channels.category.dedicated,
+            );
+            if (!dedicated_text_category.children.size) return true;
+            return !dedicated_text_category.children.some(c => {
+              if (c.isText()) {
+                const data = c.topic.split(' ');
+                return this.client.role(data[1])?.id === r.id;
+              }
+              return false;
+            });
+          }
+          return false;
+        });
+        for (const team_role of team_roles.array()) {
+          promises.push(this.client.role_manager.delete(team_role));
         }
         await Promise.all(promises);
       } catch (error) {
