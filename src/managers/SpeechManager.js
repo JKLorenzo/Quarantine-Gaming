@@ -36,9 +36,10 @@ export default class SpeechManager {
   say(channel, message) {
     console.log(`Speech: Queueing ${this.queuer.totalID} (${channel.name})`);
     return this.queuer.queue(async () => {
+      let connection;
       try {
         const player = createAudioPlayer();
-        const connection = joinVoiceChannel({
+        connection = joinVoiceChannel({
           adapterCreator: channel.guild.voiceAdapterCreator,
           guildId: channel.guild.id,
           channelId: channel.id,
@@ -51,20 +52,18 @@ export default class SpeechManager {
         });
         fs.writeFileSync('tts.mp3', data);
 
-        connection.on(VoiceConnectionStatus.Ready, async () => {
+        connection.on(VoiceConnectionStatus.Ready, () => {
           player.play(createAudioResource('tts.mp3'));
         });
         await entersState(player, AudioPlayerStatus.Playing, 10e3);
         await entersState(player, AudioPlayerStatus.Idle, 30e3);
-        connection.destroy();
-        console.log(
-          `Speech: Finished ${this.queuer.currentID} (${channel.name})`,
-        );
       } catch (this_error) {
+        this.client.error_manager.mark(ETM.create('say', this_error));
+      } finally {
+        if (connection) connection.destroy();
         console.log(
           `Speech: Finished ${this.queuer.currentID} (${channel.name})`,
         );
-        this.client.error_manager.mark(ETM.create('say', this_error));
       }
     });
   }
