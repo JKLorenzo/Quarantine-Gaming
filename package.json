@@ -29,7 +29,7 @@
     "axios": "^0.21.1",
     "common-tags": "^1.8.0",
     "discord-api-types": "^0.18.1",
-    "discord.js": "^13.0.0-dev.f5f3f772865ee98bbb44df938e0e71f9f8865c10",
+    "discord.js": "^13.0.0-dev.99ff7151379fe03a1cfd52f252c0e6fc892d7776",
     "express": "^4.17.1",
     "ffmpeg-static": "^4.3.0",
     "firebase-admin": "^9.9.0",
