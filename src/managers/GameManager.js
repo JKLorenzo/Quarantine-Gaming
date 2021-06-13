@@ -531,13 +531,8 @@ export default class GameManager {
       }
 
       if (options.player_count) {
-        for (let i = 0; i < options.player_count; i++) {
-          if (embed.fields.length < 25) {
-            embed.addField(
-              `Player ${embed.fields.length + 1}:`,
-              'Slot Available',
-            );
-          }
+        for (let i = embed.fields.length; i < options.player_count; i++) {
+          embed.addField(`Player ${i + 1}:`, 'Slot Available');
         }
       }
 
