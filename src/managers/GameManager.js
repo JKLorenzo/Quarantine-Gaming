@@ -544,10 +544,9 @@ export default class GameManager {
       const invite = await this.client.message_manager.sendToChannel(
         constants.qg.channels.integrations.game_invites,
         {
-          content: `${inviter} is inviting you to play ${game_role}.`,
+          content: `${inviter.displayName} is inviting you to play ${game_role}.`,
           embeds: [embed],
           allowedMentions: {
-            users: [],
             roles: [game_role.id],
           },
           components: this.client.interaction_manager.components
