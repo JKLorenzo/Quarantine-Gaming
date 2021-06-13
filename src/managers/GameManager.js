@@ -505,7 +505,8 @@ export default class GameManager {
         title: game_role.name,
         thumbnail: { url: this_game?.icon },
         description:
-          options.description ?? `${inviter} wants to play ${game_role}.`,
+          options.description ??
+          `${inviter.displayName} wants to play ${game_role.name}.`,
         fields: [{ name: 'Player 1:', value: inviter.toString() }],
         image: {
           url: this_game?.banner ?? constants.images.multiplayer_banner,
