@@ -119,7 +119,7 @@ export default class GameBracket extends MessageComponent {
           players
             .filter(p => parseMention(p) !== inviter.id)
             .map((value, index) => ({
-              name: `Player ${index + 2}`,
+              name: `Player ${index + 2}:`,
               value: value,
             })),
         );

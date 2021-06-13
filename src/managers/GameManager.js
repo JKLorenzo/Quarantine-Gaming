@@ -506,7 +506,7 @@ export default class GameManager {
         thumbnail: { url: this_game?.icon },
         description:
           options.description ?? `${inviter} wants to play ${game_role}.`,
-        fields: [{ name: 'Player 1', value: inviter.toString() }],
+        fields: [{ name: 'Player 1:', value: inviter.toString() }],
         image: {
           url: this_game?.banner ?? constants.images.multiplayer_banner,
         },
@@ -522,7 +522,7 @@ export default class GameManager {
         for (const member of options.reserved) {
           if (member) {
             embed.addField(
-              `Player ${embed.fields.length + 1}`,
+              `Player ${embed.fields.length + 1}:`,
               member.toString(),
             );
           }
@@ -533,7 +533,7 @@ export default class GameManager {
         for (let i = 0; i < options.player_count; i++) {
           if (embed.fields.length < 25) {
             embed.addField(
-              `Player ${embed.fields.length + 1}`,
+              `Player ${embed.fields.length + 1}:`,
               'Slot Available',
             );
           }
