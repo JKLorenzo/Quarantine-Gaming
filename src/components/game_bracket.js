@@ -126,7 +126,7 @@ export default class GameBracket extends MessageComponent {
       }
 
       await message.edit({
-        embed: embed,
+        embeds: [embed],
         components: message.components,
       });
     });

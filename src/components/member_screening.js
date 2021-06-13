@@ -104,7 +104,7 @@ export default class MemberScreening extends MessageComponent {
     }
 
     await message.edit({
-      embed: embed.setFooter(new Date().toString()),
+      embeds: [embed.setFooter(new Date().toString())],
       components: [],
     });
 

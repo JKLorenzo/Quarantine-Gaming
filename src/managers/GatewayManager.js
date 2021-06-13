@@ -246,9 +246,11 @@ export default class GatewayManager {
 
         const action_message = await message.edit({
           content: null,
-          embed: embed.setFooter(
-            'Apply actions by clicking one of the buttons below.',
-          ),
+          embeds: [
+            embed.setFooter(
+              'Apply actions by clicking one of the buttons below.',
+            ),
+          ],
           components: this.client.interaction_manager.components
             .get('member_screening')
             .getComponents(),
@@ -427,7 +429,7 @@ export default class GatewayManager {
       return message
         ? await message.edit({
             content: null,
-            embed: embed,
+            embeds: [embed],
             components: [],
           })
         : await this.client.message_manager.sendToChannel(
