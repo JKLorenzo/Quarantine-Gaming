@@ -10,6 +10,7 @@
     <a href="https://david-dm.org/JKLorenzo/Quarantine-Gaming"><img src="https://img.shields.io/david/JKLorenzo/Quarantine-Gaming.svg?maxAge=3600" alt="Dependencies" /></a>
     <a href="https://github.com/prettier/prettier"><img src="https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square" alt="Prettier" /></a>
   </p>
+  <br />
   <p>Quarantine Gaming is an invite-only discord community server for gamers and friends.</p>
   <p>This repository powers the Quarantine Gaming Discord Bot.</p>
 </div>
