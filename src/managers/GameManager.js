@@ -505,8 +505,9 @@ export default class GameManager {
         title: game_role.name,
         thumbnail: { url: this_game?.icon },
         description:
-          options.description ?? `${inviter} wants to play ${game_role}.`,
-        fields: [{ name: 'Player 1', value: inviter.toString() }],
+          options.description ??
+          `${inviter.displayName} wants to play ${game_role.name}.`,
+        fields: [{ name: 'Player 1:', value: inviter.toString() }],
         image: {
           url: this_game?.banner ?? constants.images.multiplayer_banner,
         },
@@ -522,7 +523,7 @@ export default class GameManager {
         for (const member of options.reserved) {
           if (member) {
             embed.addField(
-              `Player ${embed.fields.length + 1}`,
+              `Player ${embed.fields.length + 1}:`,
               member.toString(),
             );
           }
@@ -530,23 +531,17 @@ export default class GameManager {
       }
 
       if (options.player_count) {
-        for (let i = 0; i < options.player_count; i++) {
-          if (embed.fields.length < 25) {
-            embed.addField(
-              `Player ${embed.fields.length + 1}`,
-              'Slot Available',
-            );
-          }
+        for (let i = embed.fields.length; i < options.player_count; i++) {
+          embed.addField(`Player ${i + 1}:`, 'Slot Available');
         }
       }
 
       const invite = await this.client.message_manager.sendToChannel(
         constants.qg.channels.integrations.game_invites,
         {
-          content: `${inviter} is inviting you to play ${game_role}.`,
+          content: `${inviter.displayName} is inviting you to play ${game_role}.`,
           embeds: [embed],
           allowedMentions: {
-            users: [],
             roles: [game_role.id],
           },
           components: this.client.interaction_manager.components
