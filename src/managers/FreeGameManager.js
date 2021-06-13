@@ -167,7 +167,11 @@ export default class FreeGameManager {
         description?.toLowerCase() ?? '*'
       }`;
 
-      if (contains(searchables, 'steampowered.com')) {
+      if (
+        contains(searchables, ['steampowered.com']) ||
+        (contains(searchables, ['humblebundle.com']) &&
+          contains(filtered_title.map(s => s.toLowerCase()).join(' '), 'steam'))
+      ) {
         mentionables.push(constants.qg.roles.steam);
         color.add({ red: 0, green: 157, blue: 255 });
       }
