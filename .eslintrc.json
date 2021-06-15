@@ -11,8 +11,7 @@
     "es6": true
   },
   "parserOptions": {
-    "ecmaVersion": 2021,
-    "sourceType": "module"
+    "ecmaVersion": 2021
   },
   "rules": {
     "import/order": [
