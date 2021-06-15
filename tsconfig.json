@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    /* Visit https://aka.ms/tsconfig.json to read more about this file */
+    "target": "ES2021",
+    "module": "ESNext",
+    "lib": [
+      "esnext",
+      "esnext.array",
+      "esnext.asynciterable",
+      "esnext.intl",
+      "esnext.symbol"
+    ],
+    "sourceMap": false,
+    "outDir": "./dist",
+    "strict": true,
+    "alwaysStrict": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}
