@@ -28,7 +28,6 @@ jobs:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           buildpack: 'https://github.com/heroku/heroku-buildpack-nodejs.git'
           healthcheck: 'https://quarantine-gaming.herokuapp.com'
-          procfile: 'web: node ./src/main.js'
           rollbackonhealthcheckfailed: true
           checkstring: 'online'
           delay: 180
