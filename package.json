@@ -18,7 +18,8 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "prettier": "prettier --check src/**/*.js",
-    "prettier:fix": "prettier --write src/**/*.js"
+    "prettier:fix": "prettier --write src/**/*.js",
+    "prepare": "is-ci || husky install"
   },
   "engines": {
     "node": "14.x"
@@ -47,6 +48,12 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-prettier": "^3.4.0",
+    "husky": "^6.0.0",
+    "is-ci": "^3.0.0",
+    "lint-staged": "^11.0.0",
     "prettier": "^2.3.0"
+  },
+  "lint-staged": {
+    "*.js": "eslint --cache --fix"
   }
 }
