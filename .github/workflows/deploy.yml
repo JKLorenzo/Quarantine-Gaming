@@ -1,5 +1,8 @@
 name: Deploy
-on: release
+on:
+  push:
+    branches:
+      - master
 
 jobs:
   deploy:
@@ -9,17 +12,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Install Node v14
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Deploy
         uses: akhileshns/heroku-deploy@v3.12.12
         with:
-          heroku_app_name: "quarantine-gaming"
+          heroku_app_name: 'quarantine-gaming'
           heroku_email: ${{secrets.HEROKU_EMAIL}}
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-          buildpack: "https://github.com/heroku/heroku-buildpack-nodejs.git"
-          healthcheck: "https://quarantine-gaming.herokuapp.com"
+          buildpack: 'https://github.com/heroku/heroku-buildpack-nodejs.git'
+          healthcheck: 'https://quarantine-gaming.herokuapp.com'
           rollbackonhealthcheckfailed: true
-          checkstring: "online"
+          checkstring: 'online'
           delay: 180
-        env:
-          HD_BOT_TOKEN: ${{secrets.BOT_TOKEN}}
-          HD_FIREBASE_CREDENTIALS: ${{secrets.FIREBASE_CREDENTIALS}}
