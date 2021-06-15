@@ -1,5 +1,8 @@
 name: Deploy
-on: release
+on:
+  release:
+    types:
+      - released
 
 jobs:
   deploy:
@@ -8,6 +11,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      - name: Install Node v14
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Deploy
         uses: akhileshns/heroku-deploy@v3.12.12
