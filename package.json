@@ -3,25 +3,26 @@
   "version": "4.0.0",
   "description": "A Discord Bot for Quarantine Gaming Server.",
   "main": "./src/main.js",
-  "engines": {
-    "node": "14.x"
+  "type": "module",
+  "author": "Juruel Keanu Lorenzo",
+  "license": "GPL-3.0-only",
+  "homepage": "https://github.com/JKLorenzo/Quarantine-Gaming#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JKLorenzo/Quarantine-Gaming.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JKLorenzo/Quarantine-Gaming/issues"
   },
   "scripts": {
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "prettier": "prettier --check src/**/*.js",
-    "prettier:fix": "prettier --write src/**/*.js"
+    "prettier": "prettier --write src/**/*.js",
+    "prepare": "is-ci || husky install"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/JKLorenzo/Quarantine-Gaming"
+  "engines": {
+    "node": "14.x"
   },
-  "author": "Juruel Keanu Lorenzo",
-  "license": "GPL-3.0-only",
-  "bugs": {
-    "url": "https://github.com/JKLorenzo/Quarantine-Gaming/issues"
-  },
-  "homepage": "https://github.com/JKLorenzo/Quarantine-Gaming#readme",
   "dependencies": {
     "@discordjs/opus": "^0.5.3",
     "@discordjs/voice": "^0.3.1",
@@ -42,10 +43,15 @@
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
+    "@commitlint/cli": "^12.1.4",
+    "@commitlint/config-angular": "^12.1.4",
     "eslint": "^7.27.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-prettier": "^3.4.0",
+    "husky": "^6.0.0",
+    "is-ci": "^3.0.0",
+    "lint-staged": "^11.0.0",
     "prettier": "^2.3.0",
     "typescript": "^4.3.2"
   }
