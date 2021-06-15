@@ -1,6 +1,6 @@
 import { Intents, Structures } from 'discord.js';
 import express from 'express';
-import { Client, ExtendedMessage } from './structures/Base.js';
+import { Client, ExtendedMessage } from './structures/Base';
 
 const {
   DIRECT_MESSAGES,
