@@ -17,7 +17,7 @@
   "scripts": {
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "prettier": "prettier --check src/**/*.js",
+    "prettier": "prettier --write src/**/*.js",
     "prepare": "is-ci || husky install"
   },
   "engines": {
