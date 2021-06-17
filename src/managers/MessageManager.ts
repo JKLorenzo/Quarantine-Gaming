@@ -9,8 +9,8 @@ import {
   TextChannel,
   UserResolvable,
 } from 'discord.js';
-import QGClient from '../structures/Client.js';
 import ExtendedMessage from '../structures/ExtendedMessage.js';
+import QGClient from '../structures/QGClient.js';
 import constants from '../utils/Constants.js';
 import ErrorTicketManager from '../utils/ErrorTicketManager.js';
 import { contains } from '../utils/Functions.js';
