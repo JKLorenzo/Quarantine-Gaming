@@ -1,11 +1,10 @@
 {
   "extends": [
     "eslint:recommended",
-    "plugin:prettier/recommended"
+    "plugin:prettier/recommended",
+    "plugin:@typescript-eslint/recommended"
   ],
-  "plugins": [
-    "import"
-  ],
+  "plugins": ["import", "prettier", "@typescript-eslint"],
   "env": {
     "node": true,
     "es6": true
@@ -47,10 +46,10 @@
         ]
       }
     ],
-    "strict": [
-      "error",
-      "global"
-    ],
+    "@typescript-eslint/no-redeclare": "error",
+    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "strict": ["error", "global"],
     "no-compare-neg-zero": "error",
     "no-template-curly-in-string": "error",
     "no-unsafe-negation": "error",
@@ -79,14 +78,8 @@
     ],
     "accessor-pairs": "warn",
     "array-callback-return": "error",
-    "curly": [
-      "error",
-      "multi-line"
-    ],
-    "dot-location": [
-      "error",
-      "property"
-    ],
+    "curly": ["error", "multi-line"],
+    "dot-location": ["error", "property"],
     "dot-notation": "error",
     "eqeqeq": "error",
     "no-empty-function": "error",
@@ -141,17 +134,11 @@
         "ignoreConsecutiveComments": true
       }
     ],
-    "comma-dangle": [
-      "error",
-      "always-multiline"
-    ],
+    "comma-dangle": ["error", "always-multiline"],
     "comma-spacing": "error",
     "comma-style": "error",
     "computed-property-spacing": "error",
-    "consistent-this": [
-      "error",
-      "$this"
-    ],
+    "consistent-this": ["error", "$this"],
     "eol-last": "error",
     "func-names": "error",
     "func-name-matching": "error",
@@ -203,19 +190,10 @@
     "no-unneeded-ternary": "error",
     "no-whitespace-before-property": "error",
     "nonblock-statement-body-position": "error",
-    "object-curly-spacing": [
-      "error",
-      "always"
-    ],
+    "object-curly-spacing": ["error", "always"],
     "operator-assignment": "error",
-    "padded-blocks": [
-      "error",
-      "never"
-    ],
-    "quote-props": [
-      "error",
-      "as-needed"
-    ],
+    "padded-blocks": ["error", "never"],
+    "quote-props": ["error", "as-needed"],
     "quotes": [
       "error",
       "single",
@@ -242,10 +220,7 @@
     "template-tag-spacing": "error",
     "unicode-bom": "error",
     "arrow-body-style": "error",
-    "arrow-parens": [
-      "error",
-      "as-needed"
-    ],
+    "arrow-parens": ["error", "as-needed"],
     "arrow-spacing": "error",
     "no-duplicate-imports": "error",
     "no-useless-computed-key": "error",
