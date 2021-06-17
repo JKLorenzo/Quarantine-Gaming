@@ -1,8 +1,4 @@
-interface ErrorTicket {
-  name: string;
-  location: string;
-  error: Error;
-}
+import { ErrorTicket } from '../structures/Interfaces.js';
 
 export default class ErrorTicketManager {
   location: string;
