@@ -1,3 +1,5 @@
+import { DiscordAPIError } from 'discord.js';
+
 export interface PartialMember {
   id: bigint;
   name: string;
@@ -29,4 +31,10 @@ export interface Color {
   red: number;
   green: number;
   blue: number;
+}
+
+export interface ErrorTicket {
+  name: string;
+  location: string;
+  error: Error | DiscordAPIError;
 }
