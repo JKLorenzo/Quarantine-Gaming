@@ -1,6 +1,6 @@
 import { MessageEmbed } from 'discord.js';
-import QGClient from '../structures/Client.js';
 import { ErrorTicket } from '../structures/Interfaces.js';
+import QGClient from '../structures/QGClient.js';
 import constants from '../utils/Constants.js';
 import ProcessQueue from '../utils/ProcessQueue.js';
 
