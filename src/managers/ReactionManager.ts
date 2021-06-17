@@ -1,33 +1,27 @@
-import { ErrorTicketManager, ProcessQueue, sleep } from '../utils/Base.js';
-
-/**
- * @typedef {import('discord.js').Message} Message
- * @typedef {import('discord.js').EmojiResolvable} EmojiResolvable
- * @typedef {import('discord.js').MessageReaction} MessageReaction
- * @typedef {import('../structures/Base').Client} Client
- */
+import { Emoji, EmojiResolvable, Message, MessageReaction } from 'discord.js';
+import QGClient from '../structures/Client.js';
+import ErrorTicketManager from '../utils/ErrorTicketManager.js';
+import { sleep } from '../utils/Functions.js';
+import ProcessQueue from '../utils/ProcessQueue.js';
 
 const ETM = new ErrorTicketManager('Reaction Manager');
 
 export default class ReactionManager {
-  /**
-   * @param {Client} client The QG Client
-   */
-  constructor(client) {
+  client: QGClient;
+  queuer: ProcessQueue;
+
+  constructor(client: QGClient) {
     this.client = client;
     this.queuer = new ProcessQueue(1000);
   }
 
-  /**
-   * Adds a reaction to a message.
-   * @param {Message} message The message where the reaction will be added
-   * @param {EmojiResolvable | EmojiResolvable[]} emoji The emoji to add
-   * @returns {Promise<MessageReaction | MessageReaction[]>}
-   */
-  add(message, emoji) {
+  add(
+    message: Message,
+    emoji: EmojiResolvable | EmojiResolvable[],
+  ): Promise<MessageReaction | MessageReaction[]> {
     console.log(
       `ReactionAdd: Queueing ${this.queuer.totalID} (${message.channel.id} | ${
-        emoji?.name ?? emoji
+        (emoji as Emoji).name ?? emoji
       }})`,
     );
     return this.queuer.queue(async () => {
@@ -49,11 +43,11 @@ export default class ReactionManager {
         console.log(
           `ReactionAdd: Finished ${this.queuer.currentID} (${
             message.channel.id
-          } | ${emoji?.name ?? emoji}})`,
+          } | ${(emoji as Emoji).name ?? emoji}})`,
         );
       }
       if (error) throw error;
       return result;
-    });
+    }) as Promise<MessageReaction | MessageReaction[]>;
   }
 }
