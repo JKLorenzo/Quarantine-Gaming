@@ -1,21 +1,21 @@
 import { DiscordAPIError } from 'discord.js';
 
 export interface PartialMember {
-  id: bigint;
+  id: `${bigint}`;
   name: string;
   tagname: string;
-  inviter: bigint;
-  moderator: bigint;
+  inviter: `${bigint}`;
+  moderator: `${bigint}`;
 }
 
 export interface PartialRole {
-  id: bigint;
+  id: `${bigint}`;
   name: string;
   lastUpdated: number;
 }
 
 export interface FreeGame {
-  id?: bigint;
+  id?: `${bigint}`;
   title: string;
   url: string;
   author: string;
