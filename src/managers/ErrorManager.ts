@@ -1,17 +1,16 @@
-import { MessageEmbed } from 'discord.js';
+import { Client, MessageEmbed } from 'discord.js';
 import { ErrorTicket } from '../structures/Interfaces.js';
-import QGClient from '../structures/QGClient.js';
 import constants from '../utils/Constants.js';
 import ProcessQueue from '../utils/ProcessQueue.js';
 
 export default class ErrorManager {
-  client: QGClient;
+  client: Client;
   queuer: ProcessQueue;
   threshold_hitcount: number;
   threshold_reached: boolean;
   errors: ErrorTicket[];
 
-  constructor(client: QGClient) {
+  constructor(client: Client) {
     this.client = client;
     this.queuer = new ProcessQueue();
     this.threshold_hitcount = 0;

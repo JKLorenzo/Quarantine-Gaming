@@ -1,6 +1,6 @@
 import {
   Channel,
-  ExtendedMessage,
+  Client,
   Guild,
   GuildChannel,
   GuildChannelResolvable,
@@ -8,7 +8,6 @@ import {
   TextChannel,
   VoiceChannel,
 } from 'discord.js';
-import QGClient from '../structures/Client.js';
 import ErrorTicketManager from '../utils/ErrorTicketManager.js';
 import { sleep } from '../utils/Functions.js';
 import ProcessQueue from '../utils/ProcessQueue.js';
@@ -16,10 +15,10 @@ import ProcessQueue from '../utils/ProcessQueue.js';
 const ETM = new ErrorTicketManager('Channel Manager');
 
 export default class ChannelManager {
-  client: QGClient;
+  client: Client;
   queuer: ProcessQueue;
 
-  constructor(client: QGClient) {
+  constructor(client: Client) {
     this.client = client;
     this.queuer = new ProcessQueue(1000);
   }
@@ -100,7 +99,7 @@ export default class ChannelManager {
             .then(messages => messages.array())
             .then(async messages => {
               for (const message of messages) {
-                (message as ExtendedMessage).delete({ timeout: 900000 });
+                message.delete({ timeout: 900000 });
                 await sleep(5000);
               }
             });

@@ -1,5 +1,10 @@
-import { Emoji, EmojiResolvable, Message, MessageReaction } from 'discord.js';
-import QGClient from '../structures/Client.js';
+import {
+  Client,
+  Emoji,
+  EmojiResolvable,
+  Message,
+  MessageReaction,
+} from 'discord.js';
 import ErrorTicketManager from '../utils/ErrorTicketManager.js';
 import { sleep } from '../utils/Functions.js';
 import ProcessQueue from '../utils/ProcessQueue.js';
@@ -7,10 +12,10 @@ import ProcessQueue from '../utils/ProcessQueue.js';
 const ETM = new ErrorTicketManager('Reaction Manager');
 
 export default class ReactionManager {
-  client: QGClient;
+  client: Client;
   queuer: ProcessQueue;
 
-  constructor(client: QGClient) {
+  constructor(client: Client) {
     this.client = client;
     this.queuer = new ProcessQueue(1000);
   }

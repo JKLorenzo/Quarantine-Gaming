@@ -1,6 +1,7 @@
 import {
   APIMessage,
   CategoryChannel,
+  Client,
   GuildChannel,
   GuildChannelResolvable,
   Message,
@@ -10,7 +11,6 @@ import {
   UserResolvable,
 } from 'discord.js';
 import ExtendedMessage from '../structures/ExtendedMessage.js';
-import QGClient from '../structures/QGClient.js';
 import constants from '../utils/Constants.js';
 import ErrorTicketManager from '../utils/ErrorTicketManager.js';
 import { contains } from '../utils/Functions.js';
@@ -19,10 +19,10 @@ import ProcessQueue from '../utils/ProcessQueue.js';
 const ETM = new ErrorTicketManager('Message Manager');
 
 export default class MessageManager {
-  client: QGClient;
+  client: Client;
   queuer: ProcessQueue;
 
-  constructor(client: QGClient) {
+  constructor(client: Client) {
     this.client = client;
     this.queuer = new ProcessQueue(1000);
 
