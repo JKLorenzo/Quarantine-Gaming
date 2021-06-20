@@ -1,7 +1,7 @@
 name: Testing Cron
 on:
   schedule:
-    - cron: "0 16 * * 5"
+    - cron: '0 16 * * 5'
 jobs:
   lint:
     name: ESLint
