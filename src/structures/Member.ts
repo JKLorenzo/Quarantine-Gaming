@@ -15,9 +15,9 @@ export default class ExtendedMember extends GuildMember {
     };
   }
 
-  public register(inviter: GuildMember, moderator: GuildMember): Promise<void> {
-    this.partial_data.inviter = inviter.id;
-    this.partial_data.moderator = moderator.id;
+  public register(inviter: `${bigint}`, moderator: `${bigint}`): Promise<void> {
+    this.partial_data.inviter = inviter;
+    this.partial_data.moderator = moderator;
     return this.client.database_manager.updateMemberData(
       this.id,
       this.partial_data,
@@ -40,20 +40,20 @@ export default class ExtendedMember extends GuildMember {
     }
   }
 
-  public async fetchInviter(): Promise<GuildMember | null> {
+  public async fetchInviter(): Promise<GuildMember | undefined> {
     await this.fetchData();
 
-    return this.partial_data.inviter
-      ? this.client.member(this.partial_data.inviter)
-      : null;
+    if (this.partial_data.inviter) {
+      return this.client.member(this.partial_data.inviter);
+    }
   }
 
-  async fetchModerator(): Promise<GuildMember | null> {
+  async fetchModerator(): Promise<GuildMember | undefined> {
     await this.fetchData();
 
-    return this.partial_data.moderator
-      ? this.client.member(this.partial_data.moderator)
-      : null;
+    if (this.partial_data.moderator) {
+      return this.client.member(this.partial_data.moderator);
+    }
   }
 
   public async fetchExpiredGameRoles(): Promise<PartialRole[]> {
