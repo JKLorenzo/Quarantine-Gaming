@@ -1,17 +1,44 @@
-import { DiscordAPIError } from 'discord.js';
+import { Collection, DiscordAPIError } from 'discord.js';
+
+export interface PartialRole {
+  id: `${bigint}`;
+  name: string;
+  lastUpdated: Date;
+}
+
+export interface PartialRoleData {
+  name?: string;
+  lastUpdated?: Date;
+}
 
 export interface PartialMember {
   id: `${bigint}`;
   name: string;
   tagname: string;
-  inviter: `${bigint}`;
-  moderator: `${bigint}`;
+  inviter?: `${bigint}`;
+  moderator?: `${bigint}`;
+  roles: Collection<string, PartialRole>;
 }
 
-export interface PartialRole {
-  id: `${bigint}`;
+export interface PartialMemberData {
+  name?: string;
+  tagname?: string;
+  inviter?: `${bigint}`;
+  moderator?: `${bigint}`;
+  roles?: Collection<string, PartialRole>;
+}
+
+export interface Game {
   name: string;
-  lastUpdated: number;
+  icon: string;
+  banner: string;
+  status: 'Pending' | 'Approved' | 'Denied';
+}
+
+export interface GameData {
+  icon?: string;
+  banner?: string;
+  status?: 'Pending' | 'Approved' | 'Denied';
 }
 
 export interface FreeGame {
