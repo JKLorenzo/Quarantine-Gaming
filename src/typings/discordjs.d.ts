@@ -34,13 +34,13 @@ declare module 'discord.js' {
   }
 
   interface GuildMember {
-    register(inviter: `${bigint}`, moderator: `${bigint}`): Promise<void>;
+    register(inviter: Snowflake, moderator: Snowflake): Promise<void>;
 
     fetchInviter(): Promise<GuildMember | undefined>;
     fetchModerator(): Promise<GuildMember | undefined>;
 
     fetchExpiredGameRoles(): Promise<PartialRole[]>;
     updateGameRole(role: Role): Promise<void>;
-    deleteGameRole(id: `${bigint}`): Promise<void>;
+    deleteGameRole(id: Snowflake): Promise<void>;
   }
 }

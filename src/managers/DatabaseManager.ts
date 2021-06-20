@@ -1,4 +1,4 @@
-import { Client, Collection } from 'discord.js';
+import { Client, Collection, Snowflake } from 'discord.js';
 import Firebase from 'firebase-admin';
 import {
   Game,
@@ -39,7 +39,7 @@ export default class DatabaseManager {
     this.images = Firestore.collection('Images');
   }
 
-  async getMemberData(id: `${bigint}`): Promise<PartialMember | undefined> {
+  async getMemberData(id: Snowflake): Promise<PartialMember | undefined> {
     const member_DocSnap = await this.members.doc(id).get();
 
     if (member_DocSnap.exists) {
@@ -70,7 +70,7 @@ export default class DatabaseManager {
   }
 
   async updateMemberData(
-    id: `${bigint}`,
+    id: Snowflake,
     data: PartialMemberData,
   ): Promise<void> {
     const member_DocSnap = await this.members.doc(id).get();
@@ -89,8 +89,8 @@ export default class DatabaseManager {
   }
 
   async updateMemberGameRole(
-    id: `${bigint}`,
-    role_id: `${bigint}`,
+    id: Snowflake,
+    role_id: Snowflake,
     data: PartialRoleData,
   ): Promise<void> {
     const role_DocSnap = await this.members
@@ -110,10 +110,7 @@ export default class DatabaseManager {
     }
   }
 
-  async deleteMemberGameRole(
-    id: `${bigint}`,
-    role_id: `${bigint}`,
-  ): Promise<void> {
+  async deleteMemberGameRole(id: Snowflake, role_id: Snowflake): Promise<void> {
     const role_DocSnap = await this.members
       .doc(id)
       .collection('roles')

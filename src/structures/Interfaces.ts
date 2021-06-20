@@ -1,7 +1,7 @@
-import { Collection, DiscordAPIError } from 'discord.js';
+import { Collection, DiscordAPIError, Snowflake } from 'discord.js';
 
 export interface PartialRole {
-  id: `${bigint}`;
+  id: Snowflake;
   name: string;
   lastUpdated: Date;
 }
@@ -12,19 +12,19 @@ export interface PartialRoleData {
 }
 
 export interface PartialMember {
-  id: `${bigint}`;
+  id: Snowflake;
   name: string;
   tagname: string;
-  inviter?: `${bigint}`;
-  moderator?: `${bigint}`;
+  inviter?: Snowflake;
+  moderator?: Snowflake;
   roles: Collection<string, PartialRole>;
 }
 
 export interface PartialMemberData {
   name?: string;
   tagname?: string;
-  inviter?: `${bigint}`;
-  moderator?: `${bigint}`;
+  inviter?: Snowflake;
+  moderator?: Snowflake;
   roles?: Collection<string, PartialRole>;
 }
 
@@ -42,7 +42,7 @@ export interface GameData {
 }
 
 export interface FreeGame {
-  id?: `${bigint}`;
+  id?: Snowflake;
   title: string;
   url: string;
   author: string;

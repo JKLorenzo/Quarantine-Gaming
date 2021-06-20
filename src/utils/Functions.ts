@@ -1,7 +1,7 @@
 import {
-  ChannelResolvable,
   GuildChannelResolvable,
   RoleResolvable,
+  Snowflake,
   UserResolvable,
 } from 'discord.js';
 import gis from 'g-i-s';
@@ -22,12 +22,8 @@ export function parseHTML(html: string): string {
 }
 
 export function parseMention(
-  mention:
-    | ChannelResolvable
-    | GuildChannelResolvable
-    | UserResolvable
-    | RoleResolvable,
-): `${bigint}` {
+  mention: GuildChannelResolvable | UserResolvable | RoleResolvable,
+): Snowflake {
   return `${BigInt(String(mention).replace(/\W/g, ''))}`;
 }
 

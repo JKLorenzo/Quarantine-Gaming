@@ -1,4 +1,11 @@
-import { Client, Collection, Guild, GuildMember, Role } from 'discord.js';
+import {
+  Client,
+  Collection,
+  Guild,
+  GuildMember,
+  Role,
+  Snowflake,
+} from 'discord.js';
 import { PartialMember, PartialRole } from './Interfaces';
 
 export default class ExtendedMember extends GuildMember {
@@ -15,7 +22,7 @@ export default class ExtendedMember extends GuildMember {
     };
   }
 
-  public register(inviter: `${bigint}`, moderator: `${bigint}`): Promise<void> {
+  public register(inviter: Snowflake, moderator: Snowflake): Promise<void> {
     this.partial_data.inviter = inviter;
     this.partial_data.moderator = moderator;
     return this.client.database_manager.updateMemberData(
@@ -82,7 +89,7 @@ export default class ExtendedMember extends GuildMember {
     });
   }
 
-  public async deleteGameRole(id: `${bigint}`): Promise<void> {
+  public async deleteGameRole(id: Snowflake): Promise<void> {
     await this.client.database_manager.deleteMemberGameRole(this.id, id);
 
     const this_role = this.partial_data.roles.get(id);
