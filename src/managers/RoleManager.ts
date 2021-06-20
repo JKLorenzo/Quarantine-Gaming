@@ -1,33 +1,27 @@
-import { ErrorTicketManager, ProcessQueue, constants } from '../utils/Base.js';
-
-/**
- * @typedef {import('discord.js').Role} Role
- * @typedef {import('discord.js').RoleData} RoleData
- * @typedef {import('discord.js').GuildMember} GuildMember
- * @typedef {import('discord.js').RoleResolvable} RoleResolvable
- * @typedef {import('discord.js').UserResolvable} UserResolvable
- * @typedef {import('discord.js').ColorResolvable} ColorResolvable
- * @typedef {import('discord.js').PermissionResolvable} PermissionResolvable
- * @typedef {import('../structures/Base').Client} Client
- */
+import {
+  Client,
+  GuildMember,
+  Role,
+  RoleData,
+  RoleResolvable,
+  UserResolvable,
+} from 'discord.js';
+import constants from '../utils/Constants.js';
+import ErrorTicketManager from '../utils/ErrorTicketManager.js';
+import ProcessQueue from '../utils/ProcessQueue.js';
 
 const ETM = new ErrorTicketManager('Role Manager');
 
 export default class RoleManager {
-  /**
-   * @param {Client} client The QG Client
-   */
-  constructor(client) {
+  client: Client;
+  queuer: ProcessQueue;
+
+  constructor(client: Client) {
     this.client = client;
     this.queuer = new ProcessQueue(1000);
   }
 
-  /**
-   * Creates a new role in the guild.
-   * @param {RoleData} options The options of this role
-   * @returns {Role}
-   */
-  create(options) {
+  create(options: RoleData & { guild?: 'qg' | 'cs' }): Promise<Role> {
     console.log(
       `RoleCreate: Queueing ${this.queuer.totalID} (${options.name})`,
     );
@@ -45,16 +39,10 @@ export default class RoleManager {
       }
       if (error) throw error;
       return result;
-    });
+    }) as Promise<Role>;
   }
 
-  /**
-   * Deletes a role from the guild.
-   * @param {RoleResolvable} role The role to delete
-   * @param {string} [reason] The reason for deleting this role
-   * @returns {Promise<Role>}
-   */
-  delete(role, reason) {
+  delete(role: RoleResolvable, reason?: string): Promise<Role> {
     const this_role = this.client.role(role);
     console.log(
       `RoleDelete: Queueing ${this.queuer.totalID} (${
@@ -77,17 +65,14 @@ export default class RoleManager {
       }
       if (error) throw error;
       return result;
-    });
+    }) as Promise<Role>;
   }
 
-  /**
-   * Adds the role to the target user.
-   * @param {UserResolvable} user The user where the role will be added
-   * @param {RoleResolvable} role The role to be added
-   * @param {string} [reason] The reason for adding the role
-   * @returns {Promise<GuildMember>}
-   */
-  add(user, role, reason) {
+  add(
+    user: UserResolvable,
+    role: RoleResolvable,
+    reason?: string,
+  ): Promise<GuildMember> {
     const this_member = this.client.member(user);
     const this_role = this.client.role(role);
     console.log(
@@ -98,15 +83,16 @@ export default class RoleManager {
     return this.queuer.queue(async () => {
       let result, error;
       try {
+        if (!this_member) {
+          throw new TypeError(`${this_member} is not a member.`);
+        }
+        if (!this_role) {
+          throw new TypeError(`${this_role} is not a role.`);
+        }
+
         result = await this_member.roles.add(this_role, reason);
         if (this_role.hexColor === constants.colors.game_role) {
-          await this.client.database_manager.updateMemberGameRole(
-            this_member.id,
-            {
-              id: this_role.id,
-              name: this_role.name,
-            },
-          );
+          await this_member.updateGameRole(this_role);
         }
       } catch (this_error) {
         this.client.error_manager.mark(ETM.create('add', this_error));
@@ -120,17 +106,14 @@ export default class RoleManager {
       }
       if (error) throw error;
       return result;
-    });
+    }) as Promise<GuildMember>;
   }
 
-  /**
-   * Removes the role from the target user.
-   * @param {UserResolvable} user The user where the role will be removed
-   * @param {RoleResolvable} role The role to be removed
-   * @param {string} [reason] The reason for removing the role
-   * @returns {Promise<GuildMember>}
-   */
-  remove(user, role, reason) {
+  remove(
+    user: UserResolvable,
+    role: RoleResolvable,
+    reason?: string,
+  ): Promise<GuildMember> {
     const this_member = this.client.member(user);
     const this_role = this.client.role(role);
     console.log(
@@ -141,6 +124,13 @@ export default class RoleManager {
     return this.queuer.queue(async () => {
       let result, error;
       try {
+        if (!this_member) {
+          throw new TypeError(`${this_member} is not a member.`);
+        }
+        if (!this_role) {
+          throw new TypeError(`${this_role} is not a role.`);
+        }
+
         result = await this_member.roles.remove(this_role, reason);
       } catch (this_error) {
         this.client.error_manager.mark(ETM.create('remove', this_error));
@@ -154,6 +144,6 @@ export default class RoleManager {
       }
       if (error) throw error;
       return result;
-    });
+    }) as Promise<GuildMember>;
   }
 }
