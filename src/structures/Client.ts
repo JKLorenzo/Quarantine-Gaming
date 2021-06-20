@@ -1,5 +1,4 @@
 import {
-  Channel,
   Client,
   Guild,
   GuildChannel,
@@ -79,36 +78,40 @@ export default class extends Client {
     return this.guilds.cache.get(`${constants.cs.guild}`)!;
   }
 
-  channel(channel: GuildChannelResolvable): Channel | GuildChannel | null {
+  channel(channel: GuildChannelResolvable): GuildChannel | undefined {
     const parsed_channel = parseMention(channel);
     return (
       this.qg.channels.resolve(parsed_channel) ??
-      this.cs.channels.resolve(parsed_channel)
+      this.cs.channels.resolve(parsed_channel) ??
+      undefined
     );
   }
 
-  member(user: UserResolvable): GuildMember | null {
+  member(user: UserResolvable): GuildMember | undefined {
     const parsed_user = parseMention(user);
     return (
       this.qg.members.resolve(parsed_user) ??
-      this.cs.members.resolve(parsed_user)
+      this.cs.members.resolve(parsed_user) ??
+      undefined
     );
   }
 
-  role(role: RoleResolvable): Role | null {
+  role(role: RoleResolvable): Role | undefined {
     const parsed_role = parseMention(role);
     return (
-      this.qg.roles.resolve(parsed_role) ?? this.cs.roles.resolve(parsed_role)
+      this.qg.roles.resolve(parsed_role) ??
+      this.cs.roles.resolve(parsed_role) ??
+      undefined
     );
   }
 
   message(
     channel: GuildChannelResolvable,
     message: MessageResolvable,
-  ): Message | null {
+  ): Message | undefined {
     const this_channel = this.channel(channel);
-    return this_channel?.isText()
-      ? this_channel.messages.resolve(message)
-      : null;
+    if (this_channel?.isText()) {
+      return this_channel.messages.resolve(message) ?? undefined;
+    }
   }
 }
