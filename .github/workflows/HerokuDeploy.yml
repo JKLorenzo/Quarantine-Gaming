@@ -1,4 +1,4 @@
-name: Deployment
+name: Heroku Deploy
 on:
   push:
     branches:
@@ -30,4 +30,4 @@ jobs:
           healthcheck: 'https://quarantine-gaming.herokuapp.com'
           rollbackonhealthcheckfailed: true
           checkstring: 'online'
-          delay: 60
+          delay: 30
