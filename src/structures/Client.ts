@@ -12,6 +12,7 @@ import {
   Structures,
   UserResolvable,
 } from 'discord.js';
+import ExtendedMember from './ExtendedMember.js';
 import ExtendedMessage from './ExtendedMessage.js';
 import ChannelManager from '../managers/ChannelManager.js';
 import ErrorManager from '../managers/ErrorManager.js';
@@ -22,6 +23,7 @@ import SpeechManager from '../managers/SpeechManager.js';
 import constants from '../utils/Constants.js';
 import { parseMention } from '../utils/Functions.js';
 
+Structures.extend('GuildMember', () => ExtendedMember);
 Structures.extend('Message', () => ExtendedMessage);
 
 export default class extends Client {
