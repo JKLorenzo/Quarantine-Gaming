@@ -20,13 +20,13 @@ declare module 'discord.js' {
     qg: Guild;
     cs: Guild;
 
-    channel(channel: GuildChannelResolvable): Channel | GuildChannel | null;
-    member(user: UserResolvable): GuildMember | null;
-    role(role: RoleResolvable): Role | null;
+    channel(channel: GuildChannelResolvable): GuildChannel | undefined;
+    member(user: UserResolvable): GuildMember | undefined;
+    role(role: RoleResolvable): Role | undefined;
     message(
       channel: GuildChannelResolvable,
       message: MessageResolvable,
-    ): Message | null;
+    ): Message | undefined;
   }
 
   interface Message {
@@ -34,10 +34,10 @@ declare module 'discord.js' {
   }
 
   interface GuildMember {
-    register(inviter: GuildMember, moderator: GuildMember): Promise<void>;
+    register(inviter: `${bigint}`, moderator: `${bigint}`): Promise<void>;
 
-    fetchInviter(): Promise<GuildMember | null>;
-    fetchModerator(): Promise<GuildMember | null>;
+    fetchInviter(): Promise<GuildMember | undefined>;
+    fetchModerator(): Promise<GuildMember | undefined>;
 
     fetchExpiredGameRoles(): Promise<PartialRole[]>;
     updateGameRole(role: Role): Promise<void>;
