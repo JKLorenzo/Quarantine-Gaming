@@ -40,13 +40,27 @@ export default class NotSafeForWork extends MessageComponent {
    * @param {MessageComponentInteraction} interaction The interaction that triggered this component
    */
   async exec(interaction) {
-    await interaction.deferUpdate();
+    await interaction.defer({ ephemeral: true });
     const member = this.client.member(interaction.member);
 
     if (member.roles.cache.has(constants.qg.roles.nsfw)) {
       await this.client.role_manager.remove(member, constants.qg.roles.nsfw);
+      await interaction.editReply(
+        `${
+          interaction.member
+        }, you will now be able to interact with the ${this.client.channel(
+          constants.qg.channels.text.explicit,
+        )} channel.`,
+      );
     } else {
       await this.client.role_manager.add(member, constants.qg.roles.nsfw);
+      await interaction.editReply(
+        `${
+          interaction.member
+        }, you will no longer be able to interact with the ${this.client.channel(
+          constants.qg.channels.text.explicit,
+        )} channel.`,
+      );
     }
   }
 }
