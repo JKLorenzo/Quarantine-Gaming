@@ -13,12 +13,12 @@ export default {
       member: '722699433225224233',
       everyone: '351178660725915649',
       // Integrations
-      nsfw: '700481554132107414',
+      nsfw: '857327053761413220',
       streaming: '757128062276993115',
       // Bots
       bot: '699681300075905046',
       music_bot: '700397445506531358',
-      nsfw_bot: '700486309655085107',
+      nsfw_bot: '857327143482556446',
       // Free game updates
       steam: '722645979248984084',
       epic: '722691589813829672',
@@ -52,7 +52,7 @@ export default {
       text: {
         general: '749661539908190258',
         memes: '699792119077928960',
-        explicit: '699847972623482931',
+        explicit: '857327618868117554',
         music_commands: '699782177378009108',
       },
       integrations: {
