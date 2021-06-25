@@ -125,29 +125,33 @@ export default class FreeGameManager {
         },
       });
 
-      const words = title.split(' ');
-      const filters = ['other', 'alpha', 'beta', 'psa'];
-      /** @type {String[]} */
-      const filtered_title = [];
       let filter_instance = 0;
-      for (const word of words) {
-        if (contains(word, filters)) {
-          return 'Uh-oh! This free game is marked as filtered.';
-        }
-        if (word.startsWith('[') || word.startsWith('(')) {
+      let safe_title = '';
+      let filtered_title = '';
+      for (const char of title.split('')) {
+        if (char === '[' || char === '(') {
           filter_instance++;
         }
-        if (filter_instance > 0) {
-          filtered_title.push(word);
+        if (filter_instance === 0) {
+          safe_title += char;
+        } else {
+          filtered_title += char;
         }
-        if (filter_instance > 0 && (word.endsWith(']') || word.endsWith(')'))) {
+        if (filter_instance > 0 && (char === ']' || char === ')')) {
           filter_instance--;
         }
       }
-      const safe_title = words
-        .filter(word => !contains(word, filtered_title))
-        .join(' ');
-      embed.setTitle(`**${safe_title ?? title}**`);
+      if (
+        contains(filtered_title.toLowerCase(), [
+          'other',
+          'alpha',
+          'beta',
+          'psa',
+        ])
+      ) {
+        return 'Uh-oh! This free game is marked as filtered.';
+      }
+      embed.setTitle(`**${safe_title.length ? safe_title : title}**`);
 
       if (flair) {
         if (
@@ -170,7 +174,7 @@ export default class FreeGameManager {
       if (
         contains(searchables, ['steampowered.com']) ||
         (contains(searchables, ['humblebundle.com']) &&
-          contains(filtered_title.map(s => s.toLowerCase()).join(' '), 'steam'))
+          contains(filtered_title.toLowerCase(), 'steam'))
       ) {
         mentionables.push(constants.qg.roles.steam);
         color.add({ red: 0, green: 157, blue: 255 });
@@ -205,7 +209,9 @@ export default class FreeGameManager {
       embed.setColor(color.toHex());
 
       // Image
-      const image = await this.client.methods.fetchImage(safe_title ?? title);
+      const image = await this.client.methods.fetchImage(
+        safe_title.length ? safe_title : title,
+      );
       if (image?.small) embed.setThumbnail(image.small);
 
       // Mentionable Roles
