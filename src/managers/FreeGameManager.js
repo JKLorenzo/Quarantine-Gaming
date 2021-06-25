@@ -141,6 +141,10 @@ export default class FreeGameManager {
           filter_instance--;
         }
       }
+      // Trim title
+      safe_title = safe_title.trim();
+      filtered_title = filtered_title.trim();
+
       if (
         contains(filtered_title.toLowerCase(), [
           'other',
