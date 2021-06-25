@@ -533,15 +533,17 @@ export default class GameManager {
         }
       }
 
+      const attachments = [];
+      if (!this_game?.banner) {
+        attachments.push(
+          new MessageAttachment('./src/assets/banners/multiplayer_banner.png'),
+        );
+      }
       const invite = await this.client.message_manager.sendToChannel(
         constants.qg.channels.integrations.game_invites,
         {
           content: `${inviter.displayName} is inviting you to play ${game_role}.`,
-          files: [
-            new MessageAttachment(
-              './src/assets/banners/multiplayer_banner.png',
-            ),
-          ],
+          files: attachments,
           embeds: [
             embed.setImage(
               this_game?.banner ?? 'attachment://multiplayer_banner.png',

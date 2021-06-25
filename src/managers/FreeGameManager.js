@@ -238,17 +238,19 @@ export default class FreeGameManager {
       }
 
       // Send
+      const attachments = [];
+      if (!image?.large) {
+        attachments.push(
+          new MessageAttachment('./src/assets/banners/free_games_banner_2.png'),
+        );
+      }
       const message = await this.client.message_manager.sendToChannel(
         constants.qg.channels.integrations.free_games,
         {
           content: `${embed.title} is now available on ${mentionable_roles.join(
             ' and ',
           )}.`,
-          files: [
-            new MessageAttachment(
-              './src/assets/banners/free_games_banner_2.png',
-            ),
-          ],
+          files: attachments,
           embeds: [
             embed.setImage(
               image?.large ?? 'attachment://free_games_banner_2.png',
