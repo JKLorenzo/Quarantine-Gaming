@@ -84,29 +84,6 @@ export default {
       telemetry: '842698906067927060',
     },
   },
-  images: {
-    /* eslint-disable prettier/prettier */
-    free_games_banner:
-      'https://media.playstation.com/is/image/SCEA/playstation-vue-hero-banner-desktop-01-us-22jan19?$native_nt$',
-    free_games_banner_1:
-      'https://th.bing.com/th/id/Refb29ff6809187d2cba9e340367d66f7?rik=16Td9AQg3LL7Cg&riu=http%3a%2f%2f2.bp.blogspot.com%2f-brXtJ3udkBk%2fUCnE_REJjsI%2fAAAAAAAACDU%2faDXC9brYZMo%2fs1600%2f46647-game-banner-full.png&ehk=4cYtiI0VSSFC8NdDjgGFDu97FcW%2fsYjKzsg4ILAB2W0%3d&risl=&pid=ImgRaw',
-    nsfw_banner:
-      'https://yesofcorsa.com/wp-content/uploads/2016/09/shokugeki_no_soma_wallpaper_download_3.png',
-    multiplayer_banner:
-      'https://playbingerepeat.files.wordpress.com/2018/05/fortnite-banner.png?w=1332&h=666&crop=1',
-    audio_control_thumbnail:
-      'http://www.extensions.in.th/amitiae/2013/prefs/images/sound_icon.png',
-    error_message_thumbnail:
-      'https://mir-s3-cdn-cf.behance.net/project_modules/disp/c9955d46715833.589222657aded.png',
-    ratelimit_thumbnail:
-      'https://th.bing.com/th/id/Rf7832050f813fd4298d1e088f0f3fa55?rik=7Xq2EbPkqJZkOA&riu=http%3a%2f%2fwikitravel.org%2fupload%2fen%2fb%2fb2%2fWarning-icon.png&ehk=PkXja2hMq1jutYB%2b0GFtPqmAz5kDFDNF46LFCMRThhs%3d&risl=&pid=ImgRaw',
-    error_thumbnail:
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Alert-Stop-Warning-Error_icon.svg/1024px-Alert-Stop-Warning-Error_icon.svg.png',
-    warning_thumbnail:
-      'https://th.bing.com/th/id/R56a2c39ff1eb81159883eb0199a23a55?rik=P0sSInV4jnLJ4A&riu=http%3a%2f%2ficons.iconarchive.com%2ficons%2fcreative-freedom%2fshimmer%2f256%2fWarning-icon.png&ehk=%2bzahp%2f2lHxKQmBVmJvWgliQGudrOs9%2ftdVwSnN5FQPM%3d&risl=&pid=ImgRaw',
-    streaming_banner:
-      'https://pa1.narvii.com/6771/d33918fa87ad0d84b7dc854dcbf6a8545c73f94d_hq.gif',
-  },
   colors: {
     play_role: '#5865f2',
     game_role: '#00ffff',
