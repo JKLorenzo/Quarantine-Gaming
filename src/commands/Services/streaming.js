@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { MessageAttachment, MessageEmbed } from 'discord.js';
 import { SlashCommand } from '../../structures/Base.js';
 import { constants } from '../../utils/Base.js';
 
@@ -38,18 +38,26 @@ export default class Streaming extends SlashCommand {
 
     if (member.voice.channelID && !hasStreaming) {
       const voice_channel = member.voice.channel;
-      const embed = new MessageEmbed({
-        author: { name: 'Quarantine Gaming: Streaming' },
-        title: `${member.displayName} is currently Streaming`,
-        description:
-          'Please observe proper behavior on your current voice channel.',
-        image: { url: constants.images.streaming_banner },
-        color: '#5DFF00',
-      });
       for (const this_member of voice_channel.members.array()) {
         if (this_member.id === member.id) continue;
         if (this_member.user.bot) continue;
-        this.client.message_manager.sendToUser(member, { embeds: [embed] });
+        this.client.message_manager.sendToUser(member, {
+          files: [
+            new MessageAttachment('./src/assets/banners/streaming_banner.gif'),
+          ],
+          embeds: [
+            new MessageEmbed({
+              author: { name: 'Quarantine Gaming: Streaming' },
+              title: `${member.displayName} is currently Streaming`,
+              description:
+                'Please observe proper behavior on your current voice channel.',
+              image: {
+                url: 'attachment://streaming_banner.gif',
+              },
+              color: '#5DFF00',
+            }),
+          ],
+        });
       }
 
       await this.client.speech_manager.say(

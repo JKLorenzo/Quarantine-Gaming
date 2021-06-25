@@ -1,4 +1,4 @@
-import { Collection, MessageEmbed } from 'discord.js';
+import { Collection, MessageAttachment, MessageEmbed } from 'discord.js';
 import {
   ErrorTicketManager,
   contains,
@@ -508,9 +508,6 @@ export default class GameManager {
           options.description ??
           `${inviter.displayName} wants to play ${game_role.name}.`,
         fields: [{ name: 'Player 1:', value: inviter.toString() }],
-        image: {
-          url: this_game?.banner ?? constants.images.multiplayer_banner,
-        },
         footer: {
           text: `Join this ${
             options.player_count ? 'limited' : 'open'
@@ -540,7 +537,16 @@ export default class GameManager {
         constants.qg.channels.integrations.game_invites,
         {
           content: `${inviter.displayName} is inviting you to play ${game_role}.`,
-          embeds: [embed],
+          files: [
+            new MessageAttachment(
+              './src/assets/banners/multiplayer_banner.png',
+            ),
+          ],
+          embeds: [
+            embed.setImage(
+              this_game?.banner ?? 'attachment://multiplayer_banner.png',
+            ),
+          ],
           allowedMentions: {
             roles: [game_role.id],
           },

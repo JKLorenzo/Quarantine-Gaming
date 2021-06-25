@@ -1,4 +1,4 @@
-import { MessageEmbed, Permissions } from 'discord.js';
+import { MessageAttachment, MessageEmbed, Permissions } from 'discord.js';
 import {
   ErrorTicketManager,
   ProcessQueue,
@@ -422,6 +422,11 @@ export default class DedicatedChannelManager {
         // Notify member
         if (streamers.length > 0) {
           this.client.message_manager.sendToUser(member, {
+            files: [
+              new MessageAttachment(
+                './src/assets/banners/streaming_banner.gif',
+              ),
+            ],
             embeds: [
               new MessageEmbed({
                 author: { name: 'Quarantine Gaming: Information' },
@@ -437,7 +442,9 @@ export default class DedicatedChannelManager {
                 thumbnail: { url: member.user.displayAvatarURL() },
                 description:
                   'Please observe proper behavior on your current voice channel.',
-                image: { url: constants.images.streaming_banner },
+                image: {
+                  url: 'attachment://streaming_banner.gif',
+                },
                 color: 'YELLOW',
               }),
             ],

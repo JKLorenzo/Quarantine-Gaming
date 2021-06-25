@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { MessageAttachment, MessageEmbed } from 'discord.js';
 import fetch from 'node-fetch';
 import { Color, FreeGame } from '../types/Base.js';
 import {
@@ -207,7 +207,6 @@ export default class FreeGameManager {
       // Image
       const image = await this.client.methods.fetchImage(safe_title ?? title);
       if (image?.small) embed.setThumbnail(image.small);
-      embed.setImage(image?.large ?? constants.images.free_games_banner);
 
       // Mentionable Roles
       const mentionable_roles = mentionables.map(mentionable =>
@@ -233,12 +232,23 @@ export default class FreeGameManager {
           content: `${embed.title} is now available on ${mentionable_roles.join(
             ' and ',
           )}.`,
-          embeds: [embed],
+          files: [
+            new MessageAttachment(
+              './src/assets/banners/free_games_banner_2.png',
+            ),
+          ],
+          embeds: [
+            embed.setImage(
+              image?.large ?? 'attachment://free_games_banner_2.png',
+            ),
+          ],
         },
       );
+
       free_game.title = embed.title;
       free_game.id = message.id;
       await this.client.database_manager.pushFreeGame(free_game);
+
       return `Done! Reference ID: \`${message.id}\``;
     } catch (error) {
       this.client.error_manager.mark(ETM.create('post', error));
