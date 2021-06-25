@@ -46,13 +46,13 @@ export default {
         suggestions: '700126421682618389',
       },
       staff: {
-        general: '774785123866247228',
         pandoras_box: '747005488197009568',
       },
       text: {
         general: '749661539908190258',
         memes: '699792119077928960',
         explicit: '857327618868117554',
+        malibogan: '857815738353451048',
         music_commands: '699782177378009108',
       },
       integrations: {
