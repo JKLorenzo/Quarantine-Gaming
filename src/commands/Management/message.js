@@ -244,9 +244,11 @@ export default class Message extends SlashCommand {
           description: [
             `The ${this.client.role(
               constants.qg.roles.nsfw_bot,
-            )} and the ${this.client.channel(
+            )}, together with the ${this.client.channel(
               constants.qg.channels.text.explicit,
-            )} channel will be unlocked after getting the role.`,
+            )} and ${this.client.channel(
+              constants.qg.channels.text.malibogan,
+            )} channels, will be unlocked after getting the role.`,
             '',
             `**🔴 - Not Safe For Work (${this.client.role(
               constants.qg.roles.nsfw,
