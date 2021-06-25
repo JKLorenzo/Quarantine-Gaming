@@ -225,9 +225,15 @@ export default class FreeGameManager {
       );
 
       if (description) {
+        const parsedDescription = parseHTML(description);
         embed.addField(
           'Extended info (author-specified):',
-          parseHTML(description),
+          parsedDescription.length < 300
+            ? parsedDescription
+            : `${parsedDescription.substring(
+                0,
+                300,
+              )}... [Read More](${permalink})`,
         );
       }
 
@@ -251,7 +257,7 @@ export default class FreeGameManager {
         },
       );
 
-      free_game.title = embed.title;
+      free_game.title = safe_title.length ? safe_title : title;
       free_game.id = message.id;
       await this.client.database_manager.pushFreeGame(free_game);
 
