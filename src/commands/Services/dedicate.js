@@ -24,6 +24,11 @@ export default class Dedicate extends SlashCommand {
           description: 'Would you like to lock this dedicated channel?',
           type: 'BOOLEAN',
         },
+        {
+          name: 'hide',
+          description: 'Would you like to hide this dedicated channel?',
+          type: 'BOOLEAN',
+        },
       ],
     });
   }
@@ -32,6 +37,7 @@ export default class Dedicate extends SlashCommand {
    * @typedef {Object} Options
    * @property {string} [custom_name]
    * @property {boolean} [lock]
+   * @property {boolean} [hide]
    */
 
   /**
@@ -144,6 +150,50 @@ export default class Dedicate extends SlashCommand {
         title: 'Permission Changed',
         description: `${member} ${
           options.lock ? 'locked' : 'unlocked'
+        } this channel.`,
+        color: '#FFE500',
+        timestamp: new Date(),
+      });
+      await this.client.message_manager.sendToChannel(text_channel, {
+        embeds: [embed],
+      });
+    }
+
+    if (typeof options.hide === 'boolean') {
+      reply_message.push(
+        `${
+          options.hide ? 'Hiding' : 'Unhiding'
+        } ${voice_channel} dedicated channel.`,
+      );
+      await interaction.editReply(reply_message.join('\n'));
+
+      if (options.hide) {
+        await voice_channel.updateOverwrite(constants.qg.roles.member, {
+          VIEW_CHANNEL: false,
+        });
+      } else {
+        await voice_channel.updateOverwrite(constants.qg.roles.member, {
+          VIEW_CHANNEL: true,
+        });
+      }
+
+      /** @type {CategoryChannel} */
+      const dedicated_text_channels_category = this.client.channel(
+        constants.qg.channels.category.dedicated,
+      );
+      /** @type {Array<TextChannel>} */
+      const dedicated_text_channels =
+        dedicated_text_channels_category.children.array();
+      const text_channel = dedicated_text_channels.find(
+        channel =>
+          channel.topic &&
+          parseMention(channel.topic.split(' ')[0]) === voice_channel.id,
+      );
+      const embed = new MessageEmbed({
+        author: { name: 'Quarantine Gaming: Dedicated Channels' },
+        title: 'Visibility Changed',
+        description: `${member} ${
+          options.hide ? 'hid' : 'unhid'
         } this channel.`,
         color: '#FFE500',
         timestamp: new Date(),
