@@ -226,7 +226,7 @@ export default class DedicatedChannelManager {
                   allow: [VIEW_CHANNEL],
                 },
               ],
-              bitrate: 96000,
+              bitrate: 128000,
             });
 
           const dedicated_text_channel =
