@@ -217,7 +217,7 @@ export default class DedicatedChannelManager {
                 },
                 {
                   id: constants.qg.roles.moderator,
-                  allow: [CONNECT],
+                  allow: [VIEW_CHANNEL, CONNECT],
                 },
                 {
                   id: constants.qg.roles.music_bot,
