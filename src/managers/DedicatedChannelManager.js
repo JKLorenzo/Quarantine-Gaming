@@ -45,6 +45,8 @@ async function displayInfo(client, text_channel, voice_channel, name) {
             '\u200b \u200b \u200b \u200b 📎 `/dedicate custom_name: <name>` to rename this channel to a custom name.',
             '\u200b \u200b \u200b \u200b 🔒 `/dedicate lock: True` to lock this channel.',
             '\u200b \u200b \u200b \u200b 🔓 `/dedicate lock: False` to unlock this channel.',
+            '\u200b \u200b \u200b \u200b 🌘 `/dedicate hide: True` to hide this channel.',
+            '\u200b \u200b \u200b \u200b 🌕 `/dedicate hide: False` to unhide this channel.',
             '\u200b \u200b \u200b \u200b 🚏 `/transfer <member>` to transfer members from other voice channel ' +
               'to this channel regardless whether this channel is locked or unlocked.',
           ].join('\n\n')}`,
