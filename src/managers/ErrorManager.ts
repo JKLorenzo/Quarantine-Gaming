@@ -1,4 +1,4 @@
-import { Client, MessageEmbed } from 'discord.js';
+import { Client, MessageAttachment, MessageEmbed } from 'discord.js';
 import { ErrorTicket } from '../structures/Interfaces.js';
 import constants from '../utils/Constants.js';
 import ProcessQueue from '../utils/ProcessQueue.js';
@@ -16,6 +16,80 @@ export default class ErrorManager {
     this.threshold_hitcount = 0;
     this.threshold_reached = false;
     this.errors = [];
+
+    this.client.on('rateLimit', data => {
+      this.client.message_manager.sendToChannel(
+        `${constants.cs.channels.telemetry}`,
+        {
+          files: [
+            new MessageAttachment('./src/assets/thumbnails/ratelimit_icon.png'),
+          ],
+          embeds: [
+            new MessageEmbed({
+              author: { name: 'Quarantine Gaming: Telemetry' },
+              title: 'Client Rate Limit',
+              thumbnail: {
+                url: 'attachment://ratelimit_icon.png',
+              },
+              description: [
+                `**Method:** ${data.method}`,
+                `**Limit:** ${data.limit}`,
+                `**Timeout:** ${data.timeout}`,
+              ].join('\n'),
+              footer: { text: data.route },
+              color: '#1F85DE',
+            }),
+          ],
+        },
+      );
+    });
+
+    this.client.on('warn', message => {
+      this.client.message_manager.sendToChannel(
+        `${constants.cs.channels.telemetry}`,
+        {
+          files: [
+            new MessageAttachment('./src/assets/thumbnails/warning_icon.png'),
+          ],
+          embeds: [
+            new MessageEmbed({
+              author: { name: 'Quarantine Gaming: Telemetry' },
+              title: 'Client Warning',
+              thumbnail: {
+                url: 'attachment://warning_icon.png',
+              },
+              description: `**Message:** ${message}`,
+              color: '#FFA721',
+            }),
+          ],
+        },
+      );
+    });
+
+    this.client.on('error', error => {
+      this.client.message_manager.sendToChannel(
+        `${constants.cs.channels.telemetry}`,
+        {
+          files: [
+            new MessageAttachment('./src/assets/thumbnails/fatal_icon.png'),
+          ],
+          embeds: [
+            new MessageEmbed({
+              author: { name: 'Quarantine Gaming: Telemetry' },
+              title: 'Client Error',
+              thumbnail: {
+                url: 'attachment://fatal_icon.png',
+              },
+              description: [
+                `**Name:** ${error.name}`,
+                `**Message:** ${error.message}`,
+              ].join('\n'),
+              color: '#FF0A0A',
+            }),
+          ],
+        },
+      );
+    });
   }
 
   mark(error_ticket: ErrorTicket): Promise<void> {
@@ -51,7 +125,9 @@ export default class ErrorManager {
         const embed = new MessageEmbed({
           author: { name: 'Quarantine Gaming: Telemetry' },
           title: 'Error Detection',
-          thumbnail: { url: constants.images.error_message_thumbnail },
+          thumbnail: {
+            url: 'attachment://error_icon.png',
+          },
           fields: [
             { name: 'Location', value: 'N/A', inline: true },
             { name: 'Method', value: 'N/A', inline: true },
@@ -75,7 +151,12 @@ export default class ErrorManager {
 
         return this.client.message_manager.sendToChannel(
           `${constants.cs.channels.telemetry}`,
-          { embeds: [embed] },
+          {
+            files: [
+              new MessageAttachment('./src/assets/thumbnails/error_icon.png'),
+            ],
+            embeds: [embed],
+          },
         );
       } catch (error) {
         console.error(`ErrorManager: ${error}`);

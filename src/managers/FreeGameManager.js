@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { MessageAttachment, MessageEmbed } from 'discord.js';
 import fetch from 'node-fetch';
 import { Color, FreeGame } from '../types/Base.js';
 import {
@@ -125,29 +125,37 @@ export default class FreeGameManager {
         },
       });
 
-      const words = title.split(' ');
-      const filters = ['other', 'alpha', 'beta', 'psa'];
-      /** @type {String[]} */
-      const filtered_title = [];
       let filter_instance = 0;
-      for (const word of words) {
-        if (contains(word, filters)) {
-          return 'Uh-oh! This free game is marked as filtered.';
-        }
-        if (word.startsWith('[') || word.startsWith('(')) {
+      let safe_title = '';
+      let filtered_title = '';
+      for (const char of title.split('')) {
+        if (char === '[' || char === '(') {
           filter_instance++;
         }
-        if (filter_instance > 0) {
-          filtered_title.push(word);
+        if (filter_instance === 0) {
+          safe_title += char;
+        } else {
+          filtered_title += char;
         }
-        if (filter_instance > 0 && (word.endsWith(']') || word.endsWith(')'))) {
+        if (filter_instance > 0 && (char === ']' || char === ')')) {
           filter_instance--;
         }
       }
-      const safe_title = words
-        .filter(word => !contains(word, filtered_title))
-        .join(' ');
-      embed.setTitle(`**${safe_title ?? title}**`);
+      // Trim title
+      safe_title = safe_title.trim();
+      filtered_title = filtered_title.trim();
+
+      if (
+        contains(filtered_title.toLowerCase(), [
+          'other',
+          'alpha',
+          'beta',
+          'psa',
+        ])
+      ) {
+        return 'Uh-oh! This free game is marked as filtered.';
+      }
+      embed.setTitle(`**${safe_title.length ? safe_title : title}**`);
 
       if (flair) {
         if (
@@ -170,7 +178,7 @@ export default class FreeGameManager {
       if (
         contains(searchables, ['steampowered.com']) ||
         (contains(searchables, ['humblebundle.com']) &&
-          contains(filtered_title.map(s => s.toLowerCase()).join(' '), 'steam'))
+          contains(filtered_title.toLowerCase(), 'steam'))
       ) {
         mentionables.push(constants.qg.roles.steam);
         color.add({ red: 0, green: 157, blue: 255 });
@@ -205,9 +213,10 @@ export default class FreeGameManager {
       embed.setColor(color.toHex());
 
       // Image
-      const image = await this.client.methods.fetchImage(safe_title ?? title);
+      const image = await this.client.methods.fetchImage(
+        safe_title.length ? safe_title : title,
+      );
       if (image?.small) embed.setThumbnail(image.small);
-      embed.setImage(image?.large ?? constants.images.free_games_banner);
 
       // Mentionable Roles
       const mentionable_roles = mentionables.map(mentionable =>
@@ -220,25 +229,44 @@ export default class FreeGameManager {
       );
 
       if (description) {
+        const parsedDescription = parseHTML(description);
         embed.addField(
           'Extended info (author-specified):',
-          parseHTML(description),
+          parsedDescription.length < 300
+            ? parsedDescription
+            : `${parsedDescription.substring(
+                0,
+                300,
+              )}... [Read More](${permalink})`,
         );
       }
 
       // Send
+      const attachments = [];
+      if (!image?.large) {
+        attachments.push(
+          new MessageAttachment('./src/assets/banners/free_games_banner_2.png'),
+        );
+      }
       const message = await this.client.message_manager.sendToChannel(
         constants.qg.channels.integrations.free_games,
         {
           content: `${embed.title} is now available on ${mentionable_roles.join(
             ' and ',
           )}.`,
-          embeds: [embed],
+          files: attachments,
+          embeds: [
+            embed.setImage(
+              image?.large ?? 'attachment://free_games_banner_2.png',
+            ),
+          ],
         },
       );
-      free_game.title = embed.title;
+
+      free_game.title = safe_title.length ? safe_title : title;
       free_game.id = message.id;
       await this.client.database_manager.pushFreeGame(free_game);
+
       return `Done! Reference ID: \`${message.id}\``;
     } catch (error) {
       this.client.error_manager.mark(ETM.create('post', error));

@@ -1,4 +1,4 @@
-import { MessageEmbed, Permissions } from 'discord.js';
+import { MessageAttachment, MessageEmbed, Permissions } from 'discord.js';
 import {
   ErrorTicketManager,
   ProcessQueue,
@@ -45,6 +45,8 @@ async function displayInfo(client, text_channel, voice_channel, name) {
             '\u200b \u200b \u200b \u200b 📎 `/dedicate custom_name: <name>` to rename this channel to a custom name.',
             '\u200b \u200b \u200b \u200b 🔒 `/dedicate lock: True` to lock this channel.',
             '\u200b \u200b \u200b \u200b 🔓 `/dedicate lock: False` to unlock this channel.',
+            '\u200b \u200b \u200b \u200b 🌘 `/dedicate hide: True` to hide this channel.',
+            '\u200b \u200b \u200b \u200b 🌕 `/dedicate hide: False` to unhide this channel.',
             '\u200b \u200b \u200b \u200b 🚏 `/transfer <member>` to transfer members from other voice channel ' +
               'to this channel regardless whether this channel is locked or unlocked.',
           ].join('\n\n')}`,
@@ -217,7 +219,7 @@ export default class DedicatedChannelManager {
                 },
                 {
                   id: constants.qg.roles.moderator,
-                  allow: [CONNECT],
+                  allow: [VIEW_CHANNEL, CONNECT],
                 },
                 {
                   id: constants.qg.roles.music_bot,
@@ -422,6 +424,11 @@ export default class DedicatedChannelManager {
         // Notify member
         if (streamers.length > 0) {
           this.client.message_manager.sendToUser(member, {
+            files: [
+              new MessageAttachment(
+                './src/assets/banners/streaming_banner.gif',
+              ),
+            ],
             embeds: [
               new MessageEmbed({
                 author: { name: 'Quarantine Gaming: Information' },
@@ -437,7 +444,9 @@ export default class DedicatedChannelManager {
                 thumbnail: { url: member.user.displayAvatarURL() },
                 description:
                   'Please observe proper behavior on your current voice channel.',
-                image: { url: constants.images.streaming_banner },
+                image: {
+                  url: 'attachment://streaming_banner.gif',
+                },
                 color: 'YELLOW',
               }),
             ],

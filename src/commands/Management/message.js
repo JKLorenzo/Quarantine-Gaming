@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { MessageAttachment, MessageEmbed } from 'discord.js';
 import { SlashCommand } from '../../structures/Base.js';
 import { constants } from '../../utils/Base.js';
 
@@ -143,6 +143,9 @@ export default class Message extends SlashCommand {
    */
   freeGameUpdatesPC() {
     return {
+      files: [
+        new MessageAttachment('./src/assets/banners/free_games_banner_2.png'),
+      ],
       embeds: [
         new MessageEmbed({
           author: { name: 'Quarantine Gaming: Free Game Updates' },
@@ -172,7 +175,9 @@ export default class Message extends SlashCommand {
             )} - UPlay (${this.client.role(constants.qg.roles.ubisoft)})**`,
             'Notifies you with games that are currently free on UPlay.',
           ].join('\n'),
-          image: { url: constants.images.free_games_banner_1 },
+          image: {
+            url: 'attachment://free_games_banner_2.png',
+          },
           footer: { text: 'Update your role by clicking the buttons below.' },
           color: 'GREEN',
         }),
@@ -192,6 +197,9 @@ export default class Message extends SlashCommand {
   freeGameUpdatesCS() {
     const emojis = this.client.emojis.cache;
     return {
+      files: [
+        new MessageAttachment('./src/assets/banners/free_games_banner_1.png'),
+      ],
       embeds: [
         new MessageEmbed({
           author: { name: 'Quarantine Gaming: Free Game Updates' },
@@ -218,7 +226,9 @@ export default class Message extends SlashCommand {
             )})**`,
             'Notifies you with games that are currently free for Wii U/3DS/Switch.',
           ].join('\n'),
-          image: { url: constants.images.free_games_banner },
+          image: {
+            url: 'attachment://free_games_banner_1.png',
+          },
           footer: { text: 'Update your role by clicking the buttons below.' },
           color: 'GREEN',
         }),
@@ -237,6 +247,7 @@ export default class Message extends SlashCommand {
    */
   notSafeForWork() {
     return {
+      files: [new MessageAttachment('./src/assets/banners/nsfw_banner.gif')],
       embeds: [
         new MessageEmbed({
           author: { name: 'Quarantine Gaming: NSFW Content' },
@@ -244,9 +255,11 @@ export default class Message extends SlashCommand {
           description: [
             `The ${this.client.role(
               constants.qg.roles.nsfw_bot,
-            )} and the ${this.client.channel(
+            )}, together with the ${this.client.channel(
               constants.qg.channels.text.explicit,
-            )} channel will be unlocked after getting the role.`,
+            )} and ${this.client.channel(
+              constants.qg.channels.text.malibogan,
+            )} channels, will be unlocked after getting the role.`,
             '',
             `**🔴 - Not Safe For Work (${this.client.role(
               constants.qg.roles.nsfw,
@@ -254,7 +267,9 @@ export default class Message extends SlashCommand {
             'The marked content may contain nudity, intense sexuality, profanity, ' +
               'violence or other potentially disturbing subject matter.',
           ].join('\n'),
-          image: { url: constants.images.nsfw_banner },
+          image: {
+            url: 'attachment://nsfw_banner.gif',
+          },
           footer: { text: 'Update your role by clicking the button below.' },
           color: 'FUCHSIA',
         }),

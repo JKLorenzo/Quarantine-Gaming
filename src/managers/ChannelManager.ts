@@ -66,7 +66,9 @@ export default class ChannelManager {
     return this.queuer.queue(async () => {
       let result, error;
       try {
-        result = await this_channel?.delete(reason);
+        if (this_channel?.deletable) {
+          result = await this_channel?.delete(reason);
+        }
       } catch (this_error) {
         this.client.error_manager.mark(ETM.create('delete', this_error));
         error = this_error;
