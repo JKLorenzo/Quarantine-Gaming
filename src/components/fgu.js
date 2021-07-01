@@ -101,107 +101,100 @@ export default class FreeGameUpdate extends MessageComponent {
   async exec(interaction, customID) {
     await interaction.defer({ ephemeral: true });
     const member = this.client.member(interaction.member);
-    const data = {
-      platform: '',
-      status: '',
-    };
+    let add_role = false;
+    let platform = '';
 
     switch (customID) {
       case 'steam':
-        data.platform = 'Steam';
+        platform = 'Steam';
         if (member.roles.cache.has(constants.qg.roles.steam)) {
           await this.client.role_manager.remove(
             member,
             constants.qg.roles.steam,
           );
-          data.status = 'no longer';
         } else {
           await this.client.role_manager.add(member, constants.qg.roles.steam);
-          data.status = 'now';
+          add_role = true;
         }
         break;
       case 'epic':
-        data.platform = 'Epic Games';
+        platform = 'Epic Games';
         if (member.roles.cache.has(constants.qg.roles.epic)) {
           await this.client.role_manager.remove(
             member,
             constants.qg.roles.epic,
           );
-          data.status = 'no longer';
         } else {
           await this.client.role_manager.add(member, constants.qg.roles.epic);
-          data.status = 'now';
+          add_role = true;
         }
         break;
       case 'gog':
-        data.platform = 'GOG';
+        platform = 'GOG';
         if (member.roles.cache.has(constants.qg.roles.gog)) {
           await this.client.role_manager.remove(member, constants.qg.roles.gog);
-          data.status = 'no longer';
         } else {
           await this.client.role_manager.add(member, constants.qg.roles.gog);
-          data.status = 'now';
+          add_role = true;
         }
         break;
       case 'ubisoft':
-        data.platform = 'Ubisoft';
+        platform = 'Ubisoft';
         if (member.roles.cache.has(constants.qg.roles.ubisoft)) {
           await this.client.role_manager.remove(
             member,
             constants.qg.roles.ubisoft,
           );
-          data.status = 'no longer';
         } else {
           await this.client.role_manager.add(
             member,
             constants.qg.roles.ubisoft,
           );
-          data.status = 'now';
+          add_role = true;
         }
         break;
       case 'xbox':
-        data.platform = 'Xbox';
+        platform = 'Xbox';
         if (member.roles.cache.has(constants.qg.roles.xbox)) {
           await this.client.role_manager.remove(
             member,
             constants.qg.roles.xbox,
           );
-          data.status = 'no longer';
         } else {
           await this.client.role_manager.add(member, constants.qg.roles.xbox);
-          data.status = 'now';
+          add_role = true;
         }
         break;
       case 'playstation':
-        data.platform = 'PlayStation';
+        platform = 'PlayStation';
         if (member.roles.cache.has(constants.qg.roles.playstation)) {
           await this.client.role_manager.remove(
             member,
             constants.qg.roles.playstation,
           );
-          data.status = 'no longer';
         } else {
           await this.client.role_manager.add(
             member,
             constants.qg.roles.playstation,
           );
-          data.status = 'now';
+          add_role = true;
         }
         break;
       case 'wii':
-        data.platform = 'Wii';
+        platform = 'Wii';
         if (member.roles.cache.has(constants.qg.roles.wii)) {
           await this.client.role_manager.remove(member, constants.qg.roles.wii);
-          data.status = 'no longer';
         } else {
           await this.client.role_manager.add(member, constants.qg.roles.wii);
-          data.status = 'now';
+          add_role = true;
         }
         break;
     }
 
     await interaction.editReply(
-      `${interaction.member}, you will ${data.status} be notified when there's a free game on **${data.platform}**.`,
+      `${interaction.member}, you will ${
+        add_role ? 'now' : 'no longer'
+      } be notified when there's a free game on **${platform}**.`,
     );
   }
 }
