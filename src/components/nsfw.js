@@ -48,18 +48,22 @@ export default class NotSafeForWork extends MessageComponent {
       await interaction.editReply(
         `${
           interaction.member
-        }, you will now be able to interact with the ${this.client.channel(
+        }, you will no longer be able to interact with the ${this.client.channel(
           constants.qg.channels.text.explicit,
-        )} channel.`,
+        )} and ${this.client.channel(
+          constants.qg.channels.text.malibogan,
+        )} channels.`,
       );
     } else {
       await this.client.role_manager.add(member, constants.qg.roles.nsfw);
       await interaction.editReply(
         `${
           interaction.member
-        }, you will no longer be able to interact with the ${this.client.channel(
+        }, you will now be able to interact with the ${this.client.channel(
           constants.qg.channels.text.explicit,
-        )} channel.`,
+        )} and ${this.client.channel(
+          constants.qg.channels.text.malibogan,
+        )} channels.`,
       );
     }
   }
