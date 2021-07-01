@@ -1,5 +1,4 @@
 import {
-  APIMessage,
   CategoryChannel,
   Client,
   GuildChannel,
@@ -7,6 +6,8 @@ import {
   Message,
   MessageAttachment,
   MessageOptions,
+  MessagePayload,
+  Snowflake,
   TextChannel,
   UserResolvable,
 } from 'discord.js';
@@ -34,7 +35,7 @@ export default class MessageManager {
 
       if (message.guild.id !== `${constants.cs.guild}`) return;
       if (message.channel instanceof GuildChannel && message.channel.parentID) {
-        switch (BigInt(message.channel.parentID)) {
+        switch (message.channel.parentID) {
           case constants.cs.channels.category.dm:
             return this.processOutgoingDM(message);
           case constants.cs.channels.category.dc:
@@ -46,7 +47,7 @@ export default class MessageManager {
 
   sendToChannel(
     channel: GuildChannelResolvable,
-    options: string | APIMessage | (MessageOptions & { split?: false }),
+    options: string | MessagePayload | MessageOptions,
   ): Promise<Message> {
     const this_channel = this.client.channel(channel);
     console.log(
@@ -79,7 +80,7 @@ export default class MessageManager {
 
   sendToUser(
     user: UserResolvable,
-    options: string | APIMessage | (MessageOptions & { split?: false }),
+    options: string | MessagePayload | MessageOptions,
   ): Promise<Message> {
     const member = this.client.member(user);
     console.log(
@@ -191,8 +192,8 @@ export default class MessageManager {
 
   async processDirectChannels(message: Message): Promise<void> {
     try {
-      let channel: bigint;
-      switch (BigInt(message.channel.id)) {
+      let channel: Snowflake;
+      switch (message.channel.id) {
         case constants.cs.channels.dc_announcements:
           channel = constants.qg.channels.server.announcements;
           break;
