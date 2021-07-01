@@ -1,12 +1,16 @@
 import {
-  ButtonInteraction,
   Client,
   MessageActionRow,
   MessageActionRowOptions,
   MessageButton,
+  MessageButtonOptions,
+  MessageComponentInteraction,
+  MessageSelectMenu,
+  MessageSelectMenuOptions,
 } from 'discord.js';
 
 export default abstract class Component {
+  client?: Client;
   name: string;
   options: MessageActionRowOptions[];
 
@@ -22,9 +26,13 @@ export default abstract class Component {
           components: row.components?.map(component => {
             switch (component.type) {
               case 'BUTTON':
-                return new MessageButton(component).setCustomID(
-                  `${this.name}__${component.customID}`,
-                );
+                return new MessageButton(
+                  component as MessageButtonOptions,
+                ).setCustomID(`${this.name}__${component.customID}`);
+              case 'SELECT_MENU':
+                return new MessageSelectMenu(
+                  component as MessageSelectMenuOptions,
+                ).setCustomID(`${this.name}__${component.customID}`);
               default:
                 return {
                   ...component,
@@ -36,10 +44,17 @@ export default abstract class Component {
     );
   }
 
-  abstract init(client: Client): Promise<void>;
+  async init(client: Client): Promise<this> {
+    this.client = client;
+    // Load the component
+    await Promise.race([this.load(client)]);
+    return this;
+  }
+
+  abstract load(client: Client): void;
 
   abstract exec(
-    interaction: ButtonInteraction,
+    interaction: MessageComponentInteraction,
     customID: string,
   ): Promise<void>;
 }
