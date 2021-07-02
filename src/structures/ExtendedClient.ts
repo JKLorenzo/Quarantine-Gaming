@@ -1,4 +1,5 @@
 import { Client, Guild, Intents, Structures } from 'discord.js';
+import ExtendedGuild from './ExtendedGuild.js';
 import ExtendedMember from './ExtendedMember.js';
 import ExtendedMessage from './ExtendedMessage.js';
 import ChannelManager from '../managers/ChannelManager.js';
@@ -9,6 +10,7 @@ import RoleManager from '../managers/RoleManager.js';
 import SpeechManager from '../managers/SpeechManager.js';
 import constants from '../utils/Constants.js';
 
+Structures.extend('Guild', () => ExtendedGuild);
 Structures.extend('GuildMember', () => ExtendedMember);
 Structures.extend('Message', () => ExtendedMessage);
 
@@ -59,10 +61,10 @@ export default class extends Client {
   }
 
   get qg(): Guild {
-    return this.guilds.cache.get(`${constants.qg.guild}`)!;
+    return this.guilds.cache.get(constants.qg.guild)!;
   }
 
   get cs(): Guild {
-    return this.guilds.cache.get(`${constants.cs.guild}`)!;
+    return this.guilds.cache.get(constants.cs.guild)!;
   }
 }
