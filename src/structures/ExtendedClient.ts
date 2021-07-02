@@ -1,9 +1,22 @@
-import { Client, Guild, Intents, Structures } from 'discord.js';
+import {
+  Client,
+  Guild,
+  GuildChannel,
+  GuildChannelResolvable,
+  GuildMember,
+  GuildMemberResolvable,
+  Intents,
+  Role,
+  RoleResolvable,
+  Structures,
+  ThreadChannel,
+} from 'discord.js';
 import ExtendedGuild from './ExtendedGuild.js';
 import ExtendedMember from './ExtendedMember.js';
 import ExtendedMessage from './ExtendedMessage.js';
 import ChannelManager from '../managers/ChannelManager.js';
 import ErrorManager from '../managers/ErrorManager.js';
+import InteractionManager from '../managers/InteractionManager.js';
 import MessageManager from '../managers/MessageManager.js';
 import ReactionManager from '../managers/ReactionManager.js';
 import RoleManager from '../managers/RoleManager.js';
@@ -14,9 +27,10 @@ Structures.extend('Guild', () => ExtendedGuild);
 Structures.extend('GuildMember', () => ExtendedMember);
 Structures.extend('Message', () => ExtendedMessage);
 
-export default class extends Client {
+export default class ExtendedClient extends Client {
   readonly channel_manager: ChannelManager;
   readonly error_manager: ErrorManager;
+  readonly interaction_manager: InteractionManager;
   readonly message_manager: MessageManager;
   readonly reaction_manager: ReactionManager;
   readonly role_manager: RoleManager;
@@ -54,6 +68,7 @@ export default class extends Client {
 
     this.channel_manager = new ChannelManager(this);
     this.error_manager = new ErrorManager(this);
+    this.interaction_manager = new InteractionManager(this);
     this.message_manager = new MessageManager(this);
     this.reaction_manager = new ReactionManager(this);
     this.role_manager = new RoleManager(this);
@@ -66,5 +81,19 @@ export default class extends Client {
 
   get cs(): Guild {
     return this.guilds.cache.get(constants.cs.guild)!;
+  }
+
+  role(resolvable: RoleResolvable): Role | undefined {
+    return this.qg.role(resolvable) ?? this.cs.role(resolvable);
+  }
+
+  member(resolvable: GuildMemberResolvable): GuildMember | undefined {
+    return this.qg.member(resolvable) ?? this.cs.member(resolvable);
+  }
+
+  channel(
+    resolvable: GuildChannelResolvable,
+  ): GuildChannel | ThreadChannel | undefined {
+    return this.qg.channel(resolvable) ?? this.cs.channel(resolvable);
   }
 }
