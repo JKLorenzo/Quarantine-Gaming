@@ -25,6 +25,10 @@ declare module 'discord.js' {
     delete(options?: { timeout: number }): Promise<Message>;
   }
 
+  interface Guild {
+    member(resolvable: GuildMemberResolvable): GuildMember | undefined;
+  }
+
   interface GuildMember {
     register(inviter: Snowflake, moderator: Snowflake): Promise<void>;
 
