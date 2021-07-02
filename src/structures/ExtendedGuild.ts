@@ -11,7 +11,7 @@ import {
 } from 'discord.js';
 import { parseMention } from '../utils/Functions';
 
-export default class extends Guild {
+export default class ExtendedGuild extends Guild {
   // eslint-disable-next-line no-useless-constructor
   constructor(client: Client, data: unknown) {
     super(client, data);
