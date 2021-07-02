@@ -19,6 +19,12 @@ declare module 'discord.js' {
 
     qg: Guild;
     cs: Guild;
+
+    role(resolvable: RoleResolvable): Role | undefined;
+    member(resolvable: GuildMemberResolvable): GuildMember | undefined;
+    channel(
+      resolvable: GuildChannelResolvable,
+    ): GuildChannel | ThreadChannel | undefined;
   }
 
   interface Message {
