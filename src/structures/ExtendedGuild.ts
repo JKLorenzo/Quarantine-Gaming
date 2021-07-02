@@ -1,4 +1,14 @@
-import { Client, Guild, GuildMember, GuildMemberResolvable } from 'discord.js';
+import {
+  Client,
+  Guild,
+  GuildChannel,
+  GuildChannelResolvable,
+  GuildMember,
+  GuildMemberResolvable,
+  Role,
+  RoleResolvable,
+  ThreadChannel,
+} from 'discord.js';
 import { parseMention } from '../utils/Functions';
 
 export default class extends Guild {
@@ -10,5 +20,17 @@ export default class extends Guild {
   member(resolvable: GuildMemberResolvable): GuildMember | undefined {
     if (typeof resolvable === 'string') resolvable = parseMention(resolvable);
     return this.members.resolve(resolvable) ?? undefined;
+  }
+
+  role(resolvable: RoleResolvable): Role | undefined {
+    if (typeof resolvable === 'string') resolvable = parseMention(resolvable);
+    return this.roles.resolve(resolvable) ?? undefined;
+  }
+
+  channel(
+    resolvable: GuildChannelResolvable,
+  ): GuildChannel | ThreadChannel | undefined {
+    if (typeof resolvable === 'string') resolvable = parseMention(resolvable);
+    return this.channels.resolve(resolvable) ?? undefined;
   }
 }
