@@ -27,6 +27,10 @@ declare module 'discord.js' {
 
   interface Guild {
     member(resolvable: GuildMemberResolvable): GuildMember | undefined;
+    role(resolvable: RoleResolvable): Role | undefined;
+    channel(
+      resolvable: GuildChannelResolvable,
+    ): GuildChannel | ThreadChannel | undefined;
   }
 
   interface GuildMember {
