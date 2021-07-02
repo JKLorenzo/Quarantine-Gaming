@@ -1,5 +1,5 @@
 import express from 'express';
-import Client from './structures/Client.js';
+import Client from './structures/ExtendedClient.js';
 
 const app = express();
 const client = new Client();
