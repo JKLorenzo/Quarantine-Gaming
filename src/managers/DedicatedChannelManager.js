@@ -402,7 +402,7 @@ export default class DedicatedChannelManager {
               }),
             ],
           });
-        } else {
+        } else if (!member.user.bot) {
           await this.client.role_manager.delete(team_role);
           await this.client.channel_manager.delete(oldState.channel);
           await this.client.channel_manager.delete(text_channel);
