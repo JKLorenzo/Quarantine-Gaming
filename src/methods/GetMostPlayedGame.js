@@ -33,7 +33,7 @@ export default function getMostPlayedGame(members) {
   for (const [game_name, players] of Object.entries(game_count)) {
     if (players > highest.count) {
       highest = {
-        name: game_name,
+        name: game_name.substring(5),
         count: players,
       };
     }
