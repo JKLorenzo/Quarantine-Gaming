@@ -109,24 +109,18 @@ export default class DedicatedChannelManager {
         const members = this_channel.members.array();
         if (!members.length) continue;
 
-        const game = this.client.methods.getMostPlayedGame(members);
+        const game_name = this.client.methods.getMostPlayedGame(members);
         if (
-          game &&
-          !this_channel.name.substring(2).startsWith(game.substring(5))
+          game_name &&
+          !this_channel.name.substring(2).startsWith(game_name) &&
+          (!this_channel.name.startsWith('🔰') ||
+            this.client.qg.roles.cache.some(
+              r =>
+                r.hexColor === constants.colors.game_role &&
+                contains(this_channel.name, r.name),
+            ))
         ) {
-          if (this_channel.name.startsWith('🔰')) {
-            if (
-              this.client.qg.roles.cache.some(
-                r =>
-                  r.hexColor === constants.colors.game_role &&
-                  contains(this_channel.name, r.name),
-              )
-            ) {
-              this.create(this_channel, game.substring(5));
-            }
-          } else {
-            this.create(this_channel, game.substring(5));
-          }
+          this.create(this_channel, game_name);
         }
       }
     } catch (error) {
