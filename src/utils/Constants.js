@@ -15,6 +15,7 @@ export default {
       // Integrations
       nsfw: '857327053761413220',
       streaming: '757128062276993115',
+      play_roles: '864784870647398420',
       // Bots
       bot: '699681300075905046',
       music_bot: '700397445506531358',
