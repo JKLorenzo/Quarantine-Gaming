@@ -416,7 +416,7 @@ export default class DedicatedChannelManager {
         }
 
         // Notify member
-        if (streamers.length > 0) {
+        if (!member.user.bot && streamers.length > 0) {
           this.client.message_manager.sendToUser(member, {
             files: [
               new MessageAttachment(
