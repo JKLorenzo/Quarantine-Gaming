@@ -108,10 +108,7 @@ export default abstract class Command {
 
     if (!samePermissions) {
       await queuer.queue(() =>
-        this_command!.permissions.set({
-          command: this_command!,
-          permissions: currentPermissions,
-        }),
+        this_command!.permissions.set({ permissions: currentPermissions }),
       );
       this.client?.message_manager.sendToChannel(
         constants.cs.channels.logs,
