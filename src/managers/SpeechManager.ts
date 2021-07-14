@@ -39,11 +39,12 @@ export default class SpeechManager {
         );
       }
       if (this.connection) this.leave();
-      return (this.connection = joinVoiceChannel({
+      this.connection = joinVoiceChannel({
         adapterCreator: voice_channel.guild.voiceAdapterCreator,
         guildId: voice_channel.guild.id,
         channelId: voice_channel.id,
-      }));
+      });
+      return this.connection;
     } catch (error) {
       this.client.error_manager.mark(ETM.create('join', error));
       throw error;
