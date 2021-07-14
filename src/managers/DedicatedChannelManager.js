@@ -193,7 +193,7 @@ export default class DedicatedChannelManager {
           const team_role = await this.client.role_manager.create({
             name: `Team ${channel_name}`,
             position:
-              this.client.role(constants.qg.roles.streaming).position + 1,
+              this.client.role(constants.qg.roles.play_roles).position + 1,
             hoist: true,
             color: generateColor({ min: 100 }).toHex(),
           });
