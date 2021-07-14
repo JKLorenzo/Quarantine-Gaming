@@ -29,7 +29,7 @@ export default function getMostPlayedGame(members) {
     }
   }
 
-  let highest = { name: '', count: 0 };
+  let highest = { name: '', count: 1 };
   for (const [game_name, players] of Object.entries(game_count)) {
     if (players > highest.count) {
       highest = {
