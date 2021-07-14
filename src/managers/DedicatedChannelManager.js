@@ -110,15 +110,15 @@ export default class DedicatedChannelManager {
         if (!members.length) continue;
 
         const game_name = this.client.methods.getMostPlayedGame(members);
+        if (!game_name) continue;
+
         if (
-          game_name &&
-          !this_channel.name.substring(2).startsWith(game_name) &&
-          (!this_channel.name.startsWith('🔰') ||
-            this.client.qg.roles.cache.some(
-              r =>
-                r.hexColor === constants.colors.game_role &&
-                contains(this_channel.name, r.name),
-            ))
+          !this_channel.name.startsWith('🔰') ||
+          this.client.qg.roles.cache.some(
+            r =>
+              r.hexColor === constants.colors.game_role &&
+              contains(this_channel.name, r.name),
+          )
         ) {
           this.create(this_channel, game_name);
         }
