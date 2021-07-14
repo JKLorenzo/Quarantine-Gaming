@@ -27,7 +27,6 @@
     "@discordjs/voice": "^0.5.4",
     "axios": "^0.21.1",
     "common-tags": "^1.8.0",
-    "discord-api-types": "^0.18.1",
     "discord.js": "^13.0.0-dev.98c6078.1626221017",
     "express": "^4.17.1",
     "ffmpeg-static": "^4.3.0",
