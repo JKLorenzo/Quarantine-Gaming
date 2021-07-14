@@ -4,7 +4,7 @@ import {
   Guild,
   GuildChannel,
   GuildChannelResolvable,
-  GuildCreateChannelOptions,
+  GuildChannelCreateOptions,
   TextChannel,
   VoiceChannel,
 } from 'discord.js';
@@ -25,7 +25,7 @@ export default class ChannelManager {
 
   create(
     name: string,
-    options: GuildCreateChannelOptions & { guild?: 'qg' | 'cs' },
+    options: GuildChannelCreateOptions & { guild?: 'qg' | 'cs' },
   ): Promise<GuildChannel> {
     console.log(`ChannelCreate: Queueing ${this.queuer.totalID} (${name})`);
 
