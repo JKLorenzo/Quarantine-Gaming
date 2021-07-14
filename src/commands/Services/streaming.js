@@ -41,7 +41,7 @@ export default class Streaming extends SlashCommand {
       for (const this_member of voice_channel.members.array()) {
         if (this_member.id === member.id) continue;
         if (this_member.user.bot) continue;
-        this.client.message_manager.sendToUser(member, {
+        this.client.message_manager.sendToUser(this_member, {
           files: [
             new MessageAttachment('./src/assets/banners/streaming_banner.gif'),
           ],
