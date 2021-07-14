@@ -264,9 +264,7 @@ export default class GameManager {
               }));
             promises.push(this.client.role_manager.add(member, game_role));
             // Play Role
-            const streaming_role = this.client.role(
-              constants.qg.roles.streaming,
-            );
+            const play_roles = this.client.role(constants.qg.roles.play_roles);
             const play_role =
               this.client.qg.roles.cache.find(
                 role => role.name === `Play ${game_name}`,
@@ -274,7 +272,7 @@ export default class GameManager {
               (await this.client.role_manager.create({
                 name: `Play ${game_name}`,
                 color: constants.colors.play_role,
-                position: streaming_role.position,
+                position: play_roles.position,
                 hoist: true,
               }));
             if (member.roles.cache.has(play_role.id)) continue;
@@ -366,7 +364,7 @@ export default class GameManager {
       if (!this_game) {
         await this.ScreenGame(game_name, activity);
       } else if (this_game.status === 'Approved') {
-        const streaming_role = this.client.role(constants.qg.roles.streaming);
+        const play_roles = this.client.role(constants.qg.roles.play_roles);
         let play_role = this.client.qg.roles.cache.find(
           role => role.name === `Play ${game_name}`,
         );
@@ -380,12 +378,12 @@ export default class GameManager {
             }));
 
           if (play_role) {
-            await play_role.setPosition(streaming_role.position - 1);
+            await play_role.setPosition(play_roles.position - 1);
           } else {
             play_role = await this.client.role_manager.create({
               name: `Play ${game_name}`,
               color: constants.colors.play_role,
-              position: streaming_role.position,
+              position: play_roles.position,
               hoist: true,
             });
           }
