@@ -195,12 +195,13 @@ export default class DatabaseManager {
 
   /**
    * Gets the images from the database.
-   * @param {string} id The id of this image
+   * @param {string} name The id of this image
    * @returns {ImageData}
    */
-  getImage(id) {
+  getImage(name) {
     try {
-      return this.data.images.get(id);
+      const hex_name = convertToHex(name);
+      return this.data.images.get(hex_name);
     } catch (error) {
       this.client.error_manager.mark(ETM.create('getImage', error));
       throw error;
@@ -209,20 +210,22 @@ export default class DatabaseManager {
 
   /**
    * Stores the images to the database.
-   * @param {string} id The id of this image
+   * @param {string} name The id of this image
    * @param {ImageData} data The data of this image
    */
-  async updateImage(id, data) {
+  async updateImage(name, data) {
     try {
-      const images = this.getImage(id);
-      if (images) {
-        await this.collections.images.doc(id).update(data);
+      const hex_name = convertToHex(name);
+      const image = this.getImage(name);
+
+      if (image) {
+        await this.collections.images.doc(hex_name).update(data);
       } else {
-        await this.collections.images.doc(id).set(data);
+        await this.collections.images.doc(hex_name).set(data);
       }
-      this.data.images.set(id, {
-        small: data?.small ?? images?.small,
-        large: data?.large ?? images?.large,
+      this.data.images.set(hex_name, {
+        small: data?.small ?? image?.small,
+        large: data?.large ?? image?.large,
       });
     } catch (error) {
       this.client.error_manager.mark(ETM.create('setImage', error));
