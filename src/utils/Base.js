@@ -242,4 +242,22 @@ export function getAllFiles(dirPath, arrayOfFiles = []) {
   return arrayOfFiles;
 }
 
+/**
+ * Convert UTF8 to HEX.
+ * @param {string} str The string to convert.
+ * @returns {string}
+ */
+export function convertToHex(str) {
+  return Buffer.from(str, 'utf8').toString('hex');
+}
+
+/**
+ * Convert HEX to UTF8.
+ * @param {string} hex The hex to convert.
+ * @returns {string}
+ */
+export function convertToStr(hex) {
+  return Buffer.from(hex, 'hex').toString('utf8');
+}
+
 export { ProcessQueue, ErrorTicketManager, constants };
