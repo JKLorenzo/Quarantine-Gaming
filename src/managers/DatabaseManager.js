@@ -6,6 +6,7 @@ import {
   ProcessQueue,
   getPercentSimilarity,
   constants,
+  convertToHex,
 } from '../utils/Base.js';
 
 /**
@@ -94,7 +95,7 @@ export default class DatabaseManager {
           const games = await this.collections.games.get();
           for (const game of games.docs) {
             const data = game.data();
-            this.data.games.set(data.name, data);
+            this.data.games.set(game.id, data);
           }
         } catch (error) {
           this.client.error_manager.mark(
@@ -365,7 +366,8 @@ export default class DatabaseManager {
    */
   getGame(game_name) {
     try {
-      return this.data.games.get(game_name);
+      const hex_name = convertToHex(game_name);
+      return this.data.games.get(hex_name);
     } catch (error) {
       this.client.error_manager.mark(ETM.create('getGame', error));
       throw error;
@@ -380,21 +382,22 @@ export default class DatabaseManager {
    */
   async updateGame(game_name, data) {
     try {
-      let this_game = this.getGame(game_name);
+      const hex_name = convertToHex(game_name);
+      let this_game = this.getGame(hex_name);
 
       if (!this_game) {
         this_game = { name: game_name, status: 'Pending' };
-        await this.collections.games.doc(game_name).set(this_game);
+        await this.collections.games.doc(hex_name).set(this_game);
       }
 
       if (data) {
         if ('status' in data) this_game.status = data.status;
         if ('icon' in data) this_game.icon = data.icon;
         if ('banner' in data) this_game.banner = data.banner;
-        await this.collections.games.doc(game_name).update(this_game);
+        await this.collections.games.doc(hex_name).update(this_game);
       }
 
-      this.data.games.set(game_name, this_game);
+      this.data.games.set(hex_name, this_game);
       return this_game;
     } catch (error) {
       this.client.error_manager.mark(ETM.create('updateGame', error));
