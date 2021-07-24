@@ -386,7 +386,7 @@ export default class DatabaseManager {
   async updateGame(game_name, data) {
     try {
       const hex_name = convertToHex(game_name);
-      let this_game = this.getGame(hex_name);
+      let this_game = this.getGame(game_name);
 
       if (!this_game) {
         this_game = { name: game_name, status: 'Pending' };
@@ -394,9 +394,9 @@ export default class DatabaseManager {
       }
 
       if (data) {
-        if ('status' in data) this_game.status = data.status;
-        if ('icon' in data) this_game.icon = data.icon;
-        if ('banner' in data) this_game.banner = data.banner;
+        if (data.status) this_game.status = data.status;
+        if (data.icon) this_game.icon = data.icon;
+        if (data.banner) this_game.banner = data.banner;
         await this.collections.games.doc(hex_name).update(this_game);
       }
 
