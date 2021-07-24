@@ -81,6 +81,7 @@ export default class CheckUser extends SlashCommand {
     const embed = new MessageEmbed({
       author: { name: 'Quarantine Gaming: Member Catalog' },
       title: member.user.tag,
+      thumbnail: { url: member.user.displayAvatarURL() },
       fields: [
         {
           name: 'Profile:',
