@@ -161,7 +161,7 @@ export function searchImage(name, options) {
   return new Promise((resolve, reject) => {
     gis(name, async (error, results) => {
       if (error) reject(error);
-      if (!results || !Array.isArray(results)) resolve();
+      if (!Array.isArray(results) || results.length === 0) resolve();
       for (const result of results) {
         if (!result || !result.url) continue;
         /*  eslint-disable no-empty-function */
