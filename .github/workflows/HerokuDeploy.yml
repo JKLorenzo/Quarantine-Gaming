@@ -32,6 +32,3 @@ jobs:
           rollbackonhealthcheckfailed: true
           checkstring: 'online'
           delay: 30
-        env:
-          HD_BOT_TOKEN: ${{secrets.BOT_TOKEN}}
-          HD_FIREBASE_CREDENTIALS: ${{secrets.FIREBASE_CREDENTIALS}}
