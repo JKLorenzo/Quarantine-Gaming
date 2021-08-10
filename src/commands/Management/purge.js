@@ -77,6 +77,10 @@ export default class Purge extends SlashCommand {
     } while (retries > 0 && deleted_messages_count < options.message_count);
     const elapsedTime = (Date.now() - interaction.createdTimestamp) / 1000;
 
+    const affected = Object.entries(deleted_messages)
+    .map(entry => `${entry[0]}: ${entry[1]}`)
+    .join('\n');
+
     const embed = new MessageEmbed({
       author: { name: 'Quarantine Gaming: Message Cleanup' },
       title: 'Channel Purge Complete',
@@ -84,9 +88,7 @@ export default class Purge extends SlashCommand {
       fields: [
         {
           name: 'Affected Authors:',
-          value: Object.entries(deleted_messages)
-            .map(entry => `${entry[0]}: ${entry[1]}`)
-            .join('\n') ?? 'None',
+          value: affected.length ? affected : 'None',
         },
       ],
       footer: {
