@@ -86,7 +86,7 @@ export default class Purge extends SlashCommand {
           name: 'Affected Authors:',
           value: Object.entries(deleted_messages)
             .map(entry => `${entry[0]}: ${entry[1]}`)
-            .join('\n'),
+            .join('\n') ?? 'None',
         },
       ],
       footer: {
